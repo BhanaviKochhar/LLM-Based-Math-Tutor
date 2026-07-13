@@ -1,0 +1,5 @@
+data/raw_pdfs/
+data/chromadb/
+__pycache__/
+*.pyc
+.env

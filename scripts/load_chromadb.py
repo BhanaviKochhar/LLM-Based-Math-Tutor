@@ -16,7 +16,7 @@ client=chromadb.PersistentClient(path="data/chromadb")
 try:
     client.delete_collection("ncert_math")
     print("old collection cleared")
-except:
+except Exception:
     pass
 
 collection=client.create_collection("ncert_math")
@@ -31,8 +31,8 @@ for i in range(0,len(chunks),BATCH):
     batch=chunks[i:i+BATCH]
     texts=[c["text"] for c in batch]
     ids=[f"chunk_{i+j}" for j in range(len(batch))]
-    embeddings=model.encode(texts).tolist()
-    metadatas=[{"grade":c["grade"],"page":c["page"],"source":c["source"]} for c in batch]
+    embeddings=model.encode(texts, show_progress_bar=True).tolist()
+    metadatas=[{"grade":c["grade"],"page":c["page"],"topic":c["topic"],"type":c["type"],"source":c["source"]} for c in batch]
     collection.add(documents=texts,embeddings=embeddings,metadatas=metadatas,ids=ids)
     print(f"batch {i//BATCH+1} done, total so far: {i+len(batch)}")
 
