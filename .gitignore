@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv/
 __pycache__/
 *.pyc
@@ -5,3 +6,10 @@ __pycache__/
 # indexes/
 # logs/
 # outputs/
+=======
+data/raw_pdfs/
+data/chromadb/
+__pycache__/
+*.pyc
+.env
+>>>>>>> agamya_dataset
