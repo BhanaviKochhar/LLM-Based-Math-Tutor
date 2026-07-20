@@ -1,5 +1,6 @@
 data/raw_pdfs/
 data/chromadb/
+data/llm_runs.jsonl
 __pycache__/
 *.pyc
 .env

@@ -1,0 +1,14 @@
+# --- Data ingestion ---
+PyMuPDF>=1.24          # imported as `fitz` in parse_ncert.py
+
+# --- Retrieval ---
+chromadb>=0.5
+sentence-transformers>=3.0
+rank-bm25>=0.2.2
+
+# --- LLM generation ---
+openai>=1.40           # OpenAI-compatible client for the HF router
+python-dotenv>=1.0     # loads HF_TOKEN from .env
+
+# --- Analysis ---
+pandas>=2.0
