@@ -86,9 +86,7 @@ HF_TOKEN=hf_your_token_here
 
 ### 3.1 Download the textbook PDFs
 
-Download the NCERT mathematics PDFs for Classes 1–5:
-
-**[ADD DOWNLOAD LINK HERE]**
+Download the NCERT mathematics PDFs for Classes 1–5: [NCERT Classes 1-5](https://drive.google.com/drive/folders/1DBPLkxJh6Y6-zJNLeopLxnYEaSN2AV_T?usp=sharing)
 
 Place them as:
 
