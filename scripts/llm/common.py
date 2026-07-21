@@ -1,9 +1,14 @@
-"""scripts/llm/common.py — shared plumbing for all model files.
+"""scripts/llm/common.py — shared plumbing for all model files (v2, backend-aware).
 
-Each model file (gpt_oss.py, llama33.py, qwen3.py) defines its own
-MODEL_ID, PROVIDERS, PARAMS and calls chat() from here.
+A "backend" = an OpenAI-compatible endpoint + credentials + a model string.
+Each model file declares its backends in preference order, e.g. Groq direct
+first, HF router second. chat() walks the list until one succeeds.
 
-Env: HF_TOKEN must be set (export HF_TOKEN=hf_xxx, or .env + python-dotenv).
+Env (.env at project root, loaded automatically):
+    GROQ_API_KEY=gsk_xxx     # console.groq.com -> API Keys
+    HF_TOKEN=hf_xxx          # huggingface.co/settings/tokens
+A backend whose env var is missing is skipped silently, so the code works
+even if you only have one of the two keys.
 """
 import json
 import os
@@ -12,44 +17,56 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
-from dotenv import load_dotenv
 load_dotenv()
 
-BASE_URL = "https://router.huggingface.co/v1"
 LOG_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "llm_runs.jsonl"
 
-_client = None
+# Base URLs for the endpoints we use. Add more here if needed (e.g. a local
+# vLLM/Ollama server later — anything OpenAI-compatible works).
+GROQ_URL = "https://api.groq.com/openai/v1"
+HF_URL = "https://router.huggingface.co/v1"
+
+_clients: dict[tuple[str, str], OpenAI] = {}
 
 
-def client() -> OpenAI:
-    global _client
-    if _client is None:
-        token = os.environ.get("HF_TOKEN")
-        if not token:
-            raise RuntimeError("Set the HF_TOKEN environment variable first.")
-        _client = OpenAI(base_url=BASE_URL, api_key=token, timeout=60)
-    return _client
+def _client(base_url: str, key_env: str) -> OpenAI | None:
+    """Return a cached client for (base_url, key_env), or None if no key set."""
+    token = os.environ.get(key_env)
+    if not token:
+        return None
+    cache_key = (base_url, key_env)
+    if cache_key not in _clients:
+        _clients[cache_key] = OpenAI(base_url=base_url, api_key=token, timeout=60)
+    return _clients[cache_key]
 
 
-def chat(model_id: str, providers: list[str], messages: list[dict],
-         params: dict, retries_per_provider: int = 2) -> dict:
-    """Try providers in order; return a structured result dict (never raises)."""
+def chat(backends: list[dict], messages: list[dict], params: dict,
+         retries_per_backend: int = 2) -> dict:
+    """Try each backend in order; return a structured result dict (never raises).
+
+    backends: [{"name": "groq", "base_url": GROQ_URL,
+                "key_env": "GROQ_API_KEY", "model": "llama-3.3-70b-versatile"}, ...]
+    """
     last_err = None
-    for provider in providers:
-        model_str = f"{model_id}:{provider}"
-        for attempt in range(retries_per_provider):
+    for be in backends:
+        cli = _client(be["base_url"], be["key_env"])
+        if cli is None:
+            last_err = f"{be['name']}: skipped ({be['key_env']} not set)"
+            continue
+        for attempt in range(retries_per_backend):
             t0 = time.perf_counter()
             try:
-                resp = client().chat.completions.create(
-                    model=model_str, messages=messages, **params)
+                resp = cli.chat.completions.create(
+                    model=be["model"], messages=messages, **params)
                 choice = resp.choices[0]
                 usage = getattr(resp, "usage", None)
                 return {
                     "ok": True,
-                    "model_id": model_id,
-                    "provider": provider,
+                    "backend": be["name"],
+                    "model_str": be["model"],
                     "text": (choice.message.content or "").strip(),
                     "finish_reason": choice.finish_reason,
                     "latency_s": round(time.perf_counter() - t0, 3),
@@ -57,10 +74,10 @@ def chat(model_id: str, providers: list[str], messages: list[dict],
                     "completion_tokens": getattr(usage, "completion_tokens", None),
                     "error": None,
                 }
-            except Exception as e:  # log + fall through to retry/next provider
-                last_err = f"{provider} attempt {attempt + 1}: {e}"
+            except Exception as e:  # noqa: BLE001 — record and fall through
+                last_err = f"{be['name']} attempt {attempt + 1}: {e}"
                 time.sleep(attempt + 1)
-    return {"ok": False, "model_id": model_id, "provider": None, "text": "",
+    return {"ok": False, "backend": None, "model_str": None, "text": "",
             "finish_reason": None, "latency_s": None, "prompt_tokens": None,
             "completion_tokens": None, "error": last_err}
 

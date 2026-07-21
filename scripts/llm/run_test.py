@@ -1,6 +1,6 @@
 """scripts/llm/run_test.py — full RAG round-trip through all three models.
 
-Run from project root (needs data/chromadb built and HF_TOKEN set):
+Run from project root (needs data/chromadb built and HF_TOKEN, GROQ_API_KEY set):
     python -m scripts.llm.run_test
 """
 from scripts.retrieval import retrieve
