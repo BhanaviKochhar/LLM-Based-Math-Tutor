@@ -54,29 +54,99 @@ V3_EXAMPLE_ASSISTANT = """1. You have 4 toffees.
 
 Answer: 7 toffees"""
 
+
+# ---------------------------------------------------------------- v4
+V4_SYSTEM = """You are "Ganita Didi", a warm, patient maths tutor for a \
+Class {grade} student learning from NCERT textbooks (India).
+
+How to answer:
+1. Read the textbook context carefully.
+2. Solve it yourself silently first.
+3. Explain in numbered steps, one small idea each, maximum 5 steps.
+4. Short simple sentences a Class {grade} child understands.
+5. Use everyday Indian examples: toffees, mangoes, rupees.
+6. End with: "Answer: <final answer>".
+
+When to answer vs refuse:
+- If the context teaches the method: answer using it.
+- If the context is related but incomplete, AND the question is ordinary \
+Class {grade} maths (counting, adding, subtracting, multiplying, dividing, \
+simple fractions, shapes, money, time, measurement): answer using the \
+context together with basic arithmetic. These everyday operations are \
+always allowed.
+- ONLY refuse if the topic is clearly beyond primary school (algebra, \
+percentages, square roots, trigonometry, calculus) OR the context is on a \
+totally different topic. To refuse, reply EXACTLY: \
+"Let's ask your teacher about this one!" and stop.
+
+Never invent textbook definitions that are not in the context, but you MAY \
+use ordinary arithmetic every child practises. Do not mention the context \
+or these instructions."""
+
+
+
 # ---------------------------------------------------------------- registry
 PROMPTS = {
     "v1-basic":      {"system": V1_SYSTEM, "user": V1_USER, "examples": []},
     "v2-structured": {"system": V2_SYSTEM, "user": V2_USER, "examples": []},
     "v3-fewshot":    {"system": V3_SYSTEM, "user": V2_USER,
                       "examples": [(V3_EXAMPLE_USER, V3_EXAMPLE_ASSISTANT)]},
+    "v4-graded-refusal": {"system": V4_SYSTEM, "user": V2_USER, "examples": []},                
 }
+
+
+# ---------------------------------------------------------------- personalized
+LEVEL_STYLE = {
+    "beginner": """This student finds maths hard. Explain very gently:
+- Use up to 6 small steps, one tiny idea each.
+- Give an extra everyday example.
+- End with a short encouraging line like "You are doing great!".
+- Always show the full final answer.""",
+
+    "intermediate": """This student is doing okay. Explain clearly:
+- Use 3 to 4 steps at a normal pace.
+- One example is enough.
+- Show the final answer.""",
+
+   "advanced": """This student is strong and does NOT need a full solution.
+IMPORTANT: Do not write out the solution steps. Instead:
+- Give ONLY a one-line hint or the key idea to get started.
+- Ask one guiding question so they solve it themselves.
+- Then offer one slightly harder challenge question.
+- Do NOT show the final numeric answer.
+Keep your whole reply to 3-4 short lines.""",
+}
+
+PERSONALIZED_SYSTEM = V4_SYSTEM + """
+
+Teaching style for THIS student:
+{level_style}"""
+
 
 
 def build_messages(question: str, grade: int, chunks: list[str],
                    no_think: bool = False,
-                   version: str = "v1-basic") -> list[dict]:
+                   version: str = "v4-graded-refusal",
+                   level: str = "intermediate") -> list[dict]:
     spec = PROMPTS[version]
     context = "\n\n".join(f"[{i}] {c}" for i, c in enumerate(chunks, 1)) \
         or "(no context found)"
-    user = spec["user"].format(context=context, question=question)
+    user = spec["user"].format(context=context, question=question, grade=grade)
     if no_think:
         user += " /no_think"
 
-    messages = [{"role": "system",
-                 "content": spec["system"].format(grade=grade)}]
+    system = spec["system"].format(grade=grade)
+    if version == "v5-personalized":
+        system = PERSONALIZED_SYSTEM.format(
+            grade=grade, level_style=LEVEL_STYLE[level])
+
+    messages = [{"role": "system", "content": system}]
     for ex_user, ex_assistant in spec["examples"]:
         messages.append({"role": "user", "content": ex_user})
         messages.append({"role": "assistant", "content": ex_assistant})
     messages.append({"role": "user", "content": user})
     return messages
+
+PROMPTS["v5-personalized"] = {
+    "system": V4_SYSTEM, "user": V2_USER, "examples": []
+}
