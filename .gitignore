@@ -1,15 +1,7 @@
-<<<<<<< HEAD
 venv/
-__pycache__/
-*.pyc
-.env
-# indexes/
-# logs/
-# outputs/
-=======
+data/llm_runs.jsonl
 data/raw_pdfs/
 data/chromadb/
 __pycache__/
 *.pyc
 .env
->>>>>>> agamya_dataset
