@@ -32,7 +32,11 @@ for i in range(0,len(chunks),BATCH):
     texts=[c["text"] for c in batch]
     ids=[f"chunk_{i+j}" for j in range(len(batch))]
     embeddings=model.encode(texts, show_progress_bar=True).tolist()
-    metadatas=[{"grade":c["grade"],"page":c["page"],"topic":c["topic"],"type":c["type"],"source":c["source"]} for c in batch]
+    metadatas=[{"grade": c["grade"],
+            "page": c["page"],
+            "topic": c.get("topic") or "",
+            "type": c.get("type") or "",
+            "source": c.get("source", "NCERT")} for c in batch]
     collection.add(documents=texts,embeddings=embeddings,metadatas=metadatas,ids=ids)
     print(f"batch {i//BATCH+1} done, total so far: {i+len(batch)}")
 
