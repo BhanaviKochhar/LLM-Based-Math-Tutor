@@ -1,0 +1,10 @@
+{
+  "session_user": {
+    "attempts": 3,
+    "correct": 1,
+    "weak_topics": {
+      "Ram has 25 apples he divided t": 1,
+      "graph og x square": 1
+    }
+  }
+}
