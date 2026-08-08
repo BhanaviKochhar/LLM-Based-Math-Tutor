@@ -7,8 +7,14 @@ sentence-transformers>=3.0
 rank-bm25>=0.2.2
 
 # --- LLM generation ---
-openai>=1.40           # OpenAI-compatible client for the HF router
-python-dotenv>=1.0     # loads HF_TOKEN from .env
+openai>=1.40           # OpenAI-compatible client for Groq + the HF router
+python-dotenv>=1.0     # loads GROQ_API_KEY / HF_TOKEN from .env
+
+# --- Answer verification (sanity check) ---
+sympy>=1.12            # evaluates the extracted arithmetic expression
+
+# --- Frontend ---
+streamlit>=1.36        # the student-facing web app (frontend/app.py)
 
 # --- Analysis ---
 pandas>=2.0
