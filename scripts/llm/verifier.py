@@ -1,29 +1,33 @@
-"""scripts/llm/verifier.py — independent maths check for the tutor's answer.
+"""scripts/llm/verifier.py — independent maths engine for the tutor.
 
-Two jobs:
+Jobs (compute/check unchanged in spirit; solve() drives the compute-first path):
 
-  compute(question)  -> ground-truth value for a *computable* question.
-                        An LLM turns the natural-language question into ONE
-                        arithmetic expression; sympy evaluates it. Conceptual
-                        or non-arithmetic questions yield verifiable=False.
+  compute(question)  -> ground-truth Computation for a *computable* question.
+  solve(question, grade)
+                     -> (answer_str_or_None, is_math_bool) for the injection gate:
+                          (str,  True)  -> inject this trusted answer
+                          (None, True)  -> computable but NOT injected because the
+                                           exact value isn't the taught form (bare
+                                           non-exact division is taught as
+                                           quotient+remainder). Skip strict verify.
+                          (None, False) -> conceptual; not a computation.
+  check(question, model_output, computed_value=None)
+                     -> post-generation consistency gate.
 
-  check(question, model_output)
-                     -> compares the model's stated final answer against the
-                        computed value and reports match / mismatch / n/a.
+Tier A hardening (from live testing):
+  * max_tokens raised so reasoning tokens can't truncate the expression
+    (we saw "45 /" at 24 tokens; "45 / 8" at 256).
+  * Extractor output is SCANNED for an expression, not assumed to be one.
+  * One retry on empty extractor result rides through brief 429s.
+  * Injection is grade-appropriate: we don't inject a form that fights NCERT.
 
-Design choices that keep this safe and honest:
-  * We NEVER eval the model's prose. The expression comes from a constrained
-    extractor and is validated against an allow-list before sympy sees it, so
-    no functions, symbols, or names (sqrt, pi, __import__, ...) can slip in.
-  * We only verify arithmetic that is *determined by the numbers in the
-    question*. Factual recall ("minutes in an hour") returns NONE — we check
-    computation, not the model's memory.
-  * If we can't read a number from the model's answer, we say so (match=None)
-    rather than guessing.
+Safety unchanged: we NEVER eval model prose. Every candidate expression is
+validated against an allow-list before sympy sees it.
 """
 from __future__ import annotations
 
 import re
+import time
 from dataclasses import dataclass
 
 import sympy
@@ -32,8 +36,10 @@ from . import response_parser
 
 # Only digits, the four operators, exponent, parens, decimal point, spaces.
 _SAFE_EXPR = re.compile(r"^[0-9+\-*/.()\s]+$")
-
-# ---- the extractor prompt -------------------------------------------------
+# A run that could be an arithmetic expression, for scanning noisier output.
+_EXPR_RUN = re.compile(r"[0-9][0-9+\-*/.()\s]*[0-9)]")
+# A bare "int / int" (taught as quotient+remainder at primary level).
+_PLAIN_DIV = re.compile(r"^\s*\d+\s*/\s*\d+\s*$")
 
 _EXTRACT_SYSTEM = (
     "You convert a primary-school (NCERT Class 1-5) maths question into ONE "
@@ -63,17 +69,20 @@ _EXTRACT_FEWSHOT = [
     ("Explain algebra to me", "NONE"),
 ]
 
+# Room for the reasoning model's hidden thinking tokens so the visible
+# expression isn't truncated. 24 was too small on gpt-oss-120b.
+_EXTRACT_MAX_TOKENS = 256
+
 
 @dataclass
 class Computation:
     verifiable: bool
     expression: str | None = None
-    value: object | None = None  # a sympy number when verifiable
+    value: object | None = None
 
 
 def _safe_eval(expr_str: str | None):
-    """Evaluate a plain arithmetic string with sympy, or return None if it's
-    unsafe, non-numeric, or unparseable."""
+    """Evaluate a plain arithmetic string with sympy, or None if unsafe/non-numeric."""
     if not expr_str:
         return None
     expr_str = expr_str.strip()
@@ -83,16 +92,19 @@ def _safe_eval(expr_str: str | None):
         val = sympy.sympify(expr_str, rational=True)
     except Exception:
         return None
-    # Reject anything that isn't a pure number (symbols, unresolved funcs).
     if getattr(val, "free_symbols", set()):
         return None
-    if not val.is_number:
+    if not getattr(val, "is_number", False):
         return None
     return val
 
 
-def _default_extractor(question: str) -> str:
-    """Ask the shared LLM client for a single arithmetic expression."""
+def _default_extractor(question: str, retries: int = 1) -> str:
+    """Ask the shared LLM client for a single arithmetic expression.
+
+    Retries once on an empty result so a brief 429 doesn't silently disable
+    injection (empty return was the live failure mode under rate limits).
+    """
     from . import llm_client  # lazy: keeps verifier import-safe offline
 
     messages = [{"role": "system", "content": _EXTRACT_SYSTEM}]
@@ -101,31 +113,113 @@ def _default_extractor(question: str) -> str:
         messages.append({"role": "assistant", "content": a})
     messages.append({"role": "user", "content": question})
 
-    result = llm_client.chat(
-        messages, params={"temperature": 0.0, "max_tokens": 24, "top_p": 1.0}
-    )
-    return (result.get("text") or "").strip()
+    text = ""
+    for attempt in range(retries + 1):
+        result = llm_client.chat(
+            messages,
+            params={"temperature": 0.0, "max_tokens": _EXTRACT_MAX_TOKENS, "top_p": 1.0},
+        )
+        text = (result.get("text") or "").strip()
+        if text:
+            break
+        if attempt < retries:
+            time.sleep(1.5)
+    return text
+
+
+def _expression_candidates(raw: str):
+    """Yield plausible expression strings from noisy output, best first."""
+    seen = set()
+
+    def _clean(s):
+        s = (s or "").strip().rstrip("=.").strip()
+        if s and s not in seen:
+            seen.add(s)
+            return s
+        return None
+
+    c = _clean(raw)
+    if c:
+        yield c
+    for line in raw.splitlines():
+        c = _clean(line)
+        if c:
+            yield c
+    for m in _EXPR_RUN.findall(raw):
+        c = _clean(m)
+        if c:
+            yield c
 
 
 def compute(question: str, extract_fn=None) -> Computation:
-    """Return the ground-truth Computation for `question`.
-
-    `extract_fn` is injectable for testing (default calls the LLM).
-    """
+    """Ground-truth Computation for `question`, robust to noisy extractor output."""
     extract_fn = extract_fn or _default_extractor
     raw = (extract_fn(question) or "").strip()
-    # Take the first line/token the model gave, be lenient about stray text.
-    first = raw.splitlines()[0].strip() if raw else ""
-    if not first or first.upper().startswith("NONE"):
+    if not raw:
         return Computation(verifiable=False)
-    val = _safe_eval(first)
-    if val is None:
-        return Computation(verifiable=False, expression=first)
-    return Computation(verifiable=True, expression=first, value=val)
+    if re.search(r"\bNONE\b", raw, re.IGNORECASE):
+        return Computation(verifiable=False)
+    for cand in _expression_candidates(raw):
+        val = _safe_eval(cand)
+        if val is not None:
+            return Computation(verifiable=True, expression=cand, value=val)
+    return Computation(verifiable=False, expression=raw)
+
+
+def format_value(val) -> str:
+    """Render a sympy number as a clean, child-facing string for injection."""
+    try:
+        if val == int(val):
+            return str(int(val))
+    except (TypeError, ValueError):
+        pass
+    if isinstance(val, sympy.Rational) and val.q != 1:
+        return f"{val.p}/{val.q}"
+    try:
+        d = float(val)
+        return f"{d:.4f}".rstrip("0").rstrip(".")
+    except (TypeError, ValueError):
+        return str(val)
+
+
+def _grade_appropriate_answer(expression: str | None, value) -> str | None:
+    """Injectable answer string, or None if the exact value isn't the taught form.
+
+      * Integer result -> inject (unambiguous at every primary grade).
+      * Bare "int / int" that isn't exact -> DON'T inject (taught as quotient +
+        remainder, not an improper fraction/decimal). Let the tutor teach
+        remainders; skip strict verify.
+      * Any other non-integer (real fraction arithmetic like 1/2 + 1/4) ->
+        inject the exact value; that IS the taught answer.
+    """
+    try:
+        if value == int(value):
+            return format_value(value)
+    except (TypeError, ValueError):
+        pass
+    if expression and _PLAIN_DIV.match(expression):
+        return None
+    return format_value(value)
+
+
+def solve(question: str, grade: int | None = None, extract_fn=None):
+    """Compute-first + injection gate.
+
+    Returns (answer_or_None, is_math):
+        (str,  True)  -> inject this trusted answer
+        (None, True)  -> computable but not injected (remainder framing)
+        (None, False) -> conceptual, not a computation
+    grade is accepted for future grade-aware framing (Tier B); current rule is
+    grade-independent.
+    """
+    comp = compute(question, extract_fn=extract_fn)
+    if not comp.verifiable or comp.value is None:
+        return None, False
+    answer = _grade_appropriate_answer(comp.expression, comp.value)
+    return answer, True
 
 
 def _close(a, b, tol: float = 1e-6) -> bool:
-    """Exact equality for rationals, else float comparison within tol."""
     try:
         if sympy.simplify(a - b) == 0:
             return True
@@ -137,36 +231,29 @@ def _close(a, b, tol: float = 1e-6) -> bool:
         return False
 
 
-def check(question: str, model_output: str, extract_fn=None) -> dict:
-    """Compare the model's stated answer to an independent computation.
-
-    Returns a dict:
-        verifiable  – could we compute a ground truth for this question?
-        match       – True / False, or None if undecidable (no number read,
-                      or not verifiable)
-        computed    – str(ground truth) or None
-        model_value – str(number read from the model) or None
-        note        – short human-readable explanation
-    """
-    # Refusals are never "wrong" — nothing to check.
+def check(question: str, model_output: str, extract_fn=None,
+          computed_value=None) -> dict:
+    """Compare a stated answer to an independent computation."""
     if response_parser.is_refusal(model_output or ""):
         return _result(False, None, None, None, "model refused; nothing to verify")
 
-    comp = compute(question, extract_fn=extract_fn)
-    if not comp.verifiable:
-        return _result(False, None, None, None, "not a computable question")
+    if computed_value is not None:
+        truth = computed_value
+    else:
+        comp = compute(question, extract_fn=extract_fn)
+        if not comp.verifiable:
+            return _result(False, None, None, None, "not a computable question")
+        truth = comp.value
 
     num_str = response_parser.final_number_str(model_output or "")
     model_val = _safe_eval(num_str) if num_str else None
     if model_val is None:
-        return _result(
-            True, None, str(comp.value), None,
-            "couldn't read a number from the answer",
-        )
+        return _result(True, None, str(truth), None,
+                       "couldn't read a number from the answer")
 
-    match = _close(comp.value, model_val)
+    match = _close(truth, model_val)
     note = "answer matches the computation" if match else "answer disagrees with the computation"
-    return _result(True, bool(match), str(comp.value), str(model_val), note)
+    return _result(True, bool(match), str(truth), str(model_val), note)
 
 
 def _result(verifiable, match, computed, model_value, note) -> dict:

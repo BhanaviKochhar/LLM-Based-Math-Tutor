@@ -1,25 +1,23 @@
 """scripts/llm/pipeline.py — the single backend entry point for the site.
 
-The Streamlit UI reveals things in stages (hints on tap, answer on tap), so
-the pipeline is split to match that flow instead of forcing one big call:
+Tier A restructure (compute-first + inject, with a lightweight gate):
 
     prepare(question, grade, level, student_id) -> TutorTurn
-        Retrieval + prompt assembly only. Cheap, no LLM. Gives you
-        .chunks and .source immediately; the answer is generated later.
+        Retrieval + a COMPUTE-FIRST step + prompt assembly. No generation yet.
+        If the question is computable AND its answer is in a grade-appropriate
+        form, sympy solves it here and the trusted answer is injected so
+        generation only has to EXPLAIN a known-correct number. Otherwise we take
+        the plain path (conceptual, or division taught as remainder).
 
-    turn.stream()      -> generator[str]   (feed to st.write_stream)
-    turn.finalize()    -> verification dict (run after the stream is done)
+    turn.stream()   -> generator[str]
+    turn.finalize() -> verification dict (post-generation consistency gate)
+    resume(...) / get_hint(...) / record_feedback / resolve_level / reset_student
 
-    resume(question, grade, chunks, level) -> TutorTurn
-        Rebuild a turn from chunks already stored in the UI session, so the
-        answer reveal doesn't re-retrieve or drift from the hints.
-
-    get_hint(...)      -> one hint string (lazy, one LLM call)
-    record_feedback / resolve_level  -> personalisation via student_tracker
-
-Level vocabulary is bridged here: the UI speaks
-needs_practice/on_track/ahead; the prompts and tracker speak
-beginner/intermediate/advanced.
+Three computed states per turn (from verifier.solve):
+    injected  : computed_answer is a string  -> inject + strict verify
+    remainder : is_math True, computed_answer None -> teach remainder, skip
+                strict verify (avoids false "mismatch" on "5 R 5")
+    conceptual: is_math False -> explain from context, nothing to verify
 """
 from __future__ import annotations
 
@@ -27,7 +25,6 @@ from . import hints, prompt_registry, response_parser, student_tracker, verifier
 
 ANSWER_VERSION = "v5-personalized"
 
-# UI level  ->  backend level
 _UI_TO_LEVEL = {
     "needs_practice": "beginner",
     "on_track": "intermediate",
@@ -45,12 +42,12 @@ def _norm_level(level: str | None) -> str:
 
 
 def resolve_level(student_id: str | None = None, ui_level: str | None = None) -> str:
-    """Prefer the tracker's classification once there's history; otherwise
-    fall back to the level the UI is showing."""
+    """Prefer the tracker's recent-window classification once there's enough
+    history; otherwise fall back to the level the UI is showing."""
     if student_id:
         try:
             stats = student_tracker.stats(student_id)
-            if stats["attempts"] >= 3:
+            if stats.get("recent_attempts", 0) >= 3:
                 return student_tracker.classify(student_id)
         except Exception:
             pass
@@ -58,7 +55,6 @@ def resolve_level(student_id: str | None = None, ui_level: str | None = None) ->
 
 
 def _make_source(chunks_meta: list[dict]) -> str:
-    """Human-readable citation from the top chunk's metadata."""
     if not chunks_meta:
         return ""
     top = chunks_meta[0]
@@ -73,29 +69,32 @@ def _make_source(chunks_meta: list[dict]) -> str:
 
 
 class TutorTurn:
-    """One question's worth of work. Retrieval happens up front; generation
-    is deferred until stream() so the UI can gate it behind the hint flow."""
+    """One question's worth of work. Retrieval AND computation happen up front;
+    only generation is deferred until stream()."""
 
     def __init__(self, question: str, grade: int, level: str,
-                 chunks_meta: list[dict]):
+                 chunks_meta: list[dict], computed_answer: str | None = None,
+                 is_math: bool = False):
         self.question = question
         self.grade = grade
         self.level = level
         self.chunks_meta = chunks_meta
         self.chunks = [c.get("text", "") for c in chunks_meta]
         self.source = _make_source(chunks_meta)
+        # Compute-first state:
+        self.computed_answer = computed_answer      # injected string or None
+        self.is_math = is_math                       # computable at all?
+        self.is_injected = computed_answer is not None
         self.messages = prompt_registry.build_messages(
-            question, grade, self.chunks, version=ANSWER_VERSION, level=level
+            question, grade, self.chunks, version=ANSWER_VERSION,
+            level=level, computed_answer=computed_answer,
         )
         self._handle = None
         self._answer = None
         self._streamed = False
 
-    # -- generation ---------------------------------------------------------
     def stream(self):
-        """Yield answer tokens; accumulate the full text; log on completion."""
-        from . import llm_client  # lazy import keeps pipeline offline-safe
-
+        from . import llm_client
         self._handle = llm_client.StreamHandle()
         for piece in llm_client.stream(self.messages, handle=self._handle):
             yield piece
@@ -106,48 +105,64 @@ class TutorTurn:
     @property
     def answer(self) -> str:
         if self._answer is None and not self._streamed:
-            # Non-streaming callers: run the stream to completion silently.
             for _ in self.stream():
                 pass
         return self._answer or ""
 
     def finalize(self) -> dict:
-        """Run the sympy sanity check on the completed answer."""
-        return verifier.check(self.question, self.answer)
+        """Post-generation consistency gate.
+
+        Only strict-verify when we injected a trusted value. For the remainder
+        case (computable but not injected) and conceptual questions we skip
+        strict verify, so a grade-appropriate "5 R 5" isn't flagged as wrong.
+        """
+        if self.is_injected:
+            computed_value = verifier._safe_eval(self.computed_answer)
+            return verifier.check(self.question, self.answer,
+                                  computed_value=computed_value)
+        note = ("taught as remainder; not strictly verified"
+                if self.is_math else "conceptual; nothing to verify")
+        return verifier._result(False, None, None, None, note)
 
     def _log(self) -> None:
         try:
             from . import common, llm_client
-
             common.log_run("tutor-pipeline", self.question, self.grade,
                            self.chunks, self.messages, llm_client.DEFAULT_PARAMS,
                            self._handle.as_result())
         except Exception:
-            # Logging is best-effort; never let it break a response.
             pass
+
+
+def _solve(question: str, grade: int) -> tuple[str | None, bool]:
+    """Compute-first + gate. Never raises; a solver failure degrades to the
+    conceptual path rather than breaking the turn."""
+    try:
+        return verifier.solve(question, grade)
+    except Exception:
+        return None, False
 
 
 def prepare(question: str, grade: int, level: str | None = None,
             student_id: str | None = None) -> TutorTurn:
-    """Retrieve context and build a TutorTurn (no generation yet)."""
     from scripts.retrieval import retrieve_with_metadata  # lazy: needs chromadb
-
     resolved = resolve_level(student_id, level)
     chunks_meta = retrieve_with_metadata(question, grade)
-    return TutorTurn(question, grade, resolved, chunks_meta)
+    computed_answer, is_math = _solve(question, grade)
+    return TutorTurn(question, grade, resolved, chunks_meta,
+                     computed_answer=computed_answer, is_math=is_math)
 
 
 def resume(question: str, grade: int, chunks: list[str],
            level: str | None = None) -> TutorTurn:
-    """Rebuild a turn from chunks the UI already has (no re-retrieval)."""
+    """Rebuild a turn from stored chunks; re-solve (cheap) so the reveal is
+    injected the same way prepare() did."""
     chunks_meta = [{"text": c} for c in chunks]
-    turn = TutorTurn(question, grade, _norm_level(level), chunks_meta)
-    # The source string needs metadata we don't have on resume; the UI keeps
-    # the original source from prepare(), so leaving it blank here is fine.
-    return turn
+    computed_answer, is_math = _solve(question, grade)
+    return TutorTurn(question, grade, _norm_level(level), chunks_meta,
+                     computed_answer=computed_answer, is_math=is_math)
 
 
-# Convenience wrapper used by app.py for the ask_tutor(...) signature it knows.
 def ask_tutor(question: str, grade: int, level: str | None = None,
               student_id: str | None = None) -> TutorTurn:
     return prepare(question, grade, level=level, student_id=student_id)
@@ -165,5 +180,15 @@ def record_feedback(student_id: str | None, topic: str, correct: bool) -> None:
         return
     try:
         student_tracker.record(student_id, topic=topic[:30], correct=correct)
+    except Exception:
+        pass
+
+
+def reset_student(student_id: str | None) -> None:
+    """Clear a student's tracked history (wire to the UI's Clear chat)."""
+    if not student_id:
+        return
+    try:
+        student_tracker.reset(student_id)
     except Exception:
         pass

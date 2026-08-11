@@ -1,12 +1,23 @@
 """scripts/llm/prompt_registry.py — all tutor answer-prompt versions in one place.
 
-Self-contained: every prompt version (v1..v5) is defined here, so this is the
-only file to touch when iterating on the answer prompt. v1 was previously
-imported from prompt.py; it is now inlined verbatim so the registry has no
-external prompt dependency. Use:
+Self-contained: every prompt version (v1..v5) is defined here. v1 was previously
+imported from prompt.py; it is now inlined so the registry has no external prompt
+dependency.
 
+Tier A changes:
+  * Step 0 (disclosure/level decoupled): the "advanced" LEVEL_STYLE no longer
+    withholds the final answer. Withholding used to break verification — there
+    was no stated number to verify. Personalisation now adjusts DEPTH, not
+    whether the answer exists. How-much-to-reveal will become a separate
+    dialogue concern in Tier B, not a property of the level.
+  * Step 1 (compute-first + inject): build_messages() accepts an optional
+    `computed_answer`. When present, it is injected as a trusted constraint so
+    the model EXPLAINS a known-correct number instead of computing its own.
+
+Use:
     from scripts.llm.prompt_registry import build_messages
-    messages = build_messages(q, grade, chunks, version="v5-personalized")
+    messages = build_messages(q, grade, chunks, version="v5-personalized",
+                              level=level, computed_answer="5.625")
 """
 
 # ---------------------------------------------------------------- v1 (team contract)
@@ -96,7 +107,6 @@ use ordinary arithmetic every child practises. Do not mention the context \
 or these instructions."""
 
 
-
 # ---------------------------------------------------------------- registry
 PROMPTS = {
     "v1-basic":      {"system": V1_SYSTEM, "user": V1_USER, "examples": []},
@@ -108,6 +118,8 @@ PROMPTS = {
 
 
 # ---------------------------------------------------------------- personalized
+# Step 0: these adjust DEPTH and TONE only. None of them decide whether the
+# final answer is shown — that is no longer a level concern.
 LEVEL_STYLE = {
     "beginner": """This student finds maths hard. Explain very gently:
 - Use up to 6 small steps, one tiny idea each.
@@ -120,13 +132,11 @@ LEVEL_STYLE = {
 - One example is enough.
 - Show the final answer.""",
 
-   "advanced": """This student is strong and does NOT need a full solution.
-IMPORTANT: Do not write out the solution steps. Instead:
-- Give ONLY a one-line hint or the key idea to get started.
-- Ask one guiding question so they solve it themselves.
-- Then offer one slightly harder challenge question.
-- Do NOT show the final numeric answer.
-Keep your whole reply to 3-4 short lines.""",
+    "advanced": """This student is strong and picks things up quickly. Explain briskly:
+- Use 2 to 3 tight steps; skip the obvious ones.
+- Keep the example short or drop it if the step is clear.
+- Still show the full final answer.
+- You may add one slightly harder practice question AFTER the answer.""",
 }
 
 PERSONALIZED_SYSTEM = V4_SYSTEM + """
@@ -134,12 +144,27 @@ PERSONALIZED_SYSTEM = V4_SYSTEM + """
 Teaching style for THIS student:
 {level_style}"""
 
+# Step 1: injected when we already computed a trusted answer. It reframes the
+# model's job from "solve" to "explain a known-correct result".
+_INJECTED_ANSWER_BLOCK = """
+
+IMPORTANT — the correct final answer is already known: {computed_answer}
+Do NOT recompute it. Your job is to EXPLAIN, step by step, how a Class {grade} \
+child reaches exactly this answer. Every step must lead to {computed_answer}. \
+End with: "Answer: {computed_answer}"."""
 
 
 def build_messages(question: str, grade: int, chunks: list[str],
                    no_think: bool = False,
                    version: str = "v4-graded-refusal",
-                   level: str = "intermediate") -> list[dict]:
+                   level: str = "intermediate",
+                   computed_answer: str | None = None) -> list[dict]:
+    """Assemble chat messages.
+
+    computed_answer: when provided (Step 1), the trusted value is injected so
+    the model explains it rather than computing its own. Safe to leave None for
+    conceptual questions or the baseline.
+    """
     spec = PROMPTS[version]
     context = "\n\n".join(f"[{i}] {c}" for i, c in enumerate(chunks, 1)) \
         or "(no context found)"
@@ -151,6 +176,10 @@ def build_messages(question: str, grade: int, chunks: list[str],
     if version == "v5-personalized":
         system = PERSONALIZED_SYSTEM.format(
             grade=grade, level_style=LEVEL_STYLE[level])
+
+    if computed_answer is not None:
+        system += _INJECTED_ANSWER_BLOCK.format(
+            computed_answer=computed_answer, grade=grade)
 
     messages = [{"role": "system", "content": system}]
     for ex_user, ex_assistant in spec["examples"]:

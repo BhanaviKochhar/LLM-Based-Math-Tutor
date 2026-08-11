@@ -1,9 +1,14 @@
 {
   "session_user": {
-    "attempts": 7,
-    "correct": 6,
+    "attempts": 2,
+    "correct": 0,
     "weak_topics": {
-      "x^2+3=0": 1
-    }
+      "89/4 explain step by step. div": 1,
+      "my exam quest: There are 26 ba": 1
+    },
+    "recent": [
+      0,
+      0
+    ]
   }
 }

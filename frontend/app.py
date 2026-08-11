@@ -475,6 +475,14 @@ with st.sidebar:
     st.markdown("---")
     if st.button("🗑️ Clear chat", use_container_width=True):
         st.session_state.messages = []
+        # Tier A: also forget tracked history so the level starts fresh and
+        # the student isn't stuck at a level from a previous session.
+        if not MOCK_MODE:
+            try:
+                from scripts.llm import pipeline
+                pipeline.reset_student(STUDENT_ID)
+            except Exception:
+                pass
         st.rerun()
 
     level = st.session_state.level
