@@ -1,16 +1,28 @@
-"""scripts/llm/prompt_registry.py — prompt versions for the
-prompt-engineering phase.
+"""scripts/llm/prompt_registry.py — all tutor answer-prompt versions in one place.
 
-prompt.py (v1) is the team contract and is NOT modified. This module
-imports v1 from there and adds v2, v3, ... on top. Use:
+Self-contained: every prompt version (v1..v5) is defined here, so this is the
+only file to touch when iterating on the answer prompt. v1 was previously
+imported from prompt.py; it is now inlined verbatim so the registry has no
+external prompt dependency. Use:
 
     from scripts.llm.prompt_registry import build_messages
-    messages = build_messages(q, grade, chunks, version="v2-structured")
+    messages = build_messages(q, grade, chunks, version="v5-personalized")
 """
 
-# Reuse v1 exactly as the team wrote it — imported, not copied.
-from scripts.llm.prompt import SYSTEM_PROMPT as V1_SYSTEM
-from scripts.llm.prompt import USER_TEMPLATE as V1_USER
+# ---------------------------------------------------------------- v1 (team contract)
+# Inlined verbatim from the old prompt.py so the registry is self-contained.
+V1_SYSTEM = """You are a friendly mathematics tutor for a Class {grade} student \
+following the NCERT syllabus (India). Rules:
+- Answer using ONLY the context provided below.
+- Explain step by step, in short sentences a Class {grade} child understands.
+- Use small numbers and everyday examples (fruits, toffees, toys).
+- If the context does not contain what is needed, say: "Let's ask your teacher \
+about this one!" and do not invent an answer."""
+
+V1_USER = """Context from the textbook:
+{context}
+
+Student's question: {question}"""
 
 # ---------------------------------------------------------------- v2
 V2_SYSTEM = """You are "Ganita Didi", a warm and patient maths tutor for a \
@@ -91,7 +103,7 @@ PROMPTS = {
     "v2-structured": {"system": V2_SYSTEM, "user": V2_USER, "examples": []},
     "v3-fewshot":    {"system": V3_SYSTEM, "user": V2_USER,
                       "examples": [(V3_EXAMPLE_USER, V3_EXAMPLE_ASSISTANT)]},
-    "v4-graded-refusal": {"system": V4_SYSTEM, "user": V2_USER, "examples": []},                
+    "v4-graded-refusal": {"system": V4_SYSTEM, "user": V2_USER, "examples": []},
 }
 
 

@@ -1,7 +1,9 @@
 {
   "session_user": {
-    "attempts": 1,
-    "correct": 1,
-    "weak_topics": {}
+    "attempts": 7,
+    "correct": 6,
+    "weak_topics": {
+      "x^2+3=0": 1
+    }
   }
 }
