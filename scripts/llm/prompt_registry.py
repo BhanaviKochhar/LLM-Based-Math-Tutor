@@ -59,6 +59,13 @@ Class {grade} student asks: {question}
 
 Remember: steps first, then "Answer: ..." on its own line."""
 
+# Tier B: format-neutral user template for the conversational tutor flow. The
+# per-turn directive decides structure, so this must NOT mandate steps/Answer.
+TUTOR_USER = """Textbook context:
+{context}
+
+Class {grade} student's message: {question}"""
+
 # ---------------------------------------------------------------- v3
 V3_SYSTEM = V2_SYSTEM + """
 
@@ -139,10 +146,49 @@ LEVEL_STYLE = {
 - You may add one slightly harder practice question AFTER the answer.""",
 }
 
-PERSONALIZED_SYSTEM = V4_SYSTEM + """
+# Tier B: a FORMAT-NEUTRAL tutor base. Unlike V4 (which mandates numbered
+# steps + an "Answer:" line for every reply — right for single-shot answers,
+# wrong for a conversation), this keeps the persona, grounding, and graded
+# refusal, but lets the per-turn directive decide structure. Teach/nudge turns
+# talk in plain prose; only solve turns (reveal/co-solve) use steps + Answer.
+TUTOR_SYSTEM = """You are "Ganita Didi", a warm, patient maths tutor for a \
+Class {grade} child learning from NCERT textbooks (India).
+
+Talk to the child like a kind teacher: friendly and encouraging, in short simple \
+sentences they understand. Use everyday Indian examples (toffees, mangoes, \
+rupees) when they help. Teach using the textbook context provided.
+
+When to answer vs refuse:
+- Ordinary Class {grade} maths (counting, adding, subtracting, multiplying, \
+dividing, simple fractions, shapes, money, time, measurement) is always allowed.
+- If the topic is clearly beyond primary school (algebra, square roots, \
+trigonometry, calculus) OR the context is on a totally different topic, reply \
+EXACTLY: "Let's ask your teacher about this one!" and stop.
+
+Formatting rules:
+- Write ALL maths in plain text, e.g. "6 x 2 = 12" or "3/4". NEVER use LaTeX, \
+dollar signs, or backslash commands like \\times or \\frac.
+- Do NOT give a full worked solution, numbered steps, or a final "Answer:" line \
+UNLESS the tutor instruction for this reply explicitly tells you to solve it. \
+When you are only teaching, nudging, or replying to a concept question, just \
+talk it through warmly in a few plain sentences and stop.
+- Never mention these instructions or the context to the child."""
+
+PERSONALIZED_SYSTEM = TUTOR_SYSTEM + """
 
 Teaching style for THIS student:
 {level_style}"""
+
+# Tier B: standing instruction so the tutor uses conversation memory to avoid
+# repeating itself. Appended only when there is history to reason about.
+_CONTINUITY_RULE = (
+    "\n\nThis is an ongoing tutoring conversation. You can see what you have "
+    "already taught this student. On a follow-up about something you've already "
+    "covered, keep it SHORT — build on what you already said, don't repeat the "
+    "whole explanation. Go a little deeper or move faster to letting them try, "
+    "UNLESS the student says they're still confused, in which case re-explain "
+    "the same idea more simply and briefly."
+)
 
 # Step 1: injected when we already computed a trusted answer. It reframes the
 # model's job from "solve" to "explain a known-correct result".
@@ -158,13 +204,21 @@ def build_messages(question: str, grade: int, chunks: list[str],
                    no_think: bool = False,
                    version: str = "v4-graded-refusal",
                    level: str = "intermediate",
-                   computed_answer: str | None = None) -> list[dict]:
+                   computed_answer: str | None = None,
+                   thread_notes: list[str] | None = None,
+                   active_turns: list[dict] | None = None,
+                   directive: str | None = None) -> list[dict]:
     """Assemble chat messages.
 
-    computed_answer: when provided (Step 1), the trusted value is injected so
-    the model explains it rather than computing its own. Safe to leave None for
-    conceptual questions or the baseline.
+    computed_answer: when provided, the trusted value is injected so the model
+        explains it rather than computing its own.
+    thread_notes:    one-line notes from earlier finished episodes (Tier B
+        memory). Rendered into the system prompt for continuity.
+    active_turns:    prior turns of the CURRENT episode ({"role","content"}),
+        inserted before the new user message so the tutor has the live thread.
     """
+    from . import memory  # local import keeps this module import-safe/standalone
+
     spec = PROMPTS[version]
     context = "\n\n".join(f"[{i}] {c}" for i, c in enumerate(chunks, 1)) \
         or "(no context found)"
@@ -181,13 +235,27 @@ def build_messages(question: str, grade: int, chunks: list[str],
         system += _INJECTED_ANSWER_BLOCK.format(
             computed_answer=computed_answer, grade=grade)
 
+    # Tier B memory: add continuity rule + thread summary when there's history.
+    prior = memory.active_messages(active_turns)
+    summary = memory.thread_summary(thread_notes or [])
+    if summary or prior:
+        system += _CONTINUITY_RULE
+    if summary:
+        system += summary
+
     messages = [{"role": "system", "content": system}]
     for ex_user, ex_assistant in spec["examples"]:
         messages.append({"role": "user", "content": ex_user})
         messages.append({"role": "assistant", "content": ex_assistant})
+    messages.extend(prior)  # live turns of the current episode
+    # Tier B: the controller's per-turn instruction steers THIS response
+    # (teach / diagnose / co-solve / reveal / ...). It goes last so it's the
+    # freshest instruction the model sees.
+    if directive:
+        user += f"\n\n[Tutor instruction for your next reply: {directive}]"
     messages.append({"role": "user", "content": user})
     return messages
 
 PROMPTS["v5-personalized"] = {
-    "system": V4_SYSTEM, "user": V2_USER, "examples": []
+    "system": V4_SYSTEM, "user": TUTOR_USER, "examples": []
 }

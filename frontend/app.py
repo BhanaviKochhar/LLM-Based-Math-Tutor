@@ -151,6 +151,100 @@ def _record_feedback(question: str, correct: bool) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Tier B: controller-driven tutoring turn adapters.
+# ---------------------------------------------------------------------------
+def _start_episode(question: str, grade: int, ui_level: str) -> dict:
+    """Begin an episode: retrieve + solve-first + controller.start().
+    Returns an episode dict stored in the message."""
+    from scripts.llm import pipeline, controller
+
+    turn = pipeline.prepare(question, grade, level=ui_level, student_id=STUDENT_ID)
+    state, action = controller.start(
+        question, grade, level=turn.level,
+        computed_answer=turn.computed_answer, is_math=turn.is_math)
+    return {
+        "state": state,
+        "action": action,
+        "chunks": turn.chunks,
+        "source": turn.source,
+        "exchanges": [],          # list of {"tutor": str, "student": str|None}
+        "buttons": action.buttons,
+        "terminal": False,
+        "pending_stream": True,    # first tutor message not yet streamed
+        "hint_texts": [],          # progressive hints given this episode
+    }
+
+
+def _thread_notes() -> list:
+    """Collect capped thread notes from finished episodes in the transcript."""
+    from scripts.llm import memory
+    notes = []
+    for m in st.session_state.messages:
+        if m.get("role") == "assistant" and m.get("thread_note"):
+            notes.append(m["thread_note"])
+    return memory.cap_thread(notes)
+
+
+def _active_turns(ep: dict) -> list:
+    """Prior exchanges of THIS episode as chat messages for memory."""
+    turns = []
+    for ex in ep["exchanges"]:
+        if ex.get("tutor"):
+            turns.append({"role": "assistant", "content": ex["tutor"]})
+        if ex.get("student"):
+            turns.append({"role": "user", "content": ex["student"]})
+    return turns
+
+
+def _turn_stream(ep: dict):
+    """Stream the current action's tutor text; stash it on the episode."""
+    from scripts.llm import pipeline, controller
+
+    action = ep["action"]
+    out = pipeline.generate_turn(
+        ep["state"], action, chunks=ep["chunks"],
+        thread_notes=_thread_notes(), active_turns=_active_turns(ep),
+        previous_hints=ep["hint_texts"],
+    )
+    # MODE_HINT returns a plain string; everything else a streamable TurnStream.
+    if isinstance(out, str):
+        ep["hint_texts"].append(out)
+        ep["_last_text"] = out
+        yield out
+        return
+    if out is None:
+        ep["_last_text"] = ""
+        return
+    for piece in out.stream():
+        yield piece
+    ep["_last_text"] = out.text
+
+
+def _advance(ep: dict, intent: str, turn_text: str | None):
+    """Run one controller step for a typed/tapped student turn."""
+    from scripts.llm import controller, memory
+
+    # record the student's turn against the last exchange
+    if ep["exchanges"]:
+        ep["exchanges"][-1]["student"] = turn_text or f"[{intent}]"
+
+    state, action = controller.step(ep["state"], intent, turn_text)
+    ep["state"] = state
+    ep["action"] = action
+    ep["buttons"] = action.buttons
+    ep["pending_stream"] = action.mode != controller.MODE_NEW_QUESTION
+    if action.terminal:
+        ep["terminal"] = True
+    return action
+
+
+def _classify(turn_text: str, ep: dict) -> str:
+    from scripts.llm import intent
+    ctx = ep["exchanges"][-1]["tutor"][:160] if ep["exchanges"] else None
+    return intent.classify_intent(turn_text, context=ctx)
+
+
+# ---------------------------------------------------------------------------
 # Page setup + styling (notebook / graph-paper theme)
 # ---------------------------------------------------------------------------
 
@@ -309,6 +403,23 @@ div[data-testid="stChatMessage"] p {
     color: white !important;
     box-shadow: 4px 4px 0 rgba(43, 45, 137, 0.25);
     transition: transform 0.08s ease;
+}
+/* Tier B: secondary action buttons (shortcuts beside the open text box) */
+div[data-testid="column"] .stButton > button {
+    font-size: 14px;
+    padding: 6px 14px;
+    background: #fff;
+    color: var(--ink, #2b2b40);
+    border: 1.5px solid #e3e3ef;
+    box-shadow: none;
+    font-weight: 600;
+}
+div[data-testid="column"] .stButton > button:hover {
+    border-color: var(--accent, #f5a623);
+    transform: none;
+}
+.or-type-hint {
+    color: #9a9ab0; font-size: 13px; margin: 2px 0 6px 2px;
 }
 .stButton > button:hover {
     transform: translateY(-2px) scale(1.02);
@@ -490,98 +601,112 @@ with st.sidebar:
 st.markdown(f"##### {GRADE_EMOJI[grade]} Class {grade} Maths · grounded in your NCERT textbook")
 
 
-def render_assistant_message(msg, idx):
-    """Progressive reveal: Hint 1 -> Hint 2 -> Hint 3 -> full answer.
+# ---------------------------------------------------------------------------
+# Tier B: episode rendering + unified text/button routing.
+# ---------------------------------------------------------------------------
+_LABEL_TO_INTENT = {
+    "I'll try": None,                 # opens the box; no step, just prompts a try
+    "Give me a hint": "HINT",
+    "Another hint": "HINT",
+    "Show me how": "SOLVE",
+    "Just show me": "SOLVE",
+    "Show me anyway": "SOLVE",
+    "Try again": None,                 # nudge to type an attempt
+    "Practice problem": "NEW_QUESTION_PRACTICE",
+    "New question": "NEW_QUESTION_UI",
+}
 
-    Hints and the answer are generated lazily — one backend call each, only
-    when the child taps the button. The answer streams in token by token, and
-    the sympy sanity check runs right after it finishes."""
-    hint_level = msg.get("hint_level", 0)
-    viewed_hints = msg.get("viewed_hints", 0)
-    feedback = msg.get("feedback")
-    hints = msg.get("hints", {})
 
-    for n in range(1, hint_level + 1):
-        if n in hints:
-            st.markdown(f'<div class="hint-tag">💡 Hint {n}: {hints[n]}</div>',
+def _stream_pending(ep):
+    """Stream the current tutor action if it hasn't been streamed yet."""
+    if not ep.get("pending_stream"):
+        return
+    from scripts.llm import controller
+    action = ep["action"]
+    if action.mode == controller.MODE_HINT:
+        # hints render as a tag, consistent with the old look
+        hint = "".join(_turn_stream(ep))
+        if not (hint or "").strip():
+            if st.button("↻ Try again", key=f"retry_{_active_idx()}"):
+                st.rerun()  # pending_stream still True -> re-streams
+            return
+        ep["exchanges"].append({"tutor": None, "student": None,
+                                "hint": hint, "hint_n": action.hint_number})
+    else:
+        text = st.write_stream(_turn_stream(ep))
+        if not (text or "").strip():
+            # Throttled / empty — keep pending so the child can retry cleanly
+            # instead of the turn silently vanishing.
+            st.caption("Hmm, I couldn't reach the tutor just now.")
+            if st.button("↻ Try again", key=f"retry_{_active_idx()}"):
+                st.rerun()
+            return
+        ep["exchanges"].append({"tutor": text or ep.get("_last_text", ""),
+                                "student": None})
+        # reveal/co-solve are answer-bearing -> verify + record
+        if action.mode in (controller.MODE_REVEAL, controller.MODE_CO_SOLVE):
+            _finalize_reveal(ep)
+    ep["pending_stream"] = False
+    if ep.get("terminal") and not ep.get("thread_note"):
+        _write_thread_note(ep)
+
+
+def _finalize_reveal(ep):
+    """After a reveal/co-solve, run verify and (interim) record an attempt."""
+    from scripts.llm import verifier
+    text = ep["exchanges"][-1]["tutor"]
+    ca = ep["state"].computed_answer
+    if ca is not None:
+        val = verifier._safe_eval(ca)
+        ep["verify"] = verifier.check(ep["state"].question, text, computed_value=val)
+    else:
+        ep["verify"] = None
+
+
+def _write_thread_note(ep):
+    from scripts.llm import memory, controller
+    st_ = ep["state"]
+    outcome = {controller.SOLVED: "solved", controller.SHOWN: "shown",
+               controller.GAVE_UP: "gave_up"}.get(st_.phase, "moved_on")
+    note = memory.build_thread_note(st_.question, outcome,
+                                    attempts=st_.attempts,
+                                    hints=st_.hints_given)
+    # store the note on the message so _thread_notes() picks it up next episode
+    ep["thread_note"] = note
+
+
+def render_episode(ep, idx):
+    """Render a controller-driven tutoring episode: exchange history + (if the
+    active episode) the secondary action buttons beside the open text box."""
+    # stream the newest tutor turn if pending (only the active episode is)
+    _stream_pending(ep)
+
+    # render exchange history
+    for j, ex in enumerate(ep["exchanges"]):
+        if ex.get("hint") is not None:
+            st.markdown(f'<div class="hint-tag">💡 Hint {ex.get("hint_n","")}: {ex["hint"]}</div>',
                         unsafe_allow_html=True)
+        elif ex.get("tutor"):
+            # already streamed live on first render; re-show on later reruns
+            if not (idx == _active_idx() and j == len(ep["exchanges"]) - 1 and ep.get("_just_streamed")):
+                st.write(ex["tutor"])
+        if ex.get("student"):
+            pass  # student turns show as their own user chat bubbles
 
-    if msg.get("reveal"):
-        if msg.get("answer") is None:
-            # First reveal on this rerun: stream the answer, then verify it.
-            answer = st.write_stream(_answer_stream(msg))
-            msg["answer"] = answer or ""
-            if not msg["answer"].strip():
-                st.warning("I couldn't reach the tutor just now — please try again.")
-                msg["verify"] = None
-            else:
-                with st.spinner("Double-checking the answer…"):
-                    msg["verify"] = _verify(msg)
-        else:
-            st.write(msg["answer"])
-
-        _render_verify_tag(msg.get("verify"))
-        if msg.get("source"):
-            st.markdown(f'<div class="source-tag">📖 {msg["source"]}</div>',
-                        unsafe_allow_html=True)
-
-    # Controls — strictly sequential (Hint 1 -> 2 -> 3 -> answer), no skipping.
-    if not msg.get("reveal"):
-        if hint_level == 0:
-            if st.button("💡 Get Hint 1", key=f"hint1_{idx}"):
-                _reveal_hint(msg, 1)
-        elif hint_level == 1:
-            if st.button("💡 Get Hint 2", key=f"hint2_{idx}"):
-                _reveal_hint(msg, 2)
-        elif hint_level == 2:
-            if st.button("💡 Get Hint 3", key=f"hint3_{idx}"):
-                _reveal_hint(msg, 3)
-        elif hint_level == 3:
-            if st.button("✅ Show Full Answer", key=f"full_{idx}"):
-                msg["reveal"] = True
-                st.rerun()
-
-    # Feedback controls, shown once the full answer is visible.
-    if msg.get("reveal") and msg.get("answer") and feedback is None:
-        st.write("")
-        f1, f2 = st.columns(2)
-        with f1:
-            if st.button("⭐ I got it right!", key=f"correct_{idx}"):
-                msg["feedback"] = "correct"
-                _record_feedback(msg["question"], True)
-                st.rerun()
-        with f2:
-            if st.button("❌ I got it wrong", key=f"wrong_{idx}"):
-                msg["feedback"] = "wrong"
-                _record_feedback(msg["question"], False)
-                st.rerun()
-    elif feedback == "correct":
-        tag = '<span class="feedback-correct">⭐ Correct! Great job!</span>'
-        if viewed_hints > 0:
-            tag += ' <span class="hint-tag" style="display:inline-block;">💡 Hint used</span>'
-        st.markdown(tag, unsafe_allow_html=True)
-    elif feedback == "wrong":
-        st.markdown(
-            '<span class="feedback-wrong">❌ Not quite — that\'s okay, mistakes help us learn! '
-            'Try re-reading the steps above and ask another question when ready.</span>',
-            unsafe_allow_html=True,
-        )
-        if viewed_hints > 0:
-            st.markdown('<div class="hint-tag">💡 Hint used</div>', unsafe_allow_html=True)
+    if ep.get("verify"):
+        _render_verify_tag(ep["verify"])
+    if ep.get("source"):
+        st.markdown(f'<div class="source-tag">📖 {ep["source"]}</div>',
+                    unsafe_allow_html=True)
 
 
-def _reveal_hint(msg, n):
-    with st.spinner(f"Thinking of hint {n}…"):
-        msg.setdefault("hints", {})[n] = _generate_hint(msg, n)
-    msg["hint_level"] = n
-    msg["viewed_hints"] = msg.get("viewed_hints", 0) + 1
-    st.rerun()
+def _active_idx():
+    idxs = [i for i, m in enumerate(st.session_state.messages)
+            if m.get("role") == "assistant"]
+    return idxs[-1] if idxs else -1
 
 
 def _render_verify_tag(verify):
-    """Only claim 'verified' when the checker actually confirmed the number.
-    On a mismatch, warn softly instead of hiding the answer. For conceptual
-    questions (match is None) show nothing."""
     if not verify:
         return
     match = verify.get("match")
@@ -597,40 +722,79 @@ def _render_verify_tag(verify):
         )
 
 
+# ---- render transcript -----------------------------------------------------
 for i, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         if msg["role"] == "user":
             st.write(msg["text"])
         else:
-            render_assistant_message(msg, i)
+            render_episode(msg, i)
 
-question = st.chat_input("Type a maths question…")
 
-if question:
-    st.session_state.messages.append({"role": "user", "text": question})
-    with st.chat_message("user"):
-        st.write(question)
+# ---- action buttons for the active (non-terminal) episode ------------------
+def _handle_intent(ep, intent, turn_text):
+    """Route a resolved intent through the controller and rerun."""
+    if intent in ("NEW_QUESTION_UI", "NEW_QUESTION_PRACTICE"):
+        # end this episode cleanly; a new question starts a fresh one
+        from scripts.llm import controller
+        controller.step(ep["state"], "NEW_QUESTION", turn_text)
+        ep["terminal"] = True
+        if not ep.get("thread_note"):
+            _write_thread_note(ep)
+        if intent == "NEW_QUESTION_PRACTICE":
+            st.session_state._pending_practice = True
+        st.rerun()
+        return
+    _advance(ep, intent, turn_text)
+    st.rerun()
 
-    with st.chat_message("assistant"):
-        with st.spinner("Finding the right textbook pages…"):
-            prep = _prepare(question, grade, st.session_state.level)
 
-        new_msg = {
-            "role": "assistant",
-            "question": question,
-            "grade": grade,
-            "level": prep["level"],
-            "chunks": prep["chunks"],
-            "source": prep.get("source", ""),
-            "hints": {},
-            "hint_level": 0,
-            "viewed_hints": 0,
-            "reveal": False,
-            "answer": None,
-            "verify": None,
-            "feedback": None,
-        }
-        if MOCK_MODE:
-            new_msg["_mock"] = prep["_mock"]
-        st.session_state.messages.append(new_msg)
-        render_assistant_message(new_msg, len(st.session_state.messages) - 1)
+_active = None
+if st.session_state.messages:
+    last = st.session_state.messages[-1]
+    if last.get("role") == "assistant" and not last.get("terminal"):
+        _active = last
+
+if _active is not None:
+    st.markdown('<p class="or-type-hint">Tap a shortcut, or just type what you\'re thinking 👇</p>',
+                unsafe_allow_html=True)
+    btns = _active.get("buttons", [])
+    if btns:
+        cols = st.columns(len(btns))
+        for c, label in zip(cols, btns):
+            with c:
+                if st.button(label, key=f"act_{_active_idx()}_{label}"):
+                    mapped = _LABEL_TO_INTENT.get(label, "ATTEMPT")
+                    if mapped is None:
+                        # "I'll try" / "Try again": just invite typing, no step
+                        st.session_state._nudge = "Go ahead — type your answer or what you're thinking."
+                        st.rerun()
+                    else:
+                        _handle_intent(_active, mapped, f"[{label}]")
+    if st.session_state.get("_nudge"):
+        st.caption(st.session_state.pop("_nudge"))
+
+
+# ---- the always-open text box (primary input) ------------------------------
+typed = st.chat_input("Type your answer, a question, or how you're thinking…")
+
+if typed:
+    st.session_state.messages.append({"role": "user", "text": typed})
+
+    # If there's an active episode, route the text as a mid-episode turn;
+    # otherwise it's a brand-new question -> start a fresh episode.
+    if _active is not None:
+        from scripts.llm import intent as _intent_mod
+        resolved = _classify(typed, _active)
+        if resolved == "NEW_QUESTION":
+            _active = None  # fall through to new-episode start below
+        else:
+            _advance(_active, resolved, typed)
+            st.rerun()
+
+    if _active is None:
+        with st.chat_message("assistant"):
+            with st.spinner("Finding the right textbook pages…"):
+                ep = _start_episode(typed, grade, st.session_state.level)
+        st.session_state.messages.append({"role": "assistant", **ep})
+        st.rerun()

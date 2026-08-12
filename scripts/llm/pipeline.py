@@ -74,7 +74,8 @@ class TutorTurn:
 
     def __init__(self, question: str, grade: int, level: str,
                  chunks_meta: list[dict], computed_answer: str | None = None,
-                 is_math: bool = False):
+                 is_math: bool = False, thread_notes: list[str] | None = None,
+                 active_turns: list[dict] | None = None):
         self.question = question
         self.grade = grade
         self.level = level
@@ -85,9 +86,13 @@ class TutorTurn:
         self.computed_answer = computed_answer      # injected string or None
         self.is_math = is_math                       # computable at all?
         self.is_injected = computed_answer is not None
+        # Tier B memory:
+        self.thread_notes = thread_notes or []
+        self.active_turns = active_turns or []
         self.messages = prompt_registry.build_messages(
             question, grade, self.chunks, version=ANSWER_VERSION,
             level=level, computed_answer=computed_answer,
+            thread_notes=self.thread_notes, active_turns=self.active_turns,
         )
         self._handle = None
         self._answer = None
@@ -144,13 +149,16 @@ def _solve(question: str, grade: int) -> tuple[str | None, bool]:
 
 
 def prepare(question: str, grade: int, level: str | None = None,
-            student_id: str | None = None) -> TutorTurn:
+            student_id: str | None = None,
+            thread_notes: list[str] | None = None,
+            active_turns: list[dict] | None = None) -> TutorTurn:
     from scripts.retrieval import retrieve_with_metadata  # lazy: needs chromadb
     resolved = resolve_level(student_id, level)
     chunks_meta = retrieve_with_metadata(question, grade)
     computed_answer, is_math = _solve(question, grade)
     return TutorTurn(question, grade, resolved, chunks_meta,
-                     computed_answer=computed_answer, is_math=is_math)
+                     computed_answer=computed_answer, is_math=is_math,
+                     thread_notes=thread_notes, active_turns=active_turns)
 
 
 def resume(question: str, grade: int, chunks: list[str],
@@ -192,3 +200,73 @@ def reset_student(student_id: str | None) -> None:
         student_tracker.reset(student_id)
     except Exception:
         pass
+
+
+# ---------------------------------------------------------------------------
+# Tier B: turn a controller Action into streamed tutor text.
+# ---------------------------------------------------------------------------
+class TurnStream:
+    """Streamable wrapper for a controller-driven turn, mirroring TutorTurn so
+    the UI can `st.write_stream(...)` and read `.text` / `.as_result()` after."""
+
+    def __init__(self, messages: list[dict]):
+        self.messages = messages
+        self._handle = None
+        self.text = ""
+
+    def stream(self):
+        from . import llm_client
+        self._handle = llm_client.StreamHandle()
+        for piece in llm_client.stream(self.messages, handle=self._handle):
+            yield piece
+        self.text = (self._handle.text or "").strip()
+        self._log()
+
+    def _log(self):
+        try:
+            from . import common, llm_client
+            common.log_run("tutor-turn", "", 0, [], self.messages,
+                           llm_client.DEFAULT_PARAMS, self._handle.as_result())
+        except Exception:
+            pass
+
+
+def generate_turn(state, action, chunks: list[str] | None = None,
+                  thread_notes: list[str] | None = None,
+                  active_turns: list[dict] | None = None,
+                  previous_hints: list[str] | None = None):
+    """Bridge the pure controller to the model.
+
+    - MODE_HINT routes to the existing progressive-hint generator (its prompt
+      and escalation are already tuned) and returns the hint STRING.
+    - MODE_NEW_QUESTION produces nothing here — the app starts a fresh episode.
+    - Every other mode builds a directive-steered message list and returns a
+      TurnStream the UI can stream, then read `.text` from.
+
+    `chunks` are the retrieved context for this episode (reused across turns so
+    the tutor stays grounded and consistent). Falls back to [] if absent.
+    """
+    from . import controller as C
+
+    chunks = chunks or []
+
+    if action.mode == C.MODE_HINT:
+        return get_hint(state.question, state.grade, chunks, state.level,
+                        action.hint_number or 1, previous_hints)
+
+    if action.mode == C.MODE_NEW_QUESTION:
+        return None
+
+    # Reveal/co-solve are the only turns allowed to state the final answer, and
+    # only then do we inject the trusted value so the worked solution is exact.
+    reveal_modes = {C.MODE_CO_SOLVE, C.MODE_REVEAL}
+    injected = state.computed_answer if action.mode in reveal_modes else None
+
+    messages = prompt_registry.build_messages(
+        state.question, state.grade, chunks,
+        version=ANSWER_VERSION, level=state.level,
+        computed_answer=injected,
+        thread_notes=thread_notes, active_turns=active_turns,
+        directive=action.directive,
+    )
+    return TurnStream(messages)
