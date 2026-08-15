@@ -177,9 +177,12 @@ def ask_tutor(question: str, grade: int, level: str | None = None,
 
 
 def get_hint(question: str, grade: int, chunks: list[str], level: str | None,
-             hint_number: int, previous_hints: list[str] | None = None) -> str:
+             hint_number: int, previous_hints: list[str] | None = None,
+             total_hints: int = 3) -> str:
+    computed_answer, _is_math = _solve(question, grade)
     return hints.generate_hint(
-        question, grade, chunks, _norm_level(level), hint_number, previous_hints
+        question, grade, chunks, _norm_level(level), hint_number,
+        previous_hints, computed_answer=computed_answer, total_hints=total_hints,
     )
 
 
