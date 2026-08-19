@@ -1,291 +1,489 @@
-# LLM-Based Math Tutor (NCERT Classes 1–5)
+# LLM-Based Math Tutor — MVP
 
-A Retrieval-Augmented Generation (RAG) tutoring system. A student asks a
-mathematics question, the system retrieves relevant passages from NCERT
-Class 1–5 textbooks, and an LLM generates a grade-appropriate, step-by-step
-answer grounded in that retrieved content.
+A Retrieval-Augmented Generation (RAG) maths tutor for NCERT Classes 1–5. The MVP combines the team's retrieval, model-integration, prompt-engineering, verification, tutoring-control, memory, and Streamlit work into one student-facing application.
 
-```
-Student question + grade
-        │
-        ▼
-┌─────────────────────┐     ┌──────────────────────┐
-│  Hybrid retrieval   │────▶│  Prompt assembly    │
-│  BM25 + ChromaDB    │     │  system + context +  │
-│  (top-3 chunks)     │     │  question            │
-└─────────────────────┘     └──────────┬───────────┘
-                                       ▼
-                            ┌──────────────────────┐
-                            │  LLM generation      │
-                            │  (gpt-oss-120b /     │
-                            │   llama3.3-70b /     │
-                            │   qwen3-32b via HF   │
-                            │   Inference Providers)│
-                            └──────────┬───────────┘
-                                       ▼
-                            Tutor answer + JSONL run log
-```
+## 1. Quick start
 
----
+### Requirements
 
-## 1. Repository layout
+- Python **3.10+**
+- Internet access for LLM inference
+- A Hugging Face token and/or Groq API key
+- The five NCERT mathematics PDFs
 
-```
-data/
-  raw_pdfs/                 # NCERT textbook PDFs (not in git — see §3)
-  extracted_json/
-    ncert_chunks.json       # parsed chunks (output of parse_ncert.py)
-  chromadb/                 # persistent vector store (not in git; built locally)
-  eval_report.json          # retrieval evaluation output
-  llm_runs.jsonl            # generation logs (not in git)
-scripts/
-  parse_ncert.py            # PDF → text chunks
-  load_chromadb.py          # chunks → embeddings → ChromaDB
-  retrieval.py              # hybrid retrieval (the team contract)
-  eval_retrieval.py         # keyword-based retrieval evaluation
-  llm/
-    common.py               # shared API client, provider fallback, logging
-    prompt.py               # prompt templates (versioned)
-    gpt_oss.py              # model file: gpt-oss-120b
-    llama33.py              # model file: Llama-3.3-70B-Instruct
-    qwen3.py                # model file: Qwen3-32B
-    run_test.py             # end-to-end RAG test across all models
-test_integration.py         # verifies retrieve() matches the team contract
-requirements.txt
-.env                        # your API tokens (never commit)
-.gitignore
-```
-
----
-
-## 2. Setup
-
-Requires Python 3.10+.
+Install dependencies:
 
 ```bash
 git clone <repo-url>
 cd LLM-Based-Math-Tutor
+
 python -m venv venv
-source venv/bin/activate          # Windows Git Bash: source venv/Scripts/activate
+# Windows Git Bash:
+source venv/Scripts/activate
+# macOS/Linux:
+# source venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
-Create a `.env` file at the project root:
+Create `.env` in the project root:
 
-```
+```env
 HF_TOKEN=hf_your_token_here
+GROQ_API_KEY=your_groq_key_here
 ```
 
-- Get a token at https://huggingface.co/settings/tokens (read access is enough).
-- No quotes, no spaces around `=`.
-- `.env` is gitignored. Never commit tokens.
+At least one of the two keys should be available. The MVP tries Groq first and then Hugging Face Inference Provider fallbacks.
 
----
+> Never commit `.env` or API keys.
 
-## 3. Data ingestion pipeline
+## 2. Get the NCERT data
 
-### 3.1 Download the textbook PDFs
+Download the Class 1–5 NCERT mathematics PDFs:
 
-Download the NCERT mathematics PDFs for Classes 1–5: [NCERT Classes 1-5](https://drive.google.com/drive/folders/1DBPLkxJh6Y6-zJNLeopLxnYEaSN2AV_T?usp=sharing)
+**NCERT Classes 1–5:**  
+https://drive.google.com/drive/folders/1DBPLkxJh6Y6-zJNLeopLxnYEaSN2AV_T?usp=sharing
 
-Place them as:
+Place them exactly here:
 
+```text
+data/
+└── raw_pdfs/
+    ├── class1.pdf
+    ├── class2.pdf
+    ├── class3.pdf
+    ├── class4.pdf
+    └── class5.pdf
 ```
-data/raw_pdfs/class1.pdf
-data/raw_pdfs/class2.pdf
-data/raw_pdfs/class3.pdf
-data/raw_pdfs/class4.pdf
-data/raw_pdfs/class5.pdf
-```
 
-### 3.2 Parse PDFs into chunks
+These PDFs are not committed to the repository.
+
+## 3. Build the local knowledge base
+
+Run these once from the **repository root**:
 
 ```bash
 python scripts/parse_ncert.py
-```
-
-What it does:
-- Opens each `classN.pdf` with PyMuPDF (`fitz`).
-- Extracts text page by page, dropping page numbers and very short lines.
-- Splits text into sentences and groups them **3 sentences per chunk**
-  (minimum 50 characters), preserving `grade` and `page` metadata.
-- Writes all chunks to `data/extracted_json/ncert_chunks.json`.
-
-Output format (one entry per chunk):
-
-```json
-{"text": "...", "grade": 3, "page": 42, "source": "NCERT"}
-```
-
-Current corpus: ~2,329 chunks across the five books.
-
-### 3.3 Build the vector store
-
-```bash
 python scripts/load_chromadb.py
 ```
 
-What it does:
-- Loads `ncert_chunks.json`.
-- Deletes any existing `ncert_math` collection (safe full rebuild).
-- Embeds every chunk with `sentence-transformers/all-MiniLM-L6-v2`
-  (384-dim embeddings, runs on CPU).
-- Inserts documents + embeddings + metadata into a **persistent ChromaDB**
-  store at `data/chromadb/` in batches of 100.
+### What happens
 
-Note: `data/chromadb/` is gitignored, so **every machine builds its own
-index** by running this script once. Rerun it whenever
-`ncert_chunks.json` changes.
-
----
-
-## 4. Retrieval
-
-### 4.1 How it works (`scripts/retrieval.py`)
-
-Hybrid retrieval combining two complementary signals:
-
-1. **BM25 (lexical)** via `rank_bm25` — exact word matching, good for
-   terms like "perimeter" or "borrowing".
-2. **Dense semantic search** via ChromaDB — meaning-based matching, good
-   when the student's wording differs from the textbook's.
-
-Both retrievers fetch 20 candidates each, restricted to a **grade window**
-of `{grade-1, grade}` (a Class 3 question may also use Class 2 content as
-prerequisite knowledge). The two rankings are merged with **Reciprocal
-Rank Fusion** (k=60) and the top 3 chunks are returned.
-
-### 4.2 The team contract
-
-```python
-from scripts.retrieval import retrieve
-
-chunks = retrieve("How do I subtract with borrowing?", grade=3)
-# -> list of exactly 3 chunk strings
+```text
+NCERT PDFs
+   ↓
+PyMuPDF / fitz
+   ↓
+cleaned text
+   ↓
+~3-sentence chunks + grade/page metadata
+   ↓
+data/extracted_json/ncert_chunks.json
+   ↓
+all-MiniLM-L6-v2 embeddings
+   ↓
+persistent ChromaDB
+data/chromadb/
 ```
 
-`retrieve_with_metadata(...)` returns the same ranking as full dicts
-(grade/page/topic/type) for debugging and evaluation.
+`parse_ncert.py` reads `data/raw_pdfs/class1.pdf` through `class5.pdf`, extracts text page-by-page, removes short/page-number-like lines, groups sentences into chunks, and writes the chunk JSON.
 
-### 4.3 Verify retrieval
+`load_chromadb.py` embeds those chunks with `sentence-transformers/all-MiniLM-L6-v2` and rebuilds the `ncert_math` ChromaDB collection in batches.
+
+> Re-run both scripts if the source PDFs or chunking logic changes. The local `data/chromadb/` directory is generated data and is not committed.
+
+## 4. Run the MVP
+
+Make sure you are in the **repository root** and the virtual environment is activated.
+
+### Start the application
 
 ```bash
-python -u scripts/retrieval.py        # smoke test, 3 sample questions
-python test_integration.py            # contract check (3 non-empty strings)
-python -u scripts/eval_retrieval.py   # keyword-based eval, 20 questions
+streamlit run frontend/app.py
 ```
 
-The evaluation reports a keyword hit-rate per class and a grade-filter
-accuracy (must be 100%), and writes `data/eval_report.json` with any weak
-retrievals to fix.
+Streamlit will start a local server and print a URL similar to:
 
----
-
-## 5. LLM generation
-
-### 5.1 Models
-
-| Registry name | Model | Providers (fallback order) |
-|---|---|---|
-| `gpt-oss-120b` | openai/gpt-oss-120b | groq → nscale → deepinfra |
-| `llama3.3-70b` | meta-llama/Llama-3.3-70B-Instruct | groq → novita → featherless-ai → scaleway |
-| `qwen3-32b` | Qwen/Qwen3-32B | groq → nscale → deepinfra |
-
-All are reached through the **Hugging Face Inference Providers router**
-(`https://router.huggingface.co/v1`), which speaks the OpenAI
-chat-completions format. One token, one client, many providers.
-
-### 5.2 Architecture (`scripts/llm/`)
-
-- **`common.py`** — creates the OpenAI-compatible client, tries each
-  provider in order with retries, returns a structured result dict
-  (text, provider used, latency, token counts, error), and appends every
-  run to `data/llm_runs.jsonl`.
-- **`prompt.py`** — builds the messages list from
-  `(question, grade, chunks)`. The system prompt instructs the model to
-  act as a friendly tutor, use ONLY the provided context, explain step by
-  step at the student's level, and refuse gracefully when the context is
-  insufficient. `PROMPT_VERSION` is logged with every run — bump it when
-  the wording changes.
-- **One file per model** (`gpt_oss.py`, `llama33.py`, `qwen3.py`) — each
-  defines its `MODEL_ID`, `PROVIDERS`, `PARAMS` and exposes the same
-  interface:
-
-```python
-generate(question: str, grade: int, chunks: list[str]) -> str
+```text
+Local URL: http://localhost:8501
+Network URL: http://192.168.x.x:8501
 ```
 
-  So the full pipeline is one line:
+Open the **Local URL** in your browser.
 
-```python
-answer = gpt_oss.generate(q, g, retrieve(q, g))
-```
+### Complete run sequence
 
-  `qwen3.py` additionally disables Qwen's thinking mode (`/no_think`) and
-  strips any `<think>...</think>` block from the output.
-
-### 5.3 Generation parameters
-
-All models currently use standard RAG-tutoring values:
-`temperature=0.3`, `top_p=0.9`, `max_tokens=1024`. Parameter tuning is a
-later phase; edit `PARAMS` in the individual model file to experiment.
-
-### 5.4 Run the models
-
-Quick single-model check (hand-made chunk, no retrieval needed):
+For a fresh setup, the complete sequence is:
 
 ```bash
-python -c "
-from scripts.llm import gpt_oss
-print(gpt_oss.generate('What is 2 + 3?', 1, ['Adding means putting together. 2 and 3 make 5.']))
-"
+# 1. Clone and enter the repository
+git clone <repo-url>
+cd LLM-Based-Math-Tutor
+
+# 2. Create and activate virtual environment
+python -m venv venv
+source venv/Scripts/activate          # Windows Git Bash
+# source venv/bin/activate            # macOS/Linux
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Add API key(s) to .env
+# HF_TOKEN=...
+# GROQ_API_KEY=...
+
+# 5. Add NCERT PDFs to data/raw_pdfs/
+
+# 6. Build the chunked knowledge base
+python scripts/parse_ncert.py
+
+# 7. Build the local ChromaDB index
+python scripts/load_chromadb.py
+
+# 8. Optional: test retrieval
+python -u scripts/retrieval.py
+
+# 9. Start the application
+streamlit run frontend/app.py
 ```
 
-Full RAG round-trip through all three models (needs `data/chromadb`
-built and `HF_TOKEN` set):
+For subsequent runs, once the knowledge base has already been built, you normally only need:
 
 ```bash
-python -m scripts.llm.run_test
+cd LLM-Based-Math-Tutor
+source venv/Scripts/activate       # Windows Git Bash
+streamlit run frontend/app.py
 ```
 
-### 5.5 Run logs
+If the PDFs or chunking logic change, rebuild the knowledge base:
 
-Every generation appends one self-contained JSON line to
-`data/llm_runs.jsonl`: timestamp, model, question, grade, the exact
-chunks and rendered messages, parameters, provider actually used,
-output text, latency, and token counts. This makes every experiment
-reproducible and comparable.
+```bash
+python scripts/parse_ncert.py
+python scripts/load_chromadb.py
+```
 
-Inspect with pandas:
+To stop the Streamlit server, press:
+
+```text
+Ctrl + C
+```
+
+`frontend/app.py` is the UI layer. It does not implement retrieval or LLM logic itself; it calls the backend in `scripts/llm/`.
+
+The current frontend has:
 
 ```python
-import pandas as pd
-df = pd.read_json("data/llm_runs.jsonl", lines=True)
+MOCK_MODE = False
 ```
 
----
+so the real backend is used.
 
-## 6. Troubleshooting
+## 5. How the MVP works
 
-| Symptom | Cause / fix |
-|---|---|
-| `Set the HF_TOKEN environment variable` | `.env` missing/misnamed, or variable not named `HF_TOKEN` exactly. |
-| ChromaDB `collection not found` | Run `python scripts/load_chromadb.py` to build the local index. |
-| `402 ... depleted your monthly included credits` | HF free inference credits exhausted for the month. Use a direct provider key (e.g. Groq free tier) or wait for the monthly reset. |
-| Provider errors for one model only | Check the `PROVIDERS` list in that model's file; provider slugs must match HF's router. |
-| Llama 403 / gated error | Accept the Llama license on the model's Hugging Face page with the same account as the token. |
-| Import errors when running scripts | Run module-style from the project root: `python -m scripts.llm.run_test`. |
+### High-level flow
 
----
+```text
+Student
+  │
+  ▼
+Streamlit frontend
+frontend/app.py
+  │
+  ▼
+pipeline.prepare()
+  │
+  ├──────────────► Retrieval
+  │                 │
+  │                 ├─ BM25
+  │                 └─ ChromaDB dense search
+  │                       ↓
+  │                    RRF fusion
+  │                       ↓
+  │                    top 3 chunks
+  │
+  ├──────────────► Compute-first verifier
+  │                 │
+  │                 └─ safe expression → SymPy
+  │
+  ▼
+Prompt construction
+prompt_registry.py
+  │
+  ├─ retrieved NCERT context
+  ├─ question + grade
+  ├─ student level
+  ├─ trusted computed answer when applicable
+  ├─ conversation memory
+  └─ controller directive
+  │
+  ▼
+LLM client
+llm_client.py
+  │
+  ├─ Groq direct
+  └─ Hugging Face router fallbacks
+  │
+  ▼
+streamed tutor response
+  │
+  ▼
+Streamlit UI
+```
 
-## 7. Project status & roadmap
+## 6. Retrieval
 
-- [x] PDF parsing and chunking (fitz)
-- [x] ChromaDB + BM25 hybrid retrieval with grade filtering
-- [x] Retrieval evaluation (keyword-based)
-- [x] LLM integration: 3 models, provider fallback, full run logging
-- [ ] Docling parsing comparison (in progress, `docling_experiment` branch)
-- [ ] Prompt engineering with real prompt versions (v2, v3, …)
-- [ ] Parameter tuning per model
-- [ ] Model comparison experiments and final selection
-- [ ] Student-facing interface (Streamlit)
+`scripts/retrieval.py` is the retrieval layer used by the MVP.
+
+It combines:
+
+1. **BM25** — lexical retrieval; useful when the student's wording contains textbook terms.
+2. **ChromaDB** — dense semantic retrieval; useful when the student's wording differs from the textbook wording.
+3. **Reciprocal Rank Fusion (RRF)** — combines both rankings.
+4. **Grade filtering** — searches the current grade and one grade below where applicable.
+
+Configuration:
+
+```text
+20 BM25 candidates
++ 20 dense candidates
+→ RRF (k=60)
+→ top 3 chunks
+```
+
+The public contract is:
+
+```python
+retrieve(question, grade)
+# -> list[str] containing the top 3 chunk texts
+```
+
+The metadata version is used by the backend when source information is needed.
+
+## 7. Backend orchestration
+
+`scripts/llm/pipeline.py` is the main backend entry point.
+
+### `prepare()`
+
+For a new question it:
+
+1. Resolves the student's level.
+2. Retrieves the relevant NCERT chunks.
+3. Runs the compute-first verifier.
+4. Builds the prompt/messages.
+5. Returns a `TutorTurn`.
+
+Generation is deliberately deferred until the turn is streamed.
+
+### Three verifier states
+
+```text
+INJECTED
+  computable + grade-appropriate result
+  → trusted result injected
+  → strict post-generation verification
+
+REMAINDER
+  mathematical question but decimal-style injection is inappropriate
+  → teach the grade-appropriate remainder form
+  → skip strict numerical mismatch check
+
+CONCEPTUAL
+  not a computable arithmetic expression
+  → explain using retrieved context
+  → no numerical verification
+```
+
+## 8. Prompting + tutoring logic
+
+The MVP uses `scripts/llm/prompt_registry.py`.
+
+The prompt is no longer just a single static instruction. The controller first decides **what the tutor should do**, then the appropriate directive is incorporated into the prompt.
+
+The tutoring controller is in:
+
+```text
+scripts/llm/controller.py
+```
+
+Typical actions include:
+
+```text
+ATTEMPT
+HINT
+SOLVE / REVEAL
+GIVE_UP / CO-SOLVE
+NEW_QUESTION
+```
+
+This separates:
+
+- **controller** → tutoring policy/state
+- **prompt registry** → instructions for the selected action
+- **LLM** → natural-language generation
+
+The MVP also passes student level, retrieved context, memory, and—when appropriate—a trusted computed answer into prompt construction.
+
+## 9. Mathematical verification
+
+`scripts/llm/verifier.py` provides the compute-first path.
+
+For supported arithmetic:
+
+```text
+Question
+  ↓
+expression extraction
+  ↓
+safe validation
+  ↓
+SymPy computation
+  ↓
+trusted result
+  ↓
+LLM explains the result
+```
+
+The system does not directly `eval()` arbitrary model output.
+
+When a trusted answer is injected, the generated response can also be checked against that trusted value after generation.
+
+## 10. LLM generation
+
+`scripts/llm/llm_client.py` is the shared streaming client.
+
+The MVP currently defaults to:
+
+```text
+openai/gpt-oss-120b
+```
+
+The client uses an OpenAI-compatible interface.
+
+Target order:
+
+```text
+1. Groq direct
+2. Hugging Face router → nscale
+3. Hugging Face router → deepinfra
+```
+
+Fallback happens **only before the first token**. Once a provider has started streaming, the response stays with that provider so the UI does not receive a partially duplicated/corrupted answer.
+
+Default generation parameters:
+
+```text
+temperature = 0.3
+top_p       = 0.9
+max_tokens  = 1024
+frequency_penalty = 0.3
+```
+
+## 11. Memory and personalization
+
+### Memory
+
+`scripts/llm/memory.py` separates:
+
+- **active episode memory** — detailed context for the current problem
+- **thread memory** — a bounded amount of information from earlier episodes
+
+The history is intentionally bounded to avoid unnecessary prompt growth and noise.
+
+### Student level
+
+`scripts/llm/student_tracker.py` records performance and can classify the student's recent level.
+
+The pipeline maps UI tracks to:
+
+```text
+needs_practice → beginner
+on_track      → intermediate
+ahead         → advanced
+```
+
+Once enough recent attempts exist, the tracker can override the UI level using recent performance.
+
+## 12. Intent and hints
+
+`scripts/llm/intent.py` handles conversational intent such as:
+
+```text
+ATTEMPT
+HINT
+SOLVE
+GIVE_UP
+NEW_QUESTION
+```
+
+The system uses a layered approach:
+
+```text
+deterministic checks
+      ↓ unresolved
+LLM classifier
+      ↓ failure
+keyword fallback
+```
+
+`scripts/llm/hints.py` generates progressive hints. Hints can use the retrieved context and, for computable questions, the trusted computed result without immediately revealing the full solution.
+
+## 13. Frontend → backend connection
+
+The important connection in `frontend/app.py` is:
+
+```text
+user question
+    ↓
+ask_tutor()
+    ↓
+pipeline.prepare()
+    ├─ retrieve
+    ├─ resolve level
+    ├─ compute/verify
+    └─ build prompt
+    ↓
+pipeline.resume()/generation
+    ↓
+LLM streaming
+    ↓
+answer returned to Streamlit
+```
+
+The frontend is therefore mainly responsible for **interaction and presentation**. Core RAG, verification, prompting, tutoring state, memory, and LLM communication stay in the backend.
+
+## 14. Useful checks
+
+Before launching the UI, retrieval can be smoke-tested:
+
+```bash
+python -u scripts/retrieval.py
+```
+
+The MVP also contains backend/pipeline tests under:
+
+```text
+scripts/llm/test_pipeline.py
+```
+
+For a full UI test, ensure the local ChromaDB has been built and at least one valid inference API key is available.
+
+## 15. Dependencies
+
+The MVP `requirements.txt` includes:
+
+- PyMuPDF
+- ChromaDB
+- sentence-transformers
+- rank-bm25
+- OpenAI client
+- python-dotenv
+- SymPy
+- Streamlit
+- pandas
+
+Install from the branch's existing `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
