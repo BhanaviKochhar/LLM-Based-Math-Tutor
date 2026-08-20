@@ -348,7 +348,8 @@ def get_hint(
     total_hints: int = 3,
     active_turns: list[dict] | None = None,
 ) -> str:
-    resolved_question, _changed = _resolve_question(question, active_turns)
+    resolution = _resolve_question(question, active_turns)
+    resolved_question = resolution.resolved_question
     computed_answer, _is_math = _solve(resolved_question, grade)
     return hints.generate_hint(
         resolved_question,
