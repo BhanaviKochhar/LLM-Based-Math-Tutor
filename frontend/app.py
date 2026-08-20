@@ -102,7 +102,41 @@ def _final_answer_string(prep) -> str:
     return raw
 
 
-def ask_tutor(question: str, grade: int, level: str = "on_track") -> dict:
+def build_active_turns(chat_messages):
+    """Convert stored UI messages into LLM conversation history.
+
+    Only prior turns are returned. The new user question is appended to the
+    UI chat after this helper is called and is therefore not duplicated in the
+    backend prompt.
+    """
+    turns = []
+    for msg in chat_messages:
+        if not isinstance(msg, dict):
+            continue
+
+        role = msg.get("role")
+        if role == "user":
+            text = (msg.get("text") or "").strip()
+            if text:
+                turns.append({"role": "user", "content": text})
+
+        elif role == "assistant":
+            if msg.get("kind") == "chat":
+                text = (msg.get("reply") or "").strip()
+            else:
+                text = (msg.get("answer") or "").strip()
+            if text:
+                turns.append({"role": "assistant", "content": text})
+
+    return turns
+
+
+def ask_tutor(
+    question: str,
+    grade: int,
+    level: str = "on_track",
+    active_turns: list[dict] | None = None,
+) -> dict:
     """Returns {answer, final_answer, source, hints, chunks, level, grade}."""
     if MOCK_MODE:
         time.sleep(0.5 + random.random() * 0.4)
@@ -110,12 +144,27 @@ def ask_tutor(question: str, grade: int, level: str = "on_track") -> dict:
         return {**r, "chunks": None, "level": level, "grade": grade}
 
     from scripts.llm import pipeline
+    # print("\n" + "=" * 80)
+    # print("DEBUG ASK_TUTOR")
+    # print("QUESTION:", repr(question))
+    # print("GRADE:", grade)
+    # print("ACTIVE TURNS:")
+    # for i, turn in enumerate(active_turns or [], 1):
+    #     print(f"  {i}. {turn['role']}: {turn['content'][:500]}")
+    # print("=" * 80)
+    # IMPORTANT: use the prepared TutorTurn directly so its prompt contains
+    # the current conversation history. The old app called prepare() and then
+    # rebuilt the turn with resume(), which discarded active_turns.
+    prep = pipeline.prepare(
+        question,
+        grade,
+        level=level,
+        student_id=STUDENT_ID,
+        active_turns=active_turns,
+    )
 
-    prep = pipeline.prepare(question, grade, level=level, student_id=STUDENT_ID)
-    turn = pipeline.resume(question, grade, prep.chunks, prep.level)
-
-    pieces = list(turn.stream())                       # drain the stream
-    answer = getattr(turn, "answer", None) or "".join(pieces)
+    pieces = list(prep.stream())
+    answer = getattr(prep, "answer", None) or "".join(pieces)
 
     return {
         "answer": answer or "",
@@ -146,17 +195,6 @@ def get_hint(msg: dict):
 
 
 # --- Intent routing ---------------------------------------------------------
-_MATHY = re.compile(
-    r"[0-9]|[+\-*/×÷=]|\b(add|plus|minus|times|multiply|divide|sum|difference|"
-    r"fraction|half|quarter|what\s+is|how\s+many|solve|calculate)\b",
-    re.I,
-)
-
-
-def _looks_like_math(q: str) -> bool:
-    return bool(_MATHY.search(q or ""))
-
-
 def _friendly_reply(q: str) -> str:
     low = q.lower()
     if any(w in low for w in ("understand", "confus", "lost", "don't get", "dont get", "stuck", "help")):
@@ -172,27 +210,26 @@ def _friendly_reply(q: str) -> str:
             "\"What is 24 + 18?\" or \"Explain fractions.\" ✏️")
 
 
-def route_message(question: str, grade: int, level: str = "on_track"):
-    q = question.strip()
-
-    # A fresh message that clearly looks like math (has digits/operators/
-    # math words) always goes straight to the tutor — no classifier needed.
-    # This matches how the original frontend worked: classify_intent is a
-    # MID-episode router (hint vs attempt vs new question), not a cold-start
-    # "is this math" gate, so we don't use it for that here.
-def route_message(question: str, grade: int, level: str = "on_track"):
+def route_message(
+    question: str,
+    grade: int,
+    level: str = "on_track",
+    active_turns: list[dict] | None = None,
+):
     """Always ask the backend — let YOUR pipeline decide what kind of question
-    this is (arithmetic, concept explanation like 'what is quantum mechanics',
-    or a conversational turn like 'hi'). No local content-based gating: that
-    was blocking anything that wasn't obviously arithmetic from ever reaching
-    the backend. This mirrors the original frontend, which always called
-    pipeline.prepare() for every typed message."""
+    this is. The active conversation history is passed into the backend so
+    follow-ups can resolve references like 'bottom number' or 'that step'."""
     q = question.strip()
     if not q:
         return "chat", _friendly_reply(q)
 
     try:
-        result = ask_tutor(q, grade, level)
+        result = ask_tutor(
+            q,
+            grade,
+            level,
+            active_turns=active_turns,
+        )
     except Exception:
         # Backend unreachable/erroring — fail toward a friendly local reply
         # rather than crashing the turn.
@@ -204,11 +241,10 @@ def route_message(question: str, grade: int, level: str = "on_track"):
     # Backend returned nothing usable — fall back locally rather than
     # rendering an empty answer block.
     return "chat", _friendly_reply(q)
-    
 
 
 def _split_explanation(answer: str):
-    """(intro, rest): longer concept/setup before the check; the computation after."""
+    """(intro, rest): longer concept/setup before the computation."""
     text = (answer or "").strip()
     if not text:
         return "", ""
@@ -668,7 +704,6 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     border-radius:20px 20px 0 0; padding:14px 34px;
     font-weight:700; font-size:16px; box-shadow:0 -6px 20px rgba(31,87,214,0.20);
 }
-.tt-footer b { font-family:'Baloo 2',sans-serif; }
 /* Fixed ask bar — floats just above the footer, spans full width like a real search bar */
 [class*="st-key-ask_bar"] {
     position: fixed !important; left: 0; right: 0; bottom: 74px; z-index: 999;
@@ -809,8 +844,6 @@ def render_qa(msg, idx):
         st.markdown(f'<div class="source-tag">📖 {html.escape(msg["source"])}</div>',
                     unsafe_allow_html=True)
 
-    
-
 
 def render_main_page():
     st.markdown(MAIN_CSS, unsafe_allow_html=True)
@@ -938,17 +971,12 @@ def render_main_page():
                             if (tries > 0) setTimeout(function () {{ scrollToLatestQuestion(tries - 1); }}, 100);
                             return;
                         }}
-                        // Each question+answer pair is its own bordered block
-                        // (st.container(border=True)). The LAST one is the
-                        // newest turn — scroll so ITS TOP is at the top of the
-                        // view, not the bottom of the whole box (which would
-                        // show only the tail end of a long answer).
                         const blocks = scrollable.querySelectorAll('[data-testid="stVerticalBlockBorderWrapper"]');
                         if (blocks.length > 0) {{
                             const last = blocks[blocks.length - 1];
                             const scrollableTop = scrollable.getBoundingClientRect().top;
                             const lastTop = last.getBoundingClientRect().top;
-                            scrollable.scrollTop += (lastTop - scrollableTop) - 8;  // small breathing room
+                            scrollable.scrollTop += (lastTop - scrollableTop) - 8;
                         }} else {{
                             scrollable.scrollTop = scrollable.scrollHeight;
                         }}
@@ -981,9 +1009,20 @@ def render_main_page():
         if ask_clicked and question.strip() and st.session_state.get("_last_submit_id") != submit_id:
             st.session_state["_last_submit_id"] = submit_id
             q = question.strip()
+
+            # Build memory BEFORE adding the current user message. This is the
+            # key detail that prevents the new question from appearing twice
+            # in the LLM prompt.
+            active_turns = build_active_turns(chat["messages"])
+
             chat["messages"].append({"role": "user", "text": q})
             with st.spinner("Thinking…"):
-                kind, payload = route_message(q, ss.grade, ss.level)
+                kind, payload = route_message(
+                    q,
+                    ss.grade,
+                    ss.level,
+                    active_turns=active_turns,
+                )
             if kind == "chat":
                 chat["messages"].append({
                     "role": "assistant", "kind": "chat",
@@ -993,8 +1032,8 @@ def render_main_page():
                 r = payload
                 _, _rest_for_steps = _split_explanation(r.get("answer", ""))
                 _step_lines = re.findall(r"(?m)^\s*\d+[.)]\s", _rest_for_steps)
-                step_count = len(_step_lines) if _step_lines else 3  # sane fallback
-                step_count = max(1, min(step_count, 3))              # avoid pathological cases
+                step_count = len(_step_lines) if _step_lines else 3
+                step_count = max(1, min(step_count, 3))
                 chat["messages"].append({
                     "role": "assistant", "kind": "solve",
                     "question": q,
