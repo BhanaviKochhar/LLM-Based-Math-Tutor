@@ -125,6 +125,46 @@ def _student_answer(turn: str) -> str | None:
     return None  # 0 numbers, or ambiguous multi-number working
 
 
+_QUESTION_SENTENCE_RE = re.compile(r"[^.!?]*\?")
+
+
+def _posed_subquestions(text: str) -> list[str]:
+    """Self-contained '...?'-terminated sentences in `text`, in the order
+    they appear. Used only as graduate_if_computable()'s candidate list; a
+    sentence ending up here is not yet known to be computable."""
+    if not text:
+        return []
+    return [m.group(0).strip() for m in _QUESTION_SENTENCE_RE.finditer(text)]
+
+
+def graduate_if_computable(state: "TutorState", generated_text: str) -> bool:
+    """Let a conceptual episode (state.is_math False -- e.g. the student
+    opened with a broad topic like "fractions") acquire a trusted answer
+    mid-conversation, so it can stop looping through MODE_ACK_CONCEPTUAL
+    forever once it has something concrete to grade.
+
+    Tutors routinely pose a concrete follow-up exercise unprompted while
+    acknowledging a conceptual turn (e.g. "What is one-third of nine
+    toffees?"). This checks each '...?'-sentence in the tutor's own reply,
+    most recent first, through the SAME compute-first+gate path used
+    everywhere else (verifier.solve) -- deliberately not a new extraction
+    mechanism. The first sentence that yields a usable value graduates the
+    episode (state.computed_answer/is_math are set so the student's NEXT
+    reply is diagnosed numerically); if none do, this is a no-op and
+    today's unchanged ack-conceptual loop continues. Returns True iff the
+    episode was graduated.
+    """
+    if state.is_math or state.computed_answer is not None:
+        return False
+    for candidate in reversed(_posed_subquestions(generated_text)):
+        answer, is_math = verifier.solve(candidate, state.grade)
+        if is_math and answer is not None:
+            state.computed_answer = answer
+            state.is_math = True
+            return True
+    return False
+
+
 def diagnose(turn: str, computed_answer: str | None, is_math: bool) -> str:
     """Return 'correct' | 'wrong' | 'unclear' | 'engaged'.
 
@@ -196,10 +236,15 @@ def _d_ack_conceptual(s: TutorState) -> str:
         "child just wrote — if it shows correct or partially correct "
         "reasoning, say so specifically and build on their own words; do NOT "
         "restart with a generic definition they have already heard in this "
-        "conversation. Then add one new, SHORT point that moves the "
-        "conversation forward (do not repeat an example you already gave). "
-        "Keep the textbook context as grounding, not as a script to re-read. "
-        "Do NOT write an 'Answer:' line and do NOT use numbered steps."
+        "conversation. Then, if it fits naturally, end with ONE small, "
+        "concrete question with a specific number in it that the child could "
+        "actually work out (e.g. 'What is one-third of 9?'), phrased as a "
+        "question ending in '?' — do not solve it yourself. If a concrete "
+        "question doesn't fit naturally here, add one new, SHORT point that "
+        "moves the conversation forward instead (do not repeat an example "
+        "you already gave). Keep the textbook context as grounding, not as "
+        "a script to re-read. Do NOT write an 'Answer:' line and do NOT use "
+        "numbered steps."
     )
 
 

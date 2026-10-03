@@ -117,6 +117,34 @@ s, a = C.start("what is a fraction", 3, "intermediate", computed_answer=None, is
 s, a = C.step(s, "ATTEMPT", "a part of something?")
 check("conceptual -> ack_conceptual, not terminal", a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
 
+# 12) conceptual episode graduates to math once the tutor poses a computable
+# exercise, and the NEXT attempt is then genuinely diagnosed (not a forever-loop)
+scenario("12. conceptual episode graduates when the reply poses a computable exercise")
+s, a = C.start("fractions", 3, "intermediate", computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "a fraction is part of a whole")
+check("still ack_conceptual before graduation", a.mode == C.MODE_ACK_CONCEPTUAL)
+graduated = C.graduate_if_computable(
+    s, "Good thinking! Here's one to try: what is 1/3 of 9?"
+)
+check("graduated to a trusted answer", graduated and s.is_math and s.computed_answer == "3")
+s, a = C.step(s, "ATTEMPT", "3")
+check("next attempt now genuinely diagnosed as correct", a.mode == C.MODE_DIAGNOSE_CORRECT and a.terminal)
+
+scenario("13. no computable sentence in the reply -> no graduation (unchanged loop)")
+s, a = C.start("fractions", 3, "intermediate", computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "a fraction is part of a whole")
+graduated = C.graduate_if_computable(
+    s, "Fractions show parts of a whole. Does that make sense so far?"
+)
+check("not graduated: no computable sentence", not graduated and not s.is_math and s.computed_answer is None)
+s, a = C.step(s, "ATTEMPT", "yes")
+check("still loops through ack_conceptual, as before", a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
+
+scenario("14. already-math episode is never re-graduated (guard against overwrite)")
+s, a = C.start("q", 3, "intermediate", computed_answer="56", is_math=True)
+graduated = C.graduate_if_computable(s, "Try this too: what is 2 + 2?")
+check("already-math episode untouched", not graduated and s.computed_answer == "56")
+
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:
     raise SystemExit(1)

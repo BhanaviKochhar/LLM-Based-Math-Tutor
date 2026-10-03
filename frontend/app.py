@@ -292,6 +292,15 @@ def _apply_action(episode, action, active_turns) -> dict:
     if action.mode == C.MODE_HINT and text:
         episode["hints_shown"].append(text)
 
+    if action.mode == C.MODE_ACK_CONCEPTUAL:
+        # Conceptual episodes have no trusted answer to grade against and
+        # would otherwise loop through ACK_CONCEPTUAL forever (controller.py
+        # diagnose()). If this reply itself posed a concrete, computable
+        # exercise, graduate the episode so the student's next reply is
+        # diagnosed numerically instead. No-op (unchanged behaviour) if it
+        # didn't -- see controller.graduate_if_computable.
+        C.graduate_if_computable(state, text)
+
     verify = _post_check(state, action, text)
     _record_outcome(state, action)
 
