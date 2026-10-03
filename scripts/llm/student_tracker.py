@@ -33,9 +33,19 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
+    """Write-then-atomic-rename so a crash or concurrent read mid-save can
+    never observe a truncated/corrupted students.json. This does NOT make
+    concurrent writers safe from lost updates (two processes doing
+    read-modify-write at the same time can still race and one's change can
+    be overwritten) -- that needs real locking or a move off a flat JSON
+    file, which is out of scope for this single-user MVP. This only
+    prevents file corruption, the narrower and lower-risk half of the
+    concurrency concern."""
     os.makedirs("data", exist_ok=True)
-    with open(STORE, "w", encoding="utf-8") as f:
+    tmp = f"{STORE}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+    os.replace(tmp, STORE)
 
 
 def _blank() -> dict:

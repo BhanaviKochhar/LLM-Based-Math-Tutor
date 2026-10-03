@@ -8,7 +8,7 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 """
 from __future__ import annotations
 
-from . import hints, llm_client, pipeline, response_parser, verifier
+from . import hints, llm_client, pipeline, response_parser, student_tracker, verifier
 
 _passed = 0
 _failed = 0
@@ -40,6 +40,80 @@ def test_response_parser() -> None:
     check("final_number_str uses answer line",
           response_parser.final_number_str("steps 2+3\nAnswer: 5") == "5")
     check("refusal detected", response_parser.is_refusal("Let's ask your teacher about this one!"))
+
+
+# ------------------------------------------- response_parser.final_number_str tiers
+def test_final_number_str_fallback_tiers() -> None:
+    """Regression tests for the confidence-tiered fallback (see
+    response_parser.py's module docstring and final_number_str's docstring).
+    Added when the fallback was changed from 'first number in the whole
+    text' (wrong: grabs an early input number) to this tiered approach.
+    Cases ex-009/ex-010 motivated the fix but these tests exercise the
+    general design, not just those two literal strings."""
+    print("response_parser.final_number_str — confidence-tiered fallback")
+    fns = response_parser.final_number_str
+
+    # Tier 1: explicit "Answer:" line, including bold/star formatting.
+    check("explicit Answer: line",
+          fns("some steps\nAnswer: 42") == "42")
+    check("explicit **Answer:** line (bold)",
+          fns("some steps\n**Answer:** 42") == "42")
+    check("Answer: line wins even with other numbers earlier",
+          fns("We started with 3 groups of 4.\nAnswer: 12") == "12")
+
+    # Tier 2: last "= value" / "equals value" statement, final answer buried
+    # in prose with no Answer: line and multiple intermediate values.
+    check("final answer in prose via last equation (ex-009-style)",
+          fns("We have 3 groups, and each group has 4 apples. "
+             "4 + 4 = 8, then 8 + 4 = 12. So 3 times 4 is 12.") == "12")
+    check("final answer in prose, single equation (ex-010-style)",
+          fns("Let's add these two numbers. 27 + 15 = 42. "
+             "So the answer is 42 toffees.") == "42")
+    check("multiple intermediate equations -> LAST one wins",
+          fns("Add the ones: 7 + 5 = 12, write 2 carry 1. "
+             "Add the tens: 2 + 1 + 1 = 4.") == "4")
+    check("'equals' spelled out, not just '='",
+          fns("Nine times six equals 54.") == "54")
+    check("trailing follow-up suggestion AFTER the answer is not picked up",
+          fns("Well done! 9 times 6 equals 54. Would you like to try a "
+             "little tougher one, like 8 times 7, or would you prefer "
+             "to explore a new topic?") == "54")
+    check("fraction as an equation result",
+          fns("First we simplify 2/4 = 1/2. Then 1/2 + 1/4 = 3/4.") == "3/4")
+    check("negative equation result",
+          fns("5 minus 8 = -3.") == "-3")
+
+    # Tier 3: no Answer: line, no equation -- sole number by elimination.
+    check("single bare number, no structure -> accepted by elimination",
+          fns("I think it's 7.") == "7")
+    check("single bare fraction, no structure -> accepted by elimination",
+          fns("I think it's 3/4.") == "3/4")
+
+    # Ambiguous: multiple bare numbers, no Answer:/equation to disambiguate
+    # -> None (unverifiable), not a guess.
+    check("multiple bare numbers with no structure -> ambiguous, None",
+          fns("I have 3 apples and my friend has 4 apples.") is None)
+
+    # Missing / no number at all.
+    check("no number anywhere -> None",
+          fns("Let's think about this together.") is None)
+    check("empty string -> None", fns("") is None)
+    check("None input -> None", fns(None) is None)
+
+    # Contradictory: two different Answer: lines -> last one wins (existing
+    # extract_answer behaviour, re-asserted here through final_number_str).
+    check("contradictory Answer: lines -> last wins",
+          fns("First attempt.\nAnswer: 10\nActually let me redo that.\n"
+             "Answer: 12") == "12")
+
+    # Malformed: an "=" with no usable number after it must not crash or
+    # fabricate a value; should fall through to the next tier instead.
+    check("malformed equation (nothing numeric after '=') falls through safely",
+          fns("This equals something unclear, but 9 works.") == "9")
+
+    # Irrelevant numbers mixed with a clear equation result.
+    check("irrelevant numbers (dates/counts) do not override the equation result",
+          fns("On day 3 of 5, we calculated 6 + 6 = 12 toffees in total.") == "12")
 
 
 # --------------------------------------------------------------- verifier maths
@@ -201,8 +275,36 @@ def test_hints_and_levels() -> None:
     check("source built", "NCERT Class 4" in src and "p.12" in src)
 
 
+def test_student_tracker_atomic_save() -> None:
+    """Regression test for the atomic-write fix in student_tracker._save():
+    uses a temp STORE path so the real data/students.json is never touched."""
+    print("student_tracker — atomic save")
+    import os
+    import tempfile
+
+    orig_store = student_tracker.STORE
+    tmpdir = tempfile.mkdtemp()
+    student_tracker.STORE = os.path.join(tmpdir, "students.json")
+    try:
+        student_tracker.record("test_student", topic="fractions", correct=True)
+        student_tracker.record("test_student", topic="fractions", correct=False)
+        stats = student_tracker.stats("test_student")
+        check("attempts recorded", stats["attempts"] == 2)
+        check("no leftover .tmp file after save",
+              not os.path.exists(student_tracker.STORE + ".tmp"))
+        import json
+        with open(student_tracker.STORE, encoding="utf-8") as f:
+            reloaded = json.load(f)
+        check("saved file is valid, re-loadable JSON",
+              reloaded["test_student"]["attempts"] == 2)
+    finally:
+        student_tracker.STORE = orig_store
+
+
 def main() -> None:
     test_response_parser()
+    test_final_number_str_fallback_tiers()
+    test_student_tracker_atomic_save()
     test_verifier_math()
     test_verifier_check()
     test_client_fallback()
