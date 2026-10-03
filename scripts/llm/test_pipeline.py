@@ -181,7 +181,15 @@ def test_hints_and_levels() -> None:
     user_msg = captured["messages"][1]["content"]
     check("hint system has grade", "Class 3" in sys_msg)
     check("hint user has prior hints", "think groups" in user_msg)
-    check("hint level-2 guidance present", "first concrete step" in user_msg)
+    # This call is hint 2 of the default total_hints=3, i.e. a MIDDLE hint, not
+    # the LAST or SINGLE case — so it must use hints._GUIDANCE_MIDDLE's wording
+    # ("...one real step closer..."), not "first concrete step" (that phrase is
+    # unique to _GUIDANCE_SINGLE, for problems with only one hint total, and
+    # never appears when total_hints=3). The previous assertion checked for
+    # the wrong guidance tier's wording and would fail even though hints.py's
+    # step-scaled guidance (_guidance_for) is working correctly.
+    check("hint level-2 (of 3) uses middle-tier escalating guidance, not first/last/single wording",
+          "one real step closer" in user_msg)
 
     check("map needs_practice", pipeline._norm_level("needs_practice") == "beginner")
     check("map on_track", pipeline._norm_level("on_track") == "intermediate")

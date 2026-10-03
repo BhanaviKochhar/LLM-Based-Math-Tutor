@@ -63,6 +63,13 @@ def _make_source(chunks_meta: list[dict]) -> str:
     return " · ".join(parts) if parts else "NCERT textbook"
 
 
+def source_citation(chunks_meta: list[dict]) -> str:
+    """Public entry point for callers outside this module (e.g. the
+    frontend) that need a display-ready source string without reaching into
+    the private _make_source helper."""
+    return _make_source(chunks_meta)
+
+
 class TutorTurn:
     """One question's worth of work. Retrieval and computation happen up front;
     only generation is deferred until stream()."""
@@ -182,6 +189,13 @@ def _solve(question: str, grade: int) -> tuple[str | None, bool]:
         return None, False
 
 
+def compute_trusted_answer(question: str, grade: int) -> tuple[str | None, bool]:
+    """Public entry point for callers outside this module (e.g. the
+    frontend) that need the compute-first trusted answer without reaching
+    into the private _solve helper."""
+    return _solve(question, grade)
+
+
 def _resolve_question(
     question: str,
     active_turns: list[dict] | None,
@@ -202,6 +216,13 @@ def _resolve_question(
         print("=" * 80)
 
     return resolution
+
+
+def resolve_conversation(question: str, active_turns: list[dict] | None = None):
+    """Public entry point for callers outside this module (e.g. the
+    frontend) that need conversation-aware resolution without reaching into
+    the private _resolve_question helper."""
+    return _resolve_question(question, active_turns)
 
 
 def _conversation_directive(resolution) -> str | None:

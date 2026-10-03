@@ -99,6 +99,15 @@ def _safe_eval(expr_str: str | None):
     return val
 
 
+def parse_trusted_value(value_str: str | None):
+    """Public entry point for callers outside this package (e.g. the
+    frontend) that already hold an already-trusted answer string — such as
+    a controller TutorState.computed_answer — and need it as a comparable
+    value. Equivalent to _safe_eval, which stays the internal name used by
+    verifier.py/controller.py/tests within this package."""
+    return _safe_eval(value_str)
+
+
 def _default_extractor(question: str, retries: int = 1) -> str:
     """Ask the shared LLM client for a single arithmetic expression.
 

@@ -186,11 +186,20 @@ def _d_ask_answer(s: TutorState) -> str:
 
 
 def _d_ack_conceptual(s: TutorState) -> str:
+    # Every ungradable turn in this episode routes through this same
+    # directive (there is no computed_answer to diagnose against), so without
+    # an explicit instruction to vary the model tends to regenerate the same
+    # explanation each time instead of building on what the child just said.
     return (
         "For THIS reply: this is a 'what is / why' question with no single "
-        "number answer. Warmly explain the idea in a few plain sentences using "
-        "the textbook context, then invite a related question or a small "
-        "practice. Do NOT write an 'Answer:' line and do NOT use numbered steps."
+        "number answer you can grade. First, directly acknowledge what the "
+        "child just wrote — if it shows correct or partially correct "
+        "reasoning, say so specifically and build on their own words; do NOT "
+        "restart with a generic definition they have already heard in this "
+        "conversation. Then add one new, SHORT point that moves the "
+        "conversation forward (do not repeat an example you already gave). "
+        "Keep the textbook context as grounding, not as a script to re-read. "
+        "Do NOT write an 'Answer:' line and do NOT use numbered steps."
     )
 
 

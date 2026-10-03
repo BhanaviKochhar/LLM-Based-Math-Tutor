@@ -1,3 +1,5 @@
+import copy
+import logging
 import re
 import sys
 import time
@@ -7,6 +9,8 @@ from pathlib import Path
 
 import streamlit as st
 import streamlit.components.v1 as components
+
+logger = logging.getLogger(__name__)
 
 # Put the repo root on sys.path so `scripts.llm` resolves, like the old frontend.
 # Launch from the repo root so data/ paths resolve too:  streamlit run frontend/app.py
@@ -80,28 +84,6 @@ MOCK_RESPONSES = [
 ]
 
 
-def _final_answer_string(prep) -> str:
-    """Turn the backend's computed_answer into a short key for auto-checking."""
-    ca = getattr(prep, "computed_answer", None)
-    if ca is None:
-        return ""
-    raw = str(ca).strip()
-    if not raw:
-        return ""
-    if re.fullmatch(r"-?\d+/\d+", raw) or re.fullmatch(r"-?\d+(\.\d+)?", raw):
-        return raw
-    try:
-        from scripts.llm import verifier
-        val = verifier._safe_eval(raw)
-        if val is not None:
-            if isinstance(val, float) and val.is_integer():
-                return str(int(val))
-            return str(val)
-    except Exception:
-        pass
-    return raw
-
-
 def build_active_turns(chat_messages):
     """Convert stored UI messages into LLM conversation history.
 
@@ -124,78 +106,16 @@ def build_active_turns(chat_messages):
             if msg.get("kind") == "chat":
                 text = (msg.get("reply") or "").strip()
             else:
-                text = (msg.get("answer") or "").strip()
+                text = (msg.get("text") or "").strip()
             if text:
                 turns.append({"role": "assistant", "content": text})
 
     return turns
 
 
-def ask_tutor(
-    question: str,
-    grade: int,
-    level: str = "on_track",
-    active_turns: list[dict] | None = None,
-) -> dict:
-    """Returns {answer, final_answer, source, hints, chunks, level, grade}."""
-    if MOCK_MODE:
-        time.sleep(0.5 + random.random() * 0.4)
-        r = random.choice(MOCK_RESPONSES)
-        return {**r, "chunks": None, "level": level, "grade": grade}
-
-    from scripts.llm import pipeline
-    # print("\n" + "=" * 80)
-    # print("DEBUG ASK_TUTOR")
-    # print("QUESTION:", repr(question))
-    # print("GRADE:", grade)
-    # print("ACTIVE TURNS:")
-    # for i, turn in enumerate(active_turns or [], 1):
-    #     print(f"  {i}. {turn['role']}: {turn['content'][:500]}")
-    # print("=" * 80)
-    # IMPORTANT: use the prepared TutorTurn directly so its prompt contains
-    # the current conversation history. The old app called prepare() and then
-    # rebuilt the turn with resume(), which discarded active_turns.
-    prep = pipeline.prepare(
-        question,
-        grade,
-        level=level,
-        student_id=STUDENT_ID,
-        active_turns=active_turns,
-    )
-
-    pieces = list(prep.stream())
-    answer = getattr(prep, "answer", None) or "".join(pieces)
-
-    return {
-        "answer": answer or "",
-        "final_answer": _final_answer_string(prep),
-        "source": getattr(prep, "source", "") or "",
-        "hints": [],
-        "chunks": getattr(prep, "chunks", None),
-        "level": getattr(prep, "level", level),
-        "grade": grade,
-    }
-
-
-def get_hint(msg: dict):
-    """Next escalating hint, capped at this problem's actual step count."""
-    shown = msg.get("hints_shown", [])
-    n = len(shown) + 1
-    total = msg.get("step_count", 3)
-    if n > total:
-        return None
-    if MOCK_MODE:
-        pool = msg.get("hints_pool") or []
-        return pool[n - 1] if n - 1 < len(pool) else \
-            "Try breaking it into smaller steps and take them one at a time. 🙂"
-    from scripts.llm import pipeline
-    return pipeline.get_hint(msg.get("question", ""), msg.get("grade", 3),
-                             msg.get("chunks"), msg.get("level", "on_track"),
-                             n, shown, total_hints=total)
-
-
-# --- Intent routing ---------------------------------------------------------
 def _friendly_reply(q: str) -> str:
+    """Local fallback reply used only when the backend errors or produces
+    nothing usable for this turn (mirrors the old route_message contract)."""
     low = q.lower()
     if any(w in low for w in ("understand", "confus", "lost", "don't get", "dont get", "stuck", "help")):
         return ("No worries — that happens to everyone! Tell me which part is confusing, "
@@ -208,61 +128,6 @@ def _friendly_reply(q: str) -> str:
         return "You're welcome! 🌟 Ask me another math question whenever you're ready."
     return ("I'm your math helper, so I do best with math questions! Try something like "
             "\"What is 24 + 18?\" or \"Explain fractions.\" ✏️")
-
-
-def route_message(
-    question: str,
-    grade: int,
-    level: str = "on_track",
-    active_turns: list[dict] | None = None,
-):
-    """Always ask the backend — let YOUR pipeline decide what kind of question
-    this is. The active conversation history is passed into the backend so
-    follow-ups can resolve references like 'bottom number' or 'that step'."""
-    q = question.strip()
-    if not q:
-        return "chat", _friendly_reply(q)
-
-    try:
-        result = ask_tutor(
-            q,
-            grade,
-            level,
-            active_turns=active_turns,
-        )
-    except Exception:
-        # Backend unreachable/erroring — fail toward a friendly local reply
-        # rather than crashing the turn.
-        return "chat", _friendly_reply(q)
-
-    if (result.get("answer") or "").strip():
-        return "solve", result
-
-    # Backend returned nothing usable — fall back locally rather than
-    # rendering an empty answer block.
-    return "chat", _friendly_reply(q)
-
-
-def _split_explanation(answer: str):
-    """(intro, rest): longer concept/setup before the computation."""
-    text = (answer or "").strip()
-    if not text:
-        return "", ""
-    lines = text.split("\n")
-    for k, ln in enumerate(lines):
-        if re.match(r"\s*\d+[.)]\s", ln):
-            intro = "\n".join(lines[:k]).strip()
-            rest = "\n".join(lines[k:]).strip()
-            if intro and rest:
-                return intro, rest
-            break
-    paras = [p.strip() for p in text.split("\n\n") if p.strip()]
-    if len(paras) >= 2:
-        return "\n\n".join(paras[:-1]).strip(), paras[-1].strip()
-    sents = re.split(r"(?<=[.!?])\s+", text)
-    if len(sents) >= 2:
-        return " ".join(sents[:2]).strip(), " ".join(sents[2:]).strip()
-    return text, ""
 
 
 def record_feedback(question: str, correct: bool) -> None:
@@ -285,34 +150,268 @@ def reset_student() -> None:
         pass
 
 
-def check_student_answer(student: str, final_answer: str):
-    if not final_answer:
+# ===========================================================================
+# Controller-driven tutoring episode
+#
+# One "episode" = one math problem/question, tracked end-to-end by the
+# tutoring state machine in scripts.llm.controller (teach_invite -> diagnose
+# -> hint -> co_solve -> reveal). This is the integration point described in
+# the project plans: the controller — not frontend flags — now decides what
+# the tutor says and how much it discloses on every turn. Post-generation
+# verification (scripts.llm.verifier.check) also runs here, so the "verify"
+# tag reflects a real result instead of a static placeholder.
+# ===========================================================================
+
+# Controller button labels this UI renders as clickable shortcuts (bypassing
+# the intent classifier, exactly as scripts/llm/intent.py documents buttons
+# should). Labels not listed here ("I'll try", "Try again") are purely
+# instructional and are shown as plain text, not buttons.
+_LABEL_TO_INTENT = {
+    "Give me a hint": "HINT",
+    "Another hint": "HINT",
+    "Show me how": "SOLVE",
+    "Just show me": "SOLVE",
+    "Show me anyway": "SOLVE",
+}
+# This ends the open episode instead of advancing it; there is no math
+# question to interpret in the button label itself.
+#
+# KNOWN LIMITATION: the controller also offers "Practice problem" after a
+# correct answer (controller._BTN_AFTER_SOLVED), intended to serve up a new,
+# similar-difficulty problem. There is no practice-problem generator
+# anywhere in scripts/llm/* to back that — building one (a grounded,
+# difficulty-matched problem generator with its own extraction/verification)
+# is a new capability, not a frontend wiring fix, so it is out of scope for
+# this integration pass. The label is deliberately left off
+# _ACTIONABLE_LABELS below so it renders as inert text rather than a button
+# that promises something the system doesn't do; "New question" remains the
+# only actionable way to close a finished episode.
+_CLOSE_EPISODE_LABELS = {"New question"}
+_ACTIONABLE_LABELS = set(_LABEL_TO_INTENT) | _CLOSE_EPISODE_LABELS
+
+
+class GenerationFailed(RuntimeError):
+    """Raised when a controller-directed turn produced no usable text —
+    either the model/backend call raised, or every provider returned empty.
+    Deliberately raised (rather than returned as "") so a single rollback
+    path in advance_episode/start_episode covers both failure shapes and the
+    controller state they were about to commit is never left stranded ahead
+    of what the student actually saw."""
+
+
+def _mock_episode_turn(question: str) -> dict:
+    time.sleep(0.5 + random.random() * 0.4)
+    r = random.choice(MOCK_RESPONSES)
+    return {
+        "role": "assistant", "kind": "turn", "mode": "reveal", "text": r["answer"],
+        "buttons": ["New question"], "terminal": True, "outcome": "shown",
+        "hint_number": None, "source": r["source"],
+        "verify": {"verifiable": True, "match": True, "computed": r["final_answer"],
+                  "model_value": r["final_answer"], "note": "mock mode"},
+    }
+
+
+def _run_generation(state, action, chunks, active_turns, previous_hints):
+    """Call the controller->model bridge for this turn's text.
+
+    MODE_HINT returns an already-generated string (hints.generate_hint is not
+    streamed); every other mode returns a TurnStream that must be streamed to
+    populate .text. MODE_NEW_QUESTION legitimately has nothing to say.
+    Raises GenerationFailed for every other mode that comes back empty, so a
+    silent provider outage is treated the same as an exception by callers."""
+    from scripts.llm import pipeline, controller as C
+
+    result = pipeline.generate_turn(
+        state, action, chunks=chunks, active_turns=active_turns,
+        previous_hints=previous_hints,
+    )
+    if action.mode == C.MODE_NEW_QUESTION:
+        return ""
+    if action.mode == C.MODE_HINT:
+        text = (result or "").strip()
+    elif result is None:
+        text = ""
+    else:
+        for _ in result.stream():
+            pass
+        text = (result.text or "").strip()
+    if not text:
+        raise GenerationFailed(f"empty generation for controller mode={action.mode!r}")
+    return text
+
+
+def _post_check(state, action, text):
+    """Real post-generation verification for turns where a trusted answer was
+    injected (co-solve/reveal) — the live counterpart of pipeline.TutorTurn's
+    finalize(), which the old ask_tutor() path never called. Returns a
+    verifier.check()-shaped dict, or None when there is nothing to verify."""
+    from scripts.llm import controller as C, verifier
+
+    if action.mode not in (C.MODE_CO_SOLVE, C.MODE_REVEAL) or not state.computed_answer:
         return None
-    s = student.strip().lower().replace(" ", "").rstrip(".!?")
-    c = final_answer.strip().lower().replace(" ", "")
-    if not s:
-        return None
-    if s == c:
-        return True
+    computed_value = verifier.parse_trusted_value(state.computed_answer)
+    return verifier.check(state.question, text, computed_value=computed_value)
+
+
+def _record_outcome(state, action) -> None:
+    """Attempt recording tied to the controller's own diagnosis, not a
+    separate frontend heuristic. Only genuine graded attempts move the
+    tracker: every DIAGNOSE_WRONG is one real wrong attempt, and the terminal
+    DIAGNOSE_CORRECT / CO_SOLVE-by-threshold turns are the correct/final-wrong
+    attempt respectively. Giving up, or asking to be shown the solution
+    without ever having attempted the problem, is a request for help, not an
+    answer — recording it as "incorrect" would be false evidence that the
+    child tried and failed when they may never have tried at all."""
+    from scripts.llm import controller as C
+
+    if action.mode == C.MODE_DIAGNOSE_CORRECT:
+        record_feedback(state.question, True)
+    elif action.mode == C.MODE_DIAGNOSE_WRONG:
+        record_feedback(state.question, False)
+    elif action.mode == C.MODE_CO_SOLVE and action.outcome == "shown":
+        # Reached only by exhausting the wrong-attempt threshold (the
+        # give-up path uses the same mode but outcome == "gave_up").
+        record_feedback(state.question, False)
+    elif action.mode == C.MODE_REVEAL and action.outcome == "shown" and state.attempts >= 1:
+        # Honoured a solve request after at least one real wrong attempt.
+        record_feedback(state.question, False)
+    # Anything else (GIVE_UP, a cold REVEAL with zero attempts, hints,
+    # teach/diagnose-in-progress turns) is not a graded attempt.
+
+
+def _apply_action(episode, action, active_turns) -> dict:
+    """Generate + verify this turn. May raise (GenerationFailed or any other
+    exception from generation) — callers must not commit episode state until
+    this returns successfully. Mutates episode's hint history, which is safe
+    because that only happens after text generation has already succeeded."""
+    from scripts.llm import controller as C
+
+    state = episode["state"]
+    text = _run_generation(state, action, episode["chunks"], active_turns,
+                           episode["hints_shown"])
+    if action.mode == C.MODE_HINT and text:
+        episode["hints_shown"].append(text)
+
+    verify = _post_check(state, action, text)
+    _record_outcome(state, action)
+
+    return {
+        "role": "assistant", "kind": "turn", "mode": action.mode, "text": text,
+        "buttons": list(action.buttons), "terminal": action.terminal,
+        "outcome": action.outcome, "hint_number": action.hint_number,
+        "source": episode.get("source", ""), "verify": verify,
+    }
+
+
+def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) -> dict:
+    """Begin a new tutoring episode: resolve conversational context, ground it
+    in retrieval, compute the trusted answer first (compute-first), then let
+    the controller open with its TEACH_INVITE move.
+
+    chat['episode'] is only committed once generation has actually succeeded
+    — if it raises, the previous episode (terminal or None) is left exactly
+    as it was, so a failed first turn doesn't leave a silently-started
+    episode the student never saw and can't now make sense of."""
+    if MOCK_MODE:
+        reply = _mock_episode_turn(question)
+        chat["episode"] = {"state": None, "chunks": [], "source": "", "hints_shown": []}
+        return reply
+
+    from scripts.llm import pipeline, controller as C
+    from scripts.retrieval import retrieve_with_metadata
+
+    resolution = pipeline.resolve_conversation(question, active_turns)
+    level = pipeline.resolve_level(STUDENT_ID, ui_level)
+
+    chunks_meta = (retrieve_with_metadata(resolution.retrieval_query, grade)
+                  if resolution.use_rag else [])
+    chunks = [c.get("text", "") for c in chunks_meta]
+    source = pipeline.source_citation(chunks_meta)
+
+    if resolution.use_verifier:
+        computed_answer, is_math = pipeline.compute_trusted_answer(resolution.resolved_question, grade)
+    else:
+        computed_answer, is_math = None, False
+
+    state, action = C.start(
+        resolution.resolved_question, grade, level,
+        computed_answer=computed_answer, is_math=is_math,
+    )
+    episode = {"state": state, "chunks": chunks, "source": source, "hints_shown": []}
+    reply = _apply_action(episode, action, active_turns)  # may raise
+    chat["episode"] = episode  # commit only after generation succeeded
+    return reply
+
+
+def advance_episode(
+    chat, text: str, grade: int, ui_level: str, active_turns,
+    forced_intent: str | None = None,
+) -> dict:
+    """Classify the student's turn against the open episode and let the
+    controller decide the next tutoring move. A terminal/missing episode, or
+    a NEW_QUESTION intent, closes out and starts fresh from this same text.
+
+    State-consistency note: controller.step() mutates its TutorState argument
+    in place. To keep a failed generation from leaving the controller state
+    advanced (attempt counted, phase flipped) ahead of what the student
+    actually saw, step() runs on a snapshot copy; the live episode's state is
+    only overwritten with that snapshot after _apply_action's generation has
+    actually succeeded. A raised exception therefore leaves the episode
+    exactly as it was before this turn, so a retry re-evaluates cleanly
+    instead of double-counting an attempt or silently dropping one."""
+    episode = chat.get("episode")
+    state = episode.get("state") if episode else None
+    if MOCK_MODE or state is None or state.terminal:
+        return start_episode(chat, text, grade, ui_level, active_turns)
+
+    from scripts.llm import intent as intent_mod, controller as C
+
+    if forced_intent:
+        label = forced_intent
+    else:
+        prior_msgs = chat["messages"][:-1]  # exclude the turn just appended
+        last_turn = next((m for m in reversed(prior_msgs) if m.get("role") == "assistant"), None)
+        context = (last_turn or {}).get("text") or (last_turn or {}).get("reply") or None
+        label = intent_mod.classify_intent(text, context=context)
+
+    if label == "NEW_QUESTION":
+        return start_episode(chat, text, grade, ui_level, active_turns)
+
+    trial_state = copy.copy(state)
+    new_state, action = C.step(trial_state, label, text)
+    trial_episode = dict(episode, state=new_state)
+    reply = _apply_action(trial_episode, action, active_turns)  # may raise
+    episode["state"] = new_state  # commit only after generation succeeded
+    return reply
+
+
+def submit_turn(
+    chat, text: str, grade: int, ui_level: str, active_turns,
+    forced_intent: str | None = None,
+) -> dict:
+    """Advance (or start) the episode for one piece of student input.
+
+    Never raises. Two distinct failure shapes are kept apart deliberately
+    (finding E): a genuine backend/generation failure is logged (visible in
+    the server console during development) and shown as an explicit,
+    recoverable error — never dressed up as a normal tutoring reply, and
+    never silently presented as if the turn succeeded — while a falsy result
+    that isn't an exception falls back to the old conversational reply used
+    for unparseable input."""
     try:
-        if abs(float(s) - float(c)) < 1e-9:
-            return True
-    except ValueError:
-        pass
-    tokens = re.findall(r"\d+/\d+|\d+\.?\d*", s)
-    if c in tokens:
-        return True
-    cm = re.fullmatch(r"(\d+)/(\d+)", c)
-    if cm:
-        for tok in tokens:
-            sm = re.fullmatch(r"(\d+)/(\d+)", tok)
-            if sm:
-                try:
-                    if int(sm[1]) * int(cm[2]) == int(cm[1]) * int(sm[2]):
-                        return True
-                except (ValueError, ZeroDivisionError):
-                    pass
-    return False
+        reply = advance_episode(chat, text, grade, ui_level, active_turns,
+                                forced_intent=forced_intent)
+    except Exception:
+        logger.exception("submit_turn: generation failed for input %r", text)
+        return {
+            "role": "assistant", "kind": "chat", "question": text,
+            "reply": ("Hmm, something went wrong on my end and I couldn't finish "
+                     "that — nothing was recorded, so please try again. 🙂"),
+        }
+    if not reply or not (reply.get("text") or "").strip():
+        return {"role": "assistant", "kind": "chat", "question": text,
+               "reply": _friendly_reply(text)}
+    return reply
 
 
 # ===========================================================================
@@ -327,7 +426,7 @@ ss.setdefault("name_field", "")
 ss.setdefault("grade", 3)
 ss.setdefault("level", "on_track")
 ss.setdefault("chat_seq", 1)
-ss.setdefault("chats", [{"id": "chat-1", "messages": []}])
+ss.setdefault("chats", [{"id": "chat-1", "messages": [], "episode": None}])
 ss.setdefault("active", "chat-1")
 
 GRADE_LABEL = {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}
@@ -355,7 +454,7 @@ def chat_title(chat) -> str:
 def start_new_chat():
     ss.chat_seq += 1
     cid = f"chat-{ss.chat_seq}"
-    ss.chats.append({"id": cid, "messages": []})
+    ss.chats.append({"id": cid, "messages": [], "episode": None})
     ss.active = cid
 
 
@@ -659,19 +758,13 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
 
 /* per-question shortcut buttons — spread + warm like image 2 */
 .tt-shortcut-hint { color:#111; font-weight:700; font-size:14px; margin:10px 2px 6px; }
-[class*="st-key-hint_"] button, [class*="st-key-explain_"] button {
+[class*="st-key-turnbtn_"] button {
     font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:16px !important;
     background:linear-gradient(135deg,#f5b301,#ff6f59) !important; color:#fff !important;
     border:2px solid #1f2a63 !important; border-radius:14px !important; padding:12px 8px !important;
     box-shadow:3px 3px 0 rgba(31,42,99,0.25) !important;
 }
-[class*="st-key-hint_"] button p, [class*="st-key-explain_"] button p { color:#fff !important; font-weight:800 !important; }
-[class*="st-key-check_"] button {
-    font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:16px !important;
-    background:#3fbf6d !important; color:#fff !important; border:2px solid #1f2a63 !important;
-    border-radius:14px !important; padding:12px 8px !important; box-shadow:3px 3px 0 rgba(31,42,99,0.25) !important;
-}
-[class*="st-key-check_"] button p { color:#fff !important; font-weight:800 !important; }
+[class*="st-key-turnbtn_"] button p { color:#fff !important; font-weight:800 !important; }
 
 /* Progress rows */
 .tt-prog-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; font-weight:800; font-size:15px; }
@@ -754,95 +847,89 @@ def render_chat_reply(msg):
                 unsafe_allow_html=True)
 
 
-def render_qa(msg, idx):
-    """Opening explanation -> shortcuts (hint / check / show me how) -> full solution.
-    Theory/conceptual questions (no computed final_answer from the backend) skip
-    the check-gate entirely and just show the full explanation — there's nothing
-    to 'try' or 'check' for something like 'what is quantum mechanics'."""
+def render_turn(msg, idx, is_latest=False):
+    """Render one controller-driven tutoring turn.
+
+    The mode (teach_invite / diagnose_correct / diagnose_wrong / hint /
+    co_solve / reveal / ...) comes straight from scripts.llm.controller, so
+    what's shown — and whether a real answer is on the screen at all — is
+    decided by the state machine, not by this function. Shortcut buttons are
+    only interactive on the latest turn; older turns are history."""
     st.markdown('<div class="tt-bot-head"><span class="tt-av bot">🤖</span>Math Buddy</div>',
                 unsafe_allow_html=True)
 
-    intro, rest = _split_explanation(msg.get("answer", ""))
-    is_theory = not (msg.get("final_answer") or "").strip()
+    mode = msg.get("mode")
+    text = msg.get("text") or ""
 
-    if intro:
-        st.markdown(f'<div class="answer-block intro">{html.escape(intro)}</div>',
+    if mode == "diagnose_correct":
+        st.markdown('<div class="feedback-correct">⭐ Correct — great job! 🎉</div>',
                     unsafe_allow_html=True)
-
-    # ---- Theory question: no gate, no buttons — just show the rest of the
-    # explanation right away. ----
-    if is_theory:
-        if rest:
-            st.markdown(f'<div class="answer-block">{html.escape(rest)}</div>',
-                        unsafe_allow_html=True)
-        st.markdown('<div class="verify-tag">✓ Explanation ready</div>', unsafe_allow_html=True)
+        if text:
+            st.markdown(f'<div class="chat-reply">{html.escape(text)}</div>', unsafe_allow_html=True)
+    elif mode == "hint":
+        n = msg.get("hint_number")
+        prefix = f"Hint {n}: " if n else ""
+        st.markdown(f'<div class="hint-tag">💡 {prefix}{html.escape(text)}</div>',
+                    unsafe_allow_html=True)
+    elif mode in ("co_solve", "reveal"):
+        if text:
+            st.markdown(f'<div class="answer-block">{html.escape(text)}</div>', unsafe_allow_html=True)
+        v = msg.get("verify")
+        if v and v.get("verifiable"):
+            if v.get("match") is True:
+                st.markdown('<div class="verify-tag">✓ Verified against computed answer</div>',
+                            unsafe_allow_html=True)
+            elif v.get("match") is False:
+                st.markdown(
+                    '<div class="verify-tag" style="background:#fdeaea;color:#c0343a;'
+                    'border-color:#f4bfc2;">⚠ Disagrees with the computed answer</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown('<div class="verify-tag">… could not read a final number to verify</div>',
+                            unsafe_allow_html=True)
         if msg.get("source"):
             st.markdown(f'<div class="source-tag">📖 {html.escape(msg["source"])}</div>',
                         unsafe_allow_html=True)
+    elif text:
+        st.markdown(f'<div class="chat-reply">{html.escape(text)}</div>', unsafe_allow_html=True)
+
+    if not is_latest:
         return
-
-    # ---- Computational question: existing hint / check / reveal flow. ----
-    for hn, h in enumerate(msg.get("hints_shown", []), 1):
-        st.markdown(f'<div class="hint-tag">💡 Hint {hn}: {html.escape(h)}</div>',
-                    unsafe_allow_html=True)
-
-    solved = msg.get("solved")
-    revealed = msg.get("revealed")
-
-    if not solved and not revealed:
-        fa = msg.get("final_answer", "")
-        st.text_input("Your answer", key=f"ans_{idx}",
-                      placeholder="Type your answer…", label_visibility="collapsed")
-        ans = st.session_state.get(f"ans_{idx}", "")
-
-        st.markdown('<div class="tt-shortcut-hint">Tap a shortcut, or type your answer 👇</div>',
-                    unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if len(msg.get("hints_shown", [])) < msg.get("step_count", 3):
-                if st.button("💡 Give me a hint", key=f"hint_{idx}", use_container_width=True):
-                    h = get_hint(msg)
-                    if h:
-                        msg.setdefault("hints_shown", []).append(h)
-                    st.rerun()
-        with c2:
-            if st.button("✅ Check my answer", key=f"check_{idx}", use_container_width=True):
-                student = (ans or "").strip()
-                if not student:
-                    st.warning("Type your answer first, then tap check!")
+    buttons = [b for b in (msg.get("buttons") or []) if b in _ACTIONABLE_LABELS]
+    if not buttons:
+        return
+    st.markdown('<div class="tt-shortcut-hint">Tap a shortcut, or type below 👇</div>',
+                unsafe_allow_html=True)
+    cols = st.columns(len(buttons))
+    for col, label in zip(cols, buttons):
+        with col:
+            if st.button(label, key=f"turnbtn_{idx}_{label}", use_container_width=True):
+                chat = active_chat()
+                if label in _CLOSE_EPISODE_LABELS:
+                    episode = chat.get("episode")
+                    state = episode.get("state") if episode else None
+                    if state is not None:
+                        from scripts.llm import controller as C
+                        try:
+                            C.step(state, "NEW_QUESTION", label)
+                        except Exception:
+                            pass
+                    chat["episode"] = None
+                    chat["messages"].append({"role": "user", "text": label})
+                    chat["messages"].append({
+                        "role": "assistant", "kind": "chat", "question": label,
+                        "reply": "Sure! What would you like to try next? 🙂",
+                    })
                 else:
-                    verdict = check_student_answer(student, fa)
-                    if verdict is True:
-                        msg["solved"] = True
-                        record_feedback(msg.get("question", ""), True)
-                    else:
-                        msg["last_wrong"] = student
-                        if verdict is None:
-                            msg["revealed"] = True
-                    st.rerun()
-        with c3:
-            if st.button("🔎 Give answer", key=f"explain_{idx}", use_container_width=True):
-                msg["revealed"] = True
+                    active_turns = build_active_turns(chat["messages"])
+                    chat["messages"].append({"role": "user", "text": label})
+                    with st.spinner("Thinking…"):
+                        chat["messages"].append(submit_turn(
+                            chat, label, ss.grade, ss.level, active_turns,
+                            forced_intent=_LABEL_TO_INTENT[label],
+                        ))
                 st.rerun()
-
-        if msg.get("last_wrong"):
-            st.markdown(
-                f'<div class="feedback-wrong">❌ "{html.escape(msg["last_wrong"])}" '
-                f'isn\'t quite right — try again, or tap a hint!</div>',
-                unsafe_allow_html=True,
-            )
-        return
-
-    if solved:
-        st.markdown('<div class="feedback-correct">⭐ Correct — great job! 🎉</div>',
-                    unsafe_allow_html=True)
-    if rest:
-        st.markdown(f'<div class="answer-block">{html.escape(rest)}</div>',
-                    unsafe_allow_html=True)
-    st.markdown('<div class="verify-tag">✓ Explanation ready</div>', unsafe_allow_html=True)
-    if msg.get("source"):
-        st.markdown(f'<div class="source-tag">📖 {html.escape(msg["source"])}</div>',
-                    unsafe_allow_html=True)
 
 
 def render_main_page():
@@ -850,7 +937,7 @@ def render_main_page():
     chat = active_chat()
     msgs = chat["messages"]
 
-    solved = sum(1 for m in msgs if m.get("role") == "assistant" and m.get("solved"))
+    solved = sum(1 for m in msgs if m.get("role") == "assistant" and m.get("outcome") == "solved")
     stars = solved * 5
     level_num = 1 + solved // 3
     lvl_pct = (solved % 3) / 3
@@ -932,7 +1019,7 @@ def render_main_page():
                             if a.get("kind") == "chat":
                                 render_chat_reply(a)
                             else:
-                                render_qa(a, a_idx)
+                                render_turn(a, a_idx, is_latest=(a_idx == len(msgs) - 1))
 
             components.html(
                 f"""
@@ -1017,37 +1104,8 @@ def render_main_page():
 
             chat["messages"].append({"role": "user", "text": q})
             with st.spinner("Thinking…"):
-                kind, payload = route_message(
-                    q,
-                    ss.grade,
-                    ss.level,
-                    active_turns=active_turns,
-                )
-            if kind == "chat":
-                chat["messages"].append({
-                    "role": "assistant", "kind": "chat",
-                    "question": q, "reply": payload,
-                })
-            else:
-                r = payload
-                _, _rest_for_steps = _split_explanation(r.get("answer", ""))
-                _step_lines = re.findall(r"(?m)^\s*\d+[.)]\s", _rest_for_steps)
-                step_count = len(_step_lines) if _step_lines else 3
-                step_count = max(1, min(step_count, 3))
-                chat["messages"].append({
-                    "role": "assistant", "kind": "solve",
-                    "question": q,
-                    "answer": r.get("answer", ""),
-                    "final_answer": r.get("final_answer", ""),
-                    "source": r.get("source", ""),
-                    "hints_pool": r.get("hints") or [],
-                    "chunks": r.get("chunks"),
-                    "grade": r.get("grade", ss.grade),
-                    "level": r.get("level", ss.level),
-                    "hints_shown": [],
-                    "step_count": step_count,
-                    "solved": False, "revealed": False, "last_wrong": None,
-                })
+                reply = submit_turn(chat, q, ss.grade, ss.level, active_turns)
+            chat["messages"].append(reply)
             st.rerun()
 
     # ---------- RIGHT: Progress + Badges ----------
@@ -1081,6 +1139,7 @@ def render_main_page():
 
         if st.button("🗑️ Clear this chat", key="clearbtn", use_container_width=True):
             chat["messages"] = []
+            chat["episode"] = None
             reset_student()
             st.rerun()
         if st.button("↩ Change name", key="chgname", use_container_width=True):
