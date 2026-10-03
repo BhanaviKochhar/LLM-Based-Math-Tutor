@@ -87,3 +87,59 @@ Reproduced live (not re-derived from memory) against the current code, including
 - Broad/short topic queries can retrieve irrelevant RAG chunks — confirmed empirically (`eval/datasets/retrieval/v1_starter.jsonl`), query-specificity-dependent rather than a wholesale retriever defect.
 - The `_d_ack_conceptual` directive reword is a partial, unvalidated mitigation for repetition/non-recognition — see A/B comparison above.
 - **New in this checkpoint:** `scripts/llm/*`'s per-stage LLM calls (conversation resolution, expression extraction, intent classification) are not logged via `common.log_run` — only the two final-generation call sites (`tutor-pipeline`, `tutor-turn`) are. `data/llm_runs.jsonl` (331 entries, 2026-07-20 to 2026-10-03) therefore cannot currently support true per-stage latency analysis, and additionally mixes multiple model-pilot architectures (`gpt-oss-120b`, `llama3.3-70b`, `qwen3-32b` alongside `tutor-pipeline`/`tutor-turn`) across a long time span — any latency analysis must filter by `model` and by date/commit before drawing conclusions. See `docs/evaluation_plan.md` §Latency for the proposed (not yet implemented) instrumentation.
+
+---
+
+## Entry: 2026-10-03 — Full-repository audit, parser fix, and evaluation expansion (same day, later session)
+
+Continuation of the entry above, in the same calendar day but a distinct working session. Branch: `final-development`. Starting point: the two commits from the prior entry (`d097af4`, `f596239`), confirmed via `git fetch` + `git rev-list --left-right --count origin/final-development...final-development` → `0 0` (local and remote already in sync at session start — see this session's closing report for discussion of how that push occurred, since this assistant did not run `git push` in the prior session).
+
+### Test reconciliation (independently re-run, not trusted from the prior entry)
+
+| Suite | Result at session start | Result after this session's fixes |
+|---|---|---|
+| `python -m scripts.llm.test_pipeline` | 38/38 | **60/60** (+19 parser-fallback-tier regression tests, +3 atomic-save regression tests) |
+| `python -m eval.controller_walk` | 27/27 | 27/27 (unchanged) |
+| `python -m frontend.test_app` | 34/34 | 34/34 (unchanged) |
+| `python -m eval.validate_datasets` | 23/23 | 23/23 (unchanged; dataset grew from 90 to 123 total lines across files, still validates) |
+| **Aggregate** | 122/122 | **144/144, 0 failed** |
+
+`data/students.json` confirmed untouched (`git status --short data/students.json` empty) after every test run and every live-LLM smoke test in this session, each reverted via `git checkout --` immediately after.
+
+### Priority fix: `response_parser.final_number_str` (Section 5)
+
+Root-caused, fixed, and regression-tested — see `docs/extraction_evaluation.md` for the full writeup. Summary: the old fallback (first number in the whole text) returned "3" instead of "12" for a realistic multi-sentence explanation with no `Answer:` line. A naive "last number instead" fix was explicitly rejected (not implemented) because this tutor's own prompts append follow-up suggestions after the answer (e.g. "...equals 54. Would you like to try 8 x 7 next?"), which a last-number heuristic would misread. Implemented instead: a 3-tier confidence fallback (explicit Answer line → last `=`/`equals` statement → sole number by elimination → ambiguous/None). 7/7 on the extraction dataset (was 5/7), 19 new regression tests covering explicit/prose/multi-equation/fraction/negative/contradictory/malformed/irrelevant-number cases.
+
+**Process note, reported transparently**: the new test function was initially written but not added to `test_pipeline.py::main()`'s call list, so it silently never ran despite the suite reporting "0 failed." Caught by explicitly grepping for the function name in `main()` before trusting the pass count, not by the test run itself. Fixed immediately.
+
+### Second low-risk fix: `student_tracker._save` atomic write
+
+Found during the persistence/privacy review (Section 11): `_save()` wrote directly to `data/students.json` with no atomicity — a crash mid-write could corrupt the file. Fixed with a write-to-temp-file-then-`os.replace()` pattern (atomic on both POSIX and Windows). This does **not** fix concurrent-writer lost-updates (two processes racing a read-modify-write cycle can still overwrite each other's change) — that would need real locking or a move off flat-file JSON, explicitly out of scope and documented as such. One regression test added (`test_student_tracker_atomic_save`, uses a temp path, never touches the real store).
+
+### Extraction evaluation (Section 6) — run live for the first time
+
+`question_to_expression` stage: 6/7 correct standalone; the 1 "failure" (`ex-007`) is a follow-up-resolution case that needs `pipeline.resolve_conversation()` run before `pipeline.compute_trusted_answer()` — re-scored at the correct pipeline stage, it is also correct (38/7, matching expected). **7/7 when each case is evaluated at its intended stage.** Full writeup: `docs/extraction_evaluation.md`.
+
+### Retrieval benchmark expansion (Section 7)
+
+Expanded from 10 to 29 queries (target of ≥50 not reached — reason stated explicitly in `docs/retrieval_evaluation.md`, not padded). Added 9 new topics beyond fractions (multiplication, subtraction/borrowing, shapes, money, time, perimeter, number patterns/parity, place value, measurement/weight, division, number sequence, data handling). Key finding: the earlier fraction-focused 8-query sample's Recall@3=0.625 was **not representative** — the expanded, topic-diverse 24-27-query sample shows Recall@3=0.778–0.875, and the "fractions" bare-word weakness does not generalize to other bare topic words (shapes/money/time/division all retrieve well). Full writeup, including root-cause investigation and newly-found issues (a recurring noise-attractor chunk, a paraphrase-without-keyword miss, a chapter-confusion miss, a curriculum-terminology mismatch): `docs/retrieval_evaluation.md`.
+
+### Conceptual tutoring evaluation (Section 8)
+
+Formal rubric applied to the real "fractions" transcripts; architecture traced component-by-component against the explicit list in the task (resolver, trusted-answer computation, controller diagnosis, prompt construction, retrieval, context assembly, generation, verification/disclosure, tracking). Confirmed: `verifier._close` already treats 3/9 and 1/3 as equal (deterministic check, no LLM) — the actual gap is that a conceptual episode's `controller.diagnose()` never reaches that equality check at all, a more precise statement than "the system can't handle equivalent fractions." Three design options for a structural fix documented (none implemented) with risks/compatibility/required-tests for each; explicit recommendation not to proceed with the two higher-risk options without sign-off. Full writeup: `docs/conceptual_tutoring_evaluation.md`.
+
+### Latency (Section 10)
+
+Real figures computed from `data/llm_runs.jsonl`, filtered to the 314 entries from the actual production call sites (excluding the 17 model-pilot comparison entries): median 1.258s, P90 2.207s, P95 3.273s, 99.0% success rate. Cross-checked against the paper's own reported pilot figures (median 1.28s, one 31.7s outlier) as last seen in conversation — closely consistent, a reassuring independent cross-check, not a formal reproduction. Per-stage latency remains unmeasured; instrumentation gap and a concrete, not-yet-implemented proposal documented in `docs/latency_reliability_evaluation.md`.
+
+### Live smoke tests, this session (real Groq calls)
+
+Two gaps in scenario coverage closed: an ambiguous follow-up ("I dont understand" mid-episode, classified as HINT by the live intent classifier) and repeated hint escalation (3 consecutive hints on one problem, each building on the last without repeating or stating the final answer — one hint showed a minor LLM-generated sentence-repetition glitch, noted as a generation-quality observation, not a system defect).
+
+### Documentation added/updated this session
+
+`docs/current_state_audit.md`, `docs/roadmap_status.md`, `docs/stabilization_audit.md`, `docs/extraction_evaluation.md`, `docs/retrieval_evaluation.md`, `docs/conceptual_tutoring_evaluation.md`, `docs/latency_reliability_evaluation.md` (all new); `docs/evaluation_paper_alignment.md` (addendum appended); `LLM_Math_Tutor_MVP_to_Final_Capstone_Plan.md` and `LLM_Math_Tutor_Paper_First_Execution_Priority.md` (added to the repository for the first time, full original content preserved verbatim, with an additive status-annotation header pointing to `docs/roadmap_status.md`).
+
+### Known limitations, updated
+
+All limitations carried forward from the prior entry remain accurate **except**: the `response_parser` fallback defect is now fixed (removed from the list); the latency instrumentation gap now has real top-level figures alongside the still-missing per-stage breakdown; the conceptual-episode non-progression root cause is now more precisely stated (controller never reaches the equality check, rather than "can't handle equivalent fractions"). A new, low-risk fix (student-tracker atomic write) was added and is not a limitation going forward.
