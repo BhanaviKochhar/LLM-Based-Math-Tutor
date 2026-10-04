@@ -1,0 +1,137 @@
+{
+  "evaluator_name": "personalization_eval",
+  "run_timestamp_utc": "20261004T083839Z",
+  "git": {
+    "commit": "ca5a419723c42ae0817f495a7a17188a2455bcc6",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\personalization\\v1_starter.jsonl",
+      "version": "v1_starter",
+      "item_count": 14
+    }
+  ],
+  "config": {
+    "method": "direct execution of scripts.llm.controller / frontend.app against the real mechanism_reference claims; prose-dependent items preserved in a queue, not scored",
+    "live_llm_used": false
+  },
+  "aggregate_metrics": {
+    "total_items": 14,
+    "deterministically_checked": 4,
+    "pass": 4,
+    "fail": 0,
+    "requires_live_generation_and_rubric_judgment": 10
+  },
+  "exclusions": [
+    {
+      "case_id": "pz-001",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-002",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-005",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-007",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-008",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-009",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-010",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-011",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-012",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    },
+    {
+      "case_id": "pz-013",
+      "reason": "prose-level personalization difference (explanation depth/terminology/scaffolding); cannot be scored deterministically -- requires live generation plus human/rubric judgment"
+    }
+  ],
+  "execution_errors": [],
+  "notes": "Only 4 of 14 personalization items describe a mechanism this module can verify from code alone. The remaining items are genuine prose/register differences this pass does not fabricate a metric for -- see the preserved queue artifact.",
+  "per_example_results": [
+    {
+      "case_id": "pz-001",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-002",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-003",
+      "outcome": "pass",
+      "detail": "reached co_solve on wrong attempt #2: True"
+    },
+    {
+      "case_id": "pz-004",
+      "outcome": "pass",
+      "detail": "reached co_solve on wrong attempt #3: True"
+    },
+    {
+      "case_id": "pz-005",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-006",
+      "outcome": "pass",
+      "detail": "HINT intent at level=advanced -> mode=hint"
+    },
+    {
+      "case_id": "pz-007",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-008",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-009",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-010",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-011",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-012",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-013",
+      "outcome": "excluded_requires_rubric"
+    },
+    {
+      "case_id": "pz-014",
+      "outcome": "pass",
+      "detail": "mode=co_solve outcome=gave_up recorded_as_attempt=False"
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+{
+  "evaluator_name": "controller_eval",
+  "run_timestamp_utc": "20261004T083711Z",
+  "git": {
+    "commit": "ca5a419723c42ae0817f495a7a17188a2455bcc6",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\controller\\v1_scenarios.json",
+      "version": "1.0",
+      "item_count": 25
+    }
+  ],
+  "config": {
+    "method": "cross-references eval/datasets/controller/v1_scenarios.json scenario_ids against REAL execution of eval/controller_walk.py (subprocess, output parsed by scenario header) and named functions in frontend/test_app.py (direct call, instrumented check()) -- does not reimplement controller assertions",
+    "live_llm_used": false
+  },
+  "aggregate_metrics": {
+    "total_scenarios": 25,
+    "pass": 18,
+    "fail": 0,
+    "excluded_live_llm_required": 5,
+    "excluded_not_implemented": 2,
+    "deterministic_pass_rate": {
+      "numerator": 18,
+      "denominator": 18,
+      "rate": 1.0
+    }
+  },
+  "exclusions": [
+    {
+      "scenario_id": "ctl-019",
+      "reason": "requires a live LLM provider call; not run in this pass"
+    },
+    {
+      "scenario_id": "ctl-020",
+      "reason": "requires a live LLM provider call; not run in this pass"
+    },
+    {
+      "scenario_id": "ctl-021",
+      "reason": "requires a live LLM provider call; not run in this pass"
+    },
+    {
+      "scenario_id": "ctl-022",
+      "reason": "requires a live LLM provider call; not run in this pass"
+    },
+    {
+      "scenario_id": "ctl-023",
+      "reason": "requires a live LLM provider call; not run in this pass"
+    },
+    {
+      "scenario_id": "ctl-024",
+      "reason": "no implementation exists yet (test_reference: 'none')"
+    },
+    {
+      "scenario_id": "ctl-025",
+      "reason": "no implementation exists yet (test_reference: 'none')"
+    }
+  ],
+  "execution_errors": [],
+  "notes": "This scores DETERMINISTIC controller/state-machine correctness only (mode/phase/transition correctness), never the quality of generated prose -- scenarios whose evidence_type is a real provider call are excluded, not scored as pass or fail.",
+  "per_example_results": [
+    {
+      "scenario_id": "ctl-001",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 1",
+      "checks": [
+        {
+          "name": "opens with teach+invite",
+          "passed": true
+        },
+        {
+          "name": "invite buttons offered",
+          "passed": true
+        },
+        {
+          "name": "correct -> diagnose_correct",
+          "passed": true
+        },
+        {
+          "name": "terminal solved",
+          "passed": true
+        },
+        {
+          "name": "offers practice/new",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-002",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 2",
+      "checks": [
+        {
+          "name": "1st wrong -> diagnose_wrong, not terminal",
+          "passed": true
+        },
+        {
+          "name": "attempt counter = 1",
+          "passed": true
+        },
+        {
+          "name": "2nd wrong -> co_solve terminal",
+          "passed": true
+        },
+        {
+          "name": "outcome shown",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-003",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 3",
+      "checks": [
+        {
+          "name": "advanced: 2 wrong still not terminal",
+          "passed": true
+        },
+        {
+          "name": "advanced: 3rd wrong -> co_solve",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-004",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 4",
+      "checks": [
+        {
+          "name": "hint mode + number",
+          "passed": true
+        },
+        {
+          "name": "hints don't count as wrong attempts",
+          "passed": true
+        },
+        {
+          "name": "then correct -> solved",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-005",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 5",
+      "checks": [
+        {
+          "name": "cold solve -> redirect, not terminal",
+          "passed": true
+        },
+        {
+          "name": "redirect flag set",
+          "passed": true
+        },
+        {
+          "name": "2nd solve -> revealed",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-006",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 6",
+      "checks": [
+        {
+          "name": "solve after attempt -> reveal (no redirect)",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-007",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 7",
+      "checks": [
+        {
+          "name": "give_up -> co_solve terminal",
+          "passed": true
+        },
+        {
+          "name": "outcome gave_up",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-008",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 8",
+      "checks": [
+        {
+          "name": "new_question -> NEW phase, moved_on",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-009",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 9",
+      "checks": [
+        {
+          "name": "ambiguous working -> ask_answer, not graded wrong",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-010",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 10",
+      "checks": [
+        {
+          "name": "student_answer('5 + 3 = 8') == 8",
+          "passed": true
+        },
+        {
+          "name": "student_answer('is it 12?') == 12",
+          "passed": true
+        },
+        {
+          "name": "student_answer('maybe 7 left') == 7",
+          "passed": true
+        },
+        {
+          "name": "'5+3=8' vs truth 8 -> correct",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-011",
+      "outcome": "pass",
+      "source": "eval/controller_walk.py scenario 11",
+      "checks": [
+        {
+          "name": "conceptual -> ack_conceptual, not terminal",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-012",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_conceptual_episode_never_advances",
+      "checks": [
+        {
+          "name": "a non-computable topic starts with teach_invite, not terminal",
+          "passed": true
+        },
+        {
+          "name": "ATTEMPT '3/9'... -> ack_conceptual, non-terminal, no attempt counted",
+          "passed": true
+        },
+        {
+          "name": "ATTEMPT '8/10 means i have 8 of the 10 '... -> ack_conceptual, non-terminal, no attempt counted",
+          "passed": true
+        },
+        {
+          "name": "ATTEMPT 'I have one mango, cut in 2 pie'... -> ack_conceptual, non-terminal, no attempt counted",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-013",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_generation_failure_rolls_back_state",
+      "checks": [
+        {
+          "name": "failure returns a reply, not a crash",
+          "passed": true
+        },
+        {
+          "name": "failure message is distinguishable from the ambiguous-input fallback",
+          "passed": true
+        },
+        {
+          "name": "controller attempts NOT incremented after a failed generation",
+          "passed": true
+        },
+        {
+          "name": "controller phase unchanged after a failed generation",
+          "passed": true
+        },
+        {
+          "name": "retry after failure succeeds",
+          "passed": true
+        },
+        {
+          "name": "retry advances attempts exactly once (no duplication from the failure)",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-014",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_generation_failure_rolls_back_state",
+      "checks": [
+        {
+          "name": "failure returns a reply, not a crash",
+          "passed": true
+        },
+        {
+          "name": "failure message is distinguishable from the ambiguous-input fallback",
+          "passed": true
+        },
+        {
+          "name": "controller attempts NOT incremented after a failed generation",
+          "passed": true
+        },
+        {
+          "name": "controller phase unchanged after a failed generation",
+          "passed": true
+        },
+        {
+          "name": "retry after failure succeeds",
+          "passed": true
+        },
+        {
+          "name": "retry advances attempts exactly once (no duplication from the failure)",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-015",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_empty_generation_treated_as_failure",
+      "checks": [
+        {
+          "name": "empty text does not crash",
+          "passed": true
+        },
+        {
+          "name": "empty text is not presented as a successful tutoring turn",
+          "passed": true
+        },
+        {
+          "name": "attempts not committed on empty generation",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-016",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_start_episode_does_not_commit_on_failure",
+      "checks": [
+        {
+          "name": "failure on the first turn still returns a reply",
+          "passed": true
+        },
+        {
+          "name": "no episode is left behind after a failed first turn",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-017",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_attempt_recording_semantics",
+      "checks": [
+        {
+          "name": "correct attempt recorded as True",
+          "passed": true
+        },
+        {
+          "name": "non-terminal wrong attempt recorded as False",
+          "passed": true
+        },
+        {
+          "name": "threshold-reached co_solve (a real final wrong attempt) recorded as False",
+          "passed": true
+        },
+        {
+          "name": "giving up is NOT recorded as a wrong attempt (no attempt was made)",
+          "passed": true
+        },
+        {
+          "name": "a cold reveal (asked to be shown, never attempted) is NOT recorded",
+          "passed": true
+        },
+        {
+          "name": "a reveal after at least one real attempt IS recorded as False",
+          "passed": true
+        },
+        {
+          "name": "hints and conceptual acknowledgements are not graded attempts",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-018",
+      "outcome": "pass",
+      "source": "frontend/test_app.py::test_post_check_paths",
+      "checks": [
+        {
+          "name": "matching stated answer -> verifiable + match True",
+          "passed": true
+        },
+        {
+          "name": "disagreeing stated answer -> verifiable + match False",
+          "passed": true
+        },
+        {
+          "name": "no readable number -> verifiable but match None (unverifiable, not silently correct)",
+          "passed": true
+        },
+        {
+          "name": "a mode with no injected answer (e.g. hint) is not checked at all",
+          "passed": true
+        },
+        {
+          "name": "reveal/co_solve with no computed answer is not checked",
+          "passed": true
+        },
+        {
+          "name": "diagnose_correct: model's restatement matching the computed answer -> match True",
+          "passed": true
+        },
+        {
+          "name": "diagnose_correct: model's restatement naming a DIFFERENT number -> match False",
+          "passed": true
+        }
+      ],
+      "reason": null
+    },
+    {
+      "scenario_id": "ctl-019",
+      "outcome": "excluded_live_llm_required"
+    },
+    {
+      "scenario_id": "ctl-020",
+      "outcome": "excluded_live_llm_required"
+    },
+    {
+      "scenario_id": "ctl-021",
+      "outcome": "excluded_live_llm_required"
+    },
+    {
+      "scenario_id": "ctl-022",
+      "outcome": "excluded_live_llm_required"
+    },
+    {
+      "scenario_id": "ctl-023",
+      "outcome": "excluded_live_llm_required"
+    },
+    {
+      "scenario_id": "ctl-024",
+      "outcome": "excluded_not_implemented"
+    },
+    {
+      "scenario_id": "ctl-025",
+      "outcome": "excluded_not_implemented"
+    }
+  ]
+}
