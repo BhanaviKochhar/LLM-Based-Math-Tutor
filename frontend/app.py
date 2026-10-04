@@ -150,6 +150,44 @@ def reset_student() -> None:
         pass
 
 
+def clear_chat(chat) -> None:
+    """Clear ONLY this chat's visible conversation and open episode. Does
+    NOT touch the persistent student_tracker profile -- that is a separate,
+    explicit action (reset_learning_progress) so clearing a chat window can
+    never silently erase a child's saved level/history. Previously these
+    were bundled into one click; see reset_learning_progress for the other
+    half of that split."""
+    chat["messages"] = []
+    chat["episode"] = None
+    chat["thread_notes"] = []
+
+
+def reset_learning_progress() -> None:
+    """Explicit, separate action that DOES erase the persistent learner
+    profile (student_tracker). Destructive and global across every chat,
+    unlike clear_chat — the UI requires its own confirmation step before
+    calling this (see render_main_page)."""
+    reset_student()
+
+
+def _current_learner_level() -> str:
+    """The REAL backend learner level (beginner/intermediate/advanced) that
+    actually drives tutoring depth/thresholds — distinct from the right
+    panel's old "Level N" gamification number, which only counted solves in
+    THIS chat and reset on every new chat. Showing both under the same word
+    "Level" was misleading (two unrelated things sharing a label); this is
+    the honest one, reusing the same resolver the live pipeline itself uses
+    so the number on screen can never drift from the number that actually
+    shapes the tutor's behaviour."""
+    if MOCK_MODE:
+        return "intermediate"
+    try:
+        from scripts.llm import pipeline
+        return pipeline.resolve_level(STUDENT_ID, ss.level)
+    except Exception:
+        return "intermediate"
+
+
 # ===========================================================================
 # Controller-driven tutoring episode
 #
@@ -211,7 +249,8 @@ def _mock_episode_turn(question: str) -> dict:
     }
 
 
-def _run_generation(state, action, chunks, active_turns, previous_hints):
+def _run_generation(state, action, chunks, active_turns, previous_hints,
+                    thread_notes=None):
     """Call the controller->model bridge for this turn's text.
 
     MODE_HINT and MODE_HINT_EXHAUSTED both return an already-generated
@@ -225,7 +264,7 @@ def _run_generation(state, action, chunks, active_turns, previous_hints):
 
     result = pipeline.generate_turn(
         state, action, chunks=chunks, active_turns=active_turns,
-        previous_hints=previous_hints,
+        previous_hints=previous_hints, thread_notes=thread_notes,
     )
     if action.mode == C.MODE_NEW_QUESTION:
         return ""
@@ -289,16 +328,18 @@ def _record_outcome(state, action) -> None:
     # teach/diagnose-in-progress turns) is not a graded attempt.
 
 
-def _apply_action(episode, action, active_turns) -> dict:
+def _apply_action(chat, episode, action, active_turns) -> dict:
     """Generate + verify this turn. May raise (GenerationFailed or any other
-    exception from generation) — callers must not commit episode state until
-    this returns successfully. Mutates episode's hint history, which is safe
-    because that only happens after text generation has already succeeded."""
-    from scripts.llm import controller as C
+    exception from generation) — callers must not commit episode/chat state
+    until this returns successfully. Mutates episode's hint history and
+    chat's thread_notes, which is safe because that only happens after text
+    generation has already succeeded."""
+    from scripts.llm import controller as C, memory, verifier
 
     state = episode["state"]
+    thread_notes = chat.get("thread_notes", [])
     text = _run_generation(state, action, episode["chunks"], active_turns,
-                           episode["hints_shown"])
+                           episode["hints_shown"], thread_notes=thread_notes)
     if action.mode == C.MODE_HINT and text:
         episode["hints_shown"].append(text)
 
@@ -314,11 +355,26 @@ def _apply_action(episode, action, active_turns) -> dict:
     verify = _post_check(state, action, text)
     _record_outcome(state, action)
 
+    # Bounded guardrail (Problem 10): the trusted-answer check above only
+    # ever covers the STUDENT's own problem, and only for 3 modes. Every
+    # mode is free to narrate its OWN illustrative arithmetic (a worked
+    # example with different numbers, a hint's partial step); nothing else
+    # checks whether THAT narrated arithmetic is internally consistent. This
+    # never blocks the reply — only surfaces a non-blocking warning tag.
+    self_check_issues = verifier.check_self_consistency(text) if text else []
+
+    if action.terminal and text:
+        chat["thread_notes"] = memory.add_note(
+            thread_notes, state.question, action.outcome,
+            attempts=state.attempts, hints=state.hints_given,
+        )
+
     return {
         "role": "assistant", "kind": "turn", "mode": action.mode, "text": text,
         "buttons": list(action.buttons), "terminal": action.terminal,
         "outcome": action.outcome, "hint_number": action.hint_number,
         "source": episode.get("source", ""), "verify": verify,
+        "self_check_issues": self_check_issues,
     }
 
 
@@ -339,7 +395,7 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
     from scripts.llm import pipeline, controller as C
     from scripts.retrieval import retrieve_with_metadata
 
-    resolution = pipeline.resolve_conversation(question, active_turns)
+    resolution = pipeline.resolve_conversation(question, active_turns, grade=grade)
     level = pipeline.resolve_level(STUDENT_ID, ui_level)
 
     chunks_meta = (retrieve_with_metadata(resolution.retrieval_query, grade)
@@ -357,8 +413,61 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
         computed_answer=computed_answer, is_math=is_math,
     )
     episode = {"state": state, "chunks": chunks, "source": source, "hints_shown": []}
-    reply = _apply_action(episode, action, active_turns)  # may raise
+    reply = _apply_action(chat, episode, action, active_turns)  # may raise
     chat["episode"] = episode  # commit only after generation succeeded
+    return reply
+
+
+def _advance_math_followup(chat, episode, text, grade, active_turns) -> dict:
+    """Handle intent.MATH_FOLLOWUP: the child changed a number/condition in
+    the CURRENT problem (e.g. "what if it was 150 instead of 136?") instead
+    of answering it.
+
+    This is the fix for the architectural gap found live: an open episode's
+    turns previously went ONLY through intent.py's ATTEMPT/HINT/SOLVE/
+    GIVE_UP/NEW_QUESTION classifier, which has no notion of "the problem
+    itself changed" — a mid-value change fell through to ATTEMPT, and
+    diagnose() (seeing several numbers, no single stated answer) replied
+    "what answer did you get?", silently losing the relationship to the
+    previous problem. Here we reuse conversation_resolver (the same
+    resolver new episodes already get) to actually compute the new resolved
+    question and trusted answer, then open a fresh sub-episode via
+    controller.start_followup so the tutor explicitly connects it to the
+    problem it came from, rather than pretending nothing came before.
+
+    Same commit-after-success discipline as advance_episode: episode["state"]
+    is only overwritten once _apply_action's generation has succeeded.
+    """
+    from scripts.llm import pipeline, controller as C
+
+    state = episode["state"]
+    resolution = pipeline.resolve_conversation(text, active_turns, grade=grade)
+
+    if resolution.mode != "MATH_FOLLOWUP" or not resolution.changed:
+        # A second, heavier look disagreed with the cheap classifier (e.g.
+        # low-confidence rewrite demoted to FRAGMENT) -- don't silently drop
+        # the turn; fall back to grading it as a plain attempt against the
+        # CURRENT problem instead of guessing a new one.
+        trial_state = copy.copy(state)
+        new_state, action = C.step(trial_state, "ATTEMPT", text)
+        trial_episode = dict(episode, state=new_state)
+        reply = _apply_action(chat, trial_episode, action, active_turns)
+        episode["state"] = new_state
+        return reply
+
+    if resolution.use_verifier:
+        computed_answer, is_math = pipeline.compute_trusted_answer(
+            resolution.resolved_question, grade)
+    else:
+        computed_answer, is_math = None, False
+
+    new_state, action = C.start_followup(
+        state.question, resolution.resolved_question, grade, state.level,
+        computed_answer=computed_answer, is_math=is_math,
+    )
+    trial_episode = dict(episode, state=new_state)
+    reply = _apply_action(chat, trial_episode, action, active_turns)  # may raise
+    episode["state"] = new_state  # commit only after generation succeeded
     return reply
 
 
@@ -369,6 +478,16 @@ def advance_episode(
     """Classify the student's turn against the open episode and let the
     controller decide the next tutoring move. A terminal/missing episode, or
     a NEW_QUESTION intent, closes out and starts fresh from this same text.
+
+    intent.py's classifier (not conversation_resolver) is still the FIRST
+    stop for an open episode, so the common ATTEMPT/HINT/SOLVE/GIVE_UP turns
+    cost exactly one classification call, same as before. It now also
+    recognises CONFUSION/CORRECTION/CLARIFY/MATH_FOLLOWUP (see intent.py's
+    module docstring); CONFUSION/CORRECTION/CLARIFY are generation-only
+    (controller.step handles them directly, no state mutation, no RAG/
+    verifier re-run) and MATH_FOLLOWUP is the one branch that needs the
+    heavier conversation_resolver to actually compute what changed, handled
+    by _advance_math_followup above.
 
     State-consistency note: controller.step() mutates its TutorState argument
     in place. To keep a failed generation from leaving the controller state
@@ -396,10 +515,13 @@ def advance_episode(
     if label == "NEW_QUESTION":
         return start_episode(chat, text, grade, ui_level, active_turns)
 
+    if label == "MATH_FOLLOWUP":
+        return _advance_math_followup(chat, episode, text, grade, active_turns)
+
     trial_state = copy.copy(state)
     new_state, action = C.step(trial_state, label, text)
     trial_episode = dict(episode, state=new_state)
-    reply = _apply_action(trial_episode, action, active_turns)  # may raise
+    reply = _apply_action(chat, trial_episode, action, active_turns)  # may raise
     episode["state"] = new_state  # commit only after generation succeeded
     return reply
 
@@ -445,7 +567,7 @@ ss.setdefault("name_field", "")
 ss.setdefault("grade", 3)
 ss.setdefault("level", "on_track")
 ss.setdefault("chat_seq", 1)
-ss.setdefault("chats", [{"id": "chat-1", "messages": [], "episode": None}])
+ss.setdefault("chats", [{"id": "chat-1", "messages": [], "episode": None, "thread_notes": []}])
 ss.setdefault("active", "chat-1")
 
 GRADE_LABEL = {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}
@@ -473,7 +595,7 @@ def chat_title(chat) -> str:
 def start_new_chat():
     ss.chat_seq += 1
     cid = f"chat-{ss.chat_seq}"
-    ss.chats.append({"id": cid, "messages": [], "episode": None})
+    ss.chats.append({"id": cid, "messages": [], "episode": None, "thread_notes": []})
     ss.active = cid
 
 
@@ -558,10 +680,31 @@ def render_name_page():
         st.text_input("Your name", key="name_field",
                       placeholder="Type your name here…", label_visibility="collapsed")
     with c_btn:
-        if st.button("Let's go →", key="go_btn", use_container_width=True):
-            ss.name = ss.name_field.strip()
-            ss.page = "greeting"
-            st.rerun()
+        go_clicked = st.button("Let's go →", key="go_btn", use_container_width=True)
+
+    st.markdown(
+        '<p class="tt-sub" style="margin-top:22px;font-size:20px;">Which class are you in?</p>',
+        unsafe_allow_html=True,
+    )
+    grade_choice = st.selectbox(
+        "Class", options=[1, 2, 3, 4, 5], index=ss.grade - 1,
+        format_func=lambda g: f"Class {g}", key="grade_field",
+        label_visibility="collapsed",
+    )
+
+    if go_clicked:
+        ss.name = ss.name_field.strip()
+        if grade_choice != ss.grade:
+            # A grade change must not let an in-progress episode (and its
+            # trusted answer, computed for the OLD grade's taught form)
+            # silently carry on under the new grade. Only the open episode is
+            # cleared -- past messages in the chat stay as a true record of
+            # what was actually discussed.
+            for c in ss.chats:
+                c["episode"] = None
+            ss.grade = grade_choice
+        ss.page = "greeting"
+        st.rerun()
     st.stop()
 
 
@@ -720,13 +863,23 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     background:rgba(255,255,255,0.12); border:1px dashed rgba(255,255,255,0.5); border-radius:10px;
     padding:14px 14px; margin: 4px 2px; text-align:center; }
 
-/* Clear / change-name */
-[class*="st-key-clearbtn"] button, [class*="st-key-chgname"] button {
+/* Clear / change-name / reset-learning */
+[class*="st-key-clearbtn"] button, [class*="st-key-chgname"] button,
+[class*="st-key-resetlearning"] button, [class*="st-key-reset_confirm_no"] button {
     font-family:'Nunito',sans-serif !important; font-weight:700 !important; font-size:13px !important;
     background:#fff !important; border:1px dashed #b9c8e6 !important; color:#111 !important;
     border-radius:10px !important; padding:8px !important; box-shadow:none !important;
 }
-[class*="st-key-clearbtn"] button p, [class*="st-key-chgname"] button p { color:#111 !important; font-weight:700 !important; font-size:13px !important; }
+[class*="st-key-clearbtn"] button p, [class*="st-key-chgname"] button p,
+[class*="st-key-resetlearning"] button p, [class*="st-key-reset_confirm_no"] button p {
+    color:#111 !important; font-weight:700 !important; font-size:13px !important;
+}
+[class*="st-key-reset_confirm_yes"] button {
+    font-family:'Nunito',sans-serif !important; font-weight:700 !important; font-size:13px !important;
+    background:#fdeaea !important; border:1px solid #f4bfc2 !important; color:#c0343a !important;
+    border-radius:10px !important; padding:8px !important; box-shadow:none !important;
+}
+[class*="st-key-reset_confirm_yes"] button p { color:#c0343a !important; font-weight:700 !important; font-size:13px !important; }
 
 /* ===== MIDDLE AREA — all black text (image-2 look) ===== */
 .tt-buddy-name { font-family:'Baloo 2',sans-serif; font-weight:800; color:#111; font-size:20px; }
@@ -927,6 +1080,19 @@ def render_turn(msg, idx, is_latest=False):
     elif text:
         st.markdown(f'<div class="chat-reply">{html.escape(text)}</div>', unsafe_allow_html=True)
 
+    # Bounded arithmetic self-consistency guardrail (Problem 10): flags a
+    # worked example the model invented ITSELF (not the student's own
+    # problem, which is already checked above) where its own stated equation
+    # doesn't add up. Non-blocking -- the reply still shows -- since this is
+    # a transparency signal, not a correctness gate.
+    for issue in (msg.get("self_check_issues") or []):
+        st.markdown(
+            f'<div class="verify-tag" style="background:#fff4d6;color:#8a6400;'
+            f'border-color:#f0dca0;">⚠ Double-check: "{html.escape(issue["statement"])}" '
+            f'doesn\'t add up (computes to {html.escape(issue["computed"])})</div>',
+            unsafe_allow_html=True,
+        )
+
     if not is_latest:
         return
     buttons = [b for b in (msg.get("buttons") or []) if b in _ACTIONABLE_LABELS]
@@ -972,7 +1138,6 @@ def render_main_page():
 
     solved = sum(1 for m in msgs if m.get("role") == "assistant" and m.get("outcome") == "solved")
     stars = solved * 5
-    level_num = 1 + solved // 3
     lvl_pct = (solved % 3) / 3
 
     initial = display_name()[0].upper() if display_name() != "friend" else "🙂"
@@ -1109,8 +1274,17 @@ def render_main_page():
             )
 
         # ---- ask bar: fixed at the bottom of the screen, above the footer ----
+        # A bare st.text_input + a separate st.button does NOT submit on
+        # Enter in Streamlit -- pressing Enter only commits the text_input's
+        # value and reruns the script; it does not set the button's return
+        # value to True. A child who types an answer and presses Enter (the
+        # near-universal chat-input expectation) previously saw nothing
+        # happen at all until they also clicked the small arrow button. An
+        # st.form's submit button, uniquely, DOES fire on Enter when it is
+        # the form's only submit button -- this is the documented fix, not a
+        # cosmetic wrapper.
         ask_key = f"askbox_{ss.active}_{len(msgs)}"
-        with st.container(key="ask_bar"):
+        with st.form(key="ask_bar", clear_on_submit=True, border=False):
             a_in, a_btn = st.columns([6, 1])
             with a_in:
                 question = st.text_input(
@@ -1119,7 +1293,7 @@ def render_main_page():
                     label_visibility="collapsed",
                 )
             with a_btn:
-                ask_clicked = st.button("↑", key="askbtn", use_container_width=True)
+                ask_clicked = st.form_submit_button("↑", use_container_width=True)
 
         # Guard against a double-fire of the ask button (Enter + click landing
         # in the same script run), which was causing the same question to be
@@ -1145,13 +1319,20 @@ def render_main_page():
     with right:
         with st.container(border=True, key="progress_panel"):
             st.markdown('<div class="tt-card-head">Progress</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="tt-prog-row"><span>⭐ Level {level_num}</span>'
+            # "Chat Progress" (this chat's solve streak, resets per new chat)
+            # and "Tutor Level" (the persistent backend classification that
+            # actually drives tutoring depth/thresholds) are two genuinely
+            # different things and are labelled as such -- they used to share
+            # the single, misleading label "Level".
+            st.markdown(f'<div class="tt-prog-row"><span>📈 Chat Progress</span>'
                         f'<span class="val">{int(lvl_pct*100)}%</span></div>',
                         unsafe_allow_html=True)
             st.progress(lvl_pct)
             st.markdown(
                 f'<div class="tt-prog-row"><span>✅ Questions Answered</span><span class="val">{solved}</span></div>'
-                f'<div class="tt-prog-row"><span>🌟 Stars</span><span class="val">{stars}</span></div>',
+                f'<div class="tt-prog-row"><span>🌟 Stars</span><span class="val">{stars}</span></div>'
+                f'<div class="tt-prog-row"><span>🎯 Tutor Level</span>'
+                f'<span class="val">{_current_learner_level().title()}</span></div>',
                 unsafe_allow_html=True,
             )
 
@@ -1170,11 +1351,38 @@ def render_main_page():
                 cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
             st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
 
+        # Clearing the visible chat and resetting the persistent learner
+        # profile are two different actions with two different blast radii
+        # (one chat window vs. every chat, forever) and used to be silently
+        # bundled into one click -- a "Clear chat" that also erased the
+        # child's whole personalisation history with no warning. They are
+        # now separate, and the destructive one requires an explicit second
+        # confirmation.
         if st.button("🗑️ Clear this chat", key="clearbtn", use_container_width=True):
-            chat["messages"] = []
-            chat["episode"] = None
-            reset_student()
+            clear_chat(chat)
             st.rerun()
+
+        if ss.get("_confirm_reset_learning"):
+            st.markdown(
+                '<div class="tt-hist-empty">This erases your saved level and '
+                'progress for good. Are you sure?</div>',
+                unsafe_allow_html=True,
+            )
+            rc1, rc2 = st.columns(2)
+            with rc1:
+                if st.button("✅ Yes, reset", key="reset_confirm_yes", use_container_width=True):
+                    reset_learning_progress()
+                    ss["_confirm_reset_learning"] = False
+                    st.rerun()
+            with rc2:
+                if st.button("Cancel", key="reset_confirm_no", use_container_width=True):
+                    ss["_confirm_reset_learning"] = False
+                    st.rerun()
+        else:
+            if st.button("⚠️ Reset my learning progress", key="resetlearning", use_container_width=True):
+                ss["_confirm_reset_learning"] = True
+                st.rerun()
+
         if st.button("↩ Change name", key="chgname", use_container_width=True):
             ss.page = "name"
             st.rerun()
