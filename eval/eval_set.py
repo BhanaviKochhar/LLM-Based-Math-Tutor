@@ -1,5 +1,15 @@
 """eval/eval_set.py — evaluation questions for Objective 3.
 
+LEGACY / HISTORICAL — this 36-item set predates the controller-integration
+stabilization and the richer, better-annotated datasets under
+eval/datasets/arithmetic/v1_starter.jsonl. It is consumed only by
+eval/run_eval.py's baseline-vs-system comparison (also legacy — see that
+file's docstring), which calls through pipeline's old single-shot
+prepare()/TutorTurn path (scripts/llm/pipeline.py), NOT the controller-driven
+start_episode/advance_episode flow frontend/app.py actually runs. Do not cite
+results from eval/run_eval.py as measuring the current student-facing tutor.
+The authoritative current evaluation entry points are eval/component_eval/*.
+
 Each item: q (question), grade, truth (a sympy-evaluable arithmetic string that
 is the CORRECT answer), cat (category, for per-category reporting).
 
