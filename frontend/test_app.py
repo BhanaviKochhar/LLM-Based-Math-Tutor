@@ -269,13 +269,28 @@ def test_post_check_paths() -> None:
           v_unreadable["verifiable"] and v_unreadable["match"] is None)
 
     hint_action = C.Action(C.MODE_HINT, "", outcome=None)
-    check("non-reveal/co_solve modes are not checked at all (nothing was injected)",
+    check("a mode with no injected answer (e.g. hint) is not checked at all",
           app._post_check(state, hint_action, "a hint") is None)
 
     no_truth_state = C.TutorState(question="q", grade=3, level="intermediate",
                                   computed_answer=None, is_math=False)
     check("reveal/co_solve with no computed answer is not checked",
           app._post_check(no_truth_state, reveal, "some text") is None)
+
+    # diagnose_correct: the controller already graded the STUDENT's stated
+    # answer before this runs; this covers the separate case of the model's
+    # own celebratory restatement naming the wrong number (see
+    # docs/current_state_evaluation.md Section 2 — previously uncaught).
+    diagnose_correct = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved", terminal=True)
+
+    v_confirm_match = app._post_check(state, diagnose_correct, "Great job! The answer is 56.")
+    check("diagnose_correct: model's restatement matching the computed answer -> match True",
+          v_confirm_match is not None and v_confirm_match["verifiable"]
+          and v_confirm_match["match"] is True)
+
+    v_confirm_mismatch = app._post_check(state, diagnose_correct, "Great job! The answer is 50.")
+    check("diagnose_correct: model's restatement naming a DIFFERENT number -> match False",
+          v_confirm_mismatch["verifiable"] and v_confirm_mismatch["match"] is False)
 
 
 # ----------------------------------- root-cause diagnostic for the reviewed conversation
@@ -288,9 +303,15 @@ def test_conceptual_episode_never_advances() -> None:
     the same non-terminal MODE_ACK_CONCEPTUAL action regardless of what the
     student actually wrote. This is a real controller/architecture property,
     confirmed live against scripts.llm.controller (no mocking) — it is NOT a
-    frontend wiring bug, and is documented as a known limitation rather than
-    patched here (see checkpoint notes)."""
-    print("Diagnostic: conceptual (ungradable) episodes never progress past teach_invite")
+    frontend wiring bug. controller.step()/diagnose() still behave exactly
+    this way by design; this test exercises that directly and its assertions
+    remain correct. The episode is no longer stuck here forever, though:
+    controller.graduate_if_computable(), wired into frontend/app.py's
+    _apply_action, can lift it out of this exact loop once the model's own
+    MODE_ACK_CONCEPTUAL reply poses a computable follow-up question — a
+    mitigation this test deliberately does not exercise, since it calls
+    C.step() directly rather than going through _apply_action."""
+    print("Diagnostic: conceptual (ungradable) episodes never progress past teach_invite via controller.step() alone")
 
     state, action = C.start("fractions", 4, "intermediate", computed_answer=None, is_math=False)
     check("a non-computable topic starts with teach_invite, not terminal",

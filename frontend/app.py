@@ -244,10 +244,18 @@ def _post_check(state, action, text):
     """Real post-generation verification for turns where a trusted answer was
     injected (co-solve/reveal) — the live counterpart of pipeline.TutorTurn's
     finalize(), which the old ask_tutor() path never called. Returns a
-    verifier.check()-shaped dict, or None when there is nothing to verify."""
+    verifier.check()-shaped dict, or None when there is nothing to verify.
+
+    Also covers MODE_DIAGNOSE_CORRECT: the controller already graded the
+    *student's* stated answer against state.computed_answer before this
+    runs, but the directive separately tells the model to "confirm the
+    answer" in its own words, and nothing previously checked that
+    restatement. Without this, a model that confirms with the wrong number
+    would go uncaught (see docs/current_state_evaluation.md Section 2)."""
     from scripts.llm import controller as C, verifier
 
-    if action.mode not in (C.MODE_CO_SOLVE, C.MODE_REVEAL) or not state.computed_answer:
+    checked_modes = (C.MODE_CO_SOLVE, C.MODE_REVEAL, C.MODE_DIAGNOSE_CORRECT)
+    if action.mode not in checked_modes or not state.computed_answer:
         return None
     computed_value = verifier.parse_trusted_value(state.computed_answer)
     return verifier.check(state.question, text, computed_value=computed_value)
@@ -875,6 +883,17 @@ def render_turn(msg, idx, is_latest=False):
                     unsafe_allow_html=True)
         if text:
             st.markdown(f'<div class="chat-reply">{html.escape(text)}</div>', unsafe_allow_html=True)
+        v = msg.get("verify")
+        if v and v.get("verifiable") and v.get("match") is False:
+            # The student's stated answer was already graded correct against
+            # state.computed_answer by the controller; this catches the rarer
+            # case where the model's own celebratory restatement names a
+            # different number than the one it just graded.
+            st.markdown(
+                '<div class="verify-tag" style="background:#fdeaea;color:#c0343a;'
+                'border-color:#f4bfc2;">⚠ Disagrees with the computed answer</div>',
+                unsafe_allow_html=True,
+            )
     elif mode == "hint":
         n = msg.get("hint_number")
         prefix = f"Hint {n}: " if n else ""
