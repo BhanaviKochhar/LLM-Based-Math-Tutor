@@ -115,6 +115,31 @@ def test_final_number_str_fallback_tiers() -> None:
     check("irrelevant numbers (dates/counts) do not override the equation result",
           fns("On day 3 of 5, we calculated 6 + 6 = 12 toffees in total.") == "12")
 
+    # Mixed numbers: a bare fraction match alone would silently drop the
+    # whole-number part ("1 1/2" -> "1/2", losing a whole unit). Realistic
+    # whenever a grade 4-5 fraction result exceeds 1.
+    check("mixed number on an Answer: line -> combined into one improper fraction",
+          fns("Answer: 1 1/2") == "3/2")
+    check("negative mixed number",
+          fns("Answer: -1 1/2") == "-3/2")
+    check("mixed number via a trailing equation, no Answer: line",
+          fns("So the total is = 1 1/2 cakes.") == "3/2")
+
+    # Comma-grouped large integers (Western "1,234" or Indian "1,00,000"):
+    # the plain-integer token alone would stop at the first comma. Realistic
+    # for grade 4-5 "numbers up to 100,000" content.
+    check("comma-grouped integer on an Answer: line",
+          fns("Answer: 1,234") == "1234")
+    check("Indian comma grouping on an Answer: line",
+          fns("Answer: 1,00,000") == "100000")
+    check("comma-grouped integer via a trailing equation",
+          fns("So the total is = 1,234 pages.") == "1234")
+
+    # A natural-language list ("3, 4") must NOT be merged into one number --
+    # a real thousands separator never has a space after the comma.
+    check("comma-separated list is not mistaken for a grouped integer",
+          fns("Ravi has 3, 4 apples left over.") is None)
+
 
 # --------------------------------------------------------------- verifier maths
 def test_verifier_math() -> None:
@@ -129,6 +154,46 @@ def test_verifier_math() -> None:
                                          verifier._safe_eval("0.75")))
     check("close reject", not verifier._close(verifier._safe_eval("5"),
                                               verifier._safe_eval("6")))
+
+    # Division by zero must never evaluate to a usable value (sympy would
+    # otherwise return zoo/nan, which `is_number` but is not a real result).
+    check("reject division by zero", verifier._safe_eval("5/0") is None)
+    check("reject division by zero, non-bare shape",
+          verifier._safe_eval("5/0+3") is None)
+    check("reject division by a zero-valued sub-expression",
+          verifier._safe_eval("8/(3-3)") is None)
+
+
+# --------------------------------------------- verifier grade-appropriate gate
+def test_verifier_injection_gate() -> None:
+    """solve()'s injection gate: integer results and non-integer fraction
+    arithmetic are injected; a bare non-exact int/int division is withheld
+    so the tutor teaches quotient+remainder instead of an improper fraction
+    (see verifier._grade_appropriate_answer). Previously untested by any
+    deterministic suite."""
+    print("verifier — grade-appropriate injection gate")
+
+    def solve(expr: str):
+        return verifier.solve(expr, extract_fn=lambda q: expr)
+
+    check("integer result -> injected",
+          solve("6*9-32") == ("22", True))
+    check("non-integer fraction arithmetic -> injected (the taught answer)",
+          solve("1/2 + 1/4") == ("3/4", True))
+    check("bare non-exact int/int division -> withheld (teach remainder)",
+          solve("20/3") == (None, True))
+    check("non-exact division WRAPPED in redundant parens -> still withheld",
+          solve("(20/3)") == (None, True))
+    check("non-exact division double-wrapped -> still withheld",
+          solve("((20/3))") == (None, True))
+    check("a division that ISN'T the whole expression is unaffected",
+          solve("(1/2)*8") == ("4", True))
+    check("exact division -> injected as an integer",
+          solve("36/4") == ("9", True))
+    check("division by zero -> not computable at all, never injected",
+          solve("5/0") == (None, False))
+    check("division by zero (non-bare shape) -> not computable, never injected",
+          solve("5/0+3") == (None, False))
 
 
 # ------------------------------------------------------- verifier check (no LLM)
@@ -306,6 +371,7 @@ def main() -> None:
     test_final_number_str_fallback_tiers()
     test_student_tracker_atomic_save()
     test_verifier_math()
+    test_verifier_injection_gate()
     test_verifier_check()
     test_client_fallback()
     test_client_skips_missing_keys()

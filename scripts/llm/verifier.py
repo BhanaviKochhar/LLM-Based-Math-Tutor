@@ -82,7 +82,17 @@ class Computation:
 
 
 def _safe_eval(expr_str: str | None):
-    """Evaluate a plain arithmetic string with sympy, or None if unsafe/non-numeric."""
+    """Evaluate a plain arithmetic string with sympy, or None if unsafe/non-numeric.
+
+    Division by zero is rejected here, not just in the bare-"int/int" shape
+    _grade_appropriate_answer special-cases. sympy evaluates e.g. "5/0+3" or
+    "8/(3-3)" to `zoo` (ComplexInfinity) or "0/0"-shaped expressions to `nan`
+    rather than raising -- and `zoo`/`nan` both satisfy sympy's `is_number`,
+    so without this check one could flow all the way through solve() and be
+    formatted as a literal "zoo"/"nan" string injected into the tutor prompt
+    as a "trusted" answer. Real numbers (int/Rational) always have
+    `is_real is True`; zoo/nan/+-oo do not.
+    """
     if not expr_str:
         return None
     expr_str = expr_str.strip()
@@ -95,6 +105,8 @@ def _safe_eval(expr_str: str | None):
     if getattr(val, "free_symbols", set()):
         return None
     if not getattr(val, "is_number", False):
+        return None
+    if val.is_real is not True:
         return None
     return val
 
@@ -191,13 +203,38 @@ def format_value(val) -> str:
         return str(val)
 
 
+def _strip_enclosing_parens(expression: str) -> str:
+    """Strip one or more layers of parentheses that wrap the WHOLE
+    expression (e.g. "(20/3)" -> "20/3", "((20/3))" -> "20/3"), so the
+    "bare int/int" shape below is recognised regardless of whether the
+    extractor happened to wrap it defensively. Parens that don't span the
+    entire expression (e.g. "(1/2)*8") are left untouched."""
+    s = expression.strip()
+    while len(s) >= 2 and s[0] == "(" and s[-1] == ")":
+        depth = 0
+        spans_whole = True
+        for i, ch in enumerate(s):
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0 and i != len(s) - 1:
+                    spans_whole = False
+                    break
+        if not spans_whole:
+            break
+        s = s[1:-1].strip()
+    return s
+
+
 def _grade_appropriate_answer(expression: str | None, value) -> str | None:
     """Injectable answer string, or None if the exact value isn't the taught form.
 
       * Integer result -> inject (unambiguous at every primary grade).
       * Bare "int / int" that isn't exact -> DON'T inject (taught as quotient +
         remainder, not an improper fraction/decimal). Let the tutor teach
-        remainders; skip strict verify.
+        remainders; skip strict verify. Recognised whether or not it's
+        wrapped in redundant enclosing parens, e.g. "(20/3)".
       * Any other non-integer (real fraction arithmetic like 1/2 + 1/4) ->
         inject the exact value; that IS the taught answer.
     """
@@ -206,7 +243,7 @@ def _grade_appropriate_answer(expression: str | None, value) -> str | None:
             return format_value(value)
     except (TypeError, ValueError):
         pass
-    if expression and _PLAIN_DIV.match(expression):
+    if expression and _PLAIN_DIV.match(_strip_enclosing_parens(expression)):
         return None
     return format_value(value)
 
