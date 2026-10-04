@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "conversations": [
+    {
+      "conversation_id": "mt-007",
+      "title": "Why-follow-up after a correct division answer",
+      "grade": 3,
+      "topic": "division_conceptual_followup",
+      "reference_answer": "6",
+      "turns": [
+        {"turn": 1, "student": "Share 18 toffees equally among 3 children. How many does each get?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown; invites the student's own attempt."},
+        {"turn": 2, "student": "6", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 6 is correct; offers a follow-up or new topic."},
+        {"turn": 3, "student": "Why does dividing work that way?", "expected_controller_action": "new episode (conceptual follow-up, CONCEPT_FOLLOWUP routing)", "expected_disclosure": "Should build on THIS problem's numbers (18, 3, 6), not a generic unrelated division explanation."},
+        {"turn": 4, "student": "Oh I see, so it's like repeated subtraction?", "expected_controller_action": "ack_conceptual", "expected_disclosure": "Should confirm the repeated-subtraction framing is a valid way to see division, tied to 18/3."}
+      ],
+      "evaluation_rubric": ["relevance_to_latest_input", "recognition_of_demonstrated_reasoning", "context_preservation"],
+      "known_ambiguity": "Turn 3's conversation_resolver routing (CONCEPT_FOLLOWUP vs NEW) has not been live-tested for this exact phrasing in this authoring pass.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-008",
+      "title": "What-about-this-one follow-up changing the numbers",
+      "grade": 2,
+      "topic": "addition_followup_variant",
+      "reference_answer": "35 then 52",
+      "turns": [
+        {"turn": 1, "student": "What is 23 + 12?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown."},
+        {"turn": 2, "student": "35", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 35."},
+        {"turn": 3, "student": "What about 23 + 29 instead?", "expected_controller_action": "new episode (MATH_FOLLOWUP or NEW, resolving to 23+29)", "expected_disclosure": "Should treat this as a new, related problem with the changed second number; compute-first should solve 23+29=52."},
+        {"turn": 4, "student": "52", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 52."}
+      ],
+      "evaluation_rubric": ["mathematical_correctness", "relevance_to_latest_input"],
+      "known_ambiguity": "Whether 'what about X instead' routes through the deterministic MATH_FOLLOWUP grammar rule or the general LLM router was not checked against the live conversation_resolver in this authoring pass.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-009",
+      "title": "Correction after a wrong multiplication attempt",
+      "grade": 3,
+      "topic": "multiplication_correction",
+      "reference_answer": "56",
+      "turns": [
+        {"turn": 1, "student": "What is 7 x 8?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown."},
+        {"turn": 2, "student": "54", "expected_controller_action": "diagnose_wrong", "expected_disclosure": "Correct value (56) held privately, not told to the student; gentle nudge toward the likely slip (confusing with 6x9=54)."},
+        {"turn": 3, "student": "Oh wait, is it 56?", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 56 as correct on the second attempt."}
+      ],
+      "evaluation_rubric": ["mathematical_correctness", "appropriate_scaffolding"],
+      "known_ambiguity": "None beyond standard wrong-then-correct flow, already covered deterministically by eval/controller_walk.py.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-010",
+      "title": "Changing questions mid-episode (new question signal)",
+      "grade": 1,
+      "topic": "topic_switch_within_arithmetic",
+      "reference_answer": "7, then 5",
+      "turns": [
+        {"turn": 1, "student": "What is 4 + 3?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown."},
+        {"turn": 2, "student": "Actually, what is 9 - 4?", "expected_controller_action": "NEW_QUESTION -> fresh episode starts, old episode closes with outcome moved_on", "expected_disclosure": "The old 4+3 episode should close cleanly (outcome='moved_on'), and a fresh episode for 9-4 should begin; no attempt should be counted for the abandoned 4+3 problem."},
+        {"turn": 3, "student": "5", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 5 for the NEW problem (9-4), not the old one."}
+      ],
+      "evaluation_rubric": ["context_preservation", "mathematical_correctness"],
+      "known_ambiguity": "None -- this mirrors the deterministic NEW_QUESTION scenario already covered by eval/controller_walk.py's scenario 8, restated here as a full conversational example for the broader benchmark.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-011",
+      "title": "Student asks for clarification in different words",
+      "grade": 5,
+      "topic": "angles_clarification_request",
+      "reference_answer": null,
+      "turns": [
+        {"turn": 1, "student": "What is the difference between an acute angle and an obtuse angle?", "expected_controller_action": "teach_invite (conceptual, no single numeric answer)", "expected_disclosure": "Explains both categories relative to 90 degrees."},
+        {"turn": 2, "student": "I don't get it, can you say that a different way?", "expected_controller_action": "CONFUSION routing -> re-explain the SAME content differently, not a new topic", "expected_disclosure": "Should re-explain the acute/obtuse distinction using different wording or an analogy, not introduce unrelated new content."},
+        {"turn": 3, "student": "Oh ok, so acute is 'less open' and obtuse is 'more open' than a right angle?", "expected_controller_action": "ack_conceptual", "expected_disclosure": "Should confirm this analogy is a reasonable way to think about it, tied to the degree-based definition already given."}
+      ],
+      "evaluation_rubric": ["clarity_and_age_appropriateness", "context_preservation", "recognition_of_demonstrated_reasoning"],
+      "known_ambiguity": "Whether the CONFUSION-mode re-explanation actually varies its wording on a second pass (vs. repeating verbatim) has not been live-tested in this authoring pass.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-012",
+      "title": "Hint progression through three escalating hints",
+      "grade": 3,
+      "topic": "subtraction_borrowing_hints",
+      "reference_answer": "47",
+      "turns": [
+        {"turn": 1, "student": "What is 82 - 35?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown."},
+        {"turn": 2, "student": "Give me a hint", "expected_controller_action": "hint, hint_number=1", "expected_disclosure": "First, gentlest hint -- does not reveal the method fully."},
+        {"turn": 3, "student": "Another hint please", "expected_controller_action": "hint, hint_number=2", "expected_disclosure": "Second hint, more specific than the first, still not the full answer."},
+        {"turn": 4, "student": "One more hint", "expected_controller_action": "hint, hint_number=3", "expected_disclosure": "Third and most specific hint; capped at 3 per scripts.llm.controller's min(hints_given, 3)."},
+        {"turn": 5, "student": "47", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 47 as correct after the hint sequence; hints themselves did not count as wrong attempts."}
+      ],
+      "evaluation_rubric": ["appropriate_scaffolding", "appropriate_progression"],
+      "known_ambiguity": "Whether the three hints are genuinely escalating in specificity (not just three similar-sounding generic nudges) has not been live-tested in this authoring pass.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-013",
+      "title": "Student builds from partial to full understanding mid-episode",
+      "grade": 4,
+      "topic": "fractions_understanding_progression",
+      "reference_answer": null,
+      "turns": [
+        {"turn": 1, "student": "What is a fraction?", "expected_controller_action": "teach_invite (conceptual)", "expected_disclosure": "Grounded explanation with one concrete example."},
+        {"turn": 2, "student": "So the bottom number tells you how many pieces the whole is split into?", "expected_controller_action": "ack_conceptual (partial understanding)", "expected_disclosure": "Confirms the denominator point specifically, per scripts.llm.controller's ack_conceptual directive ('do NOT restart with a generic definition they have already heard')."},
+        {"turn": 3, "student": "And the top number is how many of those pieces you actually have?", "expected_controller_action": "ack_conceptual (fuller understanding demonstrated) or graduate_if_computable if a concrete follow-up question was posed in turn 2's reply", "expected_disclosure": "Should confirm BOTH the numerator and denominator understanding are now correctly stated, building cumulatively across the two turns rather than re-explaining from scratch a third time."}
+      ],
+      "evaluation_rubric": ["recognition_of_demonstrated_reasoning", "avoidance_of_unnecessary_repetition", "appropriate_progression"],
+      "known_ambiguity": "This conversation deliberately exercises the same 'builds on partial understanding across multiple turns' pattern as the existing co-004 single-turn case, but as a full multi-turn trace -- whether the system avoids repeating itself across THREE consecutive conceptual turns (not just two) is an open question this item is designed to probe.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-014",
+      "title": "Persistent misconception repeated across two turns",
+      "grade": 3,
+      "topic": "multiplication_by_zero_persistent_error",
+      "reference_answer": "0",
+      "turns": [
+        {"turn": 1, "student": "What is 9 x 0?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown."},
+        {"turn": 2, "student": "9", "expected_controller_action": "diagnose_wrong", "expected_disclosure": "Correct value (0) held privately; nudge toward the specific 'multiplying by zero' misconception."},
+        {"turn": 3, "student": "I mean 9, because zero shouldn't change the number.", "expected_controller_action": "diagnose_wrong (same misconception restated, not a new attempt value)", "expected_disclosure": "Should recognize this is the SAME underlying misconception restated with a reason, not a fresh independent wrong guess, and address the reasoning directly (any number times zero groups is zero) rather than repeating an identical generic nudge."},
+        {"turn": 4, "student": "Oh! So it's 0 because there are zero groups.", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 0 and the zero-groups reasoning."}
+      ],
+      "evaluation_rubric": ["recognition_of_demonstrated_reasoning", "avoidance_of_unnecessary_repetition", "mathematical_correctness"],
+      "known_ambiguity": "Whether turn 3's second wrong attempt is recognized as the SAME misconception (warranting a different follow-up nudge than turn 2's) or treated as an identical generic 'wrong, try again' has not been live-tested in this authoring pass; this is the key thing this conversation is designed to probe.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-015",
+      "title": "Topic switch from shapes to money mid-conversation",
+      "grade": 2,
+      "topic": "topic_switch_shapes_to_money",
+      "reference_answer": null,
+      "turns": [
+        {"turn": 1, "student": "How many faces does a cube have?", "expected_controller_action": "teach_invite (conceptual)", "expected_disclosure": "Explains cube faces (6)."},
+        {"turn": 2, "student": "6", "expected_controller_action": "diagnose_correct-equivalent for a conceptual fact, or ack_conceptual depending on whether this episode was started as computable", "expected_disclosure": "Confirms 6."},
+        {"turn": 3, "student": "Can we talk about money instead? If I have 3 Rs.5 coins, how much do I have?", "expected_controller_action": "NEW_QUESTION -> fresh episode for the money problem", "expected_disclosure": "Should cleanly start the new money episode (compute-first: 3*5=15) rather than connecting it awkwardly to the cube-faces topic."},
+        {"turn": 4, "student": "15", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 15 for the NEW topic."}
+      ],
+      "evaluation_rubric": ["context_preservation", "relevance_to_latest_input", "mathematical_correctness"],
+      "known_ambiguity": "Turn 1-2's exact controller mode depends on whether 'how many faces does a cube have' is treated as computable (is_math=True, trusted answer 6) or purely conceptual by the live verifier -- not checked in this authoring pass.",
+      "status": "synthetic, not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    },
+    {
+      "conversation_id": "mt-016",
+      "title": "Pronoun back-reference to an earlier problem, then conversation termination",
+      "grade": 5,
+      "topic": "factors_pronoun_reference_and_closing",
+      "reference_answer": "8 then 6",
+      "turns": [
+        {"turn": 1, "student": "What is the HCF of 16 and 24?", "expected_controller_action": "teach_invite", "expected_disclosure": "No answer shown. Note: HCF is outside the current verifier's arithmetic grammar (see eval/datasets/arithmetic/v2_phaseB_extension.jsonl ar-018's required_assumptions), so this episode may not be computable end-to-end by the live system without an extraction extension."},
+        {"turn": 2, "student": "8", "expected_controller_action": "diagnose_correct, terminal (IF the system can compute HCF end-to-end) or ack_conceptual (if not)", "expected_disclosure": "This turn's actual outcome depends on an unresolved implementation gap, not on conversational routing -- flagged as a known limitation, not assumed to work."},
+        {"turn": 3, "student": "What about that one with 12 and 18 instead?", "expected_controller_action": "MATH_FOLLOWUP, resolving 'that one' to a new HCF problem with 12 and 18", "expected_disclosure": "Tests pronoun/reference resolution ('that one') pointing back to the HCF framing, not literally the previous numbers -- a harder resolution case than the project's existing deterministic 'X instead of Y' grammar rule, which only swaps a single operand in an arithmetic expression, not an HCF framing."},
+        {"turn": 4, "student": "6", "expected_controller_action": "diagnose_correct, terminal", "expected_disclosure": "Confirms 6 (HCF of 12 and 18) if reached."},
+        {"turn": 5, "student": "Great, thanks, that's all for today!", "expected_controller_action": "conversation termination -- no further episode should be started; a graceful closing acknowledgement expected", "expected_disclosure": "Should not attempt to start a new episode or ask another question; should acknowledge the session is ending."}
+      ],
+      "evaluation_rubric": ["mathematical_correctness", "context_preservation", "relevance_to_latest_input"],
+      "known_ambiguity": "The HCF-computability gap (turn 1-2) and the 'that one' pronoun resolution (turn 3) are both explicitly unresolved by the current implementation per this authoring pass's code reading -- this conversation is deliberately a STRESS case documenting two known gaps together, not a case expected to currently pass end-to-end.",
+      "status": "synthetic, deliberately exercises two known unresolved gaps; not yet run against the live system",
+      "provenance": "AI-drafted (Claude), authored for curriculum evaluation benchmark expansion"
+    }
+  ]
+}
