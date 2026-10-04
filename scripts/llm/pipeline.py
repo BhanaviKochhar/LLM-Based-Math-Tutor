@@ -71,7 +71,18 @@ def source_citation(chunks_meta: list[dict]) -> str:
 
 
 class TutorTurn:
-    """One question's worth of work. Retrieval and computation happen up front;
+    """LEGACY (Tier A single-shot path) — NOT called by the live Streamlit
+    app. frontend/app.py's controller-driven flow (start_episode/
+    advance_episode -> pipeline.generate_turn) is the authoritative live
+    path; TutorTurn/prepare()/resume()/ask_tutor() below predate the
+    controller integration and now exist only for scripts/llm/smoke_live.py
+    and historical callers. Kept (not deleted) because smoke_live.py still
+    exercises the retrieval/compute/generate/verify round-trip through it as
+    a plumbing smoke test independent of the controller — but anything
+    measuring the STUDENT-FACING tutor's behaviour must go through
+    start_episode/advance_episode, not through this class.
+
+    One question's worth of work. Retrieval and computation happen up front;
     only generation is deferred until stream()."""
 
     def __init__(
@@ -199,9 +210,10 @@ def compute_trusted_answer(question: str, grade: int) -> tuple[str | None, bool]
 def _resolve_question(
     question: str,
     active_turns: list[dict] | None,
+    grade: int = 3,
 ):
     """Route the current message using generic conversation understanding."""
-    resolution = conversation_resolver.resolve_question(question, active_turns)
+    resolution = conversation_resolver.resolve_question(question, active_turns, grade=grade)
 
     if DEBUG_MEMORY:
         print("\n" + "=" * 80)
@@ -218,11 +230,12 @@ def _resolve_question(
     return resolution
 
 
-def resolve_conversation(question: str, active_turns: list[dict] | None = None):
+def resolve_conversation(question: str, active_turns: list[dict] | None = None,
+                         grade: int = 3):
     """Public entry point for callers outside this module (e.g. the
     frontend) that need conversation-aware resolution without reaching into
     the private _resolve_question helper."""
-    return _resolve_question(question, active_turns)
+    return _resolve_question(question, active_turns, grade=grade)
 
 
 def _conversation_directive(resolution) -> str | None:
@@ -284,9 +297,11 @@ def prepare(
     thread_notes: list[str] | None = None,
     active_turns: list[dict] | None = None,
 ) -> TutorTurn:
+    """LEGACY — builds a TutorTurn (see its docstring). Not called by
+    frontend/app.py; retained for scripts/llm/smoke_live.py."""
     from scripts.retrieval import retrieve_with_metadata
 
-    resolution = _resolve_question(question, active_turns)
+    resolution = _resolve_question(question, active_turns, grade=grade)
     resolved_level_value = resolve_level(student_id, level)
 
     # RAG is used only when the router says the message contains a substantive
@@ -328,8 +343,10 @@ def resume(
     level: str | None = None,
     active_turns: list[dict] | None = None,
 ) -> TutorTurn:
-    """Rebuild a turn from stored chunks while preserving conversation routing."""
-    resolution = _resolve_question(question, active_turns)
+    """LEGACY — see TutorTurn's docstring. Not called by frontend/app.py.
+
+    Rebuild a turn from stored chunks while preserving conversation routing."""
+    resolution = _resolve_question(question, active_turns, grade=grade)
     if resolution.use_verifier:
         computed_answer, is_math = _solve(resolution.resolved_question, grade)
     else:
@@ -356,6 +373,7 @@ def ask_tutor(
     student_id: str | None = None,
     active_turns: list[dict] | None = None,
 ) -> TutorTurn:
+    """LEGACY — see TutorTurn's docstring. Not called by frontend/app.py."""
     return prepare(
         question,
         grade,
@@ -375,7 +393,20 @@ def get_hint(
     total_hints: int = 3,
     active_turns: list[dict] | None = None,
 ) -> str:
-    resolution = _resolve_question(question, active_turns)
+    """Resolve-and-solve from scratch, then generate one hint.
+
+    This re-resolution exists for callers (e.g. scripts/llm/smoke_live.py)
+    that only hold a raw question string, not an already-open episode. The
+    live controller-driven path does NOT call this — an open episode already
+    has its resolved question and trusted answer in TutorState, so
+    generate_turn's MODE_HINT branch below reads them directly instead of
+    paying for a redundant conversation-resolution + re-extraction LLM call
+    on every single hint click (previously: every hint press re-ran the
+    router and the arithmetic extractor against the ORIGINAL problem text,
+    even though nothing about the problem had changed since the episode
+    started).
+    """
+    resolution = _resolve_question(question, active_turns, grade=grade)
     resolved_question = resolution.resolved_question
     computed_answer, _is_math = _solve(resolved_question, grade)
     return hints.generate_hint(
@@ -454,14 +485,19 @@ def generate_turn(
     chunks = chunks or []
 
     if action.mode == C.MODE_HINT:
-        return get_hint(
+        # The open episode already has the resolved question and the trusted
+        # answer (computed once, at episode/follow-up start) in TutorState --
+        # read them directly rather than re-running conversation resolution
+        # and re-extraction on every hint click (see get_hint's docstring).
+        return hints.generate_hint(
             state.question,
             state.grade,
             chunks,
             state.level,
             action.hint_number or 1,
             previous_hints,
-            active_turns=active_turns,
+            computed_answer=state.computed_answer,
+            total_hints=C.MAX_HINTS,
         )
 
     if action.mode == C.MODE_NEW_QUESTION:

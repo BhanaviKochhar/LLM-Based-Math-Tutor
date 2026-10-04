@@ -1,13 +1,18 @@
 """scripts/llm/hints.py — one short LLM call per hint level.
 
-The Streamlit UI reveals hints one tap at a time, one per step of the actual
-worked solution (Hint 1 -> 2 -> ... -> N -> full answer), where N is however
-many steps that specific problem's solution has. We generate each hint
-lazily, only when its button is pressed, so a child who solves it early never
-costs extra calls. Every hint is grounded in the SAME retrieved chunks as the
-eventual answer, plus the true computed answer (never spoken aloud), and each
-level is told what earlier hints already said, so the levels escalate
-through the real working instead of repeating themselves.
+The Streamlit UI reveals hints one tap at a time, up to a FIXED budget of
+controller.MAX_HINTS (currently 3) per problem, escalating generically from a
+bare nudge (hint 1) through a concrete partial step (middle hints) to "one
+small thing left to do" (the last hint) — NOT one hint per actual solution
+step of that specific problem. total_hints below is honest about this: every
+live caller passes controller.MAX_HINTS, a constant, not a per-problem step
+count (no component in this codebase counts a solution's real steps). The
+budget is enforced once, in controller.step()/MODE_HINT_EXHAUSTED, not here.
+We generate each hint lazily, only when its button is pressed, so a child who
+solves it early never costs extra calls. Every hint is grounded in the SAME
+retrieved chunks as the eventual answer, plus the true computed answer (never
+spoken aloud), and each level is told what earlier hints already said, so the
+levels escalate through the real working instead of repeating themselves.
 
 A hint NEVER states the final answer — that's what the answer reveal is for.
 """
@@ -51,8 +56,9 @@ _GUIDANCE_SINGLE = (
 
 
 def _guidance_for(hint_number: int, total_hints: int) -> str:
-    """Guidance text scaled to however many hints this problem actually has
-    (its real step count), instead of a fixed 3-level scheme."""
+    """Guidance text scaled to total_hints (in practice always
+    controller.MAX_HINTS — see this module's docstring), so a 1-hint and a
+    3-hint budget each still escalate sensibly from first to last."""
     if total_hints <= 1:
         return _GUIDANCE_SINGLE
     if hint_number <= 1:
@@ -98,7 +104,7 @@ def build_hint_messages(question: str, grade: int, chunks: list[str],
     user = (
         f"Textbook context:\n{_context(chunks)}\n\n"
         f"Class {grade} student's question: {question}\n\n"
-        f"This solution has {total_hints} step(s) in total. "
+        f"You may give up to {total_hints} hint(s) for this problem in total. "
         f"Write Hint {hint_number} of {total_hints}. {guidance}\n{prior_block}\n\n"
         f"IMPORTANT: Output ONLY the hint sentence(s) themselves. Do not "
         f"include any label like 'Hint 1 of 3:' or 'Hint:' — the app adds "
@@ -124,7 +130,14 @@ def generate_hint(question: str, grade: int, chunks: list[str], level: str,
 
         chat_fn = llm_client.chat
 
-    result = chat_fn(messages, params={"temperature": 0.3, "max_tokens": 220})
+    # 220 was found truncating hints mid-sentence live (e.g. "...so write"
+    # with nothing after it) on the reasoning model (openai/gpt-oss-120b),
+    # which spends hidden "thinking" tokens before the visible hint text --
+    # the same failure mode verifier.py's extractor hit at max_tokens=24
+    # (see verifier._EXTRACT_MAX_TOKENS's docstring). A hint is still only
+    # 1-2 visible sentences; the larger budget is headroom for reasoning
+    # tokens, not an invitation to write longer hints.
+    result = chat_fn(messages, params={"temperature": 0.3, "max_tokens": 500})
     text = (result.get("text") or "").strip()
     if not text:
         return _fallback_hint(hint_number, total_hints)

@@ -234,6 +234,54 @@ check("cold 'Show me how' on a specific problem -> still redirected (protects "
      and "DIFFERENT numbers" in a_specific2.directive
      and "381" not in a_specific2.directive)
 
+scenario("19. CONFUSION/CORRECTION/CLARIFY are generation-only (no state mutation)")
+for intent_label, expected_mode in (
+    ("CONFUSION", C.MODE_CONFUSION),
+    ("CORRECTION", C.MODE_CORRECTION),
+    ("CLARIFY", C.MODE_CLARIFY),
+):
+    s0, _ = C.start("What is 7 times 8?", 3, "intermediate",
+                    computed_answer="56", is_math=True)
+    s0.attempts = 1  # mid-episode, one prior wrong attempt
+    pre_attempts, pre_hints, pre_phase = s0.attempts, s0.hints_given, s0.phase
+    s1, a1 = C.step(s0, intent_label, "huh?")
+    check(f"{intent_label} -> mode {expected_mode}", a1.mode == expected_mode)
+    check(f"{intent_label} does not touch attempts", s1.attempts == pre_attempts)
+    check(f"{intent_label} does not touch hints_given", s1.hints_given == pre_hints)
+    check(f"{intent_label} does not change phase / end the episode",
+         s1.phase == pre_phase and not a1.terminal)
+    check(f"{intent_label} never reveals the computed answer in its directive",
+         "56" not in a1.directive)
+
+s_corr, a_corr = C.step(s0, "CORRECTION", "no thats not what i meant")
+check("CORRECTION's directive explicitly forbids solving/revealing the "
+     "answer -- live walkthrough found the model otherwise happily solving "
+     "a freshly-started problem the moment the child said 'no'",
+     "do NOT solve" in a_corr.directive and "do NOT state the final" in a_corr.directive)
+
+scenario("20. start_followup connects a changed value to the previous problem")
+s_follow, a_follow = C.start_followup(
+    "245 + 136", "245 + 150", 3, "intermediate",
+    computed_answer="395", is_math=True,
+)
+check("opens as teach_invite (same disclosure policy as a fresh episode)",
+     a_follow.mode == C.MODE_TEACH_INVITE and not a_follow.terminal)
+check("fresh attempts/hints budget for the follow-up sub-episode",
+     s_follow.attempts == 0 and s_follow.hints_given == 0)
+check("the new problem's trusted answer is NOT leaked into the teach directive",
+     "395" not in a_follow.directive)
+check("the directive explicitly names BOTH the previous and the new problem, "
+     "so the tutor states the connection instead of pretending nothing came before",
+     "245 + 136" in a_follow.directive and "245 + 150" in a_follow.directive)
+
+s_follow_conceptual, a_follow_conceptual = C.start_followup(
+    "fractions", "what about thirds", 4, "intermediate",
+    computed_answer=None, is_math=False,
+)
+check("a follow-up that resolves to non-computable falls back to the ordinary "
+     "conceptual teach_invite directive (no previous-problem text needed)",
+     a_follow_conceptual.directive == C._d_teach_invite_conceptual)
+
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:
     raise SystemExit(1)

@@ -51,6 +51,9 @@ MODE_REVEAL = "reveal"
 MODE_REDIRECT = "redirect"              # cold solve -> re-explain, invite a try
 MODE_NEW_QUESTION = "new_question"
 MODE_HINT_EXHAUSTED = "hint_exhausted"   # hint budget used up; no more model calls for hints
+MODE_CONFUSION = "confusion_help"        # child didn't follow the LAST reply about THIS problem
+MODE_CORRECTION = "correction_repair"    # child is rejecting/correcting the LAST reply
+MODE_CLARIFY = "clarify"                 # message too ambiguous to safely act on
 
 # ---- level-tuned thresholds (personalization dial; Step 7 refines wording) --
 # Wrong attempts allowed before we switch to co-solving together.
@@ -335,6 +338,51 @@ def _d_redirect(s: TutorState) -> str:
     )
 
 
+# A child who says they don't understand the LAST reply about THIS problem is
+# not asking for the next rung of the hint ladder (MODE_HINT) and is not
+# giving up (GIVE_UP) -- they want the SAME idea re-explained more simply.
+# Routed here from intent.CONFUSION, kept separate from MODE_HINT so it never
+# consumes the hint budget and never just repeats verbatim.
+_d_confusion = (
+    "For THIS reply: the child says they did not follow your IMMEDIATELY "
+    "PREVIOUS reply about this SAME problem. Do not restart from scratch and "
+    "do not just give a generic hint. First identify, from your own last "
+    "reply, the ONE specific step or idea most likely to be the sticking "
+    "point. Re-explain ONLY that step, more simply (smaller numbers or fewer "
+    "words if that helps), using the SAME facts and numbers as the child's "
+    "actual problem -- do not introduce a different problem. If it is "
+    "genuinely unclear from context what confused them, ask one short, "
+    "specific clarifying question instead of guessing or repeating "
+    "yourself verbatim. No 'Answer:' line."
+)
+
+# The child is rejecting or correcting the tutor's last statement. Routed
+# from intent.CORRECTION; must not defend the previous reply or wander into a
+# new problem.
+_d_correction = (
+    "For THIS reply: the child is correcting or rejecting your last "
+    "response. Do not defend it or repeat it. Re-read what they actually "
+    "said, work out the smallest correction it implies, acknowledge it in "
+    "one short warm sentence, and continue from that corrected "
+    "understanding of the SAME problem. Do not invent a new problem. The "
+    "child has NOT earned the final answer yet just by correcting you -- "
+    "do NOT solve their problem, do NOT show the worked-out steps for "
+    "THEIR number, do NOT write an 'Answer:' line, and do NOT state the "
+    "final numeric answer; go back to gently explaining and inviting them "
+    "to try it, exactly as you would for a freshly started problem."
+)
+
+# The message is too incomplete/ambiguous to safely act on. Routed from
+# intent.CLARIFY; must never invent numbers, retrieve, or verify -- just ask.
+_d_clarify = (
+    "For THIS reply: the child's message is too incomplete or ambiguous to "
+    "safely act on by itself. Do NOT guess a new problem, do NOT invent "
+    "numbers or examples, and do NOT solve anything. In one short, warm "
+    "sentence, ask the ONE specific clarifying question that would let you "
+    "help them with THIS problem."
+)
+
+
 # ---- entry points -----------------------------------------------------------
 def start(question: str, grade: int, level: str = "intermediate",
           computed_answer: str | None = None, is_math: bool = False):
@@ -343,6 +391,38 @@ def start(question: str, grade: int, level: str = "intermediate",
                    computed_answer=computed_answer, is_math=is_math)
     return s, Action(MODE_TEACH_INVITE, _d_teach_invite(s),
                      buttons=list(_BTN_AFTER_INVITE))
+
+
+def start_followup(previous_question: str, question: str, grade: int,
+                   level: str = "intermediate", computed_answer: str | None = None,
+                   is_math: bool = False):
+    """Begin a new problem that the child derived from the PREVIOUS one by
+    changing a value/condition (e.g. "what if it was 150 instead of 136?").
+
+    Functionally a fresh TutorState/episode (its own attempts/hints budget),
+    but the opening directive explicitly names the connection to the previous
+    problem instead of silently acting as if nothing came before -- the gap
+    found live: without this, a mid-value change during an open episode fell
+    through to the intent classifier's ATTEMPT handling and the tutor asked
+    "what answer did you get?" instead of recognising the new problem.
+    Returns (state, action), same contract as start().
+    """
+    s = TutorState(question=question, grade=grade, level=level,
+                   computed_answer=computed_answer, is_math=is_math)
+    if not is_math:
+        return s, Action(MODE_TEACH_INVITE, _d_teach_invite_conceptual,
+                         buttons=list(_BTN_AFTER_INVITE))
+    directive = (
+        f"For THIS reply: the child has changed the previous problem "
+        f"(\"{previous_question}\") into a new one (\"{question}\"). In one "
+        "short sentence, acknowledge what they changed and how it connects "
+        "to the previous problem. Then continue exactly as you would for a "
+        "fresh problem: gently explain the idea in a few warm, plain "
+        "sentences (NO numbered steps), and invite the child to try THIS "
+        "version themselves. Do NOT solve it and do NOT reveal the final "
+        "answer."
+    )
+    return s, Action(MODE_TEACH_INVITE, directive, buttons=list(_BTN_AFTER_INVITE))
 
 
 def step(state: TutorState, intent: str, turn: str | None = None):
@@ -371,6 +451,23 @@ def step(state: TutorState, intent: str, turn: str | None = None):
 
     if intent == "SOLVE":
         return _handle_solve(state)
+
+    # Conversational repair intents -- deliberately do NOT touch
+    # attempts/hints_given/phase. These are not graded attempts and must not
+    # consume the hint budget or end the episode; see docstrings on the
+    # _d_confusion/_d_correction/_d_clarify directives above for why each is
+    # kept distinct from MODE_HINT/ATTEMPT.
+    if intent == "CONFUSION":
+        buttons = _BTN_AFTER_WRONG if state.attempts else _BTN_AFTER_INVITE
+        return state, Action(MODE_CONFUSION, _d_confusion, buttons=list(buttons))
+
+    if intent == "CORRECTION":
+        return state, Action(MODE_CORRECTION, _d_correction,
+                             buttons=list(_BTN_AFTER_INVITE))
+
+    if intent == "CLARIFY":
+        return state, Action(MODE_CLARIFY, _d_clarify,
+                             buttons=list(_BTN_AFTER_INVITE))
 
     # ATTEMPT (and anything unrecognised) -> treat as an attempt
     return _handle_attempt(state, turn)

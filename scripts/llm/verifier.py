@@ -12,7 +12,15 @@ Jobs (compute/check unchanged in spirit; solve() drives the compute-first path):
                                            quotient+remainder). Skip strict verify.
                           (None, False) -> conceptual; not a computation.
   check(question, model_output, computed_value=None)
-                     -> post-generation consistency gate.
+                     -> post-generation consistency gate against the
+                        STUDENT'S problem's trusted answer (only the modes
+                        that inject a computed_answer call this).
+  check_self_consistency(text)
+                     -> bounded guardrail for every OTHER mode (teach_invite,
+                        redirect, hints, diagnose_wrong, ...): the model is
+                        free to invent its own illustrative numbers there,
+                        and nothing else checks whether ITS OWN arithmetic in
+                        that example actually adds up.
 
 Tier A hardening (from live testing):
   * max_tokens raised so reasoning tokens can't truncate the expression
@@ -330,6 +338,47 @@ def check(question: str, model_output: str, extract_fn=None,
     match = _close(truth, model_val)
     note = "answer matches the computation" if match else "answer disagrees with the computation"
     return _result(True, bool(match), str(truth), str(model_val), note)
+
+
+# Bounded guardrail for numbers the model invents ITSELF outside the
+# student's own problem -- e.g. a worked example with made-up numbers in a
+# broad teach_invite/redirect reply, or a demonstration inside a hint. The
+# main compute-first/inject path only ever checks the student's problem; it
+# has no opinion on a self-chosen example the model picks to illustrate a
+# method. This does not re-derive what the "right" example should be (that
+# would need a new extraction mechanism); it only checks that whatever
+# equation the model DID write down is internally consistent, independent of
+# which mode produced it. Deliberately conservative: a statement this regex
+# can't confidently parse is skipped, not flagged, so noisy prose/text with
+# words between the numbers never produces a false alarm.
+_SELF_CONSISTENCY_EQ_RE = re.compile(
+    r"(?<![\w.])(\d+(?:\.\d+)?(?:\s*[+\-*/]\s*\d+(?:\.\d+)?)+)\s*=\s*"
+    r"([-+]?\d+(?:\.\d+)?|[-+]?\d+\s*/\s*\d+)"
+)
+
+
+def check_self_consistency(text: str) -> list[dict]:
+    """Scan free text for explicit "A op B = C" arithmetic statements the
+    model wrote itself and verify each one independently with sympy.
+
+    Returns a list of mismatches (empty if every stated equation checks out,
+    or none were found) — each item: {"statement", "computed", "stated"}.
+    Never raises; an unparsable operand is skipped, not reported.
+    """
+    mismatches = []
+    for m in _SELF_CONSISTENCY_EQ_RE.finditer(text or ""):
+        lhs_str, rhs_str = m.group(1), m.group(2)
+        lhs_val = _safe_eval(lhs_str)
+        rhs_val = _safe_eval(re.sub(r"\s+", "", rhs_str))
+        if lhs_val is None or rhs_val is None:
+            continue
+        if not _close(lhs_val, rhs_val):
+            mismatches.append({
+                "statement": f"{lhs_str.strip()} = {rhs_str.strip()}",
+                "computed": str(lhs_val),
+                "stated": str(rhs_val),
+            })
+    return mismatches
 
 
 def _result(verifiable, match, computed, model_value, note) -> dict:

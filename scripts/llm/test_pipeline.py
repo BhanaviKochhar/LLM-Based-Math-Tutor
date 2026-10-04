@@ -8,7 +8,8 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 """
 from __future__ import annotations
 
-from . import hints, intent, llm_client, pipeline, response_parser, student_tracker, verifier
+from . import (conversation_resolver, hints, intent, llm_client, pipeline,
+              response_parser, student_tracker, verifier)
 
 _passed = 0
 _failed = 0
@@ -411,47 +412,114 @@ def test_student_tracker_atomic_save() -> None:
 def test_intent_keyword_fallback() -> None:
     """scripts/llm/intent.py's deterministic keyword fallback
     (_keyword_guess) -- previously had zero test coverage anywhere in this
-    project. Specifically regression-tests the "I don't understand" ->
-    GIVE_UP misrouting found during a live manual walkthrough: the module's
-    own _SYSTEM prompt used to list "don't understand" as a GIVE_UP trigger,
-    so a confused-but-still-engaged child was sent straight to a terminal
-    co-solve reveal instead of getting another hint. Fixed by moving
-    confusion phrasing to HINT (checked before GIVE_UP) in both the system
-    prompt and this keyword fallback; this test covers the fallback, which
-    is fully deterministic and needs no LLM call."""
-    print("intent._keyword_guess -- confusion vs genuine give-up")
+    project. Regression-tests two generations of the same underlying issue:
 
-    check("'I dont understand' -> HINT, not GIVE_UP (the live-observed bug)",
-         intent._keyword_guess("I dont understand") == "HINT")
-    check("\"I don't understand\" (apostrophe) -> HINT",
-         intent._keyword_guess("I don't understand this one") == "HINT")
-    check("'I dont get it' -> HINT",
-         intent._keyword_guess("I dont get it") == "HINT")
-    check("'confused' alone -> HINT",
-         intent._keyword_guess("wait, I'm confused") == "HINT")
+    1. (Original fix) "I don't understand" must not resolve to GIVE_UP: a
+       confused-but-still-engaged child is not quitting.
+    2. (This stabilization pass) Confusion about the tutor's last explanation
+       is now its OWN label, CONFUSION, distinct from HINT -- a child who
+       says "I don't understand" wants the SAME idea re-explained, not the
+       next rung of a hint ladder (see controller._d_confusion and
+       intent.py's module docstring). "I cant understand" (no apostrophe)
+       used to be a documented, accepted gap that fell through to GIVE_UP;
+       it is now folded into the same CONFUSION keyword list and no longer a
+       gap.
+    """
+    print("intent._keyword_guess -- confusion vs hint vs genuine give-up")
+
+    check("'I dont understand' -> CONFUSION, not GIVE_UP or HINT",
+         intent._keyword_guess("I dont understand") == "CONFUSION")
+    check("\"I don't understand\" (apostrophe) -> CONFUSION",
+         intent._keyword_guess("I don't understand this one") == "CONFUSION")
+    check("'I dont get it' -> CONFUSION",
+         intent._keyword_guess("I dont get it") == "CONFUSION")
+    check("'confused' alone -> CONFUSION",
+         intent._keyword_guess("wait, I'm confused") == "CONFUSION")
     check("genuine give-up phrasing is still GIVE_UP, unaffected by this fix",
          intent._keyword_guess("I dont know, this is too hard") == "GIVE_UP")
     check("'I cant do it' is still GIVE_UP",
          intent._keyword_guess("i cant do it") == "GIVE_UP")
-    # NOTE: "I can't understand X" does NOT match this fallback's "dont
-    # understand"/"don't understand" phrases (it says "can't", not
-    # "don't"/"dont") and so still falls through to GIVE_UP via "can't" --
-    # a known, accepted gap in the deterministic fallback specifically,
-    # left unbroadened because a bare "understand" keyword would risk a
-    # worse false positive (e.g. "I understand now, let me try" containing
-    # "understand" with the OPPOSITE meaning). The live LLM classifier (the
-    # primary path; this fallback only runs if that call fails) has the
-    # updated _SYSTEM prompt's explicit guidance for this nuance instead.
-    check("'I cant understand' (without an apostrophe-don't) is a known, "
-         "accepted fallback gap -- still resolves to GIVE_UP via 'cant', "
-         "not broadened here to avoid a worse false positive elsewhere",
-         intent._keyword_guess("I cant understand this at all") == "GIVE_UP")
-    check("an ordinary hint request is still HINT (unaffected)",
+    check("'I cant understand' (without an apostrophe-don't) now resolves to "
+         "CONFUSION -- the previously-documented fallback gap is closed",
+         intent._keyword_guess("I cant understand this at all") == "CONFUSION")
+    check("an ordinary hint request is still HINT, not CONFUSION (unaffected)",
          intent._keyword_guess("give me a hint please") == "HINT")
     check("a plain SOLVE request is still SOLVE (unaffected)",
          intent._keyword_guess("just show me how") == "SOLVE")
     check("a bare attempt number still falls through to ATTEMPT",
          intent._keyword_guess("42") == "ATTEMPT")
+    check("a bare rejection resolves to CORRECTION via the prefilter",
+         intent._prefilter("no") == "CORRECTION")
+    check("'that's wrong' resolves to CORRECTION via the prefilter",
+         intent._prefilter("that's wrong") == "CORRECTION")
+    check("CORRECTION is checked before CONFUSION/GIVE_UP in the keyword list",
+         intent._keyword_guess("thats wrong") == "CORRECTION")
+
+
+# ----------------------------------------------------- conversation_resolver
+def test_conversation_resolver_deterministic_paths() -> None:
+    """Pure, no-LLM-call paths of conversation_resolver.resolve_question:
+    the "X instead of Y" grammar rule, the bare-correction regex, the
+    no-previous-turn NEW default, and (this stabilization pass) that the
+    router's own system prompt is parameterized by the REAL grade instead of
+    a hardcoded "Class 3" -- found hardcoded during the architecture audit
+    (Problem 1: grade must propagate into conversational routing, not just
+    retrieval/verifier/prompt)."""
+    print("conversation_resolver — deterministic routing paths")
+
+    prior = [{"role": "user", "content": "What is 245 + 136?"},
+             {"role": "assistant", "content": "Let's work through it..."}]
+
+    r = conversation_resolver.resolve_question(
+        "what if it was plus 150 instead of 136?", prior)
+    check("'X instead of Y' resolves deterministically, no LLM call",
+         r.mode == "MATH_FOLLOWUP" and r.resolved_question == "245 + 150"
+         and r.confidence == 1.0)
+
+    r_no_prev = conversation_resolver.resolve_question("What is 5 + 5?", None)
+    check("no previous turn -> NEW by default, no LLM call",
+         r_no_prev.mode == "NEW" and r_no_prev.use_rag and r_no_prev.use_verifier)
+
+    r_correction = conversation_resolver.resolve_question("no", prior)
+    check("a bare rejection resolves to CORRECTION deterministically",
+         r_correction.mode == "CORRECTION" and not r_correction.use_rag
+         and not r_correction.use_verifier)
+
+    r_empty = conversation_resolver.resolve_question("", prior)
+    check("empty input -> FRAGMENT, not a crash", r_empty.mode == "FRAGMENT")
+
+    rendered = conversation_resolver._ROUTER_SYSTEM_TEMPLATE.replace("{grade}", "4")
+    check("the router's system prompt is parameterized by grade, not "
+         "hardcoded to Class 3",
+         "Class 4" in rendered and "Class 3" not in rendered)
+
+
+# ------------------------------------------------- verifier.check_self_consistency
+def test_verifier_self_consistency_guardrail() -> None:
+    """Bounded guardrail (Problem 10): checks arithmetic the MODEL invents on
+    its own (e.g. a worked example in a broad teach_invite/redirect reply),
+    independent of whichever mode produced it and independent of the
+    student's own trusted answer. Must be conservative -- skip, not flag,
+    anything it can't confidently parse."""
+    print("verifier — self-consistency guardrail for self-made examples")
+
+    check("a correct self-made equation -> no issues",
+         verifier.check_self_consistency("First 4 + 4 = 8, then 8 + 4 = 12.") == [])
+    check("no equation at all -> no issues",
+         verifier.check_self_consistency("Let's think about this together.") == [])
+
+    bad = verifier.check_self_consistency("So 7 + 5 = 13, write 3 carry 1.")
+    check("a wrong self-made equation is caught",
+         len(bad) == 1 and bad[0]["computed"] == "12" and bad[0]["stated"] == "13")
+
+    multi = verifier.check_self_consistency(
+        "9 - 3 = 6 is correct, but 2 * 2 = 5 is wrong.")
+    check("multiple equations are each checked independently",
+         len(multi) == 1 and multi[0]["statement"] == "2 * 2 = 5")
+
+    check("the trusted-answer 'Answer:' line format is not mistaken for a "
+         "self-made equation (no operator before '=')",
+         verifier.check_self_consistency("Answer: 42") == [])
 
 
 def main() -> None:
@@ -465,6 +533,8 @@ def main() -> None:
     test_client_skips_missing_keys()
     test_hints_and_levels()
     test_intent_keyword_fallback()
+    test_conversation_resolver_deterministic_paths()
+    test_verifier_self_consistency_guardrail()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

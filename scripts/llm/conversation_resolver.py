@@ -35,7 +35,7 @@ MODES = {
     "FRAGMENT",
 }
 
-_ROUTER_SYSTEM = """You are a conversation router for a Class 3 maths tutor.
+_ROUTER_SYSTEM_TEMPLATE = """You are a conversation router for a Class {grade} maths tutor.
 Your job is to understand the CHILD'S CURRENT MESSAGE in the context of the
 recent conversation. Do not solve maths and do not write a tutor answer.
 
@@ -230,7 +230,8 @@ def _normalise(obj: dict, original: str) -> Resolution | None:
     )
 
 
-def _llm_route(question: str, active_turns: list[dict] | None) -> Resolution | None:
+def _llm_route(question: str, active_turns: list[dict] | None,
+               grade: int = 3) -> Resolution | None:
     from . import llm_client
 
     turns = _recent_turns(active_turns)
@@ -239,7 +240,10 @@ def _llm_route(question: str, active_turns: list[dict] | None) -> Resolution | N
     ) or "(no previous conversation)"
 
     messages = [
-        {"role": "system", "content": _ROUTER_SYSTEM},
+        # Plain substring replace, not str.format(): the template's JSON
+        # schema example below is full of literal { }, which .format() would
+        # try (and fail) to parse as format fields.
+        {"role": "system", "content": _ROUTER_SYSTEM_TEMPLATE.replace("{grade}", str(grade))},
         {
             "role": "user",
             "content": (
@@ -259,6 +263,7 @@ def _llm_route(question: str, active_turns: list[dict] | None) -> Resolution | N
 def resolve_question(
     question: str,
     active_turns: list[dict] | None = None,
+    grade: int = 3,
 ) -> Resolution:
     original = (question or "").strip()
     if not original:
@@ -306,7 +311,7 @@ def resolve_question(
         )
 
     try:
-        routed = _llm_route(original, active_turns)
+        routed = _llm_route(original, active_turns, grade=grade)
     except Exception:
         routed = None
 
