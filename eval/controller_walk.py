@@ -145,6 +145,95 @@ s, a = C.start("q", 3, "intermediate", computed_answer="56", is_math=True)
 graduated = C.graduate_if_computable(s, "Try this too: what is 2 + 2?")
 check("already-math episode untouched", not graduated and s.computed_answer == "56")
 
+# 15) hint lifecycle: state-driven numbering, progression, exhaustion, and
+# idempotent repeated clicks after exhaustion. Previously untested: the
+# prior "min(hints_given, 3)" cap had no exhaustion state at all, so every
+# click past the 3rd silently re-requested the model for "Hint 3 of 3"
+# forever (see controller.MODE_HINT_EXHAUSTED).
+scenario("15. hint lifecycle: H1 -> H2 -> H3 -> exhausted -> repeated click is idempotent")
+s, a = C.start("What is 56 - 29?", 3, "intermediate", computed_answer="27", is_math=True)
+s, a = C.step(s, "HINT")
+check("Hint 1: mode=hint, hint_number=1 (state-driven, not LLM-chosen)",
+     a.mode == C.MODE_HINT and a.hint_number == 1 and s.hints_given == 1)
+s, a = C.step(s, "HINT")
+check("Hint 2: hint_number=2", a.mode == C.MODE_HINT and a.hint_number == 2 and s.hints_given == 2)
+s, a = C.step(s, "HINT")
+check("Hint 3: hint_number=3 (== MAX_HINTS)",
+     a.mode == C.MODE_HINT and a.hint_number == 3 and s.hints_given == C.MAX_HINTS)
+s, a = C.step(s, "HINT")
+check("4th HINT request -> MODE_HINT_EXHAUSTED, not another 'Hint 3' call, "
+     "hints_given does NOT increment past MAX_HINTS",
+     a.mode == C.MODE_HINT_EXHAUSTED and s.hints_given == C.MAX_HINTS)
+check("exhausted buttons drop 'Another hint', offering a real next action instead",
+     "Another hint" not in a.buttons and "Just show me" in a.buttons)
+check("the episode is NOT terminal just because hints are exhausted -- the "
+     "student can still try or ask to be shown",
+     not a.terminal and s.phase == C.AWAITING)
+# Repeated click after exhaustion (simulating a double-submit / rerender):
+# calling step() again on the SAME already-exhausted state must be
+# idempotent, not compound.
+s2, a2 = C.step(s, "HINT")
+check("a second request after exhaustion is still MODE_HINT_EXHAUSTED, and "
+     "hints_given is unchanged (idempotent, not compounding)",
+     a2.mode == C.MODE_HINT_EXHAUSTED and s2.hints_given == C.MAX_HINTS)
+
+scenario("16. hint generation failure does not corrupt hint-count state")
+# A failed generation must not have already incremented hints_given before
+# the caller can roll back -- controller.step() mutates state SYNCHRONOUSLY
+# before any generation call happens (generation is the caller's problem,
+# in frontend/app.py's commit-only-after-success pattern), so this checks
+# the controller side of that contract: hints_given reflects exactly the
+# number of HINT steps actually taken, independent of what the (separate)
+# generation layer does with that hint_number afterward.
+s, a = C.start("What is 12 x 4?", 3, "intermediate", computed_answer="48", is_math=True)
+s, a = C.step(s, "HINT")
+pre_fail_hints_given = s.hints_given
+# Simulate: the caller's generation step for this hint fails and rolls back
+# to a COPY of the state from before this step() call (the actual rollback
+# mechanism lives in frontend/app.py; here we confirm the controller-side
+# invariant the rollback depends on -- hint_number is a pure function of
+# hints_given, so retrying the identical state produces the identical
+# hint_number, not a skipped or duplicated one).
+import copy as _copy
+retry_state = _copy.copy(s)
+retry_state.hints_given -= 1  # what frontend/app.py's rollback restores to
+s_retry, a_retry = C.step(retry_state, "HINT")
+check("retrying after a simulated generation failure reproduces the SAME "
+     "hint_number, not the next one (no hint silently skipped or double-counted)",
+     a_retry.hint_number == a.hint_number == pre_fail_hints_given)
+
+scenario("17. broad-method vs specific-problem teaching directive selection")
+# A broad method/concept question ("Addition of 3 digit") has is_math=False
+# (nothing for verifier.compute() to extract) and must get the worked-
+# example directive, not the withhold-and-invite one that's correct for a
+# SPECIFIC computable problem. See controller._d_teach_invite_conceptual.
+s_broad, a_broad = C.start("Addition of 3 digit", 3, "intermediate",
+                           computed_answer=None, is_math=False)
+check("broad method question -> the worked-example directive variant is used",
+     a_broad.directive == C._d_teach_invite_conceptual)
+check("the worked-example directive actually asks for real steps, not just an analogy",
+     "step by step" in a_broad.directive and "ONE complete worked example" in a_broad.directive)
+
+s_specific, a_specific = C.start("What is 245 + 136?", 3, "intermediate",
+                                 computed_answer="381", is_math=True)
+check("a specific computable problem -> the withhold-and-invite directive variant is used",
+     a_specific.directive == C._d_teach_invite_specific)
+check("directives differ between the two cases (not the same text for both)",
+     a_broad.directive != a_specific.directive)
+
+scenario("18. 'Show me how' (cold SOLVE) directive also distinguishes broad vs specific")
+s_broad2, a_broad2 = C.step(s_broad, "SOLVE")
+check("cold 'Show me how' on a broad method question -> honoured directly with "
+     "the SAME worked-example directive (no answer to protect, so no redirect gate)",
+     a_broad2.mode == C.MODE_REDIRECT and a_broad2.directive == C._d_teach_invite_conceptual)
+
+s_specific2, a_specific2 = C.step(s_specific, "SOLVE")
+check("cold 'Show me how' on a specific problem -> still redirected (protects "
+     "THIS problem's answer), but now requires an actual worked different-numbers example",
+     a_specific2.mode == C.MODE_REDIRECT
+     and "DIFFERENT numbers" in a_specific2.directive
+     and "381" not in a_specific2.directive)
+
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:
     raise SystemExit(1)

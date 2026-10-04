@@ -113,13 +113,33 @@ def report_question_to_expression_plan(items: list[dict]) -> dict:
     }
 
 
+def _normalize_expr(s: str) -> str:
+    """Whitespace-insensitive form for string comparison -- the model
+    reliably writes "2 + 3" with spaces around operators; the dataset's
+    expected_expression is written "2+3" without them. These are the SAME
+    expression, not a mismatch, and conflating the two was a real bug
+    caught by actually running this live (see docs/tutoring_fixes_and_limitations.md):
+    the very first live run reported exact_match=3/14 purely from this
+    string-formatting difference, not from genuine extraction failures."""
+    import re as _re
+    return _re.sub(r"\s+", "", s or "")
+
+
 def run_question_to_expression(items: list[dict]) -> dict:
     """ACTUALLY CALLS THE LIVE LLM EXTRACTOR. Only invoked when the caller
-    has explicitly confirmed (CLI --live-confirm or live_confirm=True)."""
+    has explicitly confirmed (CLI --live-confirm or live_confirm=True).
+
+    Three distinct comparisons, never conflated into one "accuracy":
+      exact_match       -- raw string equality (strictest; whitespace-sensitive)
+      normalized_match   -- equality after stripping whitespace (catches "2 + 3" vs "2+3")
+      value_equivalent_match -- both expressions evaluate to the same value via
+                            verifier._safe_eval/_close (catches e.g. "7*2" vs "2*7")
+    """
     from scripts.llm import verifier
 
     rows = [i for i in items if i["stage"] == "question_to_expression"]
-    per_example, n_exact, n_equiv, n_parse_ok, n_error = [], 0, 0, 0, 0
+    per_example = []
+    n_exact = n_normalized = n_value_equiv = n_parse_ok = n_error = 0
     for item in rows:
         try:
             comp = verifier.compute(item["input"])
@@ -128,29 +148,44 @@ def run_question_to_expression(items: list[dict]) -> dict:
             n_error += 1
             continue
         expected_expr = item.get("expected_expression")
-        equivalents = set(item.get("expected_expression_equivalents", []))
+        equivalents = item.get("expected_expression_equivalents", [])
         got_expr = comp.expression if comp.verifiable else "NONE"
+
         exact = (got_expr == expected_expr) or (expected_expr is None and got_expr == "NONE")
-        equiv = exact or (got_expr in equivalents)
+        normalized = exact or (
+            expected_expr is not None
+            and _normalize_expr(got_expr) == _normalize_expr(expected_expr)
+        ) or any(_normalize_expr(got_expr) == _normalize_expr(e) for e in equivalents)
+
+        value_equiv = normalized
+        if not value_equiv and expected_expr is not None and got_expr != "NONE":
+            got_val = verifier._safe_eval(got_expr)
+            exp_val = verifier._safe_eval(expected_expr)
+            if got_val is not None and exp_val is not None:
+                value_equiv = verifier._close(got_val, exp_val)
+
         parse_ok = comp.verifiable or expected_expr is None
         if exact:
             n_exact += 1
-        if equiv:
-            n_equiv += 1
+        if normalized:
+            n_normalized += 1
+        if value_equiv:
+            n_value_equiv += 1
         if parse_ok:
             n_parse_ok += 1
         per_example.append({
             "case_id": item["case_id"], "got_expression": got_expr,
             "expected_expression": expected_expr, "exact_match": exact,
-            "equivalent_match": equiv, "has_distractor_numbers":
-            item.get("has_distractor_numbers", False),
+            "normalized_match": normalized, "value_equivalent_match": value_equiv,
+            "has_distractor_numbers": item.get("has_distractor_numbers", False),
         })
     n = len(rows)
     return {
         "stage": "question_to_expression", "live_llm_used": True,
         "total_items": n,
         "exact_match": {"numerator": n_exact, "denominator": n, "rate": round(n_exact / n, 4) if n else None},
-        "accepted_equivalent_match": {"numerator": n_equiv, "denominator": n, "rate": round(n_equiv / n, 4) if n else None},
+        "normalized_match": {"numerator": n_normalized, "denominator": n, "rate": round(n_normalized / n, 4) if n else None},
+        "value_equivalent_match": {"numerator": n_value_equiv, "denominator": n, "rate": round(n_value_equiv / n, 4) if n else None},
         "parse_success": {"numerator": n_parse_ok, "denominator": n, "rate": round(n_parse_ok / n, 4) if n else None},
         "errors": n_error,
         "per_example": per_example,

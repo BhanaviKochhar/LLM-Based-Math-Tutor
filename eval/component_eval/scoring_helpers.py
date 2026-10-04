@@ -74,8 +74,17 @@ def score_trusted_computation(item: dict) -> dict:
     if not te:
         return {"outcome": "error", "computed": None,
                "detail": "no trusted_expression; use classify_item() first"}
+    # Pass the item's real natural-language `question` (not just the bare
+    # expression) as solve()'s `question` argument -- verifier.solve now
+    # uses that text to tell a fraction/decimal-conversion question (e.g.
+    # "Convert 7/20 to a decimal") apart from a genuine non-exact-division
+    # word problem when the trusted_expression is bare "int/int" shaped.
+    # extract_fn still forces the KNOWN-GOOD expression regardless of what's
+    # passed positionally, so this only changes what the gating logic sees,
+    # not what gets "extracted".
+    question_text = item.get("question") or te
     try:
-        answer, is_math = verifier.solve(te, extract_fn=lambda q: te)
+        answer, is_math = verifier.solve(question_text, extract_fn=lambda q: te)
     except Exception as e:
         return {"outcome": "error", "computed": None, "detail": repr(e)}
 

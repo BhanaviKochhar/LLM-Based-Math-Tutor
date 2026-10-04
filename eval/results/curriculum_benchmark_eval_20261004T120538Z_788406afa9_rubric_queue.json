@@ -1,0 +1,565 @@
+{
+  "source_result": "curriculum_benchmark_eval_20261004T120538Z_788406afa9.json",
+  "items": [
+    {
+      "case_id": "cb-002",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Why does a ball roll easily in any direction?",
+      "expected_key_idea": "A ball (sphere) is round all over with no flat sides or corners, so it can roll smoothly in any direction."
+    },
+    {
+      "case_id": "cb-003",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Can two circles be different sizes but both still be circles? Explain.",
+      "expected_key_idea": "Yes -- 'circle' describes the SHAPE (perfectly round, no corners), not a fixed size; a small circle and a large circle are both still circles."
+    },
+    {
+      "case_id": "cb-004",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a rectangle.",
+      "expected_key_idea": "Any genuinely rectangular household object (e.g. a book, a door, a table top)."
+    },
+    {
+      "case_id": "cb-005",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "question": "What shape is the student describing?",
+      "expected_key_idea": "The description is self-contradictory for one simple primary shape (round AND four straight sides at once); the tutor should ask the student to clarify or re-describe rather than guess a shape name."
+    },
+    {
+      "case_id": "cb-009",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "conceptual",
+      "question": "Why do we say there are 'zero' apples when a basket is empty, instead of saying there is no number at all?",
+      "expected_key_idea": "Zero means there is nothing/none; it is still a valid number representing an empty count, not the absence of a number."
+    },
+    {
+      "case_id": "cb-019",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "conceptual",
+      "question": "Why do we write 10 using the digits 1 and 0, instead of a brand-new symbol?",
+      "expected_key_idea": "Place value: the 1 stands for one group of ten and the 0 stands for zero extra ones; reusing digits with place value lets us write any number without needing a new symbol for every number."
+    },
+    {
+      "case_id": "cb-023",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "comparison",
+      "question": "Is 1, 2, 4, 8 an ascending (increasing) pattern? How can you tell?",
+      "expected_key_idea": "Yes -- each number in the sequence is bigger than the one before it."
+    },
+    {
+      "case_id": "cb-025",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "question": "Is the student's stated rule correct for this pattern?",
+      "expected_key_idea": "No -- the actual rule is 'add 2 each time', not 'add 1'; point out the specific gap (e.g. 4-2=2, not 1) using the student's own numbers rather than a generic correction."
+    },
+    {
+      "case_id": "cb-026",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is longer: your arm or your little finger?",
+      "expected_key_idea": "The arm is longer."
+    },
+    {
+      "case_id": "cb-027",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "Why might you and a friend measure the same table with handspans and get different numbers?",
+      "expected_key_idea": "A handspan (a non-standard unit) is a different size for different people, so the resulting count differs even though the table's real length didn't change."
+    },
+    {
+      "case_id": "cb-028",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "Name something you would describe as 'heavier' or 'lighter' rather than count with a number.",
+      "expected_key_idea": "Any sensible example comparing weight rather than count, e.g. a bag of rice vs a bag of cotton."
+    },
+    {
+      "case_id": "cb-030",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "misconception",
+      "question": "Does the differing handspan count mean the book's size changed?",
+      "expected_key_idea": "No -- the book's real size didn't change; handspans differ in size from person to person, so the COUNT differs even though the actual length is the same."
+    },
+    {
+      "case_id": "cb-033",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "real_life",
+      "question": "Name one Indian coin from this list: Rs.1, Rs.2, Rs.5, Rs.10.",
+      "expected_key_idea": "Any one of Rs.1, Rs.2, Rs.5, Rs.10 is a valid answer."
+    },
+    {
+      "case_id": "cb-034",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "conceptual",
+      "question": "Why do we count carefully (e.g. one by one) before answering 'how many toys are there' in a picture?",
+      "expected_key_idea": "Careful counting (e.g. with tally marks or pointing to each item) avoids missing or double-counting items in a picture."
+    },
+    {
+      "case_id": "cb-037",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "conceptual",
+      "question": "What is the difference between a straight line and a curved line? Give one example of each.",
+      "expected_key_idea": "A straight line does not bend (e.g. the edge of a ruler); a curved line bends (e.g. the edge of a circle)."
+    },
+    {
+      "case_id": "cb-038",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "Name one object shaped like a cylinder.",
+      "expected_key_idea": "Any genuinely cylindrical object, e.g. a pipe, a candle, a tin can."
+    },
+    {
+      "case_id": "cb-039",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "question": "A cube and a cuboid both have 6 faces and straight edges. What is one way to tell them apart?",
+      "expected_key_idea": "A cube has all 6 faces the same size (squares); a cuboid's faces can be rectangles of different sizes."
+    },
+    {
+      "case_id": "cb-040",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "misconception",
+      "question": "Is the student's identification of a ball as a circle correct?",
+      "expected_key_idea": "No -- a ball is a sphere (a solid 3D shape), not a circle (a flat 2D shape); they look similar from one angle, but a circle is flat and a sphere is not."
+    },
+    {
+      "case_id": "cb-044",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "conceptual",
+      "question": "Why is 90 greater than 19, even though both numbers contain the digit 9?",
+      "expected_key_idea": "Place value: in 90 the 9 is in the TENS place (worth 90); in 19 the 9 is in the ONES place (worth 9). Position, not just the digit, decides value."
+    },
+    {
+      "case_id": "cb-053",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Why might two people measuring the same wall with their own footsteps get different answers?",
+      "expected_key_idea": "Footsteps (a non-standard unit) differ in length from person to person."
+    },
+    {
+      "case_id": "cb-055",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "Is a heavier object always bigger in size than a lighter one? Give an example to support your answer.",
+      "expected_key_idea": "No -- e.g. a small stone can be heavier than a large balloon; size and weight are different properties."
+    },
+    {
+      "case_id": "cb-058",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "real_life",
+      "question": "Name one season you would expect heavy rain in, in most of India.",
+      "expected_key_idea": "The monsoon / rainy season."
+    },
+    {
+      "case_id": "cb-060",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "Why does a calendar have 12 separate sections for months instead of one long list of days?",
+      "expected_key_idea": "Grouping days into 12 months makes it easier to track dates, seasons, and events across a year."
+    },
+    {
+      "case_id": "cb-063",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "Why do we use tally marks instead of writing the running number directly while counting a long list of items?",
+      "expected_key_idea": "Tally marks let you keep an accurate count while looking at items one at a time, reducing counting errors, before converting to a final total."
+    },
+    {
+      "case_id": "cb-064",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "In a block diagram, if the bar for 'cats' is taller than the bar for 'dogs', what does that tell you?",
+      "expected_key_idea": "There are more cats than dogs in the data being shown."
+    },
+    {
+      "case_id": "cb-065",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "misconception",
+      "question": "Is it correct to treat a group of 4 tally marks as worth 5?",
+      "expected_key_idea": "Not automatically -- a group should only be counted as 5 if it actually has 5 marks (often shown with a diagonal slash through 4 verticals). A plain group of 4 marks is worth 4, not 5."
+    },
+    {
+      "case_id": "cb-069",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "conceptual",
+      "question": "Why is 100 the smallest 3-digit number, and not something like 099?",
+      "expected_key_idea": "A leading zero is not written in standard number form; numbers are written without unnecessary leading zeros, so the smallest 3-digit number must start with 1 in the hundreds place."
+    },
+    {
+      "case_id": "cb-084",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "question": "Share 23 pencils equally among 5 students. How many does each get, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-085",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "misconception",
+      "question": "Is it correct that the leftover cookie should go entirely to one friend, making their share 5?",
+      "expected_key_idea": "No -- in standard equal sharing, each friend gets the same whole-number share (4 each); the 1 leftover cookie remains unshared/set aside rather than being given whole to just one friend."
+    },
+    {
+      "case_id": "cb-086",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "What does it mean for a shape to have a 'line of symmetry'?",
+      "expected_key_idea": "A line along which the shape can be folded so both halves match exactly (mirror halves)."
+    },
+    {
+      "case_id": "cb-087",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "question": "Does a square have more lines of symmetry than a non-square rectangle? Explain.",
+      "expected_key_idea": "Yes -- a square has 4 lines of symmetry (2 diagonals + 2 through side midpoints); a non-square rectangle has only 2 (through the midpoints of its longer and shorter sides)."
+    },
+    {
+      "case_id": "cb-088",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "Name one everyday object or letter of the alphabet that has a line of symmetry.",
+      "expected_key_idea": "Any genuinely symmetric example, e.g. the letter 'A', a butterfly, a heart shape."
+    },
+    {
+      "case_id": "cb-089",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "What is a 'net' of a 3D shape?",
+      "expected_key_idea": "A flat (2D) pattern that can be folded up to form the 3D shape, e.g. a cube unfolded into 6 connected squares."
+    },
+    {
+      "case_id": "cb-090",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "misconception",
+      "question": "Is it true that every shape has at least one line of symmetry?",
+      "expected_key_idea": "No -- some shapes, like a general scalene triangle or an irregular/lopsided shape, have no line of symmetry at all."
+    },
+    {
+      "case_id": "cb-093",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "question": "Which is heavier: 1 kilogram of cotton or 1 kilogram of iron?",
+      "expected_key_idea": "They weigh the same (1 kg each); the material differs in density (how much space it takes up for that weight), not in the stated weight."
+    },
+    {
+      "case_id": "cb-094",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "question": "Why do we use standard units like centimetres and kilograms instead of handspans and footsteps as we get older?",
+      "expected_key_idea": "Standard units are the same for everyone everywhere, so measurements can be compared accurately and fairly between different people and places."
+    },
+    {
+      "case_id": "cb-100",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "conceptual",
+      "question": "Why is 'quarter past 3' written as 3:15 and not 3:25?",
+      "expected_key_idea": "A quarter of an hour (60 minutes) is 15 minutes, not 25; 'quarter past' means 15 minutes after the hour."
+    },
+    {
+      "case_id": "cb-104",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "conceptual",
+      "question": "Why does adding a zero at the END of 999 (making 9990) change its value a lot, while adding a zero in FRONT of 999 (0999) doesn't change its value at all?",
+      "expected_key_idea": "A trailing zero shifts every existing digit one place higher (multiplies by 10); a leading zero before the first significant digit adds no new place value."
+    },
+    {
+      "case_id": "cb-109",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "conceptual",
+      "question": "Explain, in your own words, what the 'remainder' means when you do a long division like 97 / 8.",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-112",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "conceptual",
+      "question": "Explain why 2/4 and 1/2 represent the same amount even though they look like different fractions.",
+      "expected_key_idea": "Both describe the same portion of a whole; 2/4 simplifies (divide numerator and denominator by 2) to 1/2 -- they are equivalent fractions."
+    },
+    {
+      "case_id": "cb-113",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "misconception",
+      "question": "Is 1/8 bigger than 1/4?",
+      "expected_key_idea": "No -- with the same numerator, a larger denominator means the whole is split into more, smaller pieces, so 1/8 is actually smaller than 1/4."
+    },
+    {
+      "case_id": "cb-114",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "direct_numerical",
+      "question": "What do we call the distance from the center of a circle to any point on its edge?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-115",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "How is the diameter of a circle related to its radius?",
+      "expected_key_idea": "The diameter is twice the radius (diameter = 2 x radius); it passes through the center, touching the circle on both sides."
+    },
+    {
+      "case_id": "cb-117",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "real_life",
+      "question": "Name one tool used to draw a circle accurately.",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-118",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What is special about every point on the edge of a circle, with respect to the center?",
+      "expected_key_idea": "Every point on the circle's edge is exactly the same distance (the radius) from the center."
+    },
+    {
+      "case_id": "cb-121",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "conceptual",
+      "question": "What is the difference between perimeter and area, in your own words?",
+      "expected_key_idea": "Perimeter is the total length around the boundary of a shape; area is the amount of flat space covered inside it -- they measure different things (a length vs a covered surface)."
+    },
+    {
+      "case_id": "cb-123",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "misconception",
+      "question": "Do a 1x9 rectangle and a 5x5 square -- both with perimeter 20 -- also have the same area?",
+      "expected_key_idea": "No -- both have perimeter 20 cm, but their areas differ: 1x9 = 9 sq cm vs 5x5 = 25 sq cm. Equal perimeter does not guarantee equal area."
+    },
+    {
+      "case_id": "cb-127",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "conceptual",
+      "question": "Why do train timetables use the 24-hour clock format instead of just AM/PM?",
+      "expected_key_idea": "24-hour format avoids confusion between morning and evening times sharing the same clock number (e.g. 3 PM vs 3 AM), since each hour of the day gets a unique number from 0 to 23."
+    },
+    {
+      "case_id": "cb-131",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "question": "Why is a pictograph with a scale (e.g. 1 icon = 10 items) more useful than one icon always meaning exactly 1 item, when the data involves large numbers?",
+      "expected_key_idea": "A scale lets you represent large numbers with fewer icons, keeping the chart compact and readable, instead of needing hundreds of tiny icons."
+    },
+    {
+      "case_id": "cb-133",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "misconception",
+      "question": "Should a half icon be counted as the full scale value?",
+      "expected_key_idea": "No -- a half icon should represent half the scale value (5 items if 1 icon = 10), not the full value; partial icons represent a proportional partial count."
+    },
+    {
+      "case_id": "cb-134",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "direct_numerical",
+      "question": "Write 2,45,678 in words using the Indian place-value system.",
+      "expected_key_idea": "two lakh forty-five thousand six hundred seventy-eight"
+    },
+    {
+      "case_id": "cb-138",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "conceptual",
+      "question": "What is the difference between a 'lakh' and a 'crore' in the Indian numbering system?",
+      "expected_key_idea": "1 lakh = 1,00,000 (one hundred thousand); 1 crore = 1,00,00,000 (ten million) = 100 lakhs."
+    },
+    {
+      "case_id": "cb-142",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "real_life",
+      "question": "Name one everyday object that shows a right angle.",
+      "expected_key_idea": "Any genuine right-angle example, e.g. the corner of a book, a window frame."
+    },
+    {
+      "case_id": "cb-144",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "direct_numerical",
+      "question": "What tool is used to measure an angle accurately, and what unit does it use?",
+      "expected_key_idea": "A protractor, measuring in degrees."
+    },
+    {
+      "case_id": "cb-145",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "misconception",
+      "question": "Does the length of the lines drawn for an angle affect its degree measure?",
+      "expected_key_idea": "No -- the degree measure depends on how much the two rays turn apart (the amount of rotation), not on how long the lines are drawn; a short-armed angle can have a bigger degree measure than a long-armed one."
+    },
+    {
+      "case_id": "cb-147",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "question": "After a half-turn (180 degrees), does a square look the same as before, or different?",
+      "expected_key_idea": "The same -- a square has rotational symmetry, so a 180-degree rotation returns it to an identical-looking position."
+    },
+    {
+      "case_id": "cb-148",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "Name one object or symbol that looks the same after a half-turn (180 degrees).",
+      "expected_key_idea": "Any genuine 180-degree rotational example, e.g. the letter 'S', the letter 'Z', a standard playing card's number pattern."
+    },
+    {
+      "case_id": "cb-150",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "misconception",
+      "question": "Does having a line of symmetry guarantee a shape also has rotational symmetry?",
+      "expected_key_idea": "No -- e.g. a simple arrow or the letter 'A' has a line of symmetry but does not look the same under any rotation less than a full 360-degree turn, so it lacks rotational symmetry."
+    },
+    {
+      "case_id": "cb-151",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "direct_numerical",
+      "question": "List all the factors of 20.",
+      "expected_key_idea": "1, 2, 4, 5, 10, 20"
+    },
+    {
+      "case_id": "cb-153",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "conceptual",
+      "question": "What does it mean for a number to be 'prime'?",
+      "expected_key_idea": "A prime number has exactly two factors: 1 and itself (no other whole number divides it evenly)."
+    },
+    {
+      "case_id": "cb-154",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "comparison",
+      "question": "Is 1 a prime number? Why or why not?",
+      "expected_key_idea": "No -- 1 has only one factor (itself), not two distinct factors, so it does not meet the definition of a prime number."
+    },
+    {
+      "case_id": "cb-156",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "misconception",
+      "question": "Is it true that a number's factors are always smaller than its multiples?",
+      "expected_key_idea": "Generally true for a number N (factors of N are <= N, multiples of N are >= N), but the reasoning matters: factors divide INTO N, while multiples are N added to itself repeatedly (N, 2N, 3N, ...), which is why the two sets behave oppositely in size."
+    },
+    {
+      "case_id": "cb-157",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "comparison",
+      "question": "Which is larger: 0.4 or 0.25?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-159",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "conceptual",
+      "question": "Why does the fraction 3/4 equal the decimal 0.75?",
+      "expected_key_idea": "3/4 means 3 divided by 4; dividing 3 by 4 gives 0.75, and decimals are just another way of writing fractions whose denominators are powers of 10."
+    },
+    {
+      "case_id": "cb-162",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "misconception",
+      "question": "Is 0.5 smaller than 0.25?",
+      "expected_key_idea": "No -- comparing decimals requires looking at place value, not digit count; 0.5 = 0.50, and 50 hundredths is more than 25 hundredths, so 0.5 is actually bigger than 0.25."
+    },
+    {
+      "case_id": "cb-165",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "conceptual",
+      "question": "What does 'volume' measure, and how is it different from 'area'?",
+      "expected_key_idea": "Volume measures the 3D space inside a solid (e.g. how many 1 cm cubes fit inside it); area measures a flat 2D surface -- volume adds a third dimension that area doesn't have."
+    },
+    {
+      "case_id": "cb-168",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "misconception",
+      "question": "Does doubling a square's side length double its area?",
+      "expected_key_idea": "No -- doubling the side of a square QUADRUPLES the area (area depends on side squared), not doubles it; e.g. side 3 has area 9, side 6 has area 36, which is 4 times as much, not 2 times."
+    },
+    {
+      "case_id": "cb-170",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "What does a 'scale' on a map tell us?",
+      "expected_key_idea": "It tells us how a distance measured on the map corresponds to the real/actual distance on the ground, so map measurements can be converted into real-world distances."
+    },
+    {
+      "case_id": "cb-172",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "real_life",
+      "question": "Why might a town planner use a scaled floor plan before building a house, instead of drawing it at full size?",
+      "expected_key_idea": "A scaled drawing fits on paper while still showing accurate proportions, letting the planner check how rooms relate to each other before building at full size."
+    },
+    {
+      "case_id": "cb-174",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "misconception",
+      "question": "Does a scale of '1 cm = 10 km' mean the map is bigger than real life?",
+      "expected_key_idea": "No -- it's the opposite: the map is SMALLER than real life by that scale; 1 cm on the map stands for a much larger 10 km in reality."
+    }
+  ]
+}

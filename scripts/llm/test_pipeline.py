@@ -8,7 +8,7 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 """
 from __future__ import annotations
 
-from . import hints, llm_client, pipeline, response_parser, student_tracker, verifier
+from . import hints, intent, llm_client, pipeline, response_parser, student_tracker, verifier
 
 _passed = 0
 _failed = 0
@@ -195,6 +195,47 @@ def test_verifier_injection_gate() -> None:
     check("division by zero (non-bare shape) -> not computable, never injected",
           solve("5/0+3") == (None, False))
 
+    # Fraction-vs-division disambiguation (see verifier._looks_like_fraction_
+    # conversion). A bare "int/int" expression is genuinely ambiguous on its
+    # own -- the question's own wording is what tells a division word
+    # problem apart from a fraction-value/conversion question. Found via
+    # component evaluation producing real mismatches on ar-020/cb-158
+    # (general phrasing patterns reproduced here, not those literal
+    # dataset rows).
+    def solve_q(question: str, expr: str):
+        return verifier.solve(question, extract_fn=lambda q: expr)
+
+    check("ordinary exact division word problem -> injected as before (unaffected by this fix)",
+          solve_q("Share 36 pencils among 4 students. How many each?", "36/4") == ("9", True))
+    check("ordinary non-exact division word problem -> still withheld (core remainder "
+         "behaviour must survive this fix)",
+          solve_q("Share 20 toffees equally among 3 children.", "20/3") == (None, True))
+    check("fraction-to-decimal conversion ('written as a decimal') -> now injected, "
+         "not withheld",
+          solve_q("What is 3/10 written as a decimal?", "3/10") == ("3/10", True))
+    check("fraction-to-decimal conversion ('convert ... to a decimal') -> now injected",
+          solve_q("Convert 7/20 to a decimal.", "7/20") == ("7/20", True))
+    check("plain fraction-simplification question -> now injected",
+          solve_q("Simplify the fraction 4/8.", "4/8") == ("1/2", True))
+    check("a bare fraction value with no division/decimal wording at all defaults "
+         "to the prior withholding behaviour (ambiguous in the student's favour: "
+         "conservative, not silently guessed)",
+          solve_q("What is 1/3 of 9?", "20/3")[0] is None)
+
+    # KNOWN LIMITATION, documented rather than hidden: this is a wording
+    # heuristic, not a semantic one. A genuine division word problem that
+    # happens to mention "decimal" in an unrelated sense (e.g. rounding
+    # instructions) is misread as a conversion question and gets the
+    # fraction injected when it should still be withheld. Narrowing the
+    # regex further to exclude this one adversarial phrasing risks new
+    # false negatives elsewhere; not attempted here -- see
+    # docs/tutoring_fixes_and_limitations.md.
+    check("KNOWN LIMITATION: a division word problem that happens to mention "
+         "'decimal' in an unrelated sense (rounding instructions) is "
+         "incorrectly treated as a conversion question",
+          solve_q("Share 45 rupees among 8 people. Round to 2 decimal places if needed.",
+                  "45/8") == ("45/8", True))
+
 
 # ------------------------------------------------------- verifier check (no LLM)
 def test_verifier_check() -> None:
@@ -366,6 +407,53 @@ def test_student_tracker_atomic_save() -> None:
         student_tracker.STORE = orig_store
 
 
+# -------------------------------------------- intent keyword-fallback routing
+def test_intent_keyword_fallback() -> None:
+    """scripts/llm/intent.py's deterministic keyword fallback
+    (_keyword_guess) -- previously had zero test coverage anywhere in this
+    project. Specifically regression-tests the "I don't understand" ->
+    GIVE_UP misrouting found during a live manual walkthrough: the module's
+    own _SYSTEM prompt used to list "don't understand" as a GIVE_UP trigger,
+    so a confused-but-still-engaged child was sent straight to a terminal
+    co-solve reveal instead of getting another hint. Fixed by moving
+    confusion phrasing to HINT (checked before GIVE_UP) in both the system
+    prompt and this keyword fallback; this test covers the fallback, which
+    is fully deterministic and needs no LLM call."""
+    print("intent._keyword_guess -- confusion vs genuine give-up")
+
+    check("'I dont understand' -> HINT, not GIVE_UP (the live-observed bug)",
+         intent._keyword_guess("I dont understand") == "HINT")
+    check("\"I don't understand\" (apostrophe) -> HINT",
+         intent._keyword_guess("I don't understand this one") == "HINT")
+    check("'I dont get it' -> HINT",
+         intent._keyword_guess("I dont get it") == "HINT")
+    check("'confused' alone -> HINT",
+         intent._keyword_guess("wait, I'm confused") == "HINT")
+    check("genuine give-up phrasing is still GIVE_UP, unaffected by this fix",
+         intent._keyword_guess("I dont know, this is too hard") == "GIVE_UP")
+    check("'I cant do it' is still GIVE_UP",
+         intent._keyword_guess("i cant do it") == "GIVE_UP")
+    # NOTE: "I can't understand X" does NOT match this fallback's "dont
+    # understand"/"don't understand" phrases (it says "can't", not
+    # "don't"/"dont") and so still falls through to GIVE_UP via "can't" --
+    # a known, accepted gap in the deterministic fallback specifically,
+    # left unbroadened because a bare "understand" keyword would risk a
+    # worse false positive (e.g. "I understand now, let me try" containing
+    # "understand" with the OPPOSITE meaning). The live LLM classifier (the
+    # primary path; this fallback only runs if that call fails) has the
+    # updated _SYSTEM prompt's explicit guidance for this nuance instead.
+    check("'I cant understand' (without an apostrophe-don't) is a known, "
+         "accepted fallback gap -- still resolves to GIVE_UP via 'cant', "
+         "not broadened here to avoid a worse false positive elsewhere",
+         intent._keyword_guess("I cant understand this at all") == "GIVE_UP")
+    check("an ordinary hint request is still HINT (unaffected)",
+         intent._keyword_guess("give me a hint please") == "HINT")
+    check("a plain SOLVE request is still SOLVE (unaffected)",
+         intent._keyword_guess("just show me how") == "SOLVE")
+    check("a bare attempt number still falls through to ATTEMPT",
+         intent._keyword_guess("42") == "ATTEMPT")
+
+
 def main() -> None:
     test_response_parser()
     test_final_number_str_fallback_tiers()
@@ -376,6 +464,7 @@ def main() -> None:
     test_client_fallback()
     test_client_skips_missing_keys()
     test_hints_and_levels()
+    test_intent_keyword_fallback()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

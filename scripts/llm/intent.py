@@ -39,9 +39,15 @@ _SYSTEM = (
     "these labels and nothing else:\n"
     "ATTEMPT - they give an answer, show their thinking, or restate/rephrase "
     "the problem to engage with it\n"
-    "HINT - they ask for a hint or clue but want to keep trying\n"
+    "HINT - they ask for a hint or clue, OR say they are confused/don't "
+    "understand/don't get it -- in BOTH cases they still want to keep going, "
+    "just with more help; this is the right label whenever the child is stuck "
+    "but hasn't said they want to stop\n"
     "SOLVE - they ask you to show or tell them the full answer or how to do it\n"
-    "GIVE_UP - they say they can't do it, don't understand, or want to stop\n"
+    "GIVE_UP - they explicitly want to STOP trying (e.g. 'I don't know', 'this "
+    "is too hard', 'I can't do it') -- NOT merely confused; a child who says "
+    "they don't understand is asking for help, not quitting, so that is HINT, "
+    "not GIVE_UP\n"
     "NEW_QUESTION - they ask a different maths question\n"
     "Children write short and misspell. Output only the label."
 )
@@ -55,6 +61,10 @@ _FEWSHOT = [
     ("give me a hint", "HINT"),
     ("hint pls", "HINT"),
     ("help me start", "HINT"),
+    ("i dont understand", "HINT"),
+    ("i dont get it", "HINT"),
+    ("i'm confused", "HINT"),
+    ("wait what does that mean", "HINT"),
     ("just tell me", "SOLVE"),
     ("show me how", "SOLVE"),
     ("whats the answer", "SOLVE"),
@@ -66,8 +76,16 @@ _FEWSHOT = [
     ("can we do division now", "NEW_QUESTION"),
 ]
 
+# "don't understand"/"confused" are checked under HINT, and HINT is matched
+# BEFORE give_up below, so a phrase that could plausibly fit both (e.g. "I
+# can't understand this") resolves to the keep-going HINT reading rather than
+# the stop-entirely GIVE_UP one -- see the _SYSTEM prompt's own explicit
+# distinction above, which this keyword fallback must agree with.
 _KEYWORDS = [
-    ("HINT", ("hint", "clue", "help me start", "where do i start", "stuck")),
+    ("HINT", ("hint", "clue", "help me start", "where do i start", "stuck",
+              "dont understand", "don't understand", "dont get it",
+              "don't get it", "confused", "what does that mean",
+              "what do you mean")),
     ("SOLVE", ("tell me", "show me", "the answer", "solve it", "just do it",
                "whats the answer", "what is the answer", "how do you do")),
     ("GIVE_UP", ("dont know", "don't know", "idk", "no idea", "give up",

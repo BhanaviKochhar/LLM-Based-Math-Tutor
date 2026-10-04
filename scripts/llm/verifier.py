@@ -227,23 +227,53 @@ def _strip_enclosing_parens(expression: str) -> str:
     return s
 
 
-def _grade_appropriate_answer(expression: str | None, value) -> str | None:
+# A bare "int/int" expression is genuinely ambiguous on its own: "3/10" could
+# be a non-exact division word problem (taught as quotient+remainder, so the
+# improper fraction/decimal must be withheld) or a fraction VALUE the
+# question is directly about -- "What is 3/10 written as a decimal?",
+# "Convert 7/20 to a decimal" -- where withholding makes no sense because
+# the fraction-to-decimal conversion IS the question, not a side effect of
+# sharing/dividing a quantity. The expression shape alone cannot distinguish
+# these (component-evaluation found this producing real mismatches on
+# ar-020/cb-158); the question's own wording can, in the common cases.
+_FRACTION_CONVERSION_RE = re.compile(
+    r"\bdecimal\b|\bas a fraction\b|\bwrite.{0,15}fraction\b|"
+    r"\bequivalent fraction\b|\bsimplify\b|\breduce.{0,15}fraction\b|"
+    r"\bconvert\b",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_fraction_conversion(question: str | None) -> bool:
+    return bool(question) and _FRACTION_CONVERSION_RE.search(question) is not None
+
+
+def _grade_appropriate_answer(expression: str | None, value,
+                              question: str | None = None) -> str | None:
     """Injectable answer string, or None if the exact value isn't the taught form.
 
       * Integer result -> inject (unambiguous at every primary grade).
       * Bare "int / int" that isn't exact -> DON'T inject (taught as quotient +
-        remainder, not an improper fraction/decimal). Let the tutor teach
-        remainders; skip strict verify. Recognised whether or not it's
-        wrapped in redundant enclosing parens, e.g. "(20/3)".
+        remainder, not an improper fraction/decimal), UNLESS the original
+        question's own wording signals a fraction/decimal-conversion intent
+        (see _FRACTION_CONVERSION_RE), in which case the fraction value IS
+        the taught answer and withholding it would be wrong. Recognised
+        whether or not the expression is wrapped in redundant enclosing
+        parens, e.g. "(20/3)".
       * Any other non-integer (real fraction arithmetic like 1/2 + 1/4) ->
         inject the exact value; that IS the taught answer.
+
+    `question` is optional and defaults to None (preserving the prior
+    division-withholding behaviour) for any caller that doesn't have the
+    original question text on hand -- only solve() currently passes it.
     """
     try:
         if value == int(value):
             return format_value(value)
     except (TypeError, ValueError):
         pass
-    if expression and _PLAIN_DIV.match(_strip_enclosing_parens(expression)):
+    is_bare_division = bool(expression) and _PLAIN_DIV.match(_strip_enclosing_parens(expression))
+    if is_bare_division and not _looks_like_fraction_conversion(question):
         return None
     return format_value(value)
 
@@ -261,7 +291,7 @@ def solve(question: str, grade: int | None = None, extract_fn=None):
     comp = compute(question, extract_fn=extract_fn)
     if not comp.verifiable or comp.value is None:
         return None, False
-    answer = _grade_appropriate_answer(comp.expression, comp.value)
+    answer = _grade_appropriate_answer(comp.expression, comp.value, question=question)
     return answer, True
 
 

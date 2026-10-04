@@ -50,18 +50,36 @@ MODE_CO_SOLVE = "co_solve"
 MODE_REVEAL = "reveal"
 MODE_REDIRECT = "redirect"              # cold solve -> re-explain, invite a try
 MODE_NEW_QUESTION = "new_question"
+MODE_HINT_EXHAUSTED = "hint_exhausted"   # hint budget used up; no more model calls for hints
 
 # ---- level-tuned thresholds (personalization dial; Step 7 refines wording) --
 # Wrong attempts allowed before we switch to co-solving together.
 _COSOLVE_AFTER = {"beginner": 2, "intermediate": 2, "advanced": 3}
+
+# Hints offered per problem before the hint action is retired. Previously
+# this was an implicit "min(hints_given, 3)" cap with no exhaustion state, so
+# every click past the 3rd silently re-requested "Hint 3 of 3" from the model
+# forever -- a wasted call each time, producing a near-duplicate of the same
+# "final step" hint rather than anything new (see MODE_HINT_EXHAUSTED).
+MAX_HINTS = 3
 
 # Button sets per situation (the UI renders these as SECONDARY shortcuts; the
 # text box stays primary). Labels map to intents in the app.
 _BTN_AFTER_INVITE = ["I'll try", "Give me a hint", "Show me how"]
 _BTN_AFTER_WRONG = ["Try again", "Give me a hint", "Just show me"]
 _BTN_AFTER_HINT = ["Try again", "Another hint", "Just show me"]
+_BTN_AFTER_HINT_EXHAUSTED = ["I'll try", "Just show me"]
 _BTN_AFTER_SOLVED = ["Practice problem", "New question"]
 _BTN_TERMINAL = ["New question"]
+
+# Fixed, non-generated message for MODE_HINT_EXHAUSTED -- deliberately NOT an
+# LLM call: the whole point of this state is to stop spending a call on a
+# hint the system has already told the student everything it will say
+# without solving it for them.
+HINT_EXHAUSTED_MESSAGE = (
+    "You've had all the hints for this one! Want to give it your best guess, "
+    "or see it worked out?"
+)
 
 
 @dataclass
@@ -184,15 +202,40 @@ def diagnose(turn: str, computed_answer: str | None, is_math: bool) -> str:
 
 
 # ---- directive builders (words the generator will expand) -------------------
+# A broad method/concept question ("Addition of 3 digit", "What is a
+# fraction?") has no SPECIFIC problem whose answer needs protecting --
+# state.is_math is False because verifier.compute() correctly found nothing
+# to compute, not because there's a secret answer being withheld. Treating
+# it like a specific problem (vague "idea behind it" talk, no worked steps)
+# produces exactly the generic-analogy-only response this was found to
+# produce in practice (e.g. "piles of objects" standing in for an actual
+# worked example). A SPECIFIC computable problem (is_math=True, e.g. "What
+# is 245 + 136?") keeps the original withhold-and-invite behaviour, since
+# there the whole point is for the child to attempt it before being shown.
+_d_teach_invite_conceptual = (
+    "For THIS reply: this is a BROAD method/concept question with no single "
+    "specific problem to protect an answer for (not 'solve this', but 'teach "
+    "me this'). Teach it properly: name the primary-school method/technique "
+    "by name, then show ONE complete worked example using YOUR OWN chosen "
+    "numbers (not the child's, since they gave none) with the actual steps "
+    "written out (e.g. for column addition: units, then tens, then hundreds, "
+    "carrying where needed) — a full worked demonstration, not just a "
+    "one-line analogy. Then invite the child to try a similar one themselves. "
+    "Do NOT make an analogy (like piles of objects) the ONLY explanation — "
+    "the actual numeric method must be shown step by step."
+)
+_d_teach_invite_specific = (
+    "For THIS reply: gently explain the idea behind the question in a few "
+    "warm, plain sentences — NO numbered steps. You may add ONE tiny "
+    "everyday example using DIFFERENT numbers, in a sentence, if it helps. "
+    "Then warmly invite the child to try THIS question themselves. Do NOT "
+    "solve their question, do NOT show the final answer, and do NOT write "
+    "an 'Answer:' line."
+)
+
+
 def _d_teach_invite(s: TutorState) -> str:
-    return (
-        "For THIS reply: gently explain the idea behind the question in a few "
-        "warm, plain sentences — NO numbered steps. You may add ONE tiny "
-        "everyday example using DIFFERENT numbers, in a sentence, if it helps. "
-        "Then warmly invite the child to try THIS question themselves. Do NOT "
-        "solve their question, do NOT show the final answer, and do NOT write "
-        "an 'Answer:' line."
-    )
+    return _d_teach_invite_conceptual if not s.is_math else _d_teach_invite_specific
 
 
 def _d_diagnose_wrong(s: TutorState) -> str:
@@ -269,12 +312,26 @@ def _d_reveal(s: TutorState) -> str:
 
 
 def _d_redirect(s: TutorState) -> str:
+    # "Show me how" / a cold solve request routes here. For a BROAD
+    # method question (is_math=False) there is no specific answer to
+    # protect, so honour the request directly with the same full worked
+    # demonstration as the conceptual teach_invite branch -- "earn it"
+    # pedagogy doesn't apply when there's nothing specific being withheld.
+    # For a SPECIFIC computable problem (is_math=True), keep protecting
+    # THAT problem's answer, but require an actual worked numeric example
+    # (different numbers) rather than a vague "explain it another way" --
+    # found to otherwise produce another generic conceptual explanation
+    # instead of a real demonstration of the method.
+    if not s.is_math:
+        return _d_teach_invite_conceptual
     return (
         "For THIS reply: the child wants the answer without trying yet. Don't "
-        "give it. In a few warm plain sentences, explain the key idea a "
-        "DIFFERENT, simpler way (not a repeat), and warmly invite ONE try. "
-        "Reassure them they can ask again to see it worked out. No numbered "
-        "steps, no 'Answer:' line."
+        "give THIS problem's answer. Instead, actually demonstrate the method: "
+        "show ONE complete worked example using DIFFERENT numbers (not the "
+        "child's own problem), with the real steps written out, not just a "
+        "restated idea. Then warmly invite ONE try at their own question. "
+        "Reassure them they can ask again to see their own worked out. No "
+        "'Answer:' line for their own problem."
     )
 
 
@@ -305,9 +362,12 @@ def step(state: TutorState, intent: str, turn: str | None = None):
                              outcome="gave_up")
 
     if intent == "HINT":
+        if state.hints_given >= MAX_HINTS:
+            return state, Action(MODE_HINT_EXHAUSTED, "",
+                                 buttons=list(_BTN_AFTER_HINT_EXHAUSTED))
         state.hints_given += 1
         return state, Action(MODE_HINT, "", buttons=list(_BTN_AFTER_HINT),
-                             hint_number=min(state.hints_given, 3))
+                             hint_number=state.hints_given)
 
     if intent == "SOLVE":
         return _handle_solve(state)

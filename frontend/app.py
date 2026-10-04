@@ -214,11 +214,13 @@ def _mock_episode_turn(question: str) -> dict:
 def _run_generation(state, action, chunks, active_turns, previous_hints):
     """Call the controller->model bridge for this turn's text.
 
-    MODE_HINT returns an already-generated string (hints.generate_hint is not
-    streamed); every other mode returns a TurnStream that must be streamed to
-    populate .text. MODE_NEW_QUESTION legitimately has nothing to say.
-    Raises GenerationFailed for every other mode that comes back empty, so a
-    silent provider outage is treated the same as an exception by callers."""
+    MODE_HINT and MODE_HINT_EXHAUSTED both return an already-generated
+    string (hints.generate_hint is not streamed; MODE_HINT_EXHAUSTED's text
+    is a fixed constant, no LLM call at all); every other mode returns a
+    TurnStream that must be streamed to populate .text. MODE_NEW_QUESTION
+    legitimately has nothing to say. Raises GenerationFailed for every other
+    mode that comes back empty, so a silent provider outage is treated the
+    same as an exception by callers."""
     from scripts.llm import pipeline, controller as C
 
     result = pipeline.generate_turn(
@@ -227,7 +229,7 @@ def _run_generation(state, action, chunks, active_turns, previous_hints):
     )
     if action.mode == C.MODE_NEW_QUESTION:
         return ""
-    if action.mode == C.MODE_HINT:
+    if action.mode in (C.MODE_HINT, C.MODE_HINT_EXHAUSTED):
         text = (result or "").strip()
     elif result is None:
         text = ""
@@ -898,6 +900,9 @@ def render_turn(msg, idx, is_latest=False):
         n = msg.get("hint_number")
         prefix = f"Hint {n}: " if n else ""
         st.markdown(f'<div class="hint-tag">💡 {prefix}{html.escape(text)}</div>',
+                    unsafe_allow_html=True)
+    elif mode == "hint_exhausted":
+        st.markdown(f'<div class="hint-tag">💡 {html.escape(text)}</div>',
                     unsafe_allow_html=True)
     elif mode in ("co_solve", "reveal"):
         if text:

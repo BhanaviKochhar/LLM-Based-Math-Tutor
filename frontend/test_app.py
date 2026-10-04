@@ -18,7 +18,7 @@ Run:  python -m frontend.test_app
 """
 from __future__ import annotations
 
-from scripts.llm import controller as C, pipeline, verifier
+from scripts.llm import controller as C, hints, pipeline, verifier
 from frontend import app
 
 _passed = 0
@@ -107,6 +107,95 @@ def test_generation_failure_rolls_back_state() -> None:
     check("retry after failure succeeds", reply2.get("mode") == "diagnose_wrong")
     check("retry advances attempts exactly once (no duplication from the failure)",
           chat["episode"]["state"].attempts == pre_attempts + 1)
+
+
+# -------------------------------------------- A4: hint lifecycle integration
+def test_hint_lifecycle_integration() -> None:
+    """Integration-level (through submit_turn/_apply_action), complementing
+    eval/controller_walk.py's pure-controller hint-lifecycle scenario. Covers
+    what the controller test can't: the actual generated/fixed TEXT reaching
+    the reply dict, hints_shown bookkeeping, and a hint-specific
+    generation-failure+retry (the existing test above only exercises an
+    ATTEMPT failure)."""
+    print("A4. hint lifecycle through submit_turn: numbering, exhaustion, failure+retry")
+
+    chat = _new_chat(_math_episode(attempts=0))
+
+    def _hint_fn(n):
+        # hints.generate_hint returns an already-generated plain STRING
+        # (pipeline.get_hint/generate_turn pass it straight through, no
+        # TurnStream wrapping) -- patch at THIS level, not pipeline.generate_turn
+        # itself, so the real MODE_HINT/MODE_HINT_EXHAUSTED dispatch logic in
+        # pipeline.generate_turn actually runs and is genuinely exercised,
+        # rather than being bypassed by the mock.
+        return lambda *a, **kw: f"hint text #{n}"
+
+    with _Patch(app, "record_feedback", lambda *a, **kw: None):
+        for n in (1, 2, 3):
+            with _Patch(hints, "generate_hint", _hint_fn(n)):
+                reply = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                        forced_intent="HINT")
+            check(f"hint {n}: mode=hint, hint_number={n} (state-driven)",
+                 reply.get("mode") == "hint" and reply.get("hint_number") == n)
+            check(f"hint {n}: text is the generated hint, not a placeholder",
+                 reply.get("text") == f"hint text #{n}")
+        check("3 real hints were generated and spent an LLM call each",
+             len(chat["episode"]["hints_shown"]) == 3)
+
+        # 4th request: the REAL pipeline.generate_turn/controller.step run
+        # unmocked; only hints.generate_hint is instrumented, so this
+        # genuinely proves the LLM-calling function is never reached once
+        # exhausted, rather than just proving a mock wasn't called.
+        called = {"n": 0}
+
+        def _should_not_be_called(*a, **kw):
+            called["n"] += 1
+            return "should never see this"
+
+        with _Patch(hints, "generate_hint", _should_not_be_called):
+            reply4 = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                     forced_intent="HINT")
+            check("4th hint request -> mode=hint_exhausted, not another generated hint",
+                 reply4.get("mode") == "hint_exhausted")
+            check("4th hint request's fixed message does not repeat an earlier hint string",
+                 reply4.get("text") not in {"hint text #1", "hint text #2", "hint text #3"})
+            check("the exhausted-hint message does NOT get appended to hints_shown "
+                 "(it isn't a real hint and must not pollute future hint context)",
+                 len(chat["episode"]["hints_shown"]) == 3)
+            check("'Another hint' is no longer offered once exhausted",
+                 "Another hint" not in reply4.get("buttons", []))
+            check("hints.generate_hint was never called for the exhausted request "
+                 "(no LLM call spent)", called["n"] == 0)
+
+            # Repeated click on the already-exhausted state: still
+            # idempotent, still zero LLM calls.
+            reply5 = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                     forced_intent="HINT")
+        check("a second click after exhaustion is still hint_exhausted, "
+             "no further LLM call made (called['n'] stayed 0 across both attempts)",
+             reply5.get("mode") == "hint_exhausted" and called["n"] == 0)
+
+    # Hint-specific generation failure + retry (distinct from the ATTEMPT
+    # failure already covered above): a failed hint call must not consume a
+    # hint slot, and retrying must produce the SAME hint number, not skip one.
+    chat2 = _new_chat(_math_episode(attempts=0))
+    with _Patch(app, "record_feedback", lambda *a, **kw: None):
+        with _Patch(hints, "generate_hint",
+                   lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("provider down"))):
+            fail_reply = app.submit_turn(chat2, "Give me a hint", 3, "on_track", [],
+                                         forced_intent="HINT")
+        check("a failed hint generation returns a reply, not a crash",
+             isinstance(fail_reply, dict))
+        check("hints_given is NOT incremented after a failed hint generation",
+             chat2["episode"]["state"].hints_given == 0)
+
+        with _Patch(hints, "generate_hint", _hint_fn(1)):
+            retry_reply = app.submit_turn(chat2, "Give me a hint", 3, "on_track", [],
+                                          forced_intent="HINT")
+        check("retrying after a failed hint generation produces Hint 1 "
+             "(not Hint 2 -- no hint silently skipped by the failed attempt)",
+             retry_reply.get("hint_number") == 1
+             and chat2["episode"]["state"].hints_given == 1)
 
 
 def test_empty_generation_treated_as_failure() -> None:
@@ -326,6 +415,7 @@ def test_conceptual_episode_never_advances() -> None:
 
 def main() -> None:
     test_generation_failure_rolls_back_state()
+    test_hint_lifecycle_integration()
     test_empty_generation_treated_as_failure()
     test_start_episode_does_not_commit_on_failure()
     test_practice_problem_shortcut_disabled()

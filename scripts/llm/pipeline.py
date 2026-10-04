@@ -230,12 +230,18 @@ def _conversation_directive(resolution) -> str | None:
     if mode == "CONFUSION":
         return (
             "The child says they do not understand your immediately previous "
-            "explanation. Do not treat this as a new question. Re-read the "
-            "previous exchange and re-explain the exact idea or step that was "
-            "just discussed, using the same numbers and facts. Do not introduce "
-            "a different textbook problem. Keep it short and concrete. If the "
-            "source of confusion is genuinely unclear, ask one short clarifying "
-            "question instead of guessing."
+            "explanation. Do not treat this as a new question, and do NOT just "
+            "restart the same generic explanation from the beginning. Instead: "
+            "(1) identify the SPECIFIC step or idea in your previous reply most "
+            "likely to be the sticking point, (2) re-explain ONLY that step, "
+            "using a SMALLER or simpler example than before if that would help "
+            "(e.g. smaller numbers, fewer steps), while keeping the same facts "
+            "and numbers from their actual problem, (3) if that still leaves "
+            "something to build on, offer the next concrete scaffold rather "
+            "than stopping. Do not introduce a different textbook problem. Keep "
+            "it short and concrete. If the source of confusion is genuinely "
+            "unclear from context, ask one short, specific clarifying question "
+            "(naming what you're unsure about) instead of guessing or repeating."
         )
     if mode == "CORRECTION":
         return (
@@ -460,6 +466,10 @@ def generate_turn(
 
     if action.mode == C.MODE_NEW_QUESTION:
         return None
+
+    if action.mode == C.MODE_HINT_EXHAUSTED:
+        # Deliberately NOT an LLM call -- see controller.HINT_EXHAUSTED_MESSAGE.
+        return C.HINT_EXHAUSTED_MESSAGE
 
     reveal_modes = {C.MODE_CO_SOLVE, C.MODE_REVEAL}
     injected = state.computed_answer if action.mode in reveal_modes else None

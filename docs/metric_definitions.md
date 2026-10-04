@@ -42,9 +42,11 @@ Two stages, reported separately, never combined into one "extraction accuracy":
 | Stage | Dependency | Metric | Correct means |
 |---|---|---|---|
 | `response_to_answer` | None — deterministic | `exact_match` (numerator = `response_parser.final_number_str(input)` equals `expected_final_answer`) | String-exact match on the normalized token |
-| `question_to_expression` | **Live LLM extractor** (`scripts.llm.verifier.compute()` → `llm_client.chat`) | `exact_match`, `accepted_equivalent_match`, `parse_success` | Extracted expression equals `expected_expression` (or one of `expected_expression_equivalents`); `parse_success` additionally credits a correct `NONE` classification for non-computable questions |
+| `question_to_expression` | **Live LLM extractor** (`scripts.llm.verifier.compute()` → `llm_client.chat`) | `exact_match`, `normalized_match`, `value_equivalent_match`, `parse_success` | Three DISTINCT comparisons, never conflated: `exact_match` is raw string equality (strict, whitespace-sensitive); `normalized_match` strips whitespace before comparing (the model reliably writes `"2 + 3"`, the dataset records `"2+3"` — these are the same expression, not a mismatch); `value_equivalent_match` additionally accepts any expression that evaluates to the same value via `verifier._safe_eval`/`_close` (e.g. a reordered `"7*2"` vs `"2*7"`). `parse_success` credits a correct `NONE` classification for non-computable questions. |
 
 **`question_to_expression` is never executed automatically.** Running it spends real API calls. `extraction_eval.py`'s default invocation only reports a cost/scope plan (model, call count, estimated latency) and stops; it requires `--live-confirm` to actually run.
+
+**A real bug in this evaluator was caught by actually running it live, not assumed from a dry read:** the first live run reported `exact_match = 3/14` (21%), which looked like a serious extraction regression. It was not — the comparison was raw-string equality, and the model's `"2 + 3"` vs. the dataset's `"2+3"` differ only in whitespace. After adding `normalized_match`/`value_equivalent_match`, the real rate is 13/14 (92.9%), with the sole miss being `ex-007` — a already-documented, expected limitation (the follow-up-resolution case; this evaluator deliberately calls `verifier.compute()` directly, without the conversation-resolution step the live app applies first, so this exact miss is the known, correct behavior for this test harness, not a new defect).
 
 ---
 
