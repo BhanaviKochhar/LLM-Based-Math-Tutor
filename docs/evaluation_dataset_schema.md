@@ -8,6 +8,15 @@ General rules across all datasets:
 - No item may claim a curriculum citation, chunk ID, or corpus fact that was not independently checked against `data/extracted_json/ncert_chunks.json` or the live retriever/verifier at the time of writing. Items that could not be fully verified are explicitly marked `NEEDS_REVIEW` or `NEEDS_LIVE_VERIFICATION` in their notes field — do not treat these as scored until resolved.
 - No student-identifying information. Cases derived from real interactions retain only the message text and de-identified context, never a name, session ID, or timestamp that could re-identify a person.
 
+### Review status (added Phase B)
+
+This project is built by a university capstone team, not by primary-school teachers. Every claim of "review" in this repository must say, specifically, *who* reviewed *what* — a bare `provenance: manual` does not by itself mean the item's pedagogy, age-appropriateness, or curriculum fit has been checked by anyone beyond its author. The `review_status` field (present on datasets added from Phase B onward; older datasets record equivalent information inline in `provenance`/`notes` instead of a dedicated field) uses these distinctions:
+
+- **`programmatically verified (...)`** — a numeric expected answer was independently checked with `scripts.llm.verifier._safe_eval` or a direct `sympy` call at authoring time. This confirms the *arithmetic*, not the *interpretation* of a word problem, the appropriateness of the framing for the stated grade, or the quality of a conceptual explanation.
+- **`project-team drafted; not yet independently reviewed`** — written by one member of this project, not yet read or confirmed by a second. Used for items (e.g. the Phase B out-of-scope set) where the judgment required is not reducible to a symbolic check — scope recognition, pedagogical framing, age-appropriateness.
+- **A claim of "teacher-reviewed" or "professionally validated" must never appear anywhere in this repository unless an actual primary-school teacher reviewed the specific items in question.** No dataset in this project currently has that review. Where `docs/`/paper text refers to "human evaluation" or "teacher ratings" as a *planned* protocol (see `docs/evaluation_plan.md`), that remains planned, not retroactively satisfied by project-team review.
+- Items derived from an observed live interaction (`provenance: derived from an observed live interaction, de-identified`) have their *behavioral observation* verified (the system really did produce the quoted output) but not necessarily their *rubric judgment* (whether that output was good or bad is still the reviewing team member's read, stated as such).
+
 ---
 
 ## `eval/datasets/arithmetic/v1_starter.jsonl` (JSON Lines, one object per line)
@@ -27,6 +36,50 @@ General rules across all datasets:
 | `provenance` | string | yes | See general rules above. |
 
 **Validation rules:** `case_id` unique across the file; `expected_answer is None` iff `verifiable is False`; `trusted_expression`, when not null, must parse under `scripts.llm.verifier._safe_eval`.
+
+---
+
+## `eval/datasets/arithmetic/v2_phaseB_extension.jsonl` (JSON Lines)
+
+A separately-versioned **addition** to `arithmetic/v1_starter.jsonl`, not an edit to it — `v1_starter.jsonl`'s exact item count and content are cited by name in `docs/extraction_evaluation.md` and `docs/retrieval_evaluation.md`'s prior results, so it must not change under them. New arithmetic items go in a new file, per the general versioning rule above.
+
+Added in Phase B (see `docs/curriculum_coverage_matrix.md`) to fill the two largest confirmed curriculum gaps found by that matrix: Class 1 addition/subtraction within 9 (zero items previously), and Class 5 Factors & Multiples / decimals (zero items previously, despite confirmed corpus support).
+
+Same fields as `arithmetic/v1_starter.jsonl` above, plus one addition:
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| `review_status` | string | yes | Distinguishes verification state explicitly (see "Review status" section below). All six Phase B items are `"programmatically verified (sympy); not yet reviewed by a second project-team member"` — their numeric answers were independently checked with `scripts.llm.verifier._safe_eval` or `sympy.gcd`/`sympy.lcm` directly at authoring time, but no second human has read them yet. |
+
+Two items (`ar-018` HCF, `ar-019` LCM) have `trusted_expression: null` with a note in `required_assumptions` explaining why: HCF/LCM are outside `scripts.llm.verifier`'s current arithmetic grammar (`+ - * / ** ( )` only), so they were checked with `sympy.gcd`/`sympy.lcm` directly during authoring, not through the production verifier path. A case like this cannot yet be auto-scored end-to-end by the live system — that would require extending the verifier's grammar, which is out of scope for a dataset-only pass.
+
+**Validation rules:** same as `v1_starter.jsonl`, plus: no `case_id` in this file may collide with one already used in `v1_starter.jsonl` (IDs are never reused once published, even across versioned files for the same dataset); `grade` must be 1-5; `review_status` must be present.
+
+---
+
+## `eval/datasets/out_of_scope/v1_starter.jsonl` (JSON Lines)
+
+Added in Phase B (B4). Deliberately kept in its **own directory**, never merged into `arithmetic/` or `extraction/`, because these items test scope recognition and honest refusal, not in-curriculum mathematical accuracy — mixing the two would silently corrupt an accuracy score with items that are correctly *supposed* to be declined, not solved.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| `case_id` | string | yes | `oos-NNN`. A distinct prefix from every in-scope dataset's IDs. |
+| `question` | string | yes | The out-of-scope question as a student might ask it. |
+| `out_of_scope_topic` | string | yes | The mathematical area beyond Class 1-5 (algebra, calculus, trigonometry, etc.). |
+| `out_of_scope_reason` | string | yes | Why this topic doesn't appear in `verified_ncert_class_1_5_topics.md`. |
+| `boundary_case` | bool | yes | `true` when the item is deliberately designed to *look* like simple primary content (small numbers, familiar wording) despite requiring an out-of-scope concept — the harder, more realistic test of scope recognition. |
+| `boundary_case_note` | string | only when `boundary_case` is true | What specifically makes the item deceptively simple-looking. |
+| `expected_behavior` | string | yes | What an honest, scope-aware response should do, at a high level (not a scripted reply). |
+| `must_avoid` | list[string] | yes | Specific failure modes this item is designed to catch. |
+| `provenance` | string | yes | See general rules above. |
+| `review_status` | string | yes | See "Review status" section below. All 12 starter items are `"project-team drafted; not yet independently reviewed"` — they were authored in this pass to seed the category and have not yet had a second reviewer confirm the `expected_behavior`/`must_avoid` judgments. |
+| `notes` | string | optional | Any additional caveat. |
+
+**Scoring convention:** never aggregate these items into an in-curriculum accuracy metric. The intended measurement is categorical (did the system recognize the scope limitation and respond honestly, yes/no), not numeric-answer correctness, since most of these questions have no single primary-level answer to check against.
+
+**Validation rules:** `case_id` unique, all prefixed `oos-`; required fields present; the file must live under `eval/datasets/out_of_scope/`, never under `arithmetic/` or `extraction/`; `out_of_scope_topic` must name one of the recognised beyond-curriculum concepts the validator checks for.
+
+**What this starter set is not:** 12 items is a seed, not a comprehensive out-of-scope benchmark. It covers one example each of algebra, quadratics, calculus (three forms), trigonometry, complex numbers, logarithms, matrices, permutations/combinations, vectors, and the factorial/factors wording collision — chosen to include several deliberately deceptive boundary cases, not to exhaustively sample "everything beyond Class 5."
 
 ---
 

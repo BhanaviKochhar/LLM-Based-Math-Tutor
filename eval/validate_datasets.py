@@ -81,6 +81,54 @@ def test_arithmetic() -> None:
         print("    failing:", bad_expr)
 
 
+# ------------------------------------------------------- arithmetic v2 (Phase B)
+def test_arithmetic_v2_phaseb() -> None:
+    """eval/datasets/arithmetic/v2_phaseB_extension.jsonl -- a modest,
+    separately-versioned addition to v1_starter.jsonl (Class 1 and Class 5
+    coverage-gap items; see docs/curriculum_coverage_matrix.md). Kept in its
+    own file rather than appended to v1_starter.jsonl, per the versioning
+    rule in docs/evaluation_dataset_schema.md: v1_starter.jsonl's exact
+    content is cited by docs/extraction_evaluation.md and
+    docs/retrieval_evaluation.md's prior results and must not change under
+    them."""
+    print("arithmetic/v2_phaseB_extension.jsonl")
+    path = DATASETS / "arithmetic" / "v2_phaseB_extension.jsonl"
+    rows = _load_jsonl(path)
+    check("at least 1 case", len(rows) >= 1)
+    check("case_id unique within this file", _unique_ids(rows, "case_id"))
+
+    v1_rows = _load_jsonl(DATASETS / "arithmetic" / "v1_starter.jsonl")
+    v1_ids = {r["case_id"] for r in v1_rows}
+    v2_ids = {r["case_id"] for r in rows}
+    check("no case_id collides with v1_starter.jsonl (IDs are never reused)",
+         not (v1_ids & v2_ids))
+
+    required = {"case_id", "question", "grade", "topic", "expected_answer",
+               "accepted_equivalents", "trusted_expression",
+               "required_assumptions", "verifiable", "verification_notes",
+               "provenance", "review_status"}
+    missing = [r["case_id"] for r in rows if not required.issubset(r)]
+    check("all required fields present (including the Phase B review_status field)",
+         not missing)
+    bad_null = [r["case_id"] for r in rows
+               if (r["expected_answer"] is None) != (r["verifiable"] is False)]
+    check("expected_answer is null iff verifiable is false", not bad_null)
+
+    from scripts.llm import verifier
+    bad_expr = []
+    for r in rows:
+        if r["trusted_expression"] is not None:
+            if verifier._safe_eval(r["trusted_expression"]) is None:
+                bad_expr.append(r["case_id"])
+    check("every non-null trusted_expression parses under verifier._safe_eval",
+         not bad_expr)
+    if bad_expr:
+        print("    failing:", bad_expr)
+
+    bad_grade = [r["case_id"] for r in rows if not (1 <= r.get("grade", 0) <= 5)]
+    check("grade is 1-5", not bad_grade)
+
+
 # --------------------------------------------------------------- extraction
 def test_extraction() -> None:
     print("extraction/v1_starter.jsonl")
@@ -199,8 +247,46 @@ def test_multi_turn() -> None:
         print("    failing:", bad_order)
 
 
+# --------------------------------------------------------------- out_of_scope
+def test_out_of_scope() -> None:
+    """eval/datasets/out_of_scope/v1_starter.jsonl -- deliberately NOT mixed
+    into the in-scope arithmetic/extraction accuracy datasets (B4): it tests
+    scope recognition and honest refusal, not primary-curriculum correctness.
+    A category-specific schema, not the arithmetic one -- these items have no
+    'expected_answer' to verify, by design."""
+    print("out_of_scope/v1_starter.jsonl")
+    path = DATASETS / "out_of_scope" / "v1_starter.jsonl"
+    rows = _load_jsonl(path)
+    check("at least 10 cases", len(rows) >= 10)
+    check("case_id unique", _unique_ids(rows, "case_id"))
+    check("case_id uses the oos- prefix (never collides with in-scope ar-/ex-/rq-/ctl-/co-/mt- IDs)",
+         all(r["case_id"].startswith("oos-") for r in rows))
+    required = {"case_id", "question", "out_of_scope_topic", "out_of_scope_reason",
+               "boundary_case", "expected_behavior", "must_avoid", "provenance",
+               "review_status"}
+    missing = [r["case_id"] for r in rows if not required.issubset(r)]
+    check("all required fields present", not missing)
+    check("this file lives in its own directory, never eval/datasets/arithmetic/ "
+         "or eval/datasets/extraction/ (out-of-scope items must not be mixed "
+         "into in-scope accuracy datasets)",
+         path.parent.name == "out_of_scope")
+    not_curriculum_topics = [
+        "algebra", "quadratic", "calculus", "trigonometry", "complex number",
+        "logarithm", "matri", "permutation", "combination", "limit", "vector",
+        "factorial",
+    ]
+    bad_topic = [r["case_id"] for r in rows
+                if not any(t in r["out_of_scope_topic"].lower() for t in not_curriculum_topics)]
+    check("out_of_scope_topic names a recognised beyond-Class-1-5 concept",
+         not bad_topic)
+    if bad_topic:
+        print("    failing (topic string didn't match the known out-of-scope list):", bad_topic)
+
+
 def main() -> None:
     test_arithmetic()
+    test_arithmetic_v2_phaseb()
+    test_out_of_scope()
     test_extraction()
     test_retrieval()
     test_controller()
