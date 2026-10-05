@@ -82,11 +82,16 @@ _SYSTEM = (
     "MATH_FOLLOWUP - they change a number or condition in the SAME problem "
     "instead of answering it (e.g. 'what if it was 150 instead of 136?', "
     "'what about 5 instead?')\n"
-    "CLARIFY - the message is too incomplete or ambiguous to safely act on "
-    "and none of the above clearly fits (e.g. 'the second one', 'what about "
-    "that', 'huh?')\n"
-    "NEW_QUESTION - they ask a completely different maths question, unrelated "
-    "to the current problem\n"
+    "CLARIFY - the message refers to something ('it', 'that', 'the other "
+    "one') without saying what, or is otherwise too fragmentary to act on at "
+    "all (e.g. 'the second one', 'what about that', 'huh?')\n"
+    "NEW_QUESTION - they name or ask about a different maths topic or "
+    "problem than the current one -- including a bare topic name with no "
+    "question mark (e.g. 'fractions', 'add and sub', 'multiplication "
+    "tables'), since a child this age often types just the topic, not a full "
+    "question. If it names a self-contained topic/problem, it is "
+    "NEW_QUESTION even without a question mark; CLARIFY is only for messages "
+    "with nothing to act on at all\n"
     "Children write short and misspell. Output only the label."
 )
 
@@ -120,6 +125,9 @@ _FEWSHOT = [
     ("what about that", "CLARIFY"),
     ("what is 5 plus 5", "NEW_QUESTION"),
     ("can we do division now", "NEW_QUESTION"),
+    ("add and sub", "NEW_QUESTION"),
+    ("fractions", "NEW_QUESTION"),
+    ("learn addition", "NEW_QUESTION"),
 ]
 
 # Order matters: each label is checked top-to-bottom and the first match

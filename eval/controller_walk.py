@@ -212,7 +212,8 @@ s_broad, a_broad = C.start("Addition of 3 digit", 3, "intermediate",
 check("broad method question -> the worked-example directive variant is used",
      a_broad.directive == C._d_teach_invite_conceptual)
 check("the worked-example directive actually asks for real steps, not just an analogy",
-     "step by step" in a_broad.directive and "ONE complete worked example" in a_broad.directive)
+     "ONE complete worked example" in a_broad.directive
+     and "the actual method must be" in a_broad.directive)
 
 s_specific, a_specific = C.start("What is 245 + 136?", 3, "intermediate",
                                  computed_answer="381", is_math=True)
