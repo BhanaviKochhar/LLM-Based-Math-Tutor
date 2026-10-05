@@ -865,6 +865,43 @@ def test_student_id_is_per_session_not_a_shared_constant() -> None:
          id_a1 != "session_user" and len(id_a1) >= 16)
 
 
+def test_pending_turn_shows_question_before_generating_the_reply() -> None:
+    """Track 10 (chat lifecycle): queue_pending_turn must append the user's
+    message WITHOUT generating anything, so a caller can rerun/render once
+    with just the question visible before process_pending_turn (a separate
+    call, on the next pass in the real app) actually generates the reply.
+    Live-reproduced bug this fixes: previously both the question and the
+    reply appeared together only after the full generation finished."""
+    print("Q. queue_pending_turn / process_pending_turn: immediate question, deferred reply")
+
+    chat = _new_chat(episode=None)
+    app.queue_pending_turn(chat, "What is 2 + 2?")
+    check("the question is appended immediately", chat["messages"] == [
+        {"role": "user", "text": "What is 2 + 2?"}])
+    check("no reply has been generated yet", len(chat["messages"]) == 1)
+    check("the turn is recorded as pending", chat.get("pending_turn") == {
+        "text": "What is 2 + 2?", "forced_intent": None})
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add 2 and 2!")):
+        ran = app.process_pending_turn(chat, 3, "on_track")
+    check("process_pending_turn reports that it actually ran a turn", ran is True)
+    check("the reply is now appended after the question", len(chat["messages"]) == 2
+         and chat["messages"][1]["role"] == "assistant")
+    check("the pending marker is cleared once the reply lands", chat.get("pending_turn") is None)
+
+    check("calling process_pending_turn again with nothing queued is a safe no-op",
+         app.process_pending_turn(chat, 3, "on_track") is False)
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -889,6 +926,7 @@ def main() -> None:
     test_output_safety_blocks_unsafe_generated_text()
     test_interaction_telemetry_reconstructs_the_turn()
     test_student_id_is_per_session_not_a_shared_constant()
+    test_pending_turn_shows_question_before_generating_the_reply()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

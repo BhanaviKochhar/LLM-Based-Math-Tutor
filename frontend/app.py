@@ -173,6 +173,7 @@ def clear_chat(chat) -> None:
     chat["messages"] = []
     chat["episode"] = None
     chat["thread_notes"] = []
+    chat["pending_turn"] = None
 
 
 def reset_learning_progress() -> None:
@@ -654,6 +655,47 @@ def submit_turn(
     reply["safety"]["input_checked"] = True
     reply["safety"]["input_blocked"] = False
     return reply
+
+
+def queue_pending_turn(chat, text: str, forced_intent: str | None = None) -> None:
+    """Append the student's message NOW, before any generation happens, and
+    record it as pending rather than calling submit_turn synchronously.
+
+    Streamlit renders a script top-to-bottom in one pass per rerun: the
+    message list is drawn long before the ask-bar's submit handler runs, so
+    appending the user's message AND calling the (slow, LLM-backed)
+    submit_turn in that same handler meant the browser never saw the
+    question on screen until the ENTIRE reply had also finished generating
+    -- both appeared together, seconds later, with nothing but a bare
+    spinner in between. Splitting into two passes (append + rerun here;
+    generate in process_pending_turn on the NEXT pass, once the message
+    loop has already drawn this bubble) makes the question appear
+    immediately, the way a chat UI is expected to behave."""
+    chat["messages"].append({"role": "user", "text": text})
+    chat["pending_turn"] = {"text": text, "forced_intent": forced_intent}
+
+
+def process_pending_turn(chat, grade: int, ui_level: str) -> bool:
+    """Run the generation queued by queue_pending_turn, if any. Must be
+    called AFTER the message list has been rendered (so the queued user
+    bubble from the rerun above is already on screen) and BEFORE the ask
+    bar (so it can be disabled while this runs). Returns True iff it
+    actually ran a turn (caller should st.rerun() afterward)."""
+    pending = chat.get("pending_turn")
+    if not pending:
+        return False
+    with st.container(border=True):
+        st.markdown('<div class="tt-q tt-thinking">🤖 <i>Math Buddy is thinking…</i></div>',
+                    unsafe_allow_html=True)
+    # The pending user message is already the last entry in chat["messages"]
+    # (appended by queue_pending_turn) -- active_turns must exclude it, same
+    # contract as every other call site in this file.
+    active_turns = build_active_turns(chat["messages"][:-1])
+    reply = submit_turn(chat, pending["text"], grade, ui_level, active_turns,
+                        forced_intent=pending.get("forced_intent"))
+    chat["messages"].append(reply)
+    chat["pending_turn"] = None
+    return True
 
 
 # ===========================================================================
@@ -1199,13 +1241,15 @@ def render_turn(msg, idx, is_latest=False):
     buttons = [b for b in (msg.get("buttons") or []) if b in _ACTIONABLE_LABELS]
     if not buttons:
         return
+    chat = active_chat()
+    pending = bool(chat.get("pending_turn"))
     st.markdown('<div class="tt-shortcut-hint">Tap a shortcut, or type below 👇</div>',
                 unsafe_allow_html=True)
     cols = st.columns(len(buttons))
     for col, label in zip(cols, buttons):
         with col:
-            if st.button(label, key=f"turnbtn_{idx}_{label}", use_container_width=True):
-                chat = active_chat()
+            if st.button(label, key=f"turnbtn_{idx}_{label}", use_container_width=True,
+                        disabled=pending):
                 if label in _CLOSE_EPISODE_LABELS:
                     episode = chat.get("episode")
                     state = episode.get("state") if episode else None
@@ -1222,13 +1266,7 @@ def render_turn(msg, idx, is_latest=False):
                         "reply": "Sure! What would you like to try next? 🙂",
                     })
                 else:
-                    active_turns = build_active_turns(chat["messages"])
-                    chat["messages"].append({"role": "user", "text": label})
-                    with st.spinner("Thinking…"):
-                        chat["messages"].append(submit_turn(
-                            chat, label, ss.grade, ss.level, active_turns,
-                            forced_intent=_LABEL_TO_INTENT[label],
-                        ))
+                    queue_pending_turn(chat, label, forced_intent=_LABEL_TO_INTENT[label])
                 st.rerun()
 
 
@@ -1250,39 +1288,62 @@ def render_main_page():
         unsafe_allow_html=True,
     )
 
-    left, center, right = st.columns([1, 2.4, 1], gap="medium")
+    ss.setdefault("history_collapsed", False)
+    ss.setdefault("progress_collapsed", False)
+    # Collapsing a side panel frees its width back to the chat column instead
+    # of just leaving an empty card -- Streamlit's column ratios are static
+    # per st.columns() call, so this recomputes them each render based on
+    # the two toggles below.
+    left_w = 0.18 if ss.history_collapsed else 1.0
+    right_w = 0.18 if ss.progress_collapsed else 1.0
+    center_w = 2.4 + (1.0 - left_w) + (1.0 - right_w)
+    left, center, right = st.columns([left_w, center_w, right_w], gap="medium")
 
     # ---------- LEFT: History + New chat ----------
     with left:
         with st.container(border=True, key="history_panel"):
-            st.markdown('<div class="tt-card-head">History</div>', unsafe_allow_html=True)
-            view = st.radio("view", ["Chat History", "All Chats"], horizontal=True,
-                            label_visibility="collapsed", key="hist_view")
-            if st.button("➕ New chat", key="newchat", use_container_width=True):
-                start_new_chat()
-                st.rerun()
+            if ss.history_collapsed:
+                if st.button("▸", key="toggle_history", help="Show History",
+                             use_container_width=True):
+                    ss.history_collapsed = False
+                    st.rerun()
+            else:
+                head_c, toggle_c = st.columns([5, 1])
+                with head_c:
+                    st.markdown('<div class="tt-card-head">History</div>', unsafe_allow_html=True)
+                with toggle_c:
+                    if st.button("◂", key="toggle_history", help="Hide History",
+                                 use_container_width=True):
+                        ss.history_collapsed = True
+                        st.rerun()
 
-            if view == "Chat History":
-                qs = [m["text"] for m in active_chat()["messages"] if m["role"] == "user"]
-                if qs:
-                    for n, q in enumerate(qs, 1):
-                        short = q if len(q) <= 30 else q[:29] + "…"
-                        st.markdown(f'<div class="tt-hist-item">{n}. {html.escape(short)}</div>',
+                view = st.radio("view", ["Chat History", "All Chats"], horizontal=True,
+                                label_visibility="collapsed", key="hist_view")
+                if st.button("➕ New chat", key="newchat", use_container_width=True):
+                    start_new_chat()
+                    st.rerun()
+
+                if view == "Chat History":
+                    qs = [m["text"] for m in active_chat()["messages"] if m["role"] == "user"]
+                    if qs:
+                        for n, q in enumerate(qs, 1):
+                            short = q if len(q) <= 30 else q[:29] + "…"
+                            st.markdown(f'<div class="tt-hist-item">{n}. {html.escape(short)}</div>',
+                                        unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="tt-hist-empty">No questions in this chat yet — ask one! 👇</div>',
                                     unsafe_allow_html=True)
                 else:
-                    st.markdown('<div class="tt-hist-empty">No questions in this chat yet — ask one! 👇</div>',
-                                unsafe_allow_html=True)
-            else:
-                for c in reversed(ss.chats):
-                    title = chat_title(c)
-                    short = title if len(title) <= 24 else title[:23] + "…"
-                    q_count = sum(1 for m in c["messages"] if m["role"] == "user")
-                    label = f"💬 {short}" + (f"  ({q_count})" if q_count else "")
-                    if st.button(label, key=f"chatopen_{c['id']}",
-                                 type=("primary" if c["id"] == ss.active else "secondary"),
-                                 use_container_width=True):
-                        ss.active = c["id"]
-                        st.rerun()
+                    for c in reversed(ss.chats):
+                        title = chat_title(c)
+                        short = title if len(title) <= 24 else title[:23] + "…"
+                        q_count = sum(1 for m in c["messages"] if m["role"] == "user")
+                        label = f"💬 {short}" + (f"  ({q_count})" if q_count else "")
+                        if st.button(label, key=f"chatopen_{c['id']}",
+                                     type=("primary" if c["id"] == ss.active else "secondary"),
+                                     use_container_width=True):
+                            ss.active = c["id"]
+                            st.rerun()
 
     # ---------- CENTER: greeting + conversation + ask bar ----------
     with center:
@@ -1374,6 +1435,13 @@ def render_main_page():
                 height=0,
             )
 
+        # Generate the queued reply (if any) now that the message loop above
+        # has already drawn the student's bubble for it -- see
+        # queue_pending_turn's docstring for why this is split across two
+        # reruns instead of generating inline where the question was queued.
+        if process_pending_turn(chat, ss.grade, ss.level):
+            st.rerun()
+
         # ---- ask bar: fixed at the bottom of the screen, above the footer ----
         # A bare st.text_input + a separate st.button does NOT submit on
         # Enter in Streamlit -- pressing Enter only commits the text_input's
@@ -1384,6 +1452,7 @@ def render_main_page():
         # st.form's submit button, uniquely, DOES fire on Enter when it is
         # the form's only submit button -- this is the documented fix, not a
         # cosmetic wrapper.
+        ask_pending = bool(chat.get("pending_turn"))
         ask_key = f"askbox_{ss.active}_{len(msgs)}"
         with st.form(key="ask_bar", clear_on_submit=True, border=False):
             a_in, a_btn = st.columns([6, 1])
@@ -1391,10 +1460,11 @@ def render_main_page():
                 question = st.text_input(
                     "ask", key=ask_key,
                     placeholder="Type your answer, a question, or how you're thinking…",
-                    label_visibility="collapsed",
+                    label_visibility="collapsed", disabled=ask_pending,
                 )
             with a_btn:
-                ask_clicked = st.form_submit_button("↑", use_container_width=True)
+                ask_clicked = st.form_submit_button("↑", use_container_width=True,
+                                                    disabled=ask_pending)
 
         # Guard against a double-fire of the ask button (Enter + click landing
         # in the same script run), which was causing the same question to be
@@ -1403,90 +1473,95 @@ def render_main_page():
         submit_id = f"{ask_key}:{question.strip()}"
         if ask_clicked and question.strip() and st.session_state.get("_last_submit_id") != submit_id:
             st.session_state["_last_submit_id"] = submit_id
-            q = question.strip()
-
-            # Build memory BEFORE adding the current user message. This is the
-            # key detail that prevents the new question from appearing twice
-            # in the LLM prompt.
-            active_turns = build_active_turns(chat["messages"])
-
-            chat["messages"].append({"role": "user", "text": q})
-            with st.spinner("Thinking…"):
-                reply = submit_turn(chat, q, ss.grade, ss.level, active_turns)
-            chat["messages"].append(reply)
+            queue_pending_turn(chat, question.strip())
             st.rerun()
 
     # ---------- RIGHT: Progress + Badges ----------
     with right:
         with st.container(border=True, key="progress_panel"):
-            st.markdown('<div class="tt-card-head">Progress</div>', unsafe_allow_html=True)
-            # "Chat Progress" (this chat's solve streak, resets per new chat)
-            # and "Tutor Level" (the persistent backend classification that
-            # actually drives tutoring depth/thresholds) are two genuinely
-            # different things and are labelled as such -- they used to share
-            # the single, misleading label "Level".
-            st.markdown(f'<div class="tt-prog-row"><span>📈 Chat Progress</span>'
-                        f'<span class="val">{int(lvl_pct*100)}%</span></div>',
-                        unsafe_allow_html=True)
-            st.progress(lvl_pct)
-            st.markdown(
-                f'<div class="tt-prog-row"><span>✅ Questions Answered</span><span class="val">{solved}</span></div>'
-                f'<div class="tt-prog-row"><span>🌟 Stars</span><span class="val">{stars}</span></div>'
-                f'<div class="tt-prog-row"><span>🎯 Tutor Level</span>'
-                f'<span class="val">{_current_learner_level().title()}</span></div>',
-                unsafe_allow_html=True,
-            )
-
-        with st.container(border=True, key="badges_panel"):
-            st.markdown('<div class="tt-card-head">Badges</div>', unsafe_allow_html=True)
-            badges = [
-                ("Quick Thinker", "#f5a623", "⚡", solved >= 1),
-                ("Rising Star", "#2f9e5a", "🌟", solved >= 3),
-                ("Problem Solver", "#9b5de5", "🏆", solved >= 5),
-                ("Math Genius", "#e5484d", "🎓", solved >= 8),
-            ]
-            cells = ""
-            for name, c, ico, ok in badges:
-                cls = "" if ok else "locked"
-                bg = f'style="background:{c}"' if ok else ""
-                cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
-            st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
-
-        # Clearing the visible chat and resetting the persistent learner
-        # profile are two different actions with two different blast radii
-        # (one chat window vs. every chat, forever) and used to be silently
-        # bundled into one click -- a "Clear chat" that also erased the
-        # child's whole personalisation history with no warning. They are
-        # now separate, and the destructive one requires an explicit second
-        # confirmation.
-        if st.button("🗑️ Clear this chat", key="clearbtn", use_container_width=True):
-            clear_chat(chat)
-            st.rerun()
-
-        if ss.get("_confirm_reset_learning"):
-            st.markdown(
-                '<div class="tt-hist-empty">This erases your saved level and '
-                'progress for good. Are you sure?</div>',
-                unsafe_allow_html=True,
-            )
-            rc1, rc2 = st.columns(2)
-            with rc1:
-                if st.button("✅ Yes, reset", key="reset_confirm_yes", use_container_width=True):
-                    reset_learning_progress()
-                    ss["_confirm_reset_learning"] = False
+            if ss.progress_collapsed:
+                if st.button("▸", key="toggle_progress", help="Show Progress",
+                             use_container_width=True):
+                    ss.progress_collapsed = False
                     st.rerun()
-            with rc2:
-                if st.button("Cancel", key="reset_confirm_no", use_container_width=True):
-                    ss["_confirm_reset_learning"] = False
-                    st.rerun()
-        else:
-            if st.button("⚠️ Reset my learning progress", key="resetlearning", use_container_width=True):
-                ss["_confirm_reset_learning"] = True
+            else:
+                head_c, toggle_c = st.columns([5, 1])
+                with head_c:
+                    st.markdown('<div class="tt-card-head">Progress</div>', unsafe_allow_html=True)
+                with toggle_c:
+                    if st.button("▾", key="toggle_progress", help="Hide Progress",
+                                 use_container_width=True):
+                        ss.progress_collapsed = True
+                        st.rerun()
+
+                # "Chat Progress" (this chat's solve streak, resets per new chat)
+                # and "Tutor Level" (the persistent backend classification that
+                # actually drives tutoring depth/thresholds) are two genuinely
+                # different things and are labelled as such -- they used to share
+                # the single, misleading label "Level".
+                st.markdown(f'<div class="tt-prog-row"><span>📈 Chat Progress</span>'
+                            f'<span class="val">{int(lvl_pct*100)}%</span></div>',
+                            unsafe_allow_html=True)
+                st.progress(lvl_pct)
+                st.markdown(
+                    f'<div class="tt-prog-row"><span>✅ Questions Answered</span><span class="val">{solved}</span></div>'
+                    f'<div class="tt-prog-row"><span>🌟 Stars</span><span class="val">{stars}</span></div>'
+                    f'<div class="tt-prog-row"><span>🎯 Tutor Level</span>'
+                    f'<span class="val">{_current_learner_level().title()}</span></div>',
+                    unsafe_allow_html=True,
+                )
+
+        if not ss.progress_collapsed:
+            with st.container(border=True, key="badges_panel"):
+                st.markdown('<div class="tt-card-head">Badges</div>', unsafe_allow_html=True)
+                badges = [
+                    ("Quick Thinker", "#f5a623", "⚡", solved >= 1),
+                    ("Rising Star", "#2f9e5a", "🌟", solved >= 3),
+                    ("Problem Solver", "#9b5de5", "🏆", solved >= 5),
+                    ("Math Genius", "#e5484d", "🎓", solved >= 8),
+                ]
+                cells = ""
+                for name, c, ico, ok in badges:
+                    cls = "" if ok else "locked"
+                    bg = f'style="background:{c}"' if ok else ""
+                    cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
+                st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
+
+            # Clearing the visible chat and resetting the persistent learner
+            # profile are two different actions with two different blast radii
+            # (one chat window vs. every chat, forever) and used to be silently
+            # bundled into one click -- a "Clear chat" that also erased the
+            # child's whole personalisation history with no warning. They are
+            # now separate, and the destructive one requires an explicit second
+            # confirmation.
+            if st.button("🗑️ Clear this chat", key="clearbtn", use_container_width=True):
+                clear_chat(chat)
                 st.rerun()
 
-        if st.button("↩ Change name", key="chgname", use_container_width=True):
-            ss.page = "name"
-            st.rerun()
+            if ss.get("_confirm_reset_learning"):
+                st.markdown(
+                    '<div class="tt-hist-empty">This erases your saved level and '
+                    'progress for good. Are you sure?</div>',
+                    unsafe_allow_html=True,
+                )
+                rc1, rc2 = st.columns(2)
+                with rc1:
+                    if st.button("✅ Yes, reset", key="reset_confirm_yes", use_container_width=True):
+                        reset_learning_progress()
+                        ss["_confirm_reset_learning"] = False
+                        st.rerun()
+                with rc2:
+                    if st.button("Cancel", key="reset_confirm_no", use_container_width=True):
+                        ss["_confirm_reset_learning"] = False
+                        st.rerun()
+            else:
+                if st.button("⚠️ Reset my learning progress", key="resetlearning", use_container_width=True):
+                    ss["_confirm_reset_learning"] = True
+                    st.rerun()
+
+            if st.button("↩ Change name", key="chgname", use_container_width=True):
+                ss.page = "name"
+                st.rerun()
 
     # ---------- FIXED FOOTER ----------
     st.markdown(
