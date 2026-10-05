@@ -18,7 +18,7 @@ Run:  python -m frontend.test_app
 """
 from __future__ import annotations
 
-from scripts.llm import controller as C, hints, pipeline, verifier
+from scripts.llm import controller as C, hints, pipeline, safety, verifier
 from frontend import app
 
 _passed = 0
@@ -725,6 +725,78 @@ def test_episode_scoped_active_turns_excludes_prior_episode() -> None:
              not any("3 + 2" in str(t.get("content", "")) for t in captured[-1]))
 
 
+def test_input_safety_runs_before_any_llm_routing() -> None:
+    """Track 5: an unsafe turn must never reach conversation_resolver or
+    intent.classify_intent -- both of those are themselves LLM calls, so
+    checking safety AFTER them would mean an unsafe message already went to
+    a model. Proven here by making both raise if called at all, not just by
+    checking the final reply shape."""
+    print("M. input safety gate runs before conversation_resolver/intent are ever touched")
+
+    from scripts.llm import intent as intent_mod
+
+    def _must_not_be_called(*a, **kw):
+        raise AssertionError("LLM-based routing was reached for an unsafe input")
+
+    chat = _new_chat(episode=None)
+    with _Patch(pipeline, "resolve_conversation", _must_not_be_called), \
+         _Patch(intent_mod, "classify_intent", _must_not_be_called):
+        reply = app.submit_turn(chat, "I want to kill myself", 3, "on_track", [])
+    check("unsafe input never reaches conversation_resolver/intent (no exception bubbled up)",
+         isinstance(reply, dict))
+    check("blocked reply is tagged safety_blocked, not a normal tutoring mode",
+         reply.get("mode") == "safety_blocked")
+    check("the episode is left completely untouched (no episode silently started)",
+         chat["episode"] is None)
+    check("the safety decision is recorded on the reply",
+         reply.get("safety") == {"input_checked": True, "input_blocked": True,
+                                 "input_category": "self_harm",
+                                 "output_checked": False, "output_blocked": False})
+
+    # Safe input is unaffected and still reaches the real routing/generation.
+    chat2 = _new_chat(episode=None)
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add 2 and 2!")):
+        safe_reply = app.submit_turn(chat2, "What is 2 + 2?", 3, "on_track", [])
+    check("safe input reaches real generation (not blocked)",
+         safe_reply.get("mode") != "safety_blocked" and chat2["episode"] is not None)
+    check("the safety block records input_checked/input_blocked=False and "
+         "output_checked=True for a normal turn",
+         safe_reply.get("safety", {}).get("input_checked") is True
+         and safe_reply.get("safety", {}).get("input_blocked") is False
+         and safe_reply.get("safety", {}).get("output_checked") is True)
+
+
+def test_output_safety_blocks_unsafe_generated_text() -> None:
+    """Track 5: a bounded defense-in-depth scan of the model's OWN generated
+    text, independent of the input check above (the input here is ordinary
+    and safe; only the model's output is unsafe)."""
+    print("N. output safety gate blocks an unsafe generated reply before it is rendered")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    teach_action = C.Action(C.MODE_DIAGNOSE_WRONG, "", buttons=[])
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("Just go kill yourself if you can't do this.")):
+        reply = app._apply_action(chat, chat["episode"], teach_action, [])
+    check("the unsafe generated text is never shown to the child",
+         "kill" not in reply["text"])
+    check("a safe, generic fallback is shown instead",
+         reply["text"] == safety.check_output(
+             "Just go kill yourself if you can't do this.").fallback_text)
+    check("the reply records that output safety blocked this turn",
+         reply.get("safety", {}).get("output_blocked") is True)
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -745,6 +817,8 @@ def main() -> None:
     test_self_consistency_guardrail_surfaces_but_does_not_block()
     test_live_app_never_calls_legacy_tier_a_path()
     test_episode_scoped_active_turns_excludes_prior_episode()
+    test_input_safety_runs_before_any_llm_routing()
+    test_output_safety_blocks_unsafe_generated_text()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

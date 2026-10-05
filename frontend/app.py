@@ -334,7 +334,7 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
     until this returns successfully. Mutates episode's hint history and
     chat's thread_notes, which is safe because that only happens after text
     generation has already succeeded."""
-    from scripts.llm import controller as C, memory, verifier
+    from scripts.llm import controller as C, memory, safety, verifier
 
     state = episode["state"]
     thread_notes = chat.get("thread_notes", [])
@@ -353,28 +353,42 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
                      if msg_start is not None else active_turns)
     text = _run_generation(state, action, episode["chunks"], episode_turns,
                            episode["hints_shown"], thread_notes=thread_notes)
-    if action.mode == C.MODE_HINT and text:
-        episode["hints_shown"].append(text)
 
-    if action.mode == C.MODE_ACK_CONCEPTUAL:
-        # Conceptual episodes have no trusted answer to grade against and
-        # would otherwise loop through ACK_CONCEPTUAL forever (controller.py
-        # diagnose()). If this reply itself posed a concrete, computable
-        # exercise, graduate the episode so the student's next reply is
-        # diagnosed numerically instead. No-op (unchanged behaviour) if it
-        # didn't -- see controller.graduate_if_computable.
-        C.graduate_if_computable(state, text)
+    # Output safety: bounded defense-in-depth (see scripts/llm/safety.py) in
+    # case the model drifts past the system prompt's own scope instruction.
+    # Blocked text never reaches hint bookkeeping, graduation, the
+    # trusted-answer check, or the self-consistency scan below -- none of
+    # those are meaningful against a generic safety fallback string, and
+    # running them against raw unsafe text serves no purpose either.
+    output_check = safety.check_output(text) if text else safety.SafetyResult(blocked=False)
+    if output_check.blocked:
+        text = output_check.fallback_text
+        verify = None
+        self_check_issues: list = []
+    else:
+        if action.mode == C.MODE_HINT and text:
+            episode["hints_shown"].append(text)
 
-    verify = _post_check(state, action, text)
+        if action.mode == C.MODE_ACK_CONCEPTUAL:
+            # Conceptual episodes have no trusted answer to grade against and
+            # would otherwise loop through ACK_CONCEPTUAL forever (controller.py
+            # diagnose()). If this reply itself posed a concrete, computable
+            # exercise, graduate the episode so the student's next reply is
+            # diagnosed numerically instead. No-op (unchanged behaviour) if it
+            # didn't -- see controller.graduate_if_computable.
+            C.graduate_if_computable(state, text)
+
+        verify = _post_check(state, action, text)
+
+        # Bounded guardrail (Problem 10): the trusted-answer check above only
+        # ever covers the STUDENT's own problem, and only for 3 modes. Every
+        # mode is free to narrate its OWN illustrative arithmetic (a worked
+        # example with different numbers, a hint's partial step); nothing else
+        # checks whether THAT narrated arithmetic is internally consistent. This
+        # never blocks the reply — only surfaces a non-blocking warning tag.
+        self_check_issues = verifier.check_self_consistency(text) if text else []
+
     _record_outcome(state, action)
-
-    # Bounded guardrail (Problem 10): the trusted-answer check above only
-    # ever covers the STUDENT's own problem, and only for 3 modes. Every
-    # mode is free to narrate its OWN illustrative arithmetic (a worked
-    # example with different numbers, a hint's partial step); nothing else
-    # checks whether THAT narrated arithmetic is internally consistent. This
-    # never blocks the reply — only surfaces a non-blocking warning tag.
-    self_check_issues = verifier.check_self_consistency(text) if text else []
 
     if action.terminal and text:
         chat["thread_notes"] = memory.add_note(
@@ -388,6 +402,8 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
         "outcome": action.outcome, "hint_number": action.hint_number,
         "source": episode.get("source", ""), "verify": verify,
         "self_check_issues": self_check_issues,
+        "safety": {"output_checked": True, "output_blocked": output_check.blocked,
+                  "output_category": output_check.category},
     }
 
 
@@ -563,7 +579,28 @@ def submit_turn(
     recoverable error — never dressed up as a normal tutoring reply, and
     never silently presented as if the turn succeeded — while a falsy result
     that isn't an exception falls back to the old conversational reply used
-    for unparseable input."""
+    for unparseable input.
+
+    Input safety runs FIRST, before conversation_resolver/intent.classify_intent
+    (both of which can themselves make an LLM call) -- a blocked turn never
+    reaches the resolver, retrieval, verifier, or generation at all, and the
+    open episode's state is left completely untouched."""
+    from scripts.llm import safety
+
+    input_check = safety.check_input(text)
+    if input_check.blocked:
+        logger.info("submit_turn: input safety blocked turn (category=%s)",
+                   input_check.category)
+        return {
+            "role": "assistant", "kind": "turn", "mode": "safety_blocked",
+            "text": input_check.fallback_text, "buttons": [], "terminal": False,
+            "outcome": None, "hint_number": None, "source": "", "verify": None,
+            "self_check_issues": [],
+            "safety": {"input_checked": True, "input_blocked": True,
+                      "input_category": input_check.category,
+                      "output_checked": False, "output_blocked": False},
+        }
+
     try:
         reply = advance_episode(chat, text, grade, ui_level, active_turns,
                                 forced_intent=forced_intent)
@@ -577,6 +614,9 @@ def submit_turn(
     if not reply or not (reply.get("text") or "").strip():
         return {"role": "assistant", "kind": "chat", "question": text,
                "reply": _friendly_reply(text)}
+    reply.setdefault("safety", {})
+    reply["safety"]["input_checked"] = True
+    reply["safety"]["input_blocked"] = False
     return reply
 
 

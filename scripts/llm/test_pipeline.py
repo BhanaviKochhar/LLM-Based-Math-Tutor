@@ -9,7 +9,7 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 from __future__ import annotations
 
 from . import (conversation_resolver, hints, intent, llm_client, pipeline,
-              response_parser, student_tracker, verifier)
+              response_parser, safety, student_tracker, verifier)
 
 _passed = 0
 _failed = 0
@@ -522,6 +522,39 @@ def test_verifier_self_consistency_guardrail() -> None:
          verifier.check_self_consistency("Answer: 42") == [])
 
 
+def test_safety_gate() -> None:
+    """Track 5 (safety boundary): a bounded, deterministic (no LLM call)
+    input/output safety gate. check_input must run before any LLM-based
+    routing ever sees the text; check_output is a defense-in-depth scan of
+    what the model itself produced."""
+    print("safety — deterministic input/output gate")
+
+    safe_inputs = ["What is 24 + 18?", "I don't understand", "give me a hint",
+                  "counting", "8 + 9 = 7", "can you explain fractions"]
+    for s in safe_inputs:
+        check(f"safe input not blocked: {s!r}", safety.check_input(s).blocked is False)
+
+    unsafe_cases = [
+        ("I want to kill myself", "self_harm"),
+        ("I'm going to kill you", "violence"),
+        ("you are a fucking idiot", "sexual_profanity"),
+        ("call me at 555-123-4567", "personal_info"),
+        ("my home address is 12 Oak Street", "personal_info"),
+    ]
+    for text, _ in unsafe_cases:
+        result = safety.check_input(text)
+        check(f"unsafe input blocked: {text!r}", result.blocked is True)
+        check(f"blocked input has a child-safe fallback (no category leaked): {text!r}",
+             bool(result.fallback_text) and result.category not in result.fallback_text)
+
+    check("safe generated text is not blocked",
+         safety.check_output("Let's add 3 and 2. 3 + 2 = 5. Answer: 5").blocked is False)
+    bad_output = safety.check_output("Just go kill yourself if you can't do this.")
+    check("unsafe generated text IS blocked", bad_output.blocked is True)
+    check("the output fallback is generic (not a copy of the unsafe text)",
+         bad_output.fallback_text and "kill" not in bad_output.fallback_text)
+
+
 def main() -> None:
     test_response_parser()
     test_final_number_str_fallback_tiers()
@@ -535,6 +568,7 @@ def main() -> None:
     test_intent_keyword_fallback()
     test_conversation_resolver_deterministic_paths()
     test_verifier_self_consistency_guardrail()
+    test_safety_gate()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)
