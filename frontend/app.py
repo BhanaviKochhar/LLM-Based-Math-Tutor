@@ -334,7 +334,7 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
     until this returns successfully. Mutates episode's hint history and
     chat's thread_notes, which is safe because that only happens after text
     generation has already succeeded."""
-    from scripts.llm import controller as C, memory, safety, verifier
+    from scripts.llm import controller as C, memory, safety, telemetry, verifier
 
     state = episode["state"]
     thread_notes = chat.get("thread_notes", [])
@@ -395,6 +395,22 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
             thread_notes, state.question, action.outcome,
             attempts=state.attempts, hints=state.hints_given,
         )
+
+    # Structured interaction telemetry (distinct from common.log_run's
+    # per-generation-call log): one compact record per student turn, enough
+    # to reconstruct what was decided without duplicating the raw prompt.
+    telemetry.log_interaction(
+        chat_id=chat.get("id"), student_id=STUDENT_ID,
+        resolved_question=state.question, grade=state.grade, level=state.level,
+        is_math=state.is_math, has_trusted_answer=state.computed_answer is not None,
+        controller_mode=action.mode, hint_number=action.hint_number,
+        attempts=state.attempts, hints_given=state.hints_given,
+        terminal=action.terminal, outcome=action.outcome,
+        verify=verify, self_check_issue_count=len(self_check_issues),
+        input_safety={"checked": True, "blocked": False},
+        output_safety={"checked": True, "blocked": output_check.blocked,
+                      "category": output_check.category},
+    )
 
     return {
         "role": "assistant", "kind": "turn", "mode": action.mode, "text": text,
@@ -585,12 +601,19 @@ def submit_turn(
     (both of which can themselves make an LLM call) -- a blocked turn never
     reaches the resolver, retrieval, verifier, or generation at all, and the
     open episode's state is left completely untouched."""
-    from scripts.llm import safety
+    from scripts.llm import safety, telemetry
 
     input_check = safety.check_input(text)
     if input_check.blocked:
         logger.info("submit_turn: input safety blocked turn (category=%s)",
                    input_check.category)
+        telemetry.log_interaction(
+            chat_id=chat.get("id"), student_id=STUDENT_ID,
+            controller_mode="safety_blocked", terminal=False,
+            input_safety={"checked": True, "blocked": True,
+                         "category": input_check.category},
+            output_safety={"checked": False, "blocked": False},
+        )
         return {
             "role": "assistant", "kind": "turn", "mode": "safety_blocked",
             "text": input_check.fallback_text, "buttons": [], "terminal": False,

@@ -797,6 +797,43 @@ def test_output_safety_blocks_unsafe_generated_text() -> None:
          reply.get("safety", {}).get("output_blocked") is True)
 
 
+def test_interaction_telemetry_reconstructs_the_turn() -> None:
+    """Track 6: one structured interaction_events record per student turn,
+    distinct from common.log_run's per-generation-call log, sufficient to
+    answer "what happened to this turn" (controller mode, safety decisions,
+    verify outcome) without duplicating the raw prompt transcript."""
+    print("O. structured interaction telemetry is actually written per turn")
+
+    from scripts.llm import telemetry
+
+    captured = []
+    with _Patch(telemetry, "log_interaction", lambda **kw: captured.append(kw)):
+        chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+        correct_action = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved", terminal=True)
+        with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+             _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Nice!")):
+            app._apply_action(chat, chat["episode"], correct_action, [])
+        check("a normal turn logs exactly one interaction event", len(captured) == 1)
+        check("the event records the controller mode and outcome",
+             captured[0]["controller_mode"] == "diagnose_correct"
+             and captured[0]["outcome"] == "solved")
+        check("the event records that both safety checks ran and passed",
+             captured[0]["input_safety"] == {"checked": True, "blocked": False}
+             and captured[0]["output_safety"]["checked"] is True
+             and captured[0]["output_safety"]["blocked"] is False)
+
+        captured.clear()
+        chat2 = _new_chat(episode=None)
+        app.submit_turn(chat2, "I want to kill myself", 3, "on_track", [])
+        check("a safety-blocked turn ALSO logs exactly one interaction event",
+             len(captured) == 1)
+        check("the blocked event records the input-safety category, with no "
+             "controller mode (the controller was never reached)",
+             captured[0]["input_safety"]["blocked"] is True
+             and captured[0]["input_safety"]["category"] == "self_harm"
+             and captured[0]["controller_mode"] == "safety_blocked")
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -819,6 +856,7 @@ def main() -> None:
     test_episode_scoped_active_turns_excludes_prior_episode()
     test_input_safety_runs_before_any_llm_routing()
     test_output_safety_blocks_unsafe_generated_text()
+    test_interaction_telemetry_reconstructs_the_turn()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)
