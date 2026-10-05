@@ -18,7 +18,7 @@ Run:  python -m frontend.test_app
 """
 from __future__ import annotations
 
-from scripts.llm import controller as C, hints, pipeline, safety, verifier
+from scripts.llm import controller as C, hints, pipeline, safety, student_tracker, verifier
 from frontend import app
 
 _passed = 0
@@ -574,6 +574,27 @@ def test_current_learner_level_uses_real_backend_classification() -> None:
              app._current_learner_level() == "advanced")
 
 
+def test_top_weak_topic_surfaces_canonical_topics_only() -> None:
+    """Track 16 follow-through: the canonicalized weak_topics data (fixed in
+    scripts/llm/topics.py) must actually reach the UI, and the low-confidence
+    'Other' bucket must never be shown as if it were a specific, actionable
+    topic."""
+    print("Q2. _top_weak_topic surfaces a real canonical topic, never 'Other'")
+
+    with _Patch(student_tracker, "stats",
+               lambda sid: {"weak_topics": ["Other", "Fractions & Decimals"]}):
+        check("the honest 'Other' bucket is skipped in favour of a real topic",
+             app._top_weak_topic() == "Fractions & Decimals")
+
+    with _Patch(student_tracker, "stats", lambda sid: {"weak_topics": ["Other"]}):
+        check("ONLY 'Other' present -> no topic surfaced at all (not shown as if specific)",
+             app._top_weak_topic() is None)
+
+    with _Patch(student_tracker, "stats", lambda sid: {"weak_topics": []}):
+        check("no weak topics yet -> None, not an empty-string placeholder",
+             app._top_weak_topic() is None)
+
+
 # --------------------------------------------------------------- I: thread_notes memory
 def test_thread_notes_populated_on_terminal_action() -> None:
     """Problem 8: a finished episode must leave a thread note behind so the
@@ -918,6 +939,7 @@ def main() -> None:
     test_confusion_correction_clarify_skip_retrieval()
     test_clear_chat_preserves_learner_profile()
     test_current_learner_level_uses_real_backend_classification()
+    test_top_weak_topic_surfaces_canonical_topics_only()
     test_thread_notes_populated_on_terminal_action()
     test_self_consistency_guardrail_surfaces_but_does_not_block()
     test_live_app_never_calls_legacy_tier_a_path()

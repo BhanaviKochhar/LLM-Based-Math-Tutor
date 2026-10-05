@@ -202,6 +202,25 @@ def _current_learner_level() -> str:
         return "intermediate"
 
 
+def _top_weak_topic() -> str | None:
+    """The single most-missed canonical topic (scripts/llm/topics.py) across
+    this student's recorded wrong attempts, or None if there isn't a
+    meaningful one yet. Surfaces the Track 16 fix (canonical, aggregatable
+    topic tracking) somewhere the child/parent can actually see it -- data
+    that is computed but never shown is as good as unused."""
+    if MOCK_MODE:
+        return None
+    try:
+        from scripts.llm import student_tracker
+        weak = student_tracker.stats(_student_id()).get("weak_topics", [])
+        # "Other" is an honest low-confidence bucket, not a real topic name --
+        # never surface it as if it were specific, actionable feedback.
+        named = [t for t in weak if t != "Other"]
+        return named[0] if named else None
+    except Exception:
+        return None
+
+
 # ===========================================================================
 # Controller-driven tutoring episode
 #
@@ -1510,6 +1529,13 @@ def render_main_page():
                     f'<span class="val">{_current_learner_level().title()}</span></div>',
                     unsafe_allow_html=True,
                 )
+                weak_topic = _top_weak_topic()
+                if weak_topic:
+                    st.markdown(
+                        '<div class="tt-prog-row"><span>📌 Practice more</span>'
+                        f'<span class="val">{html.escape(weak_topic)}</span></div>',
+                        unsafe_allow_html=True,
+                    )
 
         if not ss.progress_collapsed:
             with st.container(border=True, key="badges_panel"):

@@ -9,7 +9,7 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 from __future__ import annotations
 
 from . import (conversation_resolver, hints, intent, llm_client, pipeline,
-              response_parser, safety, student_tracker, verifier)
+              response_parser, safety, student_tracker, topics, verifier)
 
 _passed = 0
 _failed = 0
@@ -408,6 +408,57 @@ def test_student_tracker_atomic_save() -> None:
         student_tracker.STORE = orig_store
 
 
+def test_topic_canonicalization() -> None:
+    """Track 16: weak_topics must aggregate under a small, fixed set of
+    canonical topic names instead of the raw (previously 30-char-truncated)
+    question text, which produced an unaggregatable key per differently-
+    worded question. Covers both the classifier itself and that
+    pipeline.record_feedback actually uses it end to end."""
+    print("topics — deterministic canonical classification")
+
+    cases = [
+        ("What is 7 times 8?", "Multiplication"),
+        ("56 + 27", "Addition & Subtraction"),
+        ("add 56 and 27", "Addition & Subtraction"),
+        ("What is one-third of 9?", "Fractions & Decimals"),
+        ("perimeter of a rectangle", "Perimeter, Area & Volume"),
+        ("what are the factors of 12", "Factors & Multiples"),
+        ("89/4 explain step by step. div", "Division"),
+        ("what time is it", "Time & Calendar"),
+        ("how many rupees do I have", "Money"),
+        ("6 x 2", "Multiplication"),
+    ]
+    for q, expected in cases:
+        check(f"canonicalize({q!r}) -> {expected!r}", topics.canonicalize(q) == expected)
+    check("an un-classifiable fragment returns None, not a guess",
+         topics.canonicalize("There are 26 ba") is None)
+
+    import os
+    import tempfile
+
+    orig_store = student_tracker.STORE
+    tmpdir = tempfile.mkdtemp()
+    student_tracker.STORE = os.path.join(tmpdir, "students.json")
+    try:
+        # Two differently-worded additions should aggregate under the SAME
+        # canonical key -- the exact aggregation failure being fixed.
+        pipeline.record_feedback("topic_test", "56 + 27", correct=False)
+        pipeline.record_feedback("topic_test", "what is 12 plus 9", correct=False)
+        stats = student_tracker.stats("topic_test")
+        check("both differently-worded wrong attempts aggregate under ONE "
+             "canonical topic key, not two separate raw-text keys",
+             stats["weak_topics"] == ["Addition & Subtraction"])
+
+        # A question the matcher can't place goes in the honest "Other"
+        # bucket, never a fabricated specific topic.
+        pipeline.record_feedback("topic_test", "There are 26 ba", correct=False)
+        stats2 = student_tracker.stats("topic_test")
+        check("an unclassifiable question is bucketed as 'Other', not guessed",
+             "Other" in stats2["weak_topics"])
+    finally:
+        student_tracker.STORE = orig_store
+
+
 # -------------------------------------------- intent keyword-fallback routing
 def test_intent_keyword_fallback() -> None:
     """scripts/llm/intent.py's deterministic keyword fallback
@@ -569,6 +620,7 @@ def main() -> None:
     test_conversation_resolver_deterministic_paths()
     test_verifier_self_consistency_guardrail()
     test_safety_gate()
+    test_topic_canonicalization()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

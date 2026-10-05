@@ -425,7 +425,15 @@ def record_feedback(student_id: str | None, topic: str, correct: bool) -> None:
     if not student_id:
         return
     try:
-        student_tracker.record(student_id, topic=topic[:30], correct=correct)
+        # Canonicalize to one of topics.CANONICAL_TOPICS so weak_topics
+        # actually aggregates ("56 + 27" and "add 56 and 27" now share one
+        # key) instead of storing the raw, 30-char-truncated question text,
+        # which was never a usable topic representation (see topics.py). A
+        # question the keyword matcher can't confidently place goes in the
+        # honest "Other" bucket rather than a fabricated specific topic.
+        from . import topics
+        canonical = topics.canonicalize(topic) or "Other"
+        student_tracker.record(student_id, topic=canonical, correct=correct)
     except Exception:
         pass
 
