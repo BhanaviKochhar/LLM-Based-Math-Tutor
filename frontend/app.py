@@ -5,6 +5,7 @@ import sys
 import time
 import html
 import random
+import uuid
 from pathlib import Path
 
 import streamlit as st
@@ -20,7 +21,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # is untouched — the functions below only call into it.
 MOCK_MODE = False
 
-STUDENT_ID = "session_user"   # single-user MVP; drives the personalisation loop
+def _student_id() -> str:
+    """A stable, opaque per-BROWSER-SESSION id -- deliberately NOT the
+    child's name (two different children could share a name, and the name
+    is just a display greeting, not an identity) and NOT a single hardcoded
+    constant shared by every visitor (that would mean two different
+    children open in two different browser sessions on the same running app
+    would silently share one student_tracker profile/level/history). Full
+    authentication is out of scope for this pass; this is the bounded fix
+    that keeps identity separate from both Streamlit session state and
+    tutoring state so a real auth layer can replace it later without
+    touching the tutoring code (see the stabilization brief's identity
+    architecture section)."""
+    return st.session_state.setdefault("student_id", uuid.uuid4().hex)
 
 # Longer, kid-friendly worked explanations + 3 escalating hints each.
 MOCK_RESPONSES = [
@@ -135,7 +148,7 @@ def record_feedback(question: str, correct: bool) -> None:
         return
     try:
         from scripts.llm import pipeline
-        pipeline.record_feedback(STUDENT_ID, topic=question, correct=correct)
+        pipeline.record_feedback(_student_id(), topic=question, correct=correct)
     except Exception:
         pass
 
@@ -145,7 +158,7 @@ def reset_student() -> None:
         return
     try:
         from scripts.llm import pipeline
-        pipeline.reset_student(STUDENT_ID)
+        pipeline.reset_student(_student_id())
     except Exception:
         pass
 
@@ -183,7 +196,7 @@ def _current_learner_level() -> str:
         return "intermediate"
     try:
         from scripts.llm import pipeline
-        return pipeline.resolve_level(STUDENT_ID, ss.level)
+        return pipeline.resolve_level(_student_id(), ss.level)
     except Exception:
         return "intermediate"
 
@@ -400,7 +413,7 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
     # per-generation-call log): one compact record per student turn, enough
     # to reconstruct what was decided without duplicating the raw prompt.
     telemetry.log_interaction(
-        chat_id=chat.get("id"), student_id=STUDENT_ID,
+        chat_id=chat.get("id"), student_id=_student_id(),
         resolved_question=state.question, grade=state.grade, level=state.level,
         is_math=state.is_math, has_trusted_answer=state.computed_answer is not None,
         controller_mode=action.mode, hint_number=action.hint_number,
@@ -441,7 +454,7 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
     from scripts.retrieval import retrieve_with_metadata
 
     resolution = pipeline.resolve_conversation(question, active_turns, grade=grade)
-    level = pipeline.resolve_level(STUDENT_ID, ui_level)
+    level = pipeline.resolve_level(_student_id(), ui_level)
 
     chunks_meta = (retrieve_with_metadata(resolution.retrieval_query, grade)
                   if resolution.use_rag else [])
@@ -608,7 +621,7 @@ def submit_turn(
         logger.info("submit_turn: input safety blocked turn (category=%s)",
                    input_check.category)
         telemetry.log_interaction(
-            chat_id=chat.get("id"), student_id=STUDENT_ID,
+            chat_id=chat.get("id"), student_id=_student_id(),
             controller_mode="safety_blocked", terminal=False,
             input_safety={"checked": True, "blocked": True,
                          "category": input_check.category},

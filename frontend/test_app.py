@@ -834,6 +834,37 @@ def test_interaction_telemetry_reconstructs_the_turn() -> None:
              and captured[0]["controller_mode"] == "safety_blocked")
 
 
+def test_student_id_is_per_session_not_a_shared_constant() -> None:
+    """Track 7 (identity isolation): student_id must be a stable, opaque
+    per-BROWSER-SESSION id, not a single hardcoded constant shared by every
+    visitor (the previous STUDENT_ID = "session_user") and not the child's
+    display name (two children can share a name). Verified at the level
+    that actually matters here: different session_state backings produce
+    different, but each internally stable, ids."""
+    print("P. _student_id() is session-scoped, not a shared global constant")
+
+    import streamlit as st
+
+    class _FakeSessionState(dict):
+        def setdefault(self, key, default):
+            return dict.setdefault(self, key, default)
+
+    session_a = _FakeSessionState()
+    session_b = _FakeSessionState()
+
+    with _Patch(st, "session_state", session_a):
+        id_a1 = app._student_id()
+        id_a2 = app._student_id()
+    check("the same session gets the SAME id on repeated calls (stable)", id_a1 == id_a2)
+
+    with _Patch(st, "session_state", session_b):
+        id_b1 = app._student_id()
+    check("a DIFFERENT session gets a DIFFERENT id (isolation, not a shared constant)",
+         id_a1 != id_b1)
+    check("the id is not derived from the child's display name (it's an opaque token)",
+         id_a1 != "session_user" and len(id_a1) >= 16)
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -857,6 +888,7 @@ def main() -> None:
     test_input_safety_runs_before_any_llm_routing()
     test_output_safety_blocks_unsafe_generated_text()
     test_interaction_telemetry_reconstructs_the_turn()
+    test_student_id_is_per_session_not_a_shared_constant()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)
