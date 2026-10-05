@@ -338,7 +338,20 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
 
     state = episode["state"]
     thread_notes = chat.get("thread_notes", [])
-    text = _run_generation(state, action, episode["chunks"], active_turns,
+    # The caller's `active_turns` is built from the WHOLE chat (every earlier
+    # episode too) -- fine for conversation_resolver's routing decisions, but
+    # wrong for what the model actually sees while generating THIS reply: an
+    # earlier finished episode's full transcript would otherwise sit right
+    # before the current problem in the prompt, and a model narrating a
+    # co-solve/hint can pick up a stray number from it. When the episode
+    # tracks where it started (msg_start, set by start_episode/
+    # start_followup), scope generation strictly to this episode's own prior
+    # turns instead. Falls back to the caller's active_turns when msg_start
+    # isn't set (e.g. hand-built episodes in tests).
+    msg_start = episode.get("msg_start")
+    episode_turns = (build_active_turns(chat["messages"][msg_start:-1])
+                     if msg_start is not None else active_turns)
+    text = _run_generation(state, action, episode["chunks"], episode_turns,
                            episode["hints_shown"], thread_notes=thread_notes)
     if action.mode == C.MODE_HINT and text:
         episode["hints_shown"].append(text)
@@ -412,7 +425,12 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
         resolution.resolved_question, grade, level,
         computed_answer=computed_answer, is_math=is_math,
     )
-    episode = {"state": state, "chunks": chunks, "source": source, "hints_shown": []}
+    # msg_start anchors this episode to the user message that opened it, so
+    # _apply_action only ever shows the model turns from THIS problem, never
+    # an earlier finished episode's transcript (which can carry stray
+    # numbers from an unrelated problem into this one's generation context).
+    episode = {"state": state, "chunks": chunks, "source": source, "hints_shown": [],
+              "msg_start": len(chat["messages"]) - 1}
     reply = _apply_action(chat, episode, action, active_turns)  # may raise
     chat["episode"] = episode  # commit only after generation succeeded
     return reply
@@ -465,9 +483,16 @@ def _advance_math_followup(chat, episode, text, grade, active_turns) -> dict:
         state.question, resolution.resolved_question, grade, state.level,
         computed_answer=computed_answer, is_math=is_math,
     )
-    trial_episode = dict(episode, state=new_state)
+    # This is functionally a new episode (own attempts/hints budget) derived
+    # from the old one, so it gets its own msg_start too -- its generation
+    # context should start from the follow-up turn, not replay the whole
+    # parent problem's transcript (the directive above already names the
+    # connection to the previous problem in words).
+    msg_start = len(chat["messages"]) - 1
+    trial_episode = dict(episode, state=new_state, msg_start=msg_start)
     reply = _apply_action(chat, trial_episode, action, active_turns)  # may raise
     episode["state"] = new_state  # commit only after generation succeeded
+    episode["msg_start"] = msg_start
     return reply
 
 

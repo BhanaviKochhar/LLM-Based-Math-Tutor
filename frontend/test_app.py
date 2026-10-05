@@ -658,6 +658,73 @@ def test_live_app_never_calls_legacy_tier_a_path() -> None:
         check(f"app.py does not call {symbol}", symbol not in src)
 
 
+def test_episode_scoped_active_turns_excludes_prior_episode() -> None:
+    """Track 1 (stale-problem/stale-operand regression): a finished episode's
+    full transcript must never be replayed into a LATER episode's generation
+    context, even though both live in the same chat and the UI-level
+    active_turns (built from the whole chat, for conversation_resolver's
+    benefit) legitimately does include it. Reproduces the shape of the live
+    bug (an earlier problem's numbers surfacing in a later problem's
+    co-solve) generically, with two different arithmetic problems, not by
+    special-casing any one example."""
+    print("L. generation context is scoped to the CURRENT episode, not the whole chat")
+
+    chat = _new_chat(episode=None)
+    captured = []
+
+    def _capture_generate_turn(state, action, chunks=None, thread_notes=None,
+                               active_turns=None, previous_hints=None):
+        captured.append(list(active_turns or []))
+        return _FakeStream(f"reply about {state.question}")
+
+    def _resolution_for(q):
+        class _R:
+            resolved_question = q
+            retrieval_query = q
+            use_rag = False
+            use_verifier = False
+        return _R()
+
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "generate_turn", _capture_generate_turn):
+
+        # Episode 1: the first-ever turn in a brand new chat.
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("3 + 2")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "3 + 2"})
+            chat["messages"].append(app.submit_turn(chat, "3 + 2", 3, "on_track", active_turns))
+        check("episode 1's own first turn sees no prior turns", captured[-1] == [])
+
+        # Close episode 1 out (as a real terminal action would) so the next
+        # turn opens a fresh, unrelated episode in the SAME chat. `terminal`
+        # is a read-only property derived from `phase`, so drive it via phase.
+        chat["episode"]["state"].phase = C.SOLVED
+
+        # Episode 2: a different, unrelated problem, same chat/session.
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("8 + 9")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "8 + 9"})
+            chat["messages"].append(app.submit_turn(chat, "8 + 9", 3, "on_track", active_turns))
+        check("the UI-level active_turns passed in DOES span the whole chat "
+             "(unaffected -- conversation_resolver still sees full history)",
+             len(active_turns) == 2)
+        check("but episode 2's OWN first-turn generation context excludes "
+             "episode 1's transcript entirely",
+             captured[-1] == [])
+
+        # A follow-up turn within episode 2 (its second turn).
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("8 + 9")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "8+9=7"})
+            chat["messages"].append(app.submit_turn(chat, "8+9=7", 3, "on_track", active_turns,
+                                                     forced_intent="ATTEMPT"))
+        check("a later turn in episode 2 sees episode 2's own prior turn only",
+             len(captured[-1]) == 2 and captured[-1][0]["content"] == "8 + 9")
+        check("episode 1's question never leaks into episode 2's generation context",
+             not any("3 + 2" in str(t.get("content", "")) for t in captured[-1]))
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -677,6 +744,7 @@ def main() -> None:
     test_thread_notes_populated_on_terminal_action()
     test_self_consistency_guardrail_surfaces_but_does_not_block()
     test_live_app_never_calls_legacy_tier_a_path()
+    test_episode_scoped_active_turns_excludes_prior_episode()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)
