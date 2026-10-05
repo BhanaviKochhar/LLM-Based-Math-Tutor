@@ -1553,41 +1553,56 @@ def render_main_page():
                     cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
                 st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
 
-            # Clearing the visible chat and resetting the persistent learner
-            # profile are two different actions with two different blast radii
-            # (one chat window vs. every chat, forever) and used to be silently
-            # bundled into one click -- a "Clear chat" that also erased the
-            # child's whole personalisation history with no warning. They are
-            # now separate, and the destructive one requires an explicit second
-            # confirmation.
-            if st.button("🗑️ Clear this chat", key="clearbtn", use_container_width=True):
-                clear_chat(chat)
-                st.rerun()
+        # Deliberately OUTSIDE the progress_collapsed gate: these are account-
+        # level actions (not progress stats), so collapsing the Progress card
+        # to reclaim screen space must never also take away the only way to
+        # clear a chat, reset learning progress, or change your name. A
+        # earlier version nested these inside the collapsed panel and lost
+        # them entirely whenever Progress was collapsed. When collapsed, the
+        # column itself is too narrow for full-text buttons (Streamlit wraps
+        # them one letter per line), so fall back to icon-only labels there
+        # -- still three clicks, just compact ones.
+        compact = ss.progress_collapsed
 
-            if ss.get("_confirm_reset_learning"):
-                st.markdown(
-                    '<div class="tt-hist-empty">This erases your saved level and '
-                    'progress for good. Are you sure?</div>',
-                    unsafe_allow_html=True,
-                )
-                rc1, rc2 = st.columns(2)
-                with rc1:
-                    if st.button("✅ Yes, reset", key="reset_confirm_yes", use_container_width=True):
-                        reset_learning_progress()
-                        ss["_confirm_reset_learning"] = False
-                        st.rerun()
-                with rc2:
-                    if st.button("Cancel", key="reset_confirm_no", use_container_width=True):
-                        ss["_confirm_reset_learning"] = False
-                        st.rerun()
-            else:
-                if st.button("⚠️ Reset my learning progress", key="resetlearning", use_container_width=True):
-                    ss["_confirm_reset_learning"] = True
+        # Clearing the visible chat and resetting the persistent learner
+        # profile are two different actions with two different blast radii
+        # (one chat window vs. every chat, forever) and used to be silently
+        # bundled into one click -- a "Clear chat" that also erased the
+        # child's whole personalisation history with no warning. They are
+        # now separate, and the destructive one requires an explicit second
+        # confirmation.
+        if st.button("🗑️" if compact else "🗑️ Clear this chat", key="clearbtn",
+                     use_container_width=True, help="Clear this chat" if compact else None):
+            clear_chat(chat)
+            st.rerun()
+
+        if ss.get("_confirm_reset_learning") and not compact:
+            st.markdown(
+                '<div class="tt-hist-empty">This erases your saved level and '
+                'progress for good. Are you sure?</div>',
+                unsafe_allow_html=True,
+            )
+            rc1, rc2 = st.columns(2)
+            with rc1:
+                if st.button("✅ Yes, reset", key="reset_confirm_yes", use_container_width=True):
+                    reset_learning_progress()
+                    ss["_confirm_reset_learning"] = False
                     st.rerun()
-
-            if st.button("↩ Change name", key="chgname", use_container_width=True):
-                ss.page = "name"
+            with rc2:
+                if st.button("Cancel", key="reset_confirm_no", use_container_width=True):
+                    ss["_confirm_reset_learning"] = False
+                    st.rerun()
+        else:
+            if st.button("⚠️" if compact else "⚠️ Reset my learning progress", key="resetlearning",
+                         use_container_width=True,
+                         help="Reset my learning progress" if compact else None):
+                ss["_confirm_reset_learning"] = True
                 st.rerun()
+
+        if st.button("↩" if compact else "↩ Change name", key="chgname",
+                     use_container_width=True, help="Change name" if compact else None):
+            ss.page = "name"
+            st.rerun()
 
     # ---------- FIXED FOOTER ----------
     st.markdown(
