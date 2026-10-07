@@ -439,7 +439,15 @@ def test_math_followup_preserves_relationship() -> None:
     chat = _new_chat(_math_episode(attempts=0, computed_answer="381"))
     chat["episode"]["state"].question = "245 + 136"
 
+    # advance_episode's FIRST stop for an open episode is intent.classify_intent
+    # (a real LLM call unless forced); mocked here too, consistent with the
+    # module docstring's "no network calls" promise -- this test is about
+    # what happens once MATH_FOLLOWUP is identified, not about the
+    # classifier's own accuracy (that has its own dedicated coverage).
+    from scripts.llm import intent as intent_mod
+
     with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(intent_mod, "classify_intent", lambda *a, **kw: "MATH_FOLLOWUP"), \
          _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
          _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("395", True)), \
          _Patch(pipeline, "generate_turn",
@@ -609,7 +617,13 @@ def test_thread_notes_populated_on_terminal_action() -> None:
     chat["thread_notes"] = []
     correct_action = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved",
                               terminal=True)
-    with _Patch(app, "record_feedback", lambda *a, **kw: None):
+    # Mocked like every other generation call in this file (see the module
+    # docstring: "nothing here calls Groq/HF or spends an API credit") --
+    # this call was previously left unmocked, a real network dependency
+    # hiding in a suite that promises it has none, found when a live quota
+    # exhaustion elsewhere in testing made this specific test fail.
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Great job!")):
         reply = app._apply_action(chat, chat["episode"], correct_action, [])
     check("a terminal action with real text adds exactly one thread note",
          len(chat["thread_notes"]) == 1)
@@ -797,6 +811,35 @@ def test_input_safety_runs_before_any_llm_routing() -> None:
          and safe_reply.get("safety", {}).get("output_checked") is True)
 
 
+def test_unsafe_message_mid_episode_preserves_the_open_problem() -> None:
+    """Journey J (safety continuation): an unsafe message arriving while a
+    math problem is already open must not reset, advance, or otherwise touch
+    that episode -- the child should be able to answer the SAME problem
+    normally right afterward. submit_turn's input-safety branch returns
+    before advance_episode is ever reached, so chat["episode"] is never
+    touched either way; this proves that holds for an ALREADY-OPEN episode,
+    not just a fresh chat (which test M already covers)."""
+    print("M2. an unsafe message mid-episode leaves the open problem untouched")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    state_before = chat["episode"]["state"]
+
+    blocked_reply = app.submit_turn(chat, "I want to kill myself", 3, "on_track", [])
+    check("the unsafe message is blocked, not treated as an answer",
+         blocked_reply.get("mode") == "safety_blocked")
+    check("the SAME episode object survives completely untouched",
+         chat["episode"]["state"] is state_before
+         and state_before.question == "What is 7 times 8?"
+         and state_before.computed_answer == "56" and state_before.attempts == 0)
+
+    with _Patch(app, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Great job!")):
+        normal_reply = app.submit_turn(chat, "56", 3, "on_track", [])
+    check("tutoring resumes normally on the SAME problem right after the "
+         "safety interruption (not reset to a new/different episode)",
+         normal_reply.get("mode") == "diagnose_correct")
+
+
 def test_output_safety_blocks_unsafe_generated_text() -> None:
     """Track 5: a bounded defense-in-depth scan of the model's OWN generated
     text, independent of the input check above (the input here is ordinary
@@ -923,6 +966,78 @@ def test_pending_turn_shows_question_before_generating_the_reply() -> None:
          app.process_pending_turn(chat, 3, "on_track") is False)
 
 
+def test_progress_to_next_badge_has_a_defensible_meaning() -> None:
+    """The old `(solved % 3) / 3` formula cycled back to 0% every 3rd solve
+    -- including the instant after a correct answer -- and "3" had no
+    relationship to the actual badge thresholds (1, 3, 5, 8). This checks
+    the replacement: a monotonically non-decreasing bar WITHIN each badge
+    band, a threshold that always matches _BADGES, and 100% once every
+    badge is earned."""
+    print("R. _progress_to_next_badge ties the bar to the real badge thresholds")
+
+    check("0 solved -> 0% toward the first badge (threshold 1)",
+         app._progress_to_next_badge(0) == (0, 1, 0.0))
+    check("1 solved -> Quick Thinker just earned, fresh 0% toward Rising Star (3)",
+         app._progress_to_next_badge(1) == (1, 3, 0.0))
+    check("2 solved -> halfway to Rising Star",
+         app._progress_to_next_badge(2) == (2, 3, 0.5))
+    check("3 solved -> Rising Star just earned, fresh 0% toward Problem Solver (5)",
+         app._progress_to_next_badge(3) == (3, 5, 0.0))
+    check("8 solved -> every badge earned, 100% and no further threshold",
+         app._progress_to_next_badge(8) == (8, None, 1.0))
+    check("9 solved -> still capped at 100% with no threshold (never errors/overflows)",
+         app._progress_to_next_badge(9) == (9, None, 1.0))
+
+    # Within each band (between two badge unlocks), progress must never
+    # drop as solved increases -- the exact bug being fixed.
+    prev_pct = -1.0
+    prev_threshold = None
+    for solved in range(0, 9):
+        _, next_badge, pct = app._progress_to_next_badge(solved)
+        if next_badge == prev_threshold:
+            check(f"progress never drops within a band (solved={solved})", pct >= prev_pct)
+        prev_pct, prev_threshold = pct, next_badge
+
+    check("the progress-bar thresholds are exactly the Badges panel's own "
+         "thresholds (single source of truth, can't drift out of sync)",
+         [t for _, _, _, t in app._BADGES] == [1, 3, 5, 8])
+
+
+def test_change_grade_invalidates_open_episodes_but_keeps_chat_history() -> None:
+    """Section 10 (ongoing grade change): changing grade mid-session must not
+    let an in-progress episode -- computed (trusted answer, retrieval,
+    prompt) for the OLD grade's taught form -- silently continue under the
+    new grade, but must never touch the chat's message history. Grade is a
+    single global (ss.grade), not per-chat, so EVERY chat's open episode is
+    invalidated, not just the active one."""
+    print("S. change_grade invalidates open episodes without touching messages")
+
+    class _FakeSS:
+        grade = 3
+        chats: list = []
+
+    fake_ss = _FakeSS()
+    chat_a = {"id": "a", "messages": [{"role": "user", "text": "hi"}],
+             "episode": {"state": "something"}, "thread_notes": []}
+    chat_b = {"id": "b", "messages": [{"role": "user", "text": "yo"}],
+             "episode": {"state": "something else"}, "thread_notes": []}
+    fake_ss.chats = [chat_a, chat_b]
+
+    with _Patch(app, "ss", fake_ss):
+        app.change_grade(5)
+        check("grade is updated", fake_ss.grade == 5)
+        check("chat A's open episode is invalidated", chat_a["episode"] is None)
+        check("chat B's open episode is ALSO invalidated (grade is global, not per-chat)",
+             chat_b["episode"] is None)
+        check("chat A's message history is untouched", len(chat_a["messages"]) == 1)
+        check("chat B's message history is untouched", len(chat_b["messages"]) == 1)
+
+        chat_a["episode"] = {"state": "fresh"}
+        app.change_grade(5)
+        check("calling with the SAME grade is a no-op (episode untouched)",
+             chat_a["episode"] == {"state": "fresh"})
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
     test_hint_lifecycle_integration()
@@ -940,11 +1055,14 @@ def main() -> None:
     test_clear_chat_preserves_learner_profile()
     test_current_learner_level_uses_real_backend_classification()
     test_top_weak_topic_surfaces_canonical_topics_only()
+    test_progress_to_next_badge_has_a_defensible_meaning()
+    test_change_grade_invalidates_open_episodes_but_keeps_chat_history()
     test_thread_notes_populated_on_terminal_action()
     test_self_consistency_guardrail_surfaces_but_does_not_block()
     test_live_app_never_calls_legacy_tier_a_path()
     test_episode_scoped_active_turns_excludes_prior_episode()
     test_input_safety_runs_before_any_llm_routing()
+    test_unsafe_message_mid_episode_preserves_the_open_problem()
     test_output_safety_blocks_unsafe_generated_text()
     test_interaction_telemetry_reconstructs_the_turn()
     test_student_id_is_per_session_not_a_shared_constant()

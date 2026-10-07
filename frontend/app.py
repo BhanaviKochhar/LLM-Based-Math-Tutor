@@ -221,6 +221,30 @@ def _top_weak_topic() -> str | None:
         return None
 
 
+def change_grade(new_grade: int) -> None:
+    """Apply a grade change: update ss.grade and invalidate every chat's
+    OPEN episode (never the messages -- past turns stay as a true record of
+    what was actually discussed at the old grade).
+
+    An in-progress episode's trusted answer, retrieval, and prompt were all
+    computed for the OLD grade's taught form (e.g. a Class 1 episode's
+    verifier never injects carrying; a Class 5 one might). Letting it
+    silently continue under a new grade would mean a child who just moved
+    from Class 3 to Class 5 keeps getting Class-3-shaped hints on a problem
+    the controller still thinks is open, or a Class 5 trusted answer
+    silently applied to what was asked as a Class 3 problem. Closing the
+    episode (not the chat) is the same invariant the onboarding page's grade
+    selector already enforces -- this is the shared implementation so an
+    in-session control can offer the same safety without leaving the chat.
+
+    A no-op if new_grade == ss.grade (nothing to invalidate)."""
+    if new_grade == ss.grade:
+        return
+    for c in ss.chats:
+        c["episode"] = None
+    ss.grade = new_grade
+
+
 # ===========================================================================
 # Controller-driven tutoring episode
 #
@@ -259,6 +283,41 @@ _LABEL_TO_INTENT = {
 # only actionable way to close a finished episode.
 _CLOSE_EPISODE_LABELS = {"New question"}
 _ACTIONABLE_LABELS = set(_LABEL_TO_INTENT) | _CLOSE_EPISODE_LABELS
+
+# Single source of truth for both the Badges panel and the "progress to next
+# badge" bar, so the two can never silently drift out of sync. (name, color,
+# icon, solved-count threshold to unlock).
+_BADGES = [
+    ("Quick Thinker", "#f5a623", "⚡", 1),
+    ("Rising Star", "#2f9e5a", "🌟", 3),
+    ("Problem Solver", "#9b5de5", "🏆", 5),
+    ("Math Genius", "#e5484d", "🎓", 8),
+]
+
+
+def _progress_to_next_badge(solved: int) -> tuple[int, int | None, float]:
+    """(solved, next_threshold, fraction) -- how close this chat's solved
+    count is to the next not-yet-earned badge in _BADGES, as a fraction of
+    the span SINCE the last badge (so it reads as 0% right after a badge is
+    unlocked, climbing to 100% just before the next one -- the familiar
+    "XP bar resets on level-up" shape, not a drop). next_threshold is None
+    once every badge is earned; fraction is then 1.0.
+
+    Replaces a previous `(solved % 3) / 3` formula: that cycled back to 0%
+    every 3rd solve regardless of any badge, and "3" bore no relationship to
+    the actual badge thresholds (1, 3, 5, 8, not evenly spaced), so the bar
+    measured nothing a label could honestly describe. A simpler
+    solved/next_threshold formula was tried and rejected too -- it still
+    DROPS by a few percent at the exact moment a badge is earned (e.g. 2/3 =
+    67% then 3/5 = 60% the instant the 3rd question is solved), which reads
+    as the child's progress going backward right when they succeeded."""
+    prev_threshold = 0
+    for _, _, _, threshold in _BADGES:
+        if solved < threshold:
+            span = threshold - prev_threshold
+            return solved, threshold, (solved - prev_threshold) / span if span else 1.0
+        prev_threshold = threshold
+    return solved, None, 1.0
 
 
 class GenerationFailed(RuntimeError):
@@ -856,15 +915,7 @@ def render_name_page():
 
     if go_clicked:
         ss.name = ss.name_field.strip()
-        if grade_choice != ss.grade:
-            # A grade change must not let an in-progress episode (and its
-            # trusted answer, computed for the OLD grade's taught form)
-            # silently carry on under the new grade. Only the open episode is
-            # cleared -- past messages in the chat stay as a true record of
-            # what was actually discussed.
-            for c in ss.chats:
-                c["episode"] = None
-            ss.grade = grade_choice
+        change_grade(grade_choice)
         ss.page = "greeting"
         st.rerun()
     st.stop()
@@ -1025,15 +1076,19 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     background:rgba(255,255,255,0.12); border:1px dashed rgba(255,255,255,0.5); border-radius:10px;
     padding:14px 14px; margin: 4px 2px; text-align:center; }
 
-/* Clear / change-name / reset-learning */
+/* Clear / change-name / reset-learning / change-grade (neutral family) */
 [class*="st-key-clearbtn"] button, [class*="st-key-chgname"] button,
-[class*="st-key-resetlearning"] button, [class*="st-key-reset_confirm_no"] button {
+[class*="st-key-resetlearning"] button, [class*="st-key-reset_confirm_no"] button,
+[class*="st-key-change_grade_btn"] button, [class*="st-key-grade_picker_close"] button,
+[class*="st-key-grade_confirm_no"] button {
     font-family:'Nunito',sans-serif !important; font-weight:700 !important; font-size:13px !important;
     background:#fff !important; border:1px dashed #b9c8e6 !important; color:#111 !important;
     border-radius:10px !important; padding:8px !important; box-shadow:none !important;
 }
 [class*="st-key-clearbtn"] button p, [class*="st-key-chgname"] button p,
-[class*="st-key-resetlearning"] button p, [class*="st-key-reset_confirm_no"] button p {
+[class*="st-key-resetlearning"] button p, [class*="st-key-reset_confirm_no"] button p,
+[class*="st-key-change_grade_btn"] button p, [class*="st-key-grade_picker_close"] button p,
+[class*="st-key-grade_confirm_no"] button p {
     color:#111 !important; font-weight:700 !important; font-size:13px !important;
 }
 [class*="st-key-reset_confirm_yes"] button {
@@ -1042,6 +1097,15 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     border-radius:10px !important; padding:8px !important; box-shadow:none !important;
 }
 [class*="st-key-reset_confirm_yes"] button p { color:#c0343a !important; font-weight:700 !important; font-size:13px !important; }
+/* Grade change is a non-destructive confirm (no data lost, just ends the
+   current problem) -- green/success, not the red used for the destructive
+   learning-progress reset above. */
+[class*="st-key-grade_confirm_yes"] button {
+    font-family:'Nunito',sans-serif !important; font-weight:700 !important; font-size:13px !important;
+    background:#e6f9ee !important; border:1px solid #a9e6c1 !important; color:#1c7a41 !important;
+    border-radius:10px !important; padding:8px !important; box-shadow:none !important;
+}
+[class*="st-key-grade_confirm_yes"] button p { color:#1c7a41 !important; font-weight:700 !important; font-size:13px !important; }
 
 /* ===== MIDDLE AREA — all black text (image-2 look) ===== */
 .tt-buddy-name { font-family:'Baloo 2',sans-serif; font-weight:800; color:#111; font-size:20px; }
@@ -1095,8 +1159,12 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
 [class*="st-key-turnbtn_"] button {
     font-family:'Baloo 2',sans-serif !important; font-weight:800 !important; font-size:16px !important;
     background:linear-gradient(135deg,#f5b301,#ff6f59) !important; color:#fff !important;
-    border:2px solid #1f2a63 !important; border-radius:14px !important; padding:12px 8px !important;
-    box-shadow:3px 3px 0 rgba(31,42,99,0.25) !important;
+    /* Border/shadow use the SAME primary blue as the app bar (#1f57d6),
+       not an off-theme dark navy -- this is the "blue = primary/action"
+       border that gives the orange fill depth/contrast while staying
+       inside the documented blue/orange/yellow/white/green palette. */
+    border:2px solid #1f57d6 !important; border-radius:14px !important; padding:12px 8px !important;
+    box-shadow:3px 3px 0 rgba(31,87,214,0.25) !important;
 }
 [class*="st-key-turnbtn_"] button p { color:#fff !important; font-weight:800 !important; }
 
@@ -1247,11 +1315,17 @@ def render_turn(msg, idx, is_latest=False):
     # problem, which is already checked above) where its own stated equation
     # doesn't add up. Non-blocking -- the reply still shows -- since this is
     # a transparency signal, not a correctness gate.
+    #
+    # Framing matters here: this checks the TUTOR's own generated arithmetic,
+    # not the child's answer (that's the green/red verify-tag above, a
+    # completely different signal). Worded and colored so a child never
+    # reads this as "you got it wrong" -- amber/tutor-self-check language,
+    # the same family as hint-tag, never the red feedback-wrong treatment.
     for issue in (msg.get("self_check_issues") or []):
         st.markdown(
-            f'<div class="verify-tag" style="background:#fff4d6;color:#8a6400;'
-            f'border-color:#f0dca0;">⚠ Double-check: "{html.escape(issue["statement"])}" '
-            f'doesn\'t add up (computes to {html.escape(issue["computed"])})</div>',
+            '<div class="verify-tag" style="background:#fff4d6;color:#8a6400;'
+            'border-color:#f0dca0;">💡 Tutor check: this calculation may need '
+            'a second look.</div>',
             unsafe_allow_html=True,
         )
 
@@ -1261,6 +1335,16 @@ def render_turn(msg, idx, is_latest=False):
     if not buttons:
         return
     chat = active_chat()
+    # change_grade() (and anything else that invalidates an episode without
+    # appending a new message) clears chat["episode"] to None but leaves the
+    # last reply's stored buttons as they were. Without this check those
+    # stale "Give me a hint"/"Show me how" buttons stay clickable and would
+    # misroute through start_episode (treating the button's LABEL as a brand
+    # new question) instead of doing nothing meaningful. A legitimate
+    # terminal reply (diagnose_correct, reveal) still has episode SET (just
+    # terminal), so this only suppresses the genuinely stale case.
+    if chat.get("episode") is None:
+        return
     pending = bool(chat.get("pending_turn"))
     st.markdown('<div class="tt-shortcut-hint">Tap a shortcut, or type below 👇</div>',
                 unsafe_allow_html=True)
@@ -1296,7 +1380,7 @@ def render_main_page():
 
     solved = sum(1 for m in msgs if m.get("role") == "assistant" and m.get("outcome") == "solved")
     stars = solved * 5
-    lvl_pct = (solved % 3) / 3
+    _, next_badge, lvl_pct = _progress_to_next_badge(solved)
 
     initial = display_name()[0].upper() if display_name() != "friend" else "🙂"
     st.markdown(
@@ -1513,13 +1597,18 @@ def render_main_page():
                         ss.progress_collapsed = True
                         st.rerun()
 
-                # "Chat Progress" (this chat's solve streak, resets per new chat)
-                # and "Tutor Level" (the persistent backend classification that
-                # actually drives tutoring depth/thresholds) are two genuinely
-                # different things and are labelled as such -- they used to share
-                # the single, misleading label "Level".
-                st.markdown(f'<div class="tt-prog-row"><span>📈 Chat Progress</span>'
-                            f'<span class="val">{int(lvl_pct*100)}%</span></div>',
+                # "Next Badge" (a gamified count toward this chat's next
+                # Badges-panel unlock, reset per new chat) and "Tutor Level"
+                # (the persistent backend classification that actually drives
+                # tutoring depth/thresholds) are two genuinely different
+                # things and are labelled as such -- they used to share the
+                # single, misleading label "Level". The bar's value is
+                # literally "questions solved / next badge's threshold" (see
+                # _progress_to_next_badge) -- a real, checkable count, not a
+                # claim about mastery or learning progress.
+                next_badge_label = f"{solved}/{next_badge}" if next_badge else "All earned!"
+                st.markdown(f'<div class="tt-prog-row"><span>🏅 Next Badge</span>'
+                            f'<span class="val">{next_badge_label}</span></div>',
                             unsafe_allow_html=True)
                 st.progress(lvl_pct)
                 st.markdown(
@@ -1537,17 +1626,58 @@ def render_main_page():
                         unsafe_allow_html=True,
                     )
 
+                # Ongoing-session grade change: previously grade was only
+                # reachable from the onboarding "name" page (via Change
+                # name), forcing a full navigation away from the chat just
+                # to move a class up or down. This reuses change_grade()'s
+                # same episode-invalidation invariant without leaving the
+                # tutoring session.
+                gc1, gc2 = st.columns([3, 2])
+                with gc1:
+                    st.markdown(f'<div class="tt-prog-row"><span>🏫 Class</span>'
+                                f'<span class="val">Class {ss.grade}</span></div>',
+                                unsafe_allow_html=True)
+                with gc2:
+                    if st.button("Change ▾", key="change_grade_btn", use_container_width=True):
+                        ss["_show_grade_picker"] = not ss.get("_show_grade_picker", False)
+                        st.rerun()
+
+                if ss.get("_show_grade_picker"):
+                    new_grade = st.selectbox(
+                        "New class", options=[1, 2, 3, 4, 5], index=ss.grade - 1,
+                        format_func=lambda g: f"Class {g}", key="grade_picker",
+                        label_visibility="collapsed",
+                    )
+                    if new_grade != ss.grade:
+                        st.markdown(
+                            '<div class="tt-hist-empty">Changing class will end the '
+                            "current problem, but your chat history will stay. "
+                            'Are you sure?</div>',
+                            unsafe_allow_html=True,
+                        )
+                        gy, gn = st.columns(2)
+                        with gy:
+                            if st.button("✅ Yes, change", key="grade_confirm_yes",
+                                        use_container_width=True):
+                                change_grade(new_grade)
+                                ss["_show_grade_picker"] = False
+                                st.rerun()
+                        with gn:
+                            if st.button("Cancel", key="grade_confirm_no",
+                                        use_container_width=True):
+                                ss["_show_grade_picker"] = False
+                                st.rerun()
+                    else:
+                        if st.button("Close", key="grade_picker_close", use_container_width=True):
+                            ss["_show_grade_picker"] = False
+                            st.rerun()
+
         if not ss.progress_collapsed:
             with st.container(border=True, key="badges_panel"):
                 st.markdown('<div class="tt-card-head">Badges</div>', unsafe_allow_html=True)
-                badges = [
-                    ("Quick Thinker", "#f5a623", "⚡", solved >= 1),
-                    ("Rising Star", "#2f9e5a", "🌟", solved >= 3),
-                    ("Problem Solver", "#9b5de5", "🏆", solved >= 5),
-                    ("Math Genius", "#e5484d", "🎓", solved >= 8),
-                ]
                 cells = ""
-                for name, c, ico, ok in badges:
+                for name, c, ico, threshold in _BADGES:
+                    ok = solved >= threshold
                     cls = "" if ok else "locked"
                     bg = f'style="background:{c}"' if ok else ""
                     cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
@@ -1577,9 +1707,17 @@ def render_main_page():
             st.rerun()
 
         if ss.get("_confirm_reset_learning") and not compact:
+            # Precise about what this actually touches: student_tracker only
+            # (Tutor Level + weak topics). The Badges/Next Badge/Questions
+            # Answered shown just above come from THIS chat's messages and
+            # are untouched by this button -- they only clear via "Clear
+            # this chat" or starting a new chat. Saying plain "progress"
+            # here previously invited the child/parent to expect the visible
+            # Progress panel to reset too, when it doesn't.
             st.markdown(
-                '<div class="tt-hist-empty">This erases your saved level and '
-                'progress for good. Are you sure?</div>',
+                '<div class="tt-hist-empty">This erases your saved Tutor Level '
+                "and topic history for good (not this chat's badges or "
+                'question count — use "Clear this chat" for those). Are you sure?</div>',
                 unsafe_allow_html=True,
             )
             rc1, rc2 = st.columns(2)
