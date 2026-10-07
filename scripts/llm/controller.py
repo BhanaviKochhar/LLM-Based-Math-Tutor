@@ -119,6 +119,12 @@ class Action:
 # ---- reading a student's stated answer out of free text ---------------------
 _NUM = re.compile(r"[-+]?\d+\s*/\s*\d+|[-+]?\d*\.\d+|[-+]?\d+")
 
+# A spoken fraction ("6 over 9") said aloud rather than written "6/9".
+# Normalized to the standard slash form before any other extraction runs, so
+# the rest of _student_answer (and downstream verifier._safe_eval) only ever
+# has to understand one fraction syntax.
+_OVER_FRACTION_RE = re.compile(r"\b(\d+)\s+over\s+(\d+)\b", re.IGNORECASE)
+
 
 def _student_answer(turn: str) -> str | None:
     """Best-effort: the number the student is offering as their answer.
@@ -129,7 +135,7 @@ def _student_answer(turn: str) -> str | None:
     """
     if not turn:
         return None
-    t = turn.strip()
+    t = _OVER_FRACTION_RE.sub(r"\1/\2", turn.strip())
     # after the last '=' (e.g. "5 + 3 = 8")
     if "=" in t:
         tail = t.rsplit("=", 1)[1]
@@ -146,16 +152,28 @@ def _student_answer(turn: str) -> str | None:
     return None  # 0 numbers, or ambiguous multi-number working
 
 
-_QUESTION_SENTENCE_RE = re.compile(r"[^.!?]*\?")
+_SENTENCE_RE = re.compile(r"[^.!?]+[.!?]+|[^.!?]+$")
+
+# How many trailing sentences graduate_if_computable will try combined, at
+# most. A posed exercise's numbers routinely live in the sentence BEFORE the
+# one that actually asks the question (e.g. "Pick 2/3 and multiply both
+# parts by 3. What do you get?" is two sentences), and the exercise itself
+# may be phrased as an instruction with no '?' at all ("...tell me what it
+# is."). Bounded to 3 so this stays a localized "did the tutor just pose a
+# concrete task" check, not a scan of the whole reply.
+_MAX_GRADUATION_SENTENCES = 3
 
 
-def _posed_subquestions(text: str) -> list[str]:
-    """Self-contained '...?'-terminated sentences in `text`, in the order
-    they appear. Used only as graduate_if_computable()'s candidate list; a
-    sentence ending up here is not yet known to be computable."""
+def _trailing_candidates(text: str) -> list[str]:
+    """Progressively larger trailing windows of `text`, by sentence, most
+    specific (just the final sentence) first. Used only as
+    graduate_if_computable()'s candidate list; a candidate ending up here is
+    not yet known to be computable."""
     if not text:
         return []
-    return [m.group(0).strip() for m in _QUESTION_SENTENCE_RE.finditer(text)]
+    sentences = [m.group(0).strip() for m in _SENTENCE_RE.finditer(text) if m.group(0).strip()]
+    n = min(_MAX_GRADUATION_SENTENCES, len(sentences))
+    return [" ".join(sentences[-k:]) for k in range(1, n + 1)]
 
 
 def graduate_if_computable(state: "TutorState", generated_text: str) -> bool:
@@ -165,19 +183,23 @@ def graduate_if_computable(state: "TutorState", generated_text: str) -> bool:
     forever once it has something concrete to grade.
 
     Tutors routinely pose a concrete follow-up exercise unprompted while
-    acknowledging a conceptual turn (e.g. "What is one-third of nine
-    toffees?"). This checks each '...?'-sentence in the tutor's own reply,
-    most recent first, through the SAME compute-first+gate path used
-    everywhere else (verifier.solve) -- deliberately not a new extraction
-    mechanism. The first sentence that yields a usable value graduates the
-    episode (state.computed_answer/is_math are set so the student's NEXT
-    reply is diagnosed numerically); if none do, this is a no-op and
-    today's unchanged ack-conceptual loop continues. Returns True iff the
-    episode was graduated.
+    acknowledging a conceptual turn -- e.g. "Pick a fraction like 2/3 and
+    multiply both parts by 3. What equivalent fraction do you get?" The
+    numbers the exercise needs often live in the sentence BEFORE the one
+    that asks the question, and the exercise may be phrased as an
+    instruction with no '?' at all ("...tell me what it is."), so this
+    checks growing trailing windows of the tutor's own reply (last sentence,
+    then last two, then last three), most specific first, through the SAME
+    compute-first+gate path used everywhere else (verifier.solve) --
+    deliberately not a new extraction mechanism. The first window that
+    yields a usable value graduates the episode (state.computed_answer/
+    is_math are set so the student's NEXT reply is diagnosed numerically);
+    if none do, this is a no-op and today's unchanged ack-conceptual loop
+    continues. Returns True iff the episode was graduated.
     """
     if state.is_math or state.computed_answer is not None:
         return False
-    for candidate in reversed(_posed_subquestions(generated_text)):
+    for candidate in _trailing_candidates(generated_text):
         answer, is_math = verifier.solve(candidate, state.grade)
         if is_math and answer is not None:
             state.computed_answer = answer

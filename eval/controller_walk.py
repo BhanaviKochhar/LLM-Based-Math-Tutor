@@ -111,6 +111,24 @@ s, a = C.start("q", 3, "intermediate", computed_answer="8", is_math=True)
 s, a = C.step(s, "ATTEMPT", "5 + 3 = 8")
 check("'5+3=8' vs truth 8 -> correct", a.outcome == "solved")
 
+# 10b) natural phrasings of a stated answer, including a SPOKEN fraction
+# ("6 over 9") -- previously unrecognized (only the written "6/9" slash form
+# was understood), so a child saying it out loud would fall through to
+# "ambiguous, ask again" instead of being graded.
+scenario("10b. natural answer phrasings, including the spoken '6 over 9' fraction form")
+check("bare fraction '6/9'", C._student_answer("6/9") == "6/9")
+check("'I got 6/9'", C._student_answer("I got 6/9") == "6/9")
+check("\"I think it's 6/9\"", C._student_answer("I think it's 6/9") == "6/9")
+check("'the answer is 6/9'", C._student_answer("the answer is 6/9") == "6/9")
+check("spoken '6 over 9' -> normalized to '6/9'", C._student_answer("6 over 9") == "6/9")
+check("'I got 6 over 9' -> '6/9'", C._student_answer("I got 6 over 9") == "6/9")
+check("unrelated use of the word 'over' is not mistaken for a fraction",
+     C._student_answer("I have 6 apples and ate over 9 of them") is None)
+s7, a7 = C.start("equivalent fraction", 3, "intermediate", computed_answer="2/3", is_math=True)
+s7, a7 = C.step(s7, "ATTEMPT", "6 over 9")
+check("a spoken-fraction answer is graded correct against an equal-value "
+     "trusted answer (6/9 == 2/3)", a7.outcome == "solved")
+
 # 11) conceptual question -> engaged, supportive (not graded)
 scenario("11. conceptual attempt -> engaged")
 s, a = C.start("what is a fraction", 3, "intermediate", computed_answer=None, is_math=False)
@@ -144,6 +162,49 @@ scenario("14. already-math episode is never re-graduated (guard against overwrit
 s, a = C.start("q", 3, "intermediate", computed_answer="56", is_math=True)
 graduated = C.graduate_if_computable(s, "Try this too: what is 2 + 2?")
 check("already-math episode untouched", not graduated and s.computed_answer == "56")
+
+# 14b) The reported live bug: the posed exercise's numbers live in the
+# sentence BEFORE the one that asks the question, so the isolated trailing
+# "?"-sentence alone has nothing to compute -- graduation needs the growing
+# trailing-window retry, not just the last sentence.
+scenario("14b. posed exercise whose numbers are in the PRECEDING sentence still graduates")
+s, a = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated = C.graduate_if_computable(
+    s, "Pick a fraction you like, say 2/3, and multiply both parts by 3. "
+      "What equivalent fraction do you get?"
+)
+check("graduates using the setup sentence + the question sentence together",
+     graduated and s.is_math and s.computed_answer is not None)
+s2, a2 = C.step(s, "ATTEMPT", "6/9")
+check("the child's equivalent-fraction answer (6/9 == 2/3) is graded CORRECT, "
+     "not looped back into ack_conceptual",
+     a2.mode == C.MODE_DIAGNOSE_CORRECT and a2.terminal)
+
+# 14c) Same shape, but phrased as an instruction with NO '?' at all -- the
+# mechanism must not depend on a question mark being present.
+scenario("14c. posed exercise phrased as an instruction (no '?') still graduates")
+s3, a3 = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated3 = C.graduate_if_computable(
+    s3, "Try to find an equivalent fraction for 2/3 by multiplying the top "
+       "and bottom by 3. Write down the new fraction and tell me what it is."
+)
+check("graduates even though the exercise sentence ends in '.', not '?'",
+     graduated3 and s3.is_math and s3.computed_answer is not None)
+s4, a4 = C.step(s3, "ATTEMPT", "6/9")
+check("the natural-language answer is graded correct here too",
+     a4.mode == C.MODE_DIAGNOSE_CORRECT and a4.terminal)
+
+# 14d) A genuinely wrong equivalent fraction must still be rejected -- the
+# wider trailing window must not make grading more permissive.
+scenario("14d. a genuinely wrong answer to a graduated exercise is still caught")
+s5, a5 = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+C.graduate_if_computable(
+    s5, "Pick a fraction you like, say 2/3, and multiply both parts by 3. "
+       "What equivalent fraction do you get?"
+)
+s6, a6 = C.step(s5, "ATTEMPT", "6/12")
+check("a wrong equivalent fraction (6/12 != 2/3) is diagnosed wrong, not correct",
+     a6.mode == C.MODE_DIAGNOSE_WRONG)
 
 # 15) hint lifecycle: state-driven numbering, progression, exhaustion, and
 # idempotent repeated clicks after exhaustion. Previously untested: the

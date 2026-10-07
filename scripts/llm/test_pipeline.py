@@ -9,7 +9,8 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 from __future__ import annotations
 
 from . import (conversation_resolver, hints, intent, llm_client, pipeline,
-              response_parser, safety, student_tracker, topics, verifier)
+              prompt_registry, response_parser, safety, student_tracker,
+              topics, verifier)
 
 _passed = 0
 _failed = 0
@@ -573,6 +574,35 @@ def test_verifier_self_consistency_guardrail() -> None:
          verifier.check_self_consistency("Answer: 42") == [])
 
 
+def test_self_consistency_fraction_parsing() -> None:
+    """Regression for the false fraction self-check warning: the RHS of an
+    equation was matched by an alternation that tried the bare-number form
+    BEFORE the fraction form, so "... = 2/4" only captured "2" and silently
+    dropped "/4" -- a correct "1/2 = 2/4" was reported as "1/2 = 2", a false
+    mismatch. The fix reorders the alternation (fraction tried first); this
+    locks that fix in and proves genuinely wrong fraction equations are
+    still caught, not silently waved through."""
+    print("verifier — self-consistency correctly parses fraction equations")
+
+    correct_fraction_equations = [
+        "1/2 = 2/4", "3/5 = 6/10", "2/3 = 6/9",
+        "1/4 + 1/4 = 1/2", "3/4 - 1/4 = 1/2",
+        "1 / 2 = 2 / 4", "3 / 5 = 6 / 10",
+    ]
+    for eq in correct_fraction_equations:
+        check(f"correct fraction equation {eq!r} produces no false warning",
+             verifier.check_self_consistency(eq) == [])
+
+    wrong_frac = verifier.check_self_consistency("1/2 = 2/5")
+    check("a genuinely WRONG fraction equation is still caught (not over-corrected)",
+         len(wrong_frac) == 1
+         and wrong_frac[0]["computed"] == "1/2" and wrong_frac[0]["stated"] == "2/5")
+
+    wrong_mixed = verifier.check_self_consistency("3/4 + 1/4 = 2")
+    check("a wrong fraction-sum-to-integer equation is still caught",
+         len(wrong_mixed) == 1 and wrong_mixed[0]["stated"] == "2")
+
+
 def test_safety_gate() -> None:
     """Track 5 (safety boundary): a bounded, deterministic (no LLM call)
     input/output safety gate. check_input must run before any LLM-based
@@ -606,6 +636,47 @@ def test_safety_gate() -> None:
          bad_output.fallback_text and "kill" not in bad_output.fallback_text)
 
 
+def test_system_prompt_requires_self_contained_explanations() -> None:
+    """Retrieved NCERT chunks routinely reference pictures, textbook pages,
+    and physical classroom materials (matchsticks, bottle caps, dot grids)
+    the child cannot see through the chat. The system prompt must explicitly
+    forbid treating those as visible/available, rather than relying on the
+    model to infer it -- live testing found the tutor otherwise asserting
+    specific counts from an unseen 'picture' as fact."""
+    print("prompt_registry — system prompt requires self-contained explanations")
+
+    messages = prompt_registry.build_messages(
+        "what is data handling", 3, ["On the dot grid given below, draw..."],
+        version="v5-personalized", level="intermediate",
+    )
+    system = messages[0]["content"]
+    check("forbids referring to a picture/page the child can't see",
+         "look at the picture" in system.lower() or "cannot see any picture" in system.lower())
+    check("tells the model to transform physical-material references into "
+         "self-contained or explicitly imagined framing",
+         "imagine" in system.lower())
+
+
+def test_system_prompt_allows_simple_out_of_grade_explanations() -> None:
+    """Section 6: 'out-of-grade = immediate refusal' must not be the only
+    behavior. A simple 'what is X' about a topic beyond primary school
+    (integration, algebra...) should get one short, honest conceptual gloss;
+    only a request for the detailed procedure/formula should still defer.
+    Live testing confirmed the pre-fix prompt refused 'what is integration'
+    outright with no conceptual attempt at all."""
+    print("prompt_registry — simple out-of-grade concepts get a gloss, not a flat refusal")
+
+    messages = prompt_registry.build_messages(
+        "what is integration", 5, [], version="v5-personalized", level="intermediate",
+    )
+    system = messages[0]["content"]
+    check("allows a simple conceptual explanation of an advanced topic's name",
+         "simple" in system.lower() and "beyond primary school" in system.lower())
+    check("still reserves refusal for a DETAILED procedure/formula request, "
+         "not just an advanced-sounding topic name",
+         "detailed" in system.lower() and "procedure" in system.lower())
+
+
 def main() -> None:
     test_response_parser()
     test_final_number_str_fallback_tiers()
@@ -619,8 +690,11 @@ def main() -> None:
     test_intent_keyword_fallback()
     test_conversation_resolver_deterministic_paths()
     test_verifier_self_consistency_guardrail()
+    test_self_consistency_fraction_parsing()
     test_safety_gate()
     test_topic_canonicalization()
+    test_system_prompt_requires_self_contained_explanations()
+    test_system_prompt_allows_simple_out_of_grade_explanations()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

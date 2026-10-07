@@ -353,7 +353,13 @@ def check(question: str, model_output: str, extract_fn=None,
 # words between the numbers never produces a false alarm.
 _SELF_CONSISTENCY_EQ_RE = re.compile(
     r"(?<![\w.])(\d+(?:\.\d+)?(?:\s*[+\-*/]\s*\d+(?:\.\d+)?)+)\s*=\s*"
-    r"([-+]?\d+(?:\.\d+)?|[-+]?\d+\s*/\s*\d+)"
+    # The fraction alternative is listed BEFORE the bare-number one: regex
+    # alternation tries left-to-right and stops at the first match, so with
+    # the bare-number form first, "2/4" on the right of "=" was matching only
+    # "2" and silently discarding "/4" -- the RHS of "1/2 = 2/4" was read as
+    # "2", producing a false mismatch against the correctly-evaluated "1/2"
+    # LHS. The more specific (longer) form must be tried first.
+    r"([-+]?\d+\s*/\s*\d+|[-+]?\d+(?:\.\d+)?)"
 )
 
 
