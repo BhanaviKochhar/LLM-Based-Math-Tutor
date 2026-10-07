@@ -239,15 +239,18 @@ def _strip_enclosing_parens(expression: str) -> str:
 # be a non-exact division word problem (taught as quotient+remainder, so the
 # improper fraction/decimal must be withheld) or a fraction VALUE the
 # question is directly about -- "What is 3/10 written as a decimal?",
-# "Convert 7/20 to a decimal" -- where withholding makes no sense because
-# the fraction-to-decimal conversion IS the question, not a side effect of
-# sharing/dividing a quantity. The expression shape alone cannot distinguish
-# these (component-evaluation found this producing real mismatches on
-# ar-020/cb-158); the question's own wording can, in the common cases.
+# "Convert 7/20 to a decimal", "What fraction of the bottle caps did you
+# colour?" -- where withholding makes no sense because the fraction value
+# (not a quotient+remainder) IS the question, not a side effect of sharing/
+# dividing a quantity. The expression shape alone cannot distinguish these
+# (component-evaluation found this producing real mismatches on
+# ar-020/cb-158); the question's own wording can, in the common cases --
+# including the "what/which fraction...?" phrasing that is itself the
+# standard way NCERT poses a part-of-a-whole exercise.
 _FRACTION_CONVERSION_RE = re.compile(
     r"\bdecimal\b|\bas a fraction\b|\bwrite.{0,15}fraction\b|"
     r"\bequivalent fraction\b|\bsimplify\b|\breduce.{0,15}fraction\b|"
-    r"\bconvert\b",
+    r"\bconvert\b|\bwhat fraction\b|\bwhich fraction\b",
     re.IGNORECASE,
 )
 

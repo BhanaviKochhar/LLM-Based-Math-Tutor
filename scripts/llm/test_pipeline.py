@@ -223,6 +223,14 @@ def test_verifier_injection_gate() -> None:
          "to the prior withholding behaviour (ambiguous in the student's favour: "
          "conservative, not silently guessed)",
           solve_q("What is 1/3 of 9?", "20/3")[0] is None)
+    check("'what fraction...?' phrasing (the standard NCERT part-of-a-whole "
+         "question shape) -> now injected, not withheld as a sharing/remainder "
+         "problem. Live bug: a tutor-posed 'colour 4 of 10 bottle caps, what "
+         "fraction did you colour?' exercise never graduated because this "
+         "phrasing wasn't recognised as fraction-conversion intent",
+          solve_q("What fraction of the bottle caps did you colour?", "4/10") == ("2/5", True))
+    check("'which fraction...?' phrasing -> also injected",
+          solve_q("Which fraction of the shapes is shaded?", "3/8") == ("3/8", True))
 
     # KNOWN LIMITATION, documented rather than hidden: this is a wording
     # heuristic, not a semantic one. A genuine division word problem that

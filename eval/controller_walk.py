@@ -206,6 +206,28 @@ s6, a6 = C.step(s5, "ATTEMPT", "6/12")
 check("a wrong equivalent fraction (6/12 != 2/3) is diagnosed wrong, not correct",
      a6.mode == C.MODE_DIAGNOSE_WRONG)
 
+# 14e) The exact live-reported bug: a "colour/take N of M objects, what
+# fraction...?" exercise. The trailing-window retry (14b/14c) already finds
+# the right sentence span, but the extractor correctly resolves it to a bare
+# "int/int" expression (4/10), which verifier._grade_appropriate_answer used
+# to treat as an ambiguous division word problem and withhold -- so solve()
+# returned (None, True): "computable" but never actually injected, and the
+# episode silently never graduated no matter how wide the window got. See
+# verifier._FRACTION_CONVERSION_RE.
+scenario("14e. 'colour N of M, what fraction...?' exercise graduates and grades correctly")
+s7b, a7b = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated7 = C.graduate_if_computable(
+    s7b, "Imagine you have 10 small bottle caps. If you colour 4 of them, the "
+        "coloured part is a fraction of the whole set. What fraction of the "
+        "bottle caps did you colour?"
+)
+check("graduates (previously stuck at is_math=True, answer=None and never graduated)",
+     graduated7 and s7b.is_math and s7b.computed_answer is not None)
+s8, a8 = C.step(s7b, "ATTEMPT", "4/10")
+check("the child's literal answer (4/10, equal in value to the injected 2/5) is "
+     "genuinely diagnosed correct, not just conversationally acknowledged",
+     a8.mode == C.MODE_DIAGNOSE_CORRECT and a8.terminal)
+
 # 15) hint lifecycle: state-driven numbering, progression, exhaustion, and
 # idempotent repeated clicks after exhaustion. Previously untested: the
 # prior "min(hints_given, 3)" cap had no exhaustion state at all, so every
