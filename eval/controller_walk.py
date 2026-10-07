@@ -297,6 +297,18 @@ check("broad method question -> the worked-example directive variant is used",
 check("the worked-example directive actually asks for real steps, not just an analogy",
      "ONE complete worked example" in a_broad.directive
      and "the actual method must be" in a_broad.directive)
+# Live-observed bug: a bare topic request ("fractions") consistently got an
+# OPERATIONS-first answer (adding fractions, making equivalent fractions)
+# because a retrieved chunk discussed an operation, never once stating what
+# a fraction fundamentally IS first. The directive must explicitly require
+# grounding the basic meaning before any worked example/operation.
+check("the directive requires stating what the concept MEANS before any "
+     "worked example, for a bare topic request",
+     "fundamentally MEANS" in a_broad.directive
+     and "Ground the basic meaning first" in a_broad.directive)
+check("the directive explicitly warns against jumping to an operation just "
+     "because the retrieved context happens to discuss one",
+     "does not mean that is what was asked" in a_broad.directive)
 
 s_specific, a_specific = C.start("What is 245 + 136?", 3, "intermediate",
                                  computed_answer="381", is_math=True)

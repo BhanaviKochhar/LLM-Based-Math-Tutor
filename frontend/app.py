@@ -854,22 +854,29 @@ def render_name_page():
         <style>
         .stApp, [data-testid="stAppViewContainer"], html, body { background: #3a4a78 !important; }
         .block-container {
-            max-width: 900px !important; margin-top: 12vh !important;
+            /* Kept deliberately compact (was 12vh top margin + a much
+               larger title): with the whole card pushed low on a normal
+               laptop-height viewport, the class dropdown had too little
+               room below it and auto-flipped to open UPWARD instead of
+               down. Shrinking the space everything ABOVE the dropdown
+               takes keeps it low enough on the page that the dropdown has
+               room to open downward like every other dropdown on the site. */
+            max-width: 900px !important; margin-top: 5vh !important;
             background: rgba(255,255,255,0.06) !important;
             border: 1px solid rgba(255,255,255,0.14) !important;
-            border-radius: 34px !important; padding: 60px 64px 66px !important;
+            border-radius: 34px !important; padding: 40px 64px 48px !important;
             box-shadow: 0 30px 80px rgba(0,0,0,0.30) !important;
         }
         .tt-title {
             font-family: 'Baloo 2', sans-serif !important; font-weight: 800 !important;
-            font-size: clamp(52px, 7vw, 96px) !important; line-height: 1.02 !important;
+            font-size: clamp(40px, 5.5vw, 72px) !important; line-height: 1.02 !important;
             text-align: center !important; color: #ffffff !important; margin: 0 0 8px 0 !important;
         }
         .tt-title .accent { color: #f5b301 !important; }
         .tt-sub {
             text-align: center !important; font-family: 'Nunito', sans-serif !important;
-            font-weight: 700 !important; font-size: clamp(22px, 2.4vw, 30px) !important;
-            color: #cdd6e8 !important; margin: 2px 0 30px 0 !important;
+            font-weight: 700 !important; font-size: clamp(20px, 2.2vw, 26px) !important;
+            color: #cdd6e8 !important; margin: 2px 0 18px 0 !important;
         }
         div[data-testid="stTextInput"] input {
         font-family: 'Nunito', sans-serif !important; font-weight: 700 !important;
@@ -879,6 +886,48 @@ def render_name_page():
         box-shadow: 0 10px 26px rgba(0,0,0,0.22) !important;
         }
         [data-testid="stHorizontalBlock"] { align-items: center !important; }
+        /* Class selectbox — same card treatment as the name input (gold
+           border, white fill, Nunito, shadow) so the two controls read as
+           one cohesive form instead of one styled and one left as a bare
+           default widget. */
+        div[data-testid="stSelectbox"] > div > div {
+            font-family: 'Nunito', sans-serif !important; font-weight: 700 !important;
+            font-size: 20px !important; color: #2f4d80 !important;
+            border: 4px solid #f5b301 !important; border-radius: 16px !important;
+            background: #ffffff !important; min-height: 58px !important;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.22) !important;
+        }
+        div[data-testid="stSelectbox"] > div > div > div { color: #2f4d80 !important; }
+        div[data-testid="stSelectbox"] svg { fill: #2f4d80 !important; }
+        /* Streamlit's default focus ring is red, clashing with the gold/blue
+           theme; swap it for the same gold used on the border everywhere
+           else on this page. */
+        div[data-testid="stSelectbox"] > div > div:focus-within,
+        div[data-testid="stTextInput"] > div:focus-within {
+            border-color: #f5b301 !important; box-shadow: 0 0 0 3px rgba(245,179,1,0.35) !important;
+        }
+        /* The options list renders in a portal outside .block-container (a
+           div, not a ul -- role="listbox"/"option" on plain divs), so it
+           needs its own (global) rule to match the same card style. */
+        div[data-testid="stSelectboxVirtualDropdown"] {
+            font-family: 'Nunito', sans-serif !important;
+            border: 3px solid #f5b301 !important; border-radius: 14px !important;
+            overflow: hidden !important; box-shadow: 0 14px 30px rgba(0,0,0,0.28) !important;
+            /* Capped so 5 short options never need more vertical room than
+               this -- a shorter requested height makes the browser's
+               auto-flip-to-fit logic far less likely to decide it has to
+               open upward in the first place. */
+            max-height: 230px !important;
+        }
+        div[data-testid="stSelectboxVirtualDropdown"] div[role="listbox"] {
+            max-height: 230px !important; overflow-y: auto !important;
+        }
+        div[data-testid="stSelectboxVirtualDropdown"] div[role="option"] {
+            font-weight: 700 !important; color: #2f4d80 !important; background: #ffffff !important;
+        }
+        div[data-testid="stSelectboxVirtualDropdown"] div[role="option"]:hover {
+            background: #fff4d6 !important;
+        }
         [class*="st-key-go_btn"] button {
             font-family: 'Baloo 2', sans-serif !important; font-weight: 800 !important;
             font-size: 22px !important; width: 100% !important; border: none !important;
