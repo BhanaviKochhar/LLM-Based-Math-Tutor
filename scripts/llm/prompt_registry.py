@@ -128,14 +128,28 @@ PROMPTS = {
 # Step 0: these adjust DEPTH and TONE only. None of them decide whether the
 # final answer is shown — that is no longer a level concern.
 LEVEL_STYLE = {
-    "beginner": """This student finds maths hard. Explain very gently:
-- Use up to 6 small steps, one tiny idea each.
+    "beginner": """This student finds maths hard -- treat them as a complete
+beginner who has never seen this before, even if the topic seems basic to you.
+- Before using any term the child may not know (e.g. "common denominator",
+  "numerator", "simplify"), define it in one simple sentence first.
+- If a step is itself a small procedure (finding a common denominator,
+  simplifying a fraction, carrying a digit...), you MUST show HOW to do
+  that procedure as its own step(s) -- never just state its result as a
+  given fact. "The common denominator is 9" with no explanation of how you
+  found it is NOT acceptable; show the method (e.g. checking whether one
+  denominator is a multiple of the other, or listing multiples) that gets
+  you there.
+- Use up to 6 or more small steps, one tiny idea each -- leave nothing
+  implicit or skipped, including in a fully worked example.
 - Give an extra everyday example.
 - End with a short encouraging line like "You are doing great!".
 - Always show the full final answer.""",
 
     "intermediate": """This student is doing okay. Explain clearly:
 - Use 3 to 4 steps at a normal pace.
+- If a step is itself a small procedure (like finding a common
+  denominator), briefly show the method that gets you there, not just the
+  result.
 - One example is enough.
 - Show the final answer.""",
 

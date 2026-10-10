@@ -63,7 +63,10 @@ _SYSTEM = (
     "with that problem. Read the child's message and reply with EXACTLY ONE "
     "of these labels and nothing else:\n"
     "ATTEMPT - they give an answer, show their thinking, or restate/rephrase "
-    "the SAME problem to engage with it\n"
+    "the SAME problem to engage with it -- a 'how do I...' / 'how to...' "
+    "question is NEVER an attempt even if it happens to mention a number "
+    "from the problem (e.g. 'how do I add 2 fractions' is asking for the "
+    "method, not attempting it); that is SOLVE or CONFUSION instead\n"
     "HINT - they explicitly ask for a hint or clue, wanting to keep solving "
     "the SAME problem themselves with a little more help (e.g. 'give me a "
     "hint', 'another hint', 'help me start') -- NOT confusion about something "
@@ -72,7 +75,10 @@ _SYSTEM = (
     "about your LAST explanation of this problem, or ask you to explain it "
     "again -- they want the SAME idea explained differently, not a numbered "
     "hint and not to stop\n"
-    "SOLVE - they ask you to show or tell them the full answer or how to do it\n"
+    "SOLVE - they ask you to show or tell them the full answer, or ask HOW "
+    "to do a step or the whole method ('how do I find a common denominator', "
+    "'how do you simplify it') -- a 'how' question about the METHOD, not a "
+    "restated attempt at it\n"
     "GIVE_UP - they explicitly want to STOP trying (e.g. 'I don't know', "
     "'this is too hard', 'I can't do it') -- NOT merely confused and NOT "
     "correcting you; a child who says they don't understand is asking for "
@@ -112,6 +118,10 @@ _FEWSHOT = [
     ("just tell me", "SOLVE"),
     ("show me how", "SOLVE"),
     ("whats the answer", "SOLVE"),
+    ("how do i find the common denominator", "SOLVE"),
+    ("how do you make the denominators the same", "SOLVE"),
+    ("how to find common denominator when adding 2 fractions", "SOLVE"),
+    ("how do i simplify it", "SOLVE"),
     ("i dont know", "GIVE_UP"),
     ("idk", "GIVE_UP"),
     ("this is too hard", "GIVE_UP"),

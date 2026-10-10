@@ -138,6 +138,19 @@ _NUM = re.compile(r"[-+]?\d+\s*/\s*\d+|[-+]?\d*\.\d+|[-+]?\d+")
 # has to understand one fraction syntax.
 _OVER_FRACTION_RE = re.compile(r"\b(\d+)\s+over\s+(\d+)\b", re.IGNORECASE)
 
+# A turn containing "how" is asking a procedural question ("how do I find a
+# common denominator", "how many are left") -- never a stated final answer,
+# even when it happens to contain exactly one digit. Without this guard, the
+# "sole number" fallback below read the "2" out of "...adding 2 fractions"
+# as the child's claimed answer and graded a clarifying question as a WRONG
+# attempt (live-reported: a repeated "how do I find the common denominator"
+# kept getting "Not quite -- let's look again!" instead of being
+# re-explained). This can only ever soften a false "wrong" into a safe
+# "unclear" (which just asks "what answer did you get?") -- it never
+# suppresses a genuine answer, since "is it 12?" and other real attempts
+# don't contain "how".
+_PROCEDURAL_Q_RE = re.compile(r"\bhow\b", re.IGNORECASE)
+
 
 def _student_answer(turn: str) -> str | None:
     """Best-effort: the number the student is offering as their answer.
@@ -159,6 +172,8 @@ def _student_answer(turn: str) -> str | None:
     m = re.search(r"answer\D*(" + _NUM.pattern + ")", t, re.IGNORECASE)
     if m:
         return re.sub(r"\s+", "", m.group(1))
+    if _PROCEDURAL_Q_RE.search(t):
+        return None
     nums = _NUM.findall(t)
     if len(nums) == 1:
         return re.sub(r"\s+", "", nums[0])
@@ -312,9 +327,22 @@ def _d_diagnose_wrong(s: TutorState) -> str:
 
 
 def _d_diagnose_correct(s: TutorState) -> str:
+    # Unlike _d_diagnose_wrong, this directive used to give the model NO
+    # grounding at all -- just "confirm the answer" and trust it to recall
+    # the right number from the conversation on its own. In a conversation
+    # with several worked examples (a teaching analogy, an earlier practice
+    # problem), that recall isn't reliable: live-reported, the celebration
+    # cited a DIFFERENT problem's answer from several turns earlier ("Your
+    # answer 5/8 is exactly right!" after the child correctly answered 3/5),
+    # which the verify-tag correctly flagged as disagreeing but the praise
+    # text itself did not. Naming the actual problem and answer here, the
+    # same way the wrong-answer path already does, removes the guesswork.
+    truth = f" The correct answer is {s.computed_answer}." if s.computed_answer else ""
     return (
-        "For THIS reply: the child got it right! Warmly celebrate in a sentence "
-        "or two and confirm the answer. Then offer either a slightly harder "
+        f"For THIS reply: the child got it right on \"{s.question}\".{truth} "
+        "Warmly celebrate in a sentence or two and confirm using THAT exact "
+        "number -- do not recompute it and do not cite any other number from "
+        "earlier in the conversation. Then offer either a slightly harder "
         "practice question OR a new topic — their choice. No numbered steps."
     )
 

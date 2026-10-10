@@ -37,6 +37,16 @@ s, a = C.step(s, "ATTEMPT", "is it 56?")
 check("correct -> diagnose_correct", a.mode == C.MODE_DIAGNOSE_CORRECT)
 check("terminal solved", a.terminal and a.outcome == "solved" and s.phase == C.SOLVED)
 check("offers practice/new", "Practice problem" in a.buttons)
+# Live-reported bug: the celebration text cited a DIFFERENT, earlier
+# problem's answer ("Your answer 5/8 is exactly right!" after the child
+# correctly answered a problem whose real answer was 3/5) -- the directive
+# used to say only "confirm the answer", trusting the model to recall the
+# right number from a conversation that may contain several worked
+# examples. It must now name the actual problem and answer explicitly, the
+# same grounding _d_diagnose_wrong already gets.
+check("diagnose_correct's directive names the actual problem and the "
+     "trusted answer, not a vague 'confirm the answer'",
+     "What is 7 times 8?" in a.directive and "56" in a.directive)
 
 # 2) wrong twice (intermediate) -> CO_SOLVE
 scenario("2. two wrong attempts (intermediate) -> CO_SOLVE")
@@ -128,6 +138,24 @@ s7, a7 = C.start("equivalent fraction", 3, "intermediate", computed_answer="2/3"
 s7, a7 = C.step(s7, "ATTEMPT", "6 over 9")
 check("a spoken-fraction answer is graded correct against an equal-value "
      "trusted answer (6/9 == 2/3)", a7.outcome == "solved")
+
+# 10c) live-reported bug: a procedural "how" question that happens to
+# mention a number from the problem ("...adding 2 fractions") was being
+# read as a STATED answer (the stray "2"), then graded wrong against the
+# real computed answer -- a repeated "how do I find the common
+# denominator" kept getting "Not quite -- let's look again!" instead of
+# being re-explained or shown the method.
+scenario("10c. a 'how' question with a stray number is never read as a stated answer")
+check("'how to find common denominator when adding 2 fractions' has no "
+     "extractable answer despite the '2'",
+     C._student_answer("how to find common denominator when adding 2 fractions") is None)
+check("'how many toffees was it again' (recalling a GIVEN quantity, not "
+     "asking for the method) is unaffected by the guard",
+     C._student_answer("how many toffees was it again") is None)
+s8, a8 = C.start("q", 3, "intermediate", computed_answer="3/10", is_math=True)
+s8, a8 = C.step(s8, "ATTEMPT", "how to find common denominator when adding 2 fractions")
+check("routed to ask_answer (unclear), NOT diagnosed as a wrong attempt",
+     a8.mode == C.MODE_ASK_ANSWER and s8.attempts == 0)
 
 # 11) conceptual question -> engaged, supportive (not graded)
 scenario("11. conceptual attempt -> engaged")

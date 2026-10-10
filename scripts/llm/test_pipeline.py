@@ -44,6 +44,42 @@ def test_response_parser() -> None:
     check("refusal detected", response_parser.is_refusal("Let's ask your teacher about this one!"))
 
 
+def test_strip_latex_converts_to_plain_text() -> None:
+    """Live-reported: a beginner-level explanation leaked raw LaTeX
+    ("(\\frac{1}{4})" shown as-is instead of "1/4") despite the system
+    prompt already forbidding it. strip_latex() is the deterministic
+    prevention layer -- applied unconditionally to every generated turn in
+    frontend/episode.py's _run_generation, not a detect-and-regenerate loop
+    (explicitly ruled out: no extra LLM call per turn for something a
+    regex rewrite handles for free)."""
+    print("response_parser — strip_latex prevents LaTeX from ever reaching the child")
+    sl = response_parser.strip_latex
+
+    check("plain text with no LaTeX passes through completely unchanged",
+         sl("1/4 + 1/2 = 3/4") == "1/4 + 1/2 = 3/4")
+    check(r"\frac{a}{b} becomes a/b",
+         sl(r"Add \frac{1}{4} and \frac{1}{2}") == "Add 1/4 and 1/2")
+    check(r"\frac with spacing inside the braces still resolves",
+         sl(r"\frac{ 1 }{ 2 }") == "1/2")
+    check(r"one level of nested \frac resolves too",
+         sl(r"\frac{\frac{1}{2}}{3}") == "1/2/3")
+    check(r"\times becomes the app's own plain-text 'x' convention",
+         sl(r"3 \times 4 = 12") == "3 x 4 = 12")
+    check(r"\cdot also becomes 'x'", sl(r"3 \cdot 4") == "3 x 4")
+    check(r"\div becomes the division sign", sl(r"8 \div 2") == "8 ÷ 2")
+    check(r"\left( / \right) collapse to plain parentheses",
+         sl(r"\left(1 + 2\right)") == "(1 + 2)")
+    check("inline $...$ math delimiters are dropped, content kept",
+         sl(r"the answer is $12$ toffees") == "the answer is 12 toffees")
+    check("an unanticipated backslash command is dropped rather than shown raw",
+         sl(r"\unexpectedcommand 5") == " 5")
+    check("real-world leak from the live report converts cleanly",
+         sl(r"(\frac{1}{4}) + (\frac{1}{2}) = (\frac{3}{4})")
+         == "(1/4) + (1/2) = (3/4)")
+    check("a None/empty input is returned as-is, not crashed on",
+         sl("") == "" and sl(None) is None)
+
+
 # ------------------------------------------- response_parser.final_number_str tiers
 def test_final_number_str_fallback_tiers() -> None:
     """Regression tests for the confidence-tiered fallback (see
@@ -685,8 +721,42 @@ def test_system_prompt_allows_simple_out_of_grade_explanations() -> None:
          "detailed" in system.lower() and "procedure" in system.lower())
 
 
+def test_beginner_level_requires_showing_substep_method() -> None:
+    """Live-reported: a first-session (beginner-by-default) explanation of
+    adding fractions asserted "the smallest common denominator for 3 and 9
+    is 9" without ever showing HOW to find it -- correct final steps, but a
+    sub-procedure stated as a given fact instead of taught. The beginner
+    LEVEL_STYLE must explicitly forbid that: any sub-step that is itself a
+    small procedure (finding a common denominator, simplifying...) has to
+    show its method, not just its result. intermediate gets the same rule
+    in lighter form; advanced is intentionally allowed to skip obvious
+    steps, so it is NOT asserted here."""
+    print("prompt_registry — beginner level must show the method behind a sub-step, not just assert its result")
+
+    messages = prompt_registry.build_messages(
+        "explain fractions and how to add them", 3, [],
+        version="v5-personalized", level="beginner",
+    )
+    system = messages[0]["content"]
+    check("beginner style requires showing HOW to do a sub-procedure, not "
+         "just stating its result",
+         "show the method" in system.lower() or "must show how" in system.lower())
+    check("beginner style requires defining a term before using it",
+         "define it" in system.lower())
+
+    messages_int = prompt_registry.build_messages(
+        "explain fractions and how to add them", 3, [],
+        version="v5-personalized", level="intermediate",
+    )
+    system_int = messages_int[0]["content"]
+    check("intermediate style also asks for the method behind a sub-step "
+         "(lighter than beginner, but not silently asserting a result)",
+         "method that gets you there" in system_int.lower())
+
+
 def main() -> None:
     test_response_parser()
+    test_strip_latex_converts_to_plain_text()
     test_final_number_str_fallback_tiers()
     test_student_tracker_atomic_save()
     test_verifier_math()
@@ -703,6 +773,7 @@ def main() -> None:
     test_topic_canonicalization()
     test_system_prompt_requires_self_contained_explanations()
     test_system_prompt_allows_simple_out_of_grade_explanations()
+    test_beginner_level_requires_showing_substep_method()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

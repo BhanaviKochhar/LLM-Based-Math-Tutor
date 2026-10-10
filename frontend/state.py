@@ -139,7 +139,19 @@ def init_session_state() -> None:
     ss.setdefault("name", "")
     ss.setdefault("name_field", "")
     ss.setdefault("grade", 3)
-    ss.setdefault("level", "on_track")
+    # Default to the WEAKEST level, not the middle one -- until
+    # student_tracker has 3+ recent attempts to classify from (see
+    # pipeline.resolve_level), this UI value IS the tutor's assumption about
+    # a brand-new child it knows nothing about yet. "on_track" defaulted
+    # every first-ever session to "intermediate" depth (3-4 steps, one
+    # example, no explicit definitions) -- live-reported: a first-time
+    # explanation of common denominators asserted the answer ("the smallest
+    # common denominator for 3 and 9 is 9") without ever showing how to find
+    # it. Starting assumed-weak means that same child gets the "define every
+    # term, show the method behind every sub-step" beginner treatment until
+    # they've actually demonstrated otherwise -- erring toward over-
+    # explaining a new student rather than under-explaining one.
+    ss.setdefault("level", "needs_practice")
     ss.setdefault("chat_seq", 1)
     ss.setdefault("chats", [{"id": "chat-1", "messages": [], "episode": None, "thread_notes": []}])
     ss.setdefault("active", "chat-1")

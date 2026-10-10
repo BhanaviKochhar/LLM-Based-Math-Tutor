@@ -1013,6 +1013,24 @@ def test_progress_to_next_badge_has_a_defensible_meaning() -> None:
          [t for _, _, _, t in app._BADGES] == [1, 3, 5, 8])
 
 
+def test_init_session_state_defaults_to_the_weakest_level() -> None:
+    """Live-reported: a brand-new session's first-ever explanation (default
+    'on_track' -> 'intermediate' depth) asserted a sub-step's result ("the
+    common denominator is 9") without ever showing how to find it. Until
+    student_tracker has enough history to classify a child for real (see
+    pipeline.resolve_level), the UI-level default IS the tutor's working
+    assumption about a child it knows nothing about yet -- it should assume
+    weak/needs_practice, not the middle 'on_track', so a new child gets the
+    more thorough beginner-level explanation by default."""
+    print("T. init_session_state defaults the UI level to needs_practice, not on_track")
+
+    fake_ss = {}
+    with _Patch(state, "ss", fake_ss):
+        state.init_session_state()
+    check("defaults to needs_practice (-> beginner depth), not on_track",
+         fake_ss.get("level") == "needs_practice")
+
+
 def test_change_grade_invalidates_open_episodes_but_keeps_chat_history() -> None:
     """Section 10 (ongoing grade change): changing grade mid-session must not
     let an in-progress episode -- computed (trusted answer, retrieval,
@@ -1247,6 +1265,7 @@ def main() -> None:
     test_current_learner_level_uses_real_backend_classification()
     test_top_weak_topic_surfaces_canonical_topics_only()
     test_progress_to_next_badge_has_a_defensible_meaning()
+    test_init_session_state_defaults_to_the_weakest_level()
     test_change_grade_invalidates_open_episodes_but_keeps_chat_history()
     test_thread_notes_populated_on_terminal_action()
     test_self_consistency_guardrail_surfaces_but_does_not_block()

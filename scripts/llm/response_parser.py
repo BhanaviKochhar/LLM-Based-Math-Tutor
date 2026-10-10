@@ -51,6 +51,60 @@ _NUMBER_TOKEN = (
 )
 _FRACTION_RE = re.compile(r"[-+]?\d+\s*/\s*\d+")
 _DECIMAL_RE = re.compile(r"[-+]?\d*\.\d+|[-+]?\d+")
+
+# A handful of children's-maths LaTeX constructs the system prompt already
+# forbids ("NEVER use LaTeX... like \times or \frac") but the model
+# occasionally slips into anyway -- live-reported in a long beginner-level
+# explanation ("(\frac{1}{4})" shown raw instead of "1/4"). The prompt
+# instruction alone doesn't hold 100% of the time, and re-prompting on
+# detection was deliberately ruled out (another LLM call per turn for
+# something a deterministic rewrite handles for free); strip_latex() below
+# runs unconditionally on every generated turn instead, so a leak can never
+# reach the child -- or this pipeline's OWN number parsing just above
+# (final_number_str/verifier can't read a value out of "\frac{1}{2}" either,
+# so an unstripped leak would have silently broken correctness-checking too,
+# not just readability).
+# \frac{a}{b} -> a/b. No nested braces inside each half (fine for this
+# app's own content -- a fraction's numerator/denominator is itself a plain
+# number or short expression, never another \frac); strip_latex() applies
+# this twice to resolve the rare one-level-nested case.
+_LATEX_FRAC_RE = re.compile(r"\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}")
+_LATEX_SQRT_RE = re.compile(r"\\sqrt\s*\{([^{}]*)\}")
+_LATEX_SIMPLE_REPLACEMENTS = (
+    (re.compile(r"\\times"), "x"),
+    (re.compile(r"\\cdot"), "x"),
+    (re.compile(r"\\div"), "\u00f7"),
+    (re.compile(r"\\left"), ""),
+    (re.compile(r"\\right"), ""),
+    (re.compile(r"\\leq?\b"), "<="),
+    (re.compile(r"\\geq?\b"), ">="),
+    (re.compile(r"\\neq"), "!="),
+)
+# Any OTHER backslash command not explicitly handled above -- dropped
+# rather than shown raw, so an unanticipated LaTeX construct degrades to a
+# missing word instead of a literal "\something" a child can't read.
+_LATEX_STRAY_COMMAND_RE = re.compile(r"\\[a-zA-Z]+")
+
+
+def strip_latex(text: str) -> str:
+    """Deterministically rewrite stray LaTeX into the plain text this app
+    actually displays and parses numbers from. See the block comment above
+    for why this exists instead of a regenerate-on-detection approach."""
+    if not text or ("\\" not in text and "$" not in text):
+        return text
+    t = text
+    for _ in range(2):  # resolve one level of \frac nesting
+        t = _LATEX_FRAC_RE.sub(
+            lambda m: f"{m.group(1).strip()}/{m.group(2).strip()}", t)
+    t = _LATEX_SQRT_RE.sub(r"sqrt(\1)", t)
+    for pattern, repl in _LATEX_SIMPLE_REPLACEMENTS:
+        t = pattern.sub(repl, t)
+    t = _LATEX_STRAY_COMMAND_RE.sub("", t)
+    t = t.replace("$", "")
+    # Leftover braces from a construct not explicitly handled above read as
+    # stray punctuation to a child -- drop them too.
+    t = t.replace("{", "").replace("}", "")
+    return re.sub(r"[ \t]{2,}", " ", t)
 _NUMBER_TOKEN_RE = re.compile(_NUMBER_TOKEN)
 _MIXED_NUMBER_PARTS_RE = re.compile(r"^([-+]?)(\d+)\s+(\d+)\s*/\s*(\d+)$")
 

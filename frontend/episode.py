@@ -261,7 +261,7 @@ def _run_generation(state, action, chunks, active_turns, previous_hints,
     legitimately has nothing to say. Raises GenerationFailed for every other
     mode that comes back empty, so a silent provider outage is treated the
     same as an exception by callers."""
-    from scripts.llm import pipeline, controller as C
+    from scripts.llm import pipeline, controller as C, response_parser
 
     result = pipeline.generate_turn(
         state, action, chunks=chunks, active_turns=active_turns,
@@ -279,7 +279,13 @@ def _run_generation(state, action, chunks, active_turns, previous_hints,
         text = (result.text or "").strip()
     if not text:
         raise GenerationFailed(f"empty generation for controller mode={action.mode!r}")
-    return text
+    # Single choke point every generated turn passes through -- sanitizing
+    # here (not at display time) means the number-extraction/verification
+    # below, the self-consistency check, and what gets stored for FUTURE
+    # turns' conversation context all see the same clean text the child
+    # does, not just the on-screen rendering. See response_parser.strip_latex
+    # for why this exists instead of a regenerate-on-detection approach.
+    return response_parser.strip_latex(text)
 
 
 def _post_check(state, action, text):
