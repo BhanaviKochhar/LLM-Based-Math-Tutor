@@ -49,9 +49,34 @@ def _load(path: Path) -> list[dict]:
         return [json.loads(line) for line in f if line.strip()]
 
 
+def _page_canonical_groups() -> dict[tuple, set]:
+    """Maps (grade, page) -> the set of canonical-text ids any chunk on
+    that page belongs to (see scripts.retrieval._canonical_index). The
+    corpus contains genuine whole-page duplicates -- confirmed live, Class
+    1 pages 146 and 163 are an exact 9-chunk-for-9-chunk repeat of the same
+    lesson content -- so a dataset label naming ONE of two equally-valid
+    page locations for a passage must not count the OTHER one as a miss."""
+    from scripts.retrieval import _load_chunks, _canonical_index
+    chunks, canonical = _load_chunks(), _canonical_index()
+    groups: dict[tuple, set] = {}
+    for i, c in enumerate(chunks):
+        groups.setdefault((c["grade"], c["page"]), set()).add(canonical[i])
+    return groups
+
+
 def _is_relevant(chunk_meta: dict, relevant: list[dict]) -> bool:
     key = (chunk_meta.get("grade"), chunk_meta.get("page"))
-    return any((r.get("grade"), r.get("page")) == key for r in relevant)
+    if any((r.get("grade"), r.get("page")) == key for r in relevant):
+        return True
+    # Same passage, different (duplicate) page -- e.g. the retrieved chunk
+    # canonicalized to its EARLIER occurrence while the dataset labelled
+    # the LATER one, or vice versa. Still the same underlying content.
+    groups = _page_canonical_groups()
+    got_canon = groups.get(key, set())
+    if not got_canon:
+        return False
+    return any(got_canon & groups.get((r.get("grade"), r.get("page")), set())
+              for r in relevant)
 
 
 def run() -> dict:

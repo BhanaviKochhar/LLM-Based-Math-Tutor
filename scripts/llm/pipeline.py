@@ -193,18 +193,29 @@ class TutorTurn:
 
 
 def _solve(question: str, grade: int) -> tuple[str | None, bool]:
-    """Compute-first + gate. Never raises."""
+    """Compute-first + gate. Never raises. Numeric only -- used by the
+    LEGACY Tier A path (TutorTurn/resume/get_hint below) and the
+    controller's own-worked-example self-check, neither of which needs a
+    non-numeric trusted answer. See compute_trusted_answer for the
+    live controller path, which also tries a categorical answer."""
     try:
         return verifier.solve(question, grade)
     except Exception:
         return None, False
 
 
-def compute_trusted_answer(question: str, grade: int) -> tuple[str | None, bool]:
-    """Public entry point for callers outside this module (e.g. the
-    frontend) that need the compute-first trusted answer without reaching
-    into the private _solve helper."""
-    return _solve(question, grade)
+def compute_trusted_answer(question: str, grade: int) -> tuple[str | None, bool, str]:
+    """Public entry point for the LIVE controller path (frontend/episode.py)
+    that needs the compute-first trusted answer for the STUDENT's actual
+    problem -- the one place worth also trying a categorical (non-numeric)
+    answer via verifier.solve_with_type, so a question like "if today is
+    Monday, what day will it be after 3 days?" gets a real trusted answer
+    to grade against instead of always falling into the ungraded
+    conceptual path. Never raises."""
+    try:
+        return verifier.solve_with_type(question, grade)
+    except Exception:
+        return None, False, "numeric"
 
 
 def _resolve_question(

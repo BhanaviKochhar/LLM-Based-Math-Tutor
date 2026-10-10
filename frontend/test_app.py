@@ -317,10 +317,13 @@ def test_public_api_wrappers() -> None:
          calls == [("resolve", "q", None, 3)] and result == "R")
 
     calls.clear()
-    with _Patch(pipeline, "_solve", lambda q, g: calls.append(("solve", q, g)) or ("5", True)):
+    with _Patch(verifier, "solve_with_type",
+               lambda q, g: calls.append(("solve_with_type", q, g)) or ("5", True, "numeric")):
         result = pipeline.compute_trusted_answer("q", 3)
-    check("compute_trusted_answer forwards to the solver",
-          calls == [("solve", "q", 3)] and result == ("5", True))
+    check("compute_trusted_answer forwards to solve_with_type (the live "
+         "controller path -- also tries a categorical answer, unlike the "
+         "numeric-only _solve used by the legacy Tier A path)",
+          calls == [("solve_with_type", "q", 3)] and result == ("5", True, "numeric"))
 
     calls.clear()
     with _Patch(pipeline, "_make_source", lambda meta: calls.append(("source", meta)) or "SRC"):
@@ -458,7 +461,7 @@ def test_math_followup_preserves_relationship() -> None:
     with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
          _Patch(intent_mod, "classify_intent", lambda *a, **kw: "MATH_FOLLOWUP"), \
          _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
-         _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("395", True)), \
+         _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("395", True, "numeric")), \
          _Patch(pipeline, "generate_turn",
                lambda *a, **kw: _FakeStream("245 + 150 is like your last problem, "
                                            "but with 150 instead of 136. Try it!")):

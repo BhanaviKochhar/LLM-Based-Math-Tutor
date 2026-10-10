@@ -105,6 +105,11 @@ class TutorState:
     level: str = "intermediate"
     computed_answer: str | None = None   # injected truth, or None
     is_math: bool = False
+    # "numeric" (verifier.solve, compared via _safe_eval/_close) or
+    # "categorical" (verifier.compute_categorical -- a day name, shape
+    # name, yes/no... compared via substring match, see diagnose() below).
+    # Only meaningful when computed_answer is set.
+    answer_type: str = "numeric"
     phase: str = AWAITING
     attempts: int = 0                    # wrong attempts so far
     hints_given: int = 0
@@ -228,22 +233,64 @@ def graduate_if_computable(state: "TutorState", generated_text: str) -> bool:
     if state.is_math or state.computed_answer is not None:
         return False
     for candidate in _trailing_candidates(generated_text):
-        answer, is_math = verifier.solve(candidate, state.grade)
+        # solve_with_type, not solve: an ack_conceptual follow-up is just as
+        # likely to pose a short-factual-answer exercise ("now you try: if
+        # today is Tuesday, what day will it be after 5 days?" -- an actual
+        # live example) as an arithmetic one, and both deserve to graduate
+        # out of the ungraded loop the same way.
+        answer, is_math, answer_type = verifier.solve_with_type(candidate, state.grade)
         if is_math and answer is not None:
             state.computed_answer = answer
             state.is_math = True
+            state.answer_type = answer_type
             return True
     return False
 
 
-def diagnose(turn: str, computed_answer: str | None, is_math: bool) -> str:
+# A short categorical answer (a day name, a shape name, "yes"/"no", a
+# number used as a label rather than a computation...) can't be compared
+# with _safe_eval/_close the way a numeric one is -- there's no arithmetic
+# value to evaluate. This is the SAME kind of deterministic, pattern-based
+# extraction _student_answer already does for numbers (not an enumerated
+# list of day names or shape names: the expected answer itself is supplied
+# per-question by verifier.compute_categorical, never hardcoded here), just
+# applied as a substring check instead of a numeric comparison. Leading
+# English articles are stripped from BOTH sides so "a square" (the
+# extractor's own phrasing) still matches a child who just writes "square".
+_LEADING_ARTICLE_RE = re.compile(r"^(a|an|the)\s+", re.IGNORECASE)
+_NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _categorical_match(turn: str, trusted_answer: str) -> bool:
+    def norm(s: str) -> str:
+        s = _LEADING_ARTICLE_RE.sub("", (s or "").strip())
+        return _NON_ALNUM_RE.sub(" ", s.lower()).strip()
+    answer = norm(trusted_answer)
+    return bool(answer) and answer in norm(turn)
+
+
+def diagnose(turn: str, computed_answer: str | None, is_math: bool,
+            answer_type: str = "numeric") -> str:
     """Return 'correct' | 'wrong' | 'unclear' | 'engaged'.
 
     'engaged'  -> non-computable / no trusted value; can't grade numerically.
     'unclear'  -> computable, but we couldn't read a single stated answer.
+
+    A CATEGORICAL trusted answer only ever resolves to 'correct' or
+    'engaged', never 'wrong'/'unclear' -- deliberately conservative. Unlike
+    a number, a categorical match is a substring check against whatever
+    short phrase the extractor returned, and a real match phrased
+    differently (child writes "square" when the trusted phrase is "a
+    square shape") could miss; declaring that a WRONG answer risks
+    confidently telling a correct child they're wrong, which is worse than
+    the previous gap (no confirmation at all for a correct one). This is
+    the same conservative bias as the ack_conceptual fix next to it: when
+    unsure, stay neutral rather than assert a grade with no solid basis.
     """
     if not is_math or computed_answer is None:
         return "engaged"
+    if answer_type == "categorical":
+        return "correct" if _categorical_match(turn, computed_answer) else "engaged"
     ans = _student_answer(turn)
     if ans is None:
         return "unclear"
@@ -368,17 +415,27 @@ def _d_ack_conceptual(s: TutorState) -> str:
         "just a bare request or restatement (e.g. 'learn addition', 'what is "
         "a fraction') with no reasoning of their own in it, do NOT claim they "
         "already noticed, showed, or said something they didn't -- simply "
-        "treat it as a request and move the teaching forward. Either way, do "
-        "NOT restart with a generic definition they have already heard in "
-        "this conversation. Then, if it fits naturally, end with ONE small, "
-        "concrete question with a specific number in it that the child could "
-        "actually work out (e.g. 'What is one-third of 9?'), phrased as a "
-        "question ending in '?' — do not solve it yourself. If a concrete "
-        "question doesn't fit naturally here, add one new, SHORT point that "
-        "moves the conversation forward instead (do not repeat an example "
-        "you already gave). Keep the textbook context as grounding, not as "
-        "a script to re-read. Do NOT write an 'Answer:' line and do NOT use "
-        "numbered steps."
+        "treat it as a request and move the teaching forward. "
+        "If what they wrote is, or contains, a bare number offered as an "
+        "answer (e.g. they typed '41'), this mode has NO verified value to "
+        "check it against -- you MUST NOT tell them it is right or wrong, "
+        "and MUST NOT restate or imply any specific number is 'the' correct "
+        "answer. (Live-reported failure: told a child '41' was correct for a "
+        "problem whose real answer was 14, inventing a false derivation to "
+        "match -- there was no answer on record to check that against at "
+        "all.) Acknowledge their attempt neutrally (e.g. 'I see you're "
+        "thinking about this!') without confirming or denying it, and move "
+        "the teaching forward instead. "
+        "Either way, do NOT restart with a generic definition they have "
+        "already heard in this conversation. Then, if it fits naturally, end "
+        "with ONE small, concrete question with a specific number in it that "
+        "the child could actually work out (e.g. 'What is one-third of 9?'), "
+        "phrased as a question ending in '?' — do not solve it yourself. If "
+        "a concrete question doesn't fit naturally here, add one new, SHORT "
+        "point that moves the conversation forward instead (do not repeat an "
+        "example you already gave). Keep the textbook context as grounding, "
+        "not as a script to re-read. Do NOT write an 'Answer:' line and do "
+        "NOT use numbered steps."
     )
 
 
@@ -473,17 +530,19 @@ _d_clarify = (
 
 # ---- entry points -----------------------------------------------------------
 def start(question: str, grade: int, level: str = "intermediate",
-          computed_answer: str | None = None, is_math: bool = False):
+          computed_answer: str | None = None, is_math: bool = False,
+          answer_type: str = "numeric"):
     """Begin an episode: teach + invite. Returns (state, action)."""
     s = TutorState(question=question, grade=grade, level=level,
-                   computed_answer=computed_answer, is_math=is_math)
+                   computed_answer=computed_answer, is_math=is_math,
+                   answer_type=answer_type)
     return s, Action(MODE_TEACH_INVITE, _d_teach_invite(s),
                      buttons=list(_BTN_AFTER_INVITE))
 
 
 def start_followup(previous_question: str, question: str, grade: int,
                    level: str = "intermediate", computed_answer: str | None = None,
-                   is_math: bool = False):
+                   is_math: bool = False, answer_type: str = "numeric"):
     """Begin a new problem that the child derived from the PREVIOUS one by
     changing a value/condition (e.g. "what if it was 150 instead of 136?").
 
@@ -496,7 +555,8 @@ def start_followup(previous_question: str, question: str, grade: int,
     Returns (state, action), same contract as start().
     """
     s = TutorState(question=question, grade=grade, level=level,
-                   computed_answer=computed_answer, is_math=is_math)
+                   computed_answer=computed_answer, is_math=is_math,
+                   answer_type=answer_type)
     if not is_math:
         return s, Action(MODE_TEACH_INVITE, _d_teach_invite_conceptual,
                          buttons=list(_BTN_AFTER_INVITE))
@@ -582,7 +642,7 @@ def _handle_solve(state: TutorState):
 
 
 def _handle_attempt(state: TutorState, turn: str | None):
-    verdict = diagnose(turn or "", state.computed_answer, state.is_math)
+    verdict = diagnose(turn or "", state.computed_answer, state.is_math, state.answer_type)
 
     if verdict == "correct":
         state.phase = SOLVED

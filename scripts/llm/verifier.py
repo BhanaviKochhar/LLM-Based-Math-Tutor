@@ -81,12 +81,66 @@ _EXTRACT_FEWSHOT = [
 # expression isn't truncated. 24 was too small on gpt-oss-120b.
 _EXTRACT_MAX_TOKENS = 256
 
+# Objective 2 gap, live-reported: a question with a single short, objectively
+# checkable but NON-numeric answer (a day of the week, a shape name, a
+# yes/no fact) was never computable by the arithmetic extractor above, so it
+# had no trusted value to grade against at all -- a CORRECT answer to "if
+# today is Monday, what day will it be after 3 days?" landed in the same
+# ungraded path as a genuinely conceptual "what is a fraction?" question,
+# and personalisation tracking (student_tracker.record, only called from a
+# graded diagnose_correct/wrong outcome) never saw it either. This extends
+# the SAME compute-first philosophy -- ground the trusted answer via a
+# constrained extraction call, never trust the tutor's own free text -- to
+# that second, non-numeric answer shape, rather than widening what counts
+# as "numeric". It is a SEPARATE extractor, tried only once the numeric one
+# above has already said NONE, so it can never compete with or weaken the
+# existing numeric path.
+_CATEGORICAL_EXTRACT_SYSTEM = (
+    "You read a primary-school (NCERT Class 1-5) maths question and decide "
+    "whether it has exactly ONE short, factual, objectively-checkable "
+    "answer that is NOT computed by arithmetic -- a day of the week, a "
+    "month, a shape name, a yes/no fact, which of two given things is "
+    "bigger/smaller/equal, or similar.\n"
+    "Rules:\n"
+    "- Output ONLY the answer itself, in 1-4 words, the way an NCERT "
+    "textbook would state it (e.g. 'Thursday', 'a square', 'yes', '9').\n"
+    "- The answer must be FULLY DETERMINED by the question exactly as "
+    "asked -- never guess or invent information the question didn't give.\n"
+    "- If the question asks for an explanation, a definition, an opinion, "
+    "a list of several things, or has no single short correct answer, "
+    "output exactly: NONE\n"
+    "- If the question is really an ARITHMETIC computation (addition, "
+    "subtraction, multiplication, division, fractions...), output exactly: "
+    "NONE -- that is handled separately.\n"
+    "- A question asking the CHILD to self-report -- whether something "
+    "makes sense to them, whether they understand, how they feel, what "
+    "THEY think or want to do next -- is NOT a factual question, even if "
+    "it is grammatically shaped like a yes/no question. There is no "
+    "objectively correct answer to check that against. Output NONE."
+)
+
+_CATEGORICAL_EXTRACT_FEWSHOT = [
+    ("If today is Monday, what day will it be after 3 days?", "Thursday"),
+    ("What shape has 4 equal sides and 4 right angles?", "a square"),
+    ("Is 7 an even number?", "no"),
+    ("Which is bigger, 6 or 9?", "9"),
+    ("What month comes right after June?", "July"),
+    ("What is 2 + 3?", "NONE"),
+    ("What is a fraction?", "NONE"),
+    ("Name the months that have 31 days.", "NONE"),
+    ("How do I find a common denominator?", "NONE"),
+    ("Does that make sense so far?", "NONE"),
+    ("Do you understand how to add fractions now?", "NONE"),
+    ("Would you like to try a harder question next?", "NONE"),
+]
+
 
 @dataclass
 class Computation:
     verifiable: bool
     expression: str | None = None
     value: object | None = None
+    answer_type: str = "numeric"  # or "categorical" -- see compute_categorical
 
 
 def _safe_eval(expr_str: str | None):
@@ -128,16 +182,16 @@ def parse_trusted_value(value_str: str | None):
     return _safe_eval(value_str)
 
 
-def _default_extractor(question: str, retries: int = 1) -> str:
-    """Ask the shared LLM client for a single arithmetic expression.
-
-    Retries once on an empty result so a brief 429 doesn't silently disable
-    injection (empty return was the live failure mode under rate limits).
-    """
+def _extract_via_llm(system: str, fewshot: list[tuple[str, str]], question: str,
+                     retries: int = 1) -> str:
+    """Shared call shape for both extractors below: a constrained, few-shot,
+    temperature-0 classification call. Retries once on an empty result so a
+    brief 429 doesn't silently disable injection (empty return was the live
+    failure mode under rate limits)."""
     from . import llm_client  # lazy: keeps verifier import-safe offline
 
-    messages = [{"role": "system", "content": _EXTRACT_SYSTEM}]
-    for q, a in _EXTRACT_FEWSHOT:
+    messages = [{"role": "system", "content": system}]
+    for q, a in fewshot:
         messages.append({"role": "user", "content": q})
         messages.append({"role": "assistant", "content": a})
     messages.append({"role": "user", "content": question})
@@ -154,6 +208,18 @@ def _default_extractor(question: str, retries: int = 1) -> str:
         if attempt < retries:
             time.sleep(1.5)
     return text
+
+
+def _default_extractor(question: str, retries: int = 1) -> str:
+    """Ask the shared LLM client for a single arithmetic expression."""
+    return _extract_via_llm(_EXTRACT_SYSTEM, _EXTRACT_FEWSHOT, question, retries)
+
+
+def _default_categorical_extractor(question: str, retries: int = 1) -> str:
+    """Ask the shared LLM client for a short non-numeric trusted answer
+    (see Computation.answer_type / compute_categorical)."""
+    return _extract_via_llm(_CATEGORICAL_EXTRACT_SYSTEM, _CATEGORICAL_EXTRACT_FEWSHOT,
+                            question, retries)
 
 
 def _expression_candidates(raw: str):
@@ -193,6 +259,20 @@ def compute(question: str, extract_fn=None) -> Computation:
         if val is not None:
             return Computation(verifiable=True, expression=cand, value=val)
     return Computation(verifiable=False, expression=raw)
+
+
+def compute_categorical(question: str, extract_fn=None) -> Computation:
+    """Ground-truth Computation for a question whose answer is a short,
+    objectively-checkable fact that ISN'T arithmetic (see
+    _CATEGORICAL_EXTRACT_SYSTEM) -- the non-numeric counterpart to
+    compute(). Only ever consulted by solve_with_type() AFTER the numeric
+    path has already said NONE, so it can never compete with a genuine
+    computation."""
+    extract_fn = extract_fn or _default_categorical_extractor
+    raw = (extract_fn(question) or "").strip()
+    if not raw or re.search(r"\bNONE\b", raw, re.IGNORECASE):
+        return Computation(verifiable=False)
+    return Computation(verifiable=True, value=raw, answer_type="categorical")
 
 
 def format_value(val) -> str:
@@ -304,6 +384,32 @@ def solve(question: str, grade: int | None = None, extract_fn=None):
         return None, False
     answer = _grade_appropriate_answer(comp.expression, comp.value, question=question)
     return answer, True
+
+
+def solve_with_type(question: str, grade: int | None = None, extract_fn=None,
+                    categorical_extract_fn=None):
+    """Like solve(), but for the controller's actual grading path: when the
+    question isn't arithmetic at all, also try the categorical extractor
+    (compute_categorical) before giving up. Only this entry point grows a
+    third return value -- solve() itself, and every existing caller of it
+    (controller.py's own-example self-check, the eval harnesses, the legacy
+    Tier A path), stay numeric-only and untouched; grading the STUDENT's
+    actual problem is the one place a non-numeric trusted answer is worth
+    the extra extraction call.
+
+    Returns (answer_or_None, is_math, answer_type):
+        (str,  True,  "numeric")     -> inject this computed trusted answer
+        (str,  True,  "categorical") -> inject this short factual answer
+        (None, True,  "numeric")     -> computable but not injected (remainder framing)
+        (None, False, "numeric")     -> neither arithmetic nor a checkable short fact
+    """
+    answer, is_math = solve(question, grade=grade, extract_fn=extract_fn)
+    if is_math:
+        return answer, True, "numeric"
+    cat = compute_categorical(question, extract_fn=categorical_extract_fn)
+    if cat.verifiable and cat.value:
+        return str(cat.value), True, "categorical"
+    return None, False, "numeric"
 
 
 def _close(a, b, tol: float = 1e-6) -> bool:

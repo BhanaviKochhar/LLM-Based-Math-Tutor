@@ -456,13 +456,14 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
     source = pipeline.source_citation(chunks_meta)
 
     if resolution.use_verifier:
-        computed_answer, is_math = pipeline.compute_trusted_answer(resolution.resolved_question, grade)
+        computed_answer, is_math, answer_type = pipeline.compute_trusted_answer(
+            resolution.resolved_question, grade)
     else:
-        computed_answer, is_math = None, False
+        computed_answer, is_math, answer_type = None, False, "numeric"
 
     state, action = C.start(
         resolution.resolved_question, grade, level,
-        computed_answer=computed_answer, is_math=is_math,
+        computed_answer=computed_answer, is_math=is_math, answer_type=answer_type,
     )
     # msg_start anchors this episode to the user message that opened it, so
     # _apply_action only ever shows the model turns from THIS problem, never
@@ -514,14 +515,14 @@ def _advance_math_followup(chat, episode, text, grade, active_turns) -> dict:
         return reply
 
     if resolution.use_verifier:
-        computed_answer, is_math = pipeline.compute_trusted_answer(
+        computed_answer, is_math, answer_type = pipeline.compute_trusted_answer(
             resolution.resolved_question, grade)
     else:
-        computed_answer, is_math = None, False
+        computed_answer, is_math, answer_type = None, False, "numeric"
 
     new_state, action = C.start_followup(
         state.question, resolution.resolved_question, grade, state.level,
-        computed_answer=computed_answer, is_math=is_math,
+        computed_answer=computed_answer, is_math=is_math, answer_type=answer_type,
     )
     # This is functionally a new episode (own attempts/hints budget) derived
     # from the old one, so it gets its own msg_start too -- its generation

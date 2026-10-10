@@ -163,6 +163,24 @@ s, a = C.start("what is a fraction", 3, "intermediate", computed_answer=None, is
 s, a = C.step(s, "ATTEMPT", "a part of something?")
 check("conceptual -> ack_conceptual, not terminal", a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
 
+# 11b) Live-reported bug: a bare number typed into a still-ungraded
+# (is_math=False, no computed_answer) episode got a free-text reply that
+# fabricated a false "You're right -- ...=14" confirmation for the input
+# "41", with no verified value on record to check it against at all (this
+# mode is also outside _post_check's checked-modes set, so nothing else
+# would have caught it). The directive must explicitly forbid declaring any
+# number right or wrong here.
+scenario("11b. a bare number in an ungraded conceptual episode must not be told it's right/wrong")
+s, a = C.start("teach me: what is 1 ten and 4 ones put together?", 1, "beginner",
+              computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "41")
+check("still ack_conceptual (no computed_answer exists to grade '41' against)",
+     a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
+check("directive explicitly forbids confirming/denying correctness when there is "
+     "nothing on record to check a stated number against",
+     "no verified value" in a.directive.lower()
+     and "must not tell them it is right or wrong" in a.directive.lower())
+
 # 12) conceptual episode graduates to math once the tutor poses a computable
 # exercise, and the NEXT attempt is then genuinely diagnosed (not a forever-loop)
 scenario("12. conceptual episode graduates when the reply poses a computable exercise")
@@ -420,6 +438,52 @@ s_follow_conceptual, a_follow_conceptual = C.start_followup(
 check("a follow-up that resolves to non-computable falls back to the ordinary "
      "conceptual teach_invite directive (no previous-problem text needed)",
      a_follow_conceptual.directive == C._d_teach_invite_conceptual)
+
+# 21) Objective 2 gap, live-reported: a question with a single short,
+# NON-numeric answer (a day name, shape name, yes/no...) had no trusted
+# value to grade against, so a CORRECT answer like "Thursday" never got
+# confirmed OR counted toward personalisation (student_tracker.record is
+# only reached from a genuine diagnose_correct/wrong outcome). These cover
+# the categorical half of diagnose()/TutorState added to close that gap.
+scenario("21. categorical (non-numeric) trusted answers")
+check("'Thursday' matches the trusted answer 'Thursday' (case/punct-insensitive)",
+     C._categorical_match("I think it's thursday!", "Thursday"))
+check("a leading article on the trusted answer doesn't block a bare match "
+     "('a square' vs a child just writing 'square')",
+     C._categorical_match("square", "a square"))
+check("substring match works the other way too -- a short trusted answer "
+     "inside a longer sentence", C._categorical_match("Thursday", "Thursday"))
+check("a genuinely different answer does not match",
+     not C._categorical_match("Friday", "Thursday"))
+check("empty turn never matches", not C._categorical_match("", "Thursday"))
+
+check("diagnose() with a categorical trusted answer: a real match -> correct",
+     C.diagnose("Thursday", "Thursday", True, "categorical") == "correct")
+check("diagnose() with a categorical trusted answer: no match -> 'engaged', "
+     "NEVER 'wrong' -- deliberately conservative, see diagnose()'s own "
+     "docstring for why a false 'wrong' is worse than staying neutral",
+     C.diagnose("Friday", "Thursday", True, "categorical") == "engaged")
+
+s_cat, a_cat = C.start("if today is Monday, what day will it be after 3 days?",
+                       1, "beginner", computed_answer="Thursday", is_math=True,
+                       answer_type="categorical")
+check("categorical TutorState starts the same as any other open episode",
+     a_cat.mode == C.MODE_TEACH_INVITE and s_cat.answer_type == "categorical")
+s_cat, a_cat = C.step(s_cat, "ATTEMPT", "Thursday")
+check("a correct categorical ATTEMPT reaches diagnose_correct, terminal, "
+     "outcome=solved -- the SAME real grading/personalisation path a "
+     "numeric correct answer gets, not the old ungraded ack_conceptual loop",
+     a_cat.mode == C.MODE_DIAGNOSE_CORRECT and a_cat.terminal
+     and a_cat.outcome == "solved" and s_cat.phase == C.SOLVED)
+
+s_cat2, a_cat2 = C.start("if today is Monday, what day will it be after 3 days?",
+                         1, "beginner", computed_answer="Thursday", is_math=True,
+                         answer_type="categorical")
+s_cat2, a_cat2 = C.step(s_cat2, "ATTEMPT", "Friday")
+check("a WRONG categorical ATTEMPT stays conservative (ack_conceptual, not "
+     "a confident 'wrong' diagnosis) and does NOT count as a graded attempt",
+     a_cat2.mode == C.MODE_ACK_CONCEPTUAL and s_cat2.attempts == 0
+     and not a_cat2.terminal)
 
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:

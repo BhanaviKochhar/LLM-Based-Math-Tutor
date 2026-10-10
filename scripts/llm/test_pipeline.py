@@ -283,6 +283,48 @@ def test_verifier_injection_gate() -> None:
                   "45/8") == ("45/8", True))
 
 
+def test_verifier_categorical() -> None:
+    """Objective 2 gap, live-reported: a question with a single short,
+    non-numeric answer (day name, shape name, yes/no...) had no trusted
+    value to grade against at all, so a CORRECT answer never got confirmed
+    OR tracked by personalisation. compute_categorical/solve_with_type are
+    the second, non-numeric half of the compute-first verifier -- tried
+    only once the numeric extractor has already said NONE."""
+    print("verifier — compute_categorical / solve_with_type (injected extractor, no LLM)")
+
+    comp = verifier.compute_categorical(
+        "If today is Monday, what day will it be after 3 days?",
+        extract_fn=lambda q: "Thursday")
+    check("a categorical question extracts a verifiable, non-numeric Computation",
+         comp.verifiable and comp.value == "Thursday" and comp.answer_type == "categorical")
+
+    comp_none = verifier.compute_categorical("What is a fraction?", extract_fn=lambda q: "NONE")
+    check("a genuinely open-ended question still extracts nothing",
+         not comp_none.verifiable)
+
+    # solve_with_type: numeric path takes priority and is untouched.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 7 times 8?", extract_fn=lambda q: "7 * 8",
+        categorical_extract_fn=lambda q: "should never be called")
+    check("a genuinely numeric question stays on the numeric path "
+         "(categorical extractor never even consulted)",
+         (answer, is_math, kind) == ("56", True, "numeric"))
+
+    # solve_with_type: numeric says NONE -> categorical fallback kicks in.
+    answer, is_math, kind = verifier.solve_with_type(
+        "If today is Monday, what day will it be after 3 days?",
+        extract_fn=lambda q: "NONE", categorical_extract_fn=lambda q: "Thursday")
+    check("numeric NONE falls through to the categorical extractor",
+         (answer, is_math, kind) == ("Thursday", True, "categorical"))
+
+    # solve_with_type: both say NONE -> genuinely ungradable, as before.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is a fraction?", extract_fn=lambda q: "NONE",
+        categorical_extract_fn=lambda q: "NONE")
+    check("neither path finds anything -> (None, False), same as plain solve()",
+         (answer, is_math) == (None, False))
+
+
 # ------------------------------------------------------- verifier check (no LLM)
 def test_verifier_check() -> None:
     print("verifier — check() with injected extractor")
@@ -760,6 +802,7 @@ def main() -> None:
     test_final_number_str_fallback_tiers()
     test_student_tracker_atomic_save()
     test_verifier_math()
+    test_verifier_categorical()
     test_verifier_injection_gate()
     test_verifier_check()
     test_client_fallback()
