@@ -75,6 +75,19 @@ _BTN_AFTER_HINT_EXHAUSTED = ["I'll try", "Just show me"]
 _BTN_AFTER_SOLVED = ["Practice problem", "New question"]
 _BTN_TERMINAL = ["New question"]
 
+
+def _without_hint_if_exhausted(buttons: list[str], state: "TutorState") -> list[str]:
+    """Drop "Give me a hint" from a button set once the hint budget is
+    already spent, so no reply -- wrong answer, confusion, correction,
+    clarify, a conceptual aside, or a cold solve request -- ever offers a
+    hint that no longer exists. Only the HINT/SOLVE-exhaustion branches
+    themselves already guard this; every other call site below builds its
+    button list from these same constants without checking hints_given,
+    which is what let "Give me a hint" keep appearing after MAX_HINTS."""
+    if state.hints_given < MAX_HINTS:
+        return buttons
+    return [b for b in buttons if b != "Give me a hint"]
+
 # Fixed, non-generated message for MODE_HINT_EXHAUSTED -- deliberately NOT an
 # LLM call: the whole point of this state is to stop spending a call on a
 # hint the system has already told the student everything it will say
@@ -493,7 +506,13 @@ def step(state: TutorState, intent: str, turn: str | None = None):
             return state, Action(MODE_HINT_EXHAUSTED, "",
                                  buttons=list(_BTN_AFTER_HINT_EXHAUSTED))
         state.hints_given += 1
-        return state, Action(MODE_HINT, "", buttons=list(_BTN_AFTER_HINT),
+        # This may BE the last hint (hints_given now == MAX_HINTS) -- if so,
+        # the button row must not still invite "Another hint": there isn't
+        # one. Offering it anyway was the exact reported bug (a tap on the
+        # phantom button only revealed exhaustion one wasted click later).
+        buttons = (_BTN_AFTER_HINT_EXHAUSTED if state.hints_given >= MAX_HINTS
+                  else _BTN_AFTER_HINT)
+        return state, Action(MODE_HINT, "", buttons=list(buttons),
                              hint_number=state.hints_given)
 
     if intent == "SOLVE":
@@ -506,15 +525,16 @@ def step(state: TutorState, intent: str, turn: str | None = None):
     # kept distinct from MODE_HINT/ATTEMPT.
     if intent == "CONFUSION":
         buttons = _BTN_AFTER_WRONG if state.attempts else _BTN_AFTER_INVITE
+        buttons = _without_hint_if_exhausted(buttons, state)
         return state, Action(MODE_CONFUSION, _d_confusion, buttons=list(buttons))
 
     if intent == "CORRECTION":
-        return state, Action(MODE_CORRECTION, _d_correction,
-                             buttons=list(_BTN_AFTER_INVITE))
+        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
+        return state, Action(MODE_CORRECTION, _d_correction, buttons=list(buttons))
 
     if intent == "CLARIFY":
-        return state, Action(MODE_CLARIFY, _d_clarify,
-                             buttons=list(_BTN_AFTER_INVITE))
+        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
+        return state, Action(MODE_CLARIFY, _d_clarify, buttons=list(buttons))
 
     # ATTEMPT (and anything unrecognised) -> treat as an attempt
     return _handle_attempt(state, turn)
@@ -528,8 +548,9 @@ def _handle_solve(state: TutorState):
                              buttons=list(_BTN_TERMINAL), terminal=True,
                              outcome="shown")
     state.solve_redirect_used = True
-    return state, Action(MODE_REDIRECT, _d_redirect(state),
-                         buttons=["I'll try", "Give me a hint", "Show me anyway"])
+    buttons = _without_hint_if_exhausted(
+        ["I'll try", "Give me a hint", "Show me anyway"], state)
+    return state, Action(MODE_REDIRECT, _d_redirect(state), buttons=list(buttons))
 
 
 def _handle_attempt(state: TutorState, turn: str | None):
@@ -542,12 +563,14 @@ def _handle_attempt(state: TutorState, turn: str | None):
                              outcome="solved")
 
     if verdict == "engaged":  # conceptual — can't grade, keep it supportive
+        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
         return state, Action(MODE_ACK_CONCEPTUAL, _d_ack_conceptual(state),
-                             buttons=list(_BTN_AFTER_INVITE))
+                             buttons=list(buttons))
 
     if verdict == "unclear":  # working shown but no single answer
+        buttons = _without_hint_if_exhausted(_BTN_AFTER_WRONG, state)
         return state, Action(MODE_ASK_ANSWER, _d_ask_answer(state),
-                             buttons=list(_BTN_AFTER_WRONG))
+                             buttons=list(buttons))
 
     # wrong
     state.attempts += 1
@@ -557,5 +580,6 @@ def _handle_attempt(state: TutorState, turn: str | None):
         return state, Action(MODE_CO_SOLVE, _d_co_solve(state),
                              buttons=list(_BTN_TERMINAL), terminal=True,
                              outcome="shown")
+    buttons = _without_hint_if_exhausted(_BTN_AFTER_WRONG, state)
     return state, Action(MODE_DIAGNOSE_WRONG, _d_diagnose_wrong(state),
-                         buttons=list(_BTN_AFTER_WRONG))
+                         buttons=list(buttons))

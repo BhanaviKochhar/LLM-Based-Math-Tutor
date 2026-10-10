@@ -243,6 +243,10 @@ check("Hint 2: hint_number=2", a.mode == C.MODE_HINT and a.hint_number == 2 and 
 s, a = C.step(s, "HINT")
 check("Hint 3: hint_number=3 (== MAX_HINTS)",
      a.mode == C.MODE_HINT and a.hint_number == 3 and s.hints_given == C.MAX_HINTS)
+check("live-reported bug: the LAST valid hint's own buttons must not still "
+     "offer 'Another hint' -- there isn't one, and offering it anyway meant "
+     "a tap only revealed exhaustion one wasted click later",
+     "Another hint" not in a.buttons and "Just show me" in a.buttons)
 s, a = C.step(s, "HINT")
 check("4th HINT request -> MODE_HINT_EXHAUSTED, not another 'Hint 3' call, "
      "hints_given does NOT increment past MAX_HINTS",
@@ -252,6 +256,17 @@ check("exhausted buttons drop 'Another hint', offering a real next action instea
 check("the episode is NOT terminal just because hints are exhausted -- the "
      "student can still try or ask to be shown",
      not a.terminal and s.phase == C.AWAITING)
+
+# Live-reported bug, second half: once hints are exhausted, EVERY other
+# reply that offers a retry (wrong answer, confusion, a conceptual aside)
+# must also stop offering "Give me a hint" -- not just the hint branch
+# itself. Continuing from the same now-exhausted state above.
+s3, a3 = C.step(s, "ATTEMPT", "100")
+check("a wrong answer after hints are exhausted does not re-offer a hint",
+     a3.mode == C.MODE_DIAGNOSE_WRONG and "Give me a hint" not in a3.buttons)
+s4, a4 = C.step(s, "CONFUSION", "huh?")
+check("confusion after hints are exhausted does not re-offer a hint either",
+     a4.mode == C.MODE_CONFUSION and "Give me a hint" not in a4.buttons)
 # Repeated click after exhaustion (simulating a double-submit / rerender):
 # calling step() again on the SAME already-exhausted state must be
 # idempotent, not compound.
