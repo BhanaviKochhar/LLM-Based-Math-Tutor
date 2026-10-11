@@ -269,6 +269,50 @@ def _categorical_match(turn: str, trusted_answer: str) -> bool:
     return bool(answer) and answer in norm(turn)
 
 
+# Three more non-numeric answer shapes (see verifier.solve_with_type /
+# verifier._FUNCTION_REGISTRY), each matched the SAME conservative way as
+# _categorical_match above -- correct/engaged only, never wrong/unclear,
+# because each is a best-effort pattern read of free text rather than a
+# single unambiguous numeric comparison.
+_TIME_RE = re.compile(r"\b(\d{1,2})\s*[:.]\s*(\d{2})\b")
+
+
+def _time_match(turn: str, trusted_answer: str) -> bool:
+    m_truth = _TIME_RE.search(trusted_answer or "")
+    m_turn = _TIME_RE.search(turn or "")
+    if not m_truth or not m_turn:
+        return False
+    return (int(m_truth.group(1)) % 24, int(m_truth.group(2))) == \
+        (int(m_turn.group(1)) % 24, int(m_turn.group(2)))
+
+
+def _list_match(turn: str, trusted_csv: str) -> bool:
+    """trusted_csv is verifier.compute_function's comma-separated list
+    value (e.g. factors(12) -> "1, 2, 3, 4, 6, 12"). Compared as a SET of
+    ints, not strings, so order/spacing/duplicates in the child's reply
+    never cause a false mismatch -- only the actual set of numbers named
+    matters."""
+    truth_nums = {int(x) for x in re.findall(r"\d+", trusted_csv or "")}
+    turn_nums = {int(x) for x in re.findall(r"\d+", turn or "")}
+    return bool(truth_nums) and truth_nums.issubset(turn_nums)
+
+
+_QR_RE = re.compile(
+    r"(\d+)\s*(?:,|and|\s)*\s*r(?:emainder)?\.?\s*[:=]?\s*(\d+)",
+    re.IGNORECASE,
+)
+
+
+def _qr_match(turn: str, trusted_answer: str) -> bool:
+    """trusted_answer is verifier.solve_with_type's "q remainder r" string."""
+    m_truth = _QR_RE.search(trusted_answer or "")
+    m_turn = _QR_RE.search(turn or "")
+    if not m_truth or not m_turn:
+        return False
+    return (int(m_truth.group(1)), int(m_truth.group(2))) == \
+        (int(m_turn.group(1)), int(m_turn.group(2)))
+
+
 def diagnose(turn: str, computed_answer: str | None, is_math: bool,
             answer_type: str = "numeric") -> str:
     """Return 'correct' | 'wrong' | 'unclear' | 'engaged'.
@@ -286,11 +330,21 @@ def diagnose(turn: str, computed_answer: str | None, is_math: bool,
     the previous gap (no confirmation at all for a correct one). This is
     the same conservative bias as the ack_conceptual fix next to it: when
     unsure, stay neutral rather than assert a grade with no solid basis.
+    The three answer types below (time/list/quotient_remainder -- see
+    verifier.solve_with_type) are matched with the SAME conservative bias
+    for the same reason: each is a best-effort pattern read of free text,
+    not an unambiguous single-value comparison.
     """
     if not is_math or computed_answer is None:
         return "engaged"
     if answer_type == "categorical":
         return "correct" if _categorical_match(turn, computed_answer) else "engaged"
+    if answer_type == "time":
+        return "correct" if _time_match(turn, computed_answer) else "engaged"
+    if answer_type == "list":
+        return "correct" if _list_match(turn, computed_answer) else "engaged"
+    if answer_type == "quotient_remainder":
+        return "correct" if _qr_match(turn, computed_answer) else "engaged"
     ans = _student_answer(turn)
     if ans is None:
         return "unclear"
@@ -345,18 +399,43 @@ _d_teach_invite_conceptual = (
     "piles of objects) the ONLY explanation — the actual method must be "
     "shown, not just described."
 )
-_d_teach_invite_specific = (
-    "For THIS reply: gently explain the idea behind the question in a few "
-    "warm, plain sentences — NO numbered steps. You may add ONE tiny "
-    "everyday example using DIFFERENT numbers, in a sentence, if it helps. "
-    "Then warmly invite the child to try THIS question themselves. Do NOT "
-    "solve their question, do NOT show the final answer, and do NOT write "
-    "an 'Answer:' line."
-)
+def _d_teach_invite_specific(s: TutorState) -> str:
+    # Live-reported: an "advanced"-classified student's explanations
+    # weren't measurably terser than a beginner's, despite LEVEL_STYLE's
+    # "2-3 tight steps, skip obvious ones" instruction. Root cause: that
+    # instruction lives in the big, multi-purpose system prompt, competing
+    # for attention with everything else in it, while THIS per-turn
+    # directive -- which gets far more weight, being the most specific,
+    # most recent instruction -- was the SAME fixed text for every level,
+    # and already fairly compact ("a few warm sentences... ONE tiny
+    # example"). Beginner's LEVEL_STYLE had plenty of room to EXPAND on an
+    # already-short baseline (define terms, show sub-step methods); advanced
+    # had almost no room left to compress further. Branching the directive
+    # itself, not just the style block, gives advanced a genuinely
+    # different -- not just differently-worded -- target.
+    if s.level == "advanced":
+        return (
+            "For THIS reply: this child is strong and picks things up "
+            "quickly. Get to the point in ONE or TWO short sentences -- no "
+            "numbered steps, and no example at all unless the idea "
+            "genuinely needs one to make sense (if so, ONE tiny one-line "
+            "example at most, not a full worked demonstration). Then "
+            "briskly invite the child to try THIS question themselves. Do "
+            "NOT solve their question, do NOT show the final answer, and "
+            "do NOT write an 'Answer:' line."
+        )
+    return (
+        "For THIS reply: gently explain the idea behind the question in a few "
+        "warm, plain sentences — NO numbered steps. You may add ONE tiny "
+        "everyday example using DIFFERENT numbers, in a sentence, if it helps. "
+        "Then warmly invite the child to try THIS question themselves. Do NOT "
+        "solve their question, do NOT show the final answer, and do NOT write "
+        "an 'Answer:' line."
+    )
 
 
 def _d_teach_invite(s: TutorState) -> str:
-    return _d_teach_invite_conceptual if not s.is_math else _d_teach_invite_specific
+    return _d_teach_invite_conceptual if not s.is_math else _d_teach_invite_specific(s)
 
 
 def _d_diagnose_wrong(s: TutorState) -> str:

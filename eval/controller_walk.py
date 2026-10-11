@@ -374,9 +374,29 @@ check("the directive explicitly warns against jumping to an operation just "
 s_specific, a_specific = C.start("What is 245 + 136?", 3, "intermediate",
                                  computed_answer="381", is_math=True)
 check("a specific computable problem -> the withhold-and-invite directive variant is used",
-     a_specific.directive == C._d_teach_invite_specific)
+     a_specific.directive == C._d_teach_invite_specific(s_specific))
 check("directives differ between the two cases (not the same text for both)",
      a_broad.directive != a_specific.directive)
+
+# 17b) Live-reported: an "advanced"-classified student's explanations
+# weren't measurably terser than a beginner's, even after the level
+# genuinely flipped. Root cause -- the per-turn directive (which the model
+# weighs far more than the system-prompt-level LEVEL_STYLE block) was the
+# SAME fixed text for every level. It must now visibly differ for advanced.
+scenario("17b. teach_invite_specific's directive itself scales for 'advanced', not just LEVEL_STYLE")
+s_adv, a_adv = C.start("What is 245 + 136?", 3, "advanced",
+                       computed_answer="381", is_math=True)
+check("an advanced student's teach_invite directive is genuinely different "
+     "text from intermediate's -- not just a shared baseline the system "
+     "prompt's LEVEL_STYLE block hopes to compress",
+     a_adv.directive != a_specific.directive)
+check("the advanced directive explicitly caps it at 1-2 sentences and "
+     "makes the example optional, not just 'briefly'",
+     "ONE or TWO short sentences" in a_adv.directive
+     and "no example at all unless" in a_adv.directive)
+check("the advanced directive is still protecting the answer, same as "
+     "every other level (personalisation adjusts depth, never disclosure)",
+     "do not show the final answer" in a_adv.directive.lower())
 
 scenario("18. 'Show me how' (cold SOLVE) directive also distinguishes broad vs specific")
 s_broad2, a_broad2 = C.step(s_broad, "SOLVE")
@@ -484,6 +504,64 @@ check("a WRONG categorical ATTEMPT stays conservative (ack_conceptual, not "
      "a confident 'wrong' diagnosis) and does NOT count as a graded attempt",
      a_cat2.mode == C.MODE_ACK_CONCEPTUAL and s_cat2.attempts == 0
      and not a_cat2.terminal)
+
+# 22) Issue 3 gap, live-reported: questions like "What is the LCM of 4 and
+# 6?" (needs a named function neither the numeric nor categorical
+# extractor's grammar can express), "What type of angle is 120 degrees?"
+# (classification), and "Divide 20 by 3" (the quotient+remainder pair was
+# computable but left fully ungraded) all had no trusted value to grade
+# against end-to-end through the controller. These cover the three new
+# answer_type shapes (time/list/quotient_remainder) added to close that
+# gap, the same way scenario 21 covers "categorical".
+scenario("22. time / list / quotient_remainder trusted answers")
+check("a matching clock time -> correct",
+     C._time_match("I think it will be 4:15", "4:15"))
+check("a non-matching clock time does not match",
+     not C._time_match("I think it will be 5:00", "4:15"))
+check("the full matching factor set, any order -> matches",
+     C._list_match("12, 6, 4, 3, 2, 1", "1, 2, 3, 4, 6, 12"))
+check("a partial factor set does not match",
+     not C._list_match("1, 2, 3", "1, 2, 3, 4, 6, 12"))
+check("a matching quotient+remainder pair -> matches",
+     C._qr_match("6 remainder 2", "6 remainder 2"))
+check("a wrong remainder does not match",
+     not C._qr_match("6 remainder 1", "6 remainder 2"))
+
+s_time, a_time = C.start("If it is 3:30 now, what time will it be in 45 minutes?",
+                         4, "intermediate", computed_answer="4:15", is_math=True,
+                         answer_type="time")
+s_time, a_time = C.step(s_time, "ATTEMPT", "it will be 4:15")
+check("a correct TIME attempt reaches diagnose_correct, terminal, solved -- "
+     "the same real grading/personalisation path a numeric correct answer gets",
+     a_time.mode == C.MODE_DIAGNOSE_CORRECT and a_time.terminal
+     and a_time.outcome == "solved" and s_time.phase == C.SOLVED)
+
+s_list, a_list = C.start("What are the factors of 12?",
+                         5, "intermediate", computed_answer="1, 2, 3, 4, 6, 12",
+                         is_math=True, answer_type="list")
+s_list, a_list = C.step(s_list, "ATTEMPT", "1, 2, 3, 4, 6, 12")
+check("a correct LIST attempt (full matching set) reaches diagnose_correct, "
+     "terminal, solved",
+     a_list.mode == C.MODE_DIAGNOSE_CORRECT and a_list.terminal
+     and a_list.outcome == "solved" and s_list.phase == C.SOLVED)
+
+s_qr, a_qr = C.start("Divide 20 sweets among 3 children. How many does each get?",
+                     3, "beginner", computed_answer="6 remainder 2", is_math=True,
+                     answer_type="quotient_remainder")
+s_qr, a_qr = C.step(s_qr, "ATTEMPT", "6 remainder 2")
+check("a correct QUOTIENT_REMAINDER attempt reaches diagnose_correct, "
+     "terminal, solved -- previously left fully ungraded",
+     a_qr.mode == C.MODE_DIAGNOSE_CORRECT and a_qr.terminal
+     and a_qr.outcome == "solved" and s_qr.phase == C.SOLVED)
+
+s_qr2, a_qr2 = C.start("Divide 20 sweets among 3 children. How many does each get?",
+                       3, "beginner", computed_answer="6 remainder 2", is_math=True,
+                       answer_type="quotient_remainder")
+s_qr2, a_qr2 = C.step(s_qr2, "ATTEMPT", "6 remainder 1")
+check("a WRONG quotient+remainder attempt stays conservative (ack_conceptual, "
+     "not a confident 'wrong' diagnosis) and does NOT count as a graded attempt",
+     a_qr2.mode == C.MODE_ACK_CONCEPTUAL and s_qr2.attempts == 0
+     and not a_qr2.terminal)
 
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:

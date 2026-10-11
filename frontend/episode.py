@@ -284,8 +284,10 @@ def _run_generation(state, action, chunks, active_turns, previous_hints,
     # below, the self-consistency check, and what gets stored for FUTURE
     # turns' conversation context all see the same clean text the child
     # does, not just the on-screen rendering. See response_parser.strip_latex
-    # for why this exists instead of a regenerate-on-detection approach.
-    return response_parser.strip_latex(text)
+    # and .collapse_excess_blank_lines for why these exist instead of a
+    # regenerate-on-detection approach.
+    text = response_parser.strip_latex(text)
+    return response_parser.collapse_excess_blank_lines(text)
 
 
 def _post_check(state, action, text):
@@ -614,8 +616,15 @@ def submit_turn(
     Input safety runs FIRST, before conversation_resolver/intent.classify_intent
     (both of which can themselves make an LLM call) -- a blocked turn never
     reaches the resolver, retrieval, verifier, or generation at all, and the
-    open episode's state is left completely untouched."""
-    from scripts.llm import safety, telemetry
+    open episode's state is left completely untouched. The syllabus SCOPE
+    gate (scripts/llm/scope.py) runs right after it, in the same slot and
+    for the same reason: live-reported, "solve this integral: integral of x
+    dx" was never refused at all -- it got a full worked-example
+    walkthrough -- because the out-of-grade boundary previously had no
+    code-level check, only a prose rule inside the much larger tutoring
+    prompt. A hard-refuse scope result short-circuits here with ZERO LLM
+    call, the same way a safety block does."""
+    from scripts.llm import safety, scope, telemetry
 
     input_check = safety.check_input(text)
     if input_check.blocked:
@@ -637,6 +646,39 @@ def submit_turn(
                       "input_category": input_check.category,
                       "output_checked": False, "output_blocked": False},
         }
+
+    scope_check = scope.check(text)
+    if not scope_check.in_scope and not scope_check.allow_gloss:
+        logger.info("submit_turn: scope gate refused (topic=%s)", scope_check.topic)
+        telemetry.log_interaction(
+            chat_id=chat.get("id"), student_id=_student_id(),
+            controller_mode="scope_refused", terminal=False,
+            input_safety={"checked": True, "blocked": False},
+            output_safety={"checked": False, "blocked": False},
+        )
+        return {
+            "role": "assistant", "kind": "turn", "mode": "scope_refused",
+            "text": scope_check.fallback_text, "buttons": [], "terminal": False,
+            "outcome": None, "hint_number": None, "source": "", "verify": None,
+            "self_check_issues": [],
+            "safety": {"input_checked": True, "input_blocked": False,
+                      "output_checked": False, "output_blocked": False},
+        }
+    if not scope_check.in_scope and scope_check.allow_gloss:
+        # A bare "what is X" for a topic beyond primary school -- still
+        # needs real generation, but routed through scope.generate_gloss's
+        # small, single-purpose prompt rather than the much larger
+        # multi-purpose tutoring prompt, whose prose "no formulas, no
+        # worked example" rule was NOT reliably followed (confirmed live:
+        # "what is algebra" got a full worked example anyway).
+        gloss_text = scope.generate_gloss(scope_check.topic)
+        telemetry.log_interaction(
+            chat_id=chat.get("id"), student_id=_student_id(),
+            controller_mode="scope_gloss", terminal=False,
+            input_safety={"checked": True, "blocked": False},
+            output_safety={"checked": False, "blocked": False},
+        )
+        return {"role": "assistant", "kind": "chat", "question": text, "reply": gloss_text}
 
     try:
         reply = advance_episode(chat, text, grade, ui_level, active_turns,

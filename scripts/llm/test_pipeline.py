@@ -8,9 +8,9 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 """
 from __future__ import annotations
 
-from . import (conversation_resolver, hints, intent, llm_client, pipeline,
-              prompt_registry, response_parser, safety, student_tracker,
-              topics, verifier)
+from . import (controller, conversation_resolver, hints, intent, llm_client,
+              pipeline, prompt_registry, response_parser, safety,
+              student_tracker, topics, verifier)
 
 _passed = 0
 _failed = 0
@@ -78,6 +78,32 @@ def test_strip_latex_converts_to_plain_text() -> None:
          == "(1/4) + (1/2) = (3/4)")
     check("a None/empty input is returned as-is, not crashed on",
          sl("") == "" and sl(None) is None)
+
+
+def test_collapse_excess_blank_lines() -> None:
+    """Live-reported: a co-solve walkthrough for "6 times 7" rendered with
+    seven or eight blank lines between each addition step -- a wall of dead
+    vertical space a child has to scroll through to reach the answer.
+    .answer-block renders with `white-space: pre-wrap` (frontend/styles/
+    main_css.py), so every newline the model emits is a literal line break;
+    collapse_excess_blank_lines() is the same kind of deterministic
+    prevention layer as strip_latex, applied right alongside it in
+    frontend/episode.py's _run_generation."""
+    print("response_parser — collapse_excess_blank_lines prevents walls of dead vertical space")
+    cb = response_parser.collapse_excess_blank_lines
+
+    check("text with no excess blank lines passes through unchanged",
+         cb("Step 1.\n\nStep 2.") == "Step 1.\n\nStep 2.")
+    check("exactly one blank line (a normal paragraph break) is left alone",
+         cb("a\n\nb") == "a\n\nb")
+    check("three newlines (two blank lines) collapse to one blank line",
+         cb("a\n\n\nb") == "a\n\nb")
+    check("a long run of newlines (the live-reported case) collapses the same way",
+         cb("a\n\n\n\n\n\n\n\nb") == "a\n\nb")
+    check("multiple separate excess runs in one reply are all collapsed",
+         cb("a\n\n\n\nb\n\n\n\n\nc") == "a\n\nb\n\nc")
+    check("a None/empty input is returned as-is, not crashed on",
+         cb("") == "" and cb(None) is None)
 
 
 # ------------------------------------------- response_parser.final_number_str tiers
@@ -323,6 +349,154 @@ def test_verifier_categorical() -> None:
         categorical_extract_fn=lambda q: "NONE")
     check("neither path finds anything -> (None, False), same as plain solve()",
          (answer, is_math) == (None, False))
+
+
+def test_verifier_function_registry() -> None:
+    """Issue 3 gap, live-reported: "What is the LCM of 4 and 6?" and similar
+    questions (HCF, prime check, factors, angle type, clock-time-add) had NO
+    trusted value to grade against at all, since the plain-arithmetic
+    extractor's grammar has no function-call support. compute_function /
+    verifier._FUNCTION_REGISTRY are a third, narrowly-scoped extractor,
+    tried only once BOTH the numeric and the general categorical paths
+    would otherwise apply -- see solve_with_type's own docstring."""
+    print("verifier — compute_function (named-function registry, injected extractor, no LLM)")
+
+    comp = verifier.compute_function("What is the LCM of 4 and 6?",
+                                     extract_fn=lambda q: "lcm(4, 6)")
+    check("lcm(4, 6) -> 12, numeric",
+         comp.verifiable and comp.value == "12" and comp.answer_type == "numeric")
+
+    comp = verifier.compute_function("Find the HCF of 12 and 18.",
+                                     extract_fn=lambda q: "hcf(12, 18)")
+    check("hcf(12, 18) -> 6, numeric",
+         comp.verifiable and comp.value == "6" and comp.answer_type == "numeric")
+
+    comp = verifier.compute_function("Is 7 a prime number?",
+                                     extract_fn=lambda q: "is_prime(7)")
+    check("is_prime(7) -> yes, categorical",
+         comp.verifiable and comp.value == "yes" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function("Is 15 a prime number?",
+                                     extract_fn=lambda q: "is_prime(15)")
+    check("is_prime(15) -> no, categorical",
+         comp.verifiable and comp.value == "no" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function("What are the factors of 12?",
+                                     extract_fn=lambda q: "factors(12)")
+    check("factors(12) -> '1, 2, 3, 4, 6, 12', list",
+         comp.verifiable and comp.value == "1, 2, 3, 4, 6, 12" and comp.answer_type == "list")
+
+    comp = verifier.compute_function("What type of angle is 120 degrees?",
+                                     extract_fn=lambda q: "angle_type(120)")
+    check("angle_type(120) -> obtuse angle, categorical",
+         comp.verifiable and comp.value == "obtuse angle" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function(
+        "If it is 3:30 now, what time will it be in 45 minutes?",
+        extract_fn=lambda q: "time_add(3, 30, 45)")
+    check("time_add(3, 30, 45) -> 4:15, time",
+         comp.verifiable and comp.value == "4:15" and comp.answer_type == "time")
+
+    comp = verifier.compute_function("What is 2 + 3?", extract_fn=lambda q: "NONE")
+    check("ordinary arithmetic is correctly declined (handled by the numeric path instead)",
+         not comp.verifiable)
+
+    comp = verifier.compute_function("What is the LCM of 4 and 6?",
+                                     extract_fn=lambda q: "lcm(4)")
+    check("wrong arity for the matched function is rejected, not mis-evaluated",
+         not comp.verifiable)
+
+    comp = verifier.compute_function("hack", extract_fn=lambda q: "os_system(4, 6)")
+    check("a function name outside the fixed registry is rejected outright",
+         not comp.verifiable)
+
+    # solve_with_type: numeric path still takes priority, function registry
+    # never even consulted.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 7 times 8?", extract_fn=lambda q: "7 * 8",
+        function_extract_fn=lambda q: (_ for _ in ()).throw(AssertionError("should not be called")))
+    check("a genuinely numeric question stays on the numeric path "
+         "(function extractor never even consulted)",
+         (answer, is_math, kind) == ("56", True, "numeric"))
+
+    # solve_with_type: numeric says NONE -> function registry fallback kicks in.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is the LCM of 4 and 6?", extract_fn=lambda q: "NONE",
+        function_extract_fn=lambda q: "lcm(4, 6)")
+    check("numeric NONE falls through to the function registry",
+         (answer, is_math, kind) == ("12", True, "numeric"))
+
+    answer, is_math, kind = verifier.solve_with_type(
+        "What are the factors of 12?", extract_fn=lambda q: "NONE",
+        function_extract_fn=lambda q: "factors(12)")
+    check("a list-shaped function result flows through solve_with_type intact",
+         (answer, is_math, kind) == ("1, 2, 3, 4, 6, 12", True, "list"))
+
+
+def test_verifier_quotient_remainder() -> None:
+    """Issue 3 gap, live-reported: a bare non-exact division ("Divide 20 by
+    3") was computable but deliberately withheld as an improper fraction/
+    decimal (see _grade_appropriate_answer) -- correctly so, since NCERT
+    teaches it as quotient+remainder, but the quotient+remainder pair is
+    ITSELF trivially computable and was left fully ungraded instead."""
+    print("verifier — _quotient_remainder / solve_with_type quotient_remainder branch (no LLM)")
+
+    check("20/3 -> (6, 2)", verifier._quotient_remainder("20/3") == (6, 2))
+    check("a redundantly-parenthesised bare division is recognised the same way",
+         verifier._quotient_remainder("(20/3)") == (6, 2))
+    check("division by zero is rejected, not raised",
+         verifier._quotient_remainder("5/0") is None)
+    check("a non-division expression returns None",
+         verifier._quotient_remainder("5 + 3") is None)
+    check("an exact division returns its (quotient, 0) pair too",
+         verifier._quotient_remainder("6/3") == (2, 0))
+
+    answer, is_math, kind = verifier.solve_with_type(
+        "Divide 20 sweets among 3 children. How many does each get?",
+        extract_fn=lambda q: "20/3")
+    check("a withheld non-exact division now grades as quotient_remainder "
+         "instead of being left fully ungraded",
+         (answer, is_math, kind) == ("6 remainder 2", True, "quotient_remainder"))
+
+    # An EXACT division still injects its clean integer value, unaffected.
+    answer, is_math, kind = verifier.solve_with_type(
+        "Divide 12 sweets among 3 children. How many does each get?",
+        extract_fn=lambda q: "12/3")
+    check("an exact division is unaffected -- still a plain numeric answer",
+         (answer, is_math, kind) == ("4", True, "numeric"))
+
+    # A fraction-conversion question still injects the fraction value itself,
+    # unaffected (pre-existing _looks_like_fraction_conversion carve-out).
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 20/3 written as a decimal?", extract_fn=lambda q: "20/3")
+    check("a fraction/decimal-conversion question still injects the exact "
+         "value instead of quotient_remainder (pre-existing carve-out, unaffected)",
+         is_math and kind == "numeric" and answer is not None)
+
+
+def test_controller_diagnose_new_answer_types() -> None:
+    """The controller-level grading half of the same three new answer
+    shapes: diagnose() must recognise 'time' / 'list' / 'quotient_remainder'
+    the same conservative way it already handles 'categorical' -- correct
+    or engaged, never wrong/unclear (see diagnose()'s own docstring)."""
+    print("controller.diagnose — time / list / quotient_remainder answer types (no LLM)")
+
+    check("a matching clock time -> correct",
+         controller.diagnose("I think it will be 4:15", "4:15", True, "time") == "correct")
+    check("a non-matching clock time -> engaged, never wrong",
+         controller.diagnose("I think it will be 5:00", "4:15", True, "time") == "engaged")
+    check("no time mentioned at all -> engaged, never unclear",
+         controller.diagnose("I'm not sure", "4:15", True, "time") == "engaged")
+
+    check("the full matching factor set, any order -> correct",
+         controller.diagnose("12, 6, 4, 3, 2, 1", "1, 2, 3, 4, 6, 12", True, "list") == "correct")
+    check("a partial factor set -> engaged, never wrong",
+         controller.diagnose("1, 2, 3", "1, 2, 3, 4, 6, 12", True, "list") == "engaged")
+
+    check("a matching quotient+remainder pair -> correct",
+         controller.diagnose("6 remainder 2", "6 remainder 2", True, "quotient_remainder") == "correct")
+    check("the quotient alone, wrong remainder -> engaged, never wrong",
+         controller.diagnose("6 remainder 1", "6 remainder 2", True, "quotient_remainder") == "engaged")
 
 
 # ------------------------------------------------------- verifier check (no LLM)
@@ -799,10 +973,14 @@ def test_beginner_level_requires_showing_substep_method() -> None:
 def main() -> None:
     test_response_parser()
     test_strip_latex_converts_to_plain_text()
+    test_collapse_excess_blank_lines()
     test_final_number_str_fallback_tiers()
     test_student_tracker_atomic_save()
     test_verifier_math()
     test_verifier_categorical()
+    test_verifier_function_registry()
+    test_verifier_quotient_remainder()
+    test_controller_diagnose_new_answer_types()
     test_verifier_injection_gate()
     test_verifier_check()
     test_client_fallback()

@@ -105,6 +105,27 @@ def strip_latex(text: str) -> str:
     # stray punctuation to a child -- drop them too.
     t = t.replace("{", "").replace("}", "")
     return re.sub(r"[ \t]{2,}", " ", t)
+
+
+# A step-by-step reply (co_solve/reveal in particular) is rendered with
+# `white-space: pre-wrap` (see frontend/styles/main_css.py .answer-block),
+# so every newline in the raw text is a literal line break -- the model
+# occasionally emits long RUNS of them between steps (live-reported: a
+# co-solve walkthrough for "6 times 7" had seven or eight blank lines
+# between each addition step), which renders as a wall of dead vertical
+# space a child has to scroll through. One blank line (two newlines) is a
+# normal paragraph break and is left alone; anything beyond that collapses
+# down to it.
+_EXCESS_BLANK_LINES_RE = re.compile(r"\n{3,}")
+
+
+def collapse_excess_blank_lines(text: str) -> str:
+    """Collapse 3+ consecutive newlines down to a single blank line (2)."""
+    if not text or "\n\n\n" not in text:
+        return text
+    return _EXCESS_BLANK_LINES_RE.sub("\n\n", text)
+
+
 _NUMBER_TOKEN_RE = re.compile(_NUMBER_TOKEN)
 _MIXED_NUMBER_PARTS_RE = re.compile(r"^([-+]?)(\d+)\s+(\d+)\s*/\s*(\d+)$")
 
