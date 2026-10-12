@@ -51,6 +51,43 @@ MAIN_CSS = """
     background: linear-gradient(180deg, #eaf6ec 0%, #fbf3e3 60%, #fdf6e9 100%) !important;
     background-attachment: fixed !important;
 }
+/* Live-reported, confirmed on a real browser (not reproducible headless --
+   an automated check of this page's own doc/body scrollHeight vs viewport
+   innerHeight found them exactly equal): on a near-empty chat (just the
+   greeting, no turns yet) the PAGE ITSELF still visibly dragged upward on
+   a wheel/touchpad scroll, hiding the greeting and the History card's own
+   title behind the fixed app bar, then springing back -- real Chromium's
+   elastic "rubber-band" bounce, which it will render from even a
+   sub-pixel amount of real overflow (100vh/calc() rounding, a reserved
+   scrollbar gutter, font-metric differences from this environment's
+   headless renderer) and visually exaggerates far past that real
+   overflow distance. overscroll-behavior: none on the actual scrolling
+   root suppresses that glow/bounce outright; it has no effect on any
+   panel's real internal scrolling (chat_scroll etc. keep their own
+   overscroll-behavior: contain below, for once content genuinely exceeds
+   their height). */
+.stApp, [data-testid="stAppViewContainer"], html, body {
+    overscroll-behavior: none;
+}
+/* The ACTUAL element that was scrolling, found via a live DOM walk
+   (reported scrollHeight/clientHeight for every overflowing node):
+   [data-testid="stMain"] itself -- Streamlit gives it overflow:auto by
+   default, as the one scrollable region for all non-fixed app content.
+   That's exactly backwards for this layout: the three [History | Chat |
+   Progress] panels already do their OWN internal scrolling (chat_scroll
+   etc., each with real content-driven overflow once it's actually
+   earned), so stMain is never SUPPOSED to need to scroll itself -- live
+   measurement found it ~60px taller than its own box purely from
+   calc()/box-model slop (padding/gap roundoff), not real content, which
+   was enough for a touchpad gesture to drag the page up and hide the
+   greeting/History title behind the fixed app bar. overflow:hidden here
+   matches [data-testid="stAppViewContainer"]'s own default two lines
+   below (already hidden, confirmed live not to clip the fixed composer)
+   -- same treatment, same reasoning, one level deeper where the real
+   scrollbar actually lived. */
+[data-testid="stMain"] {
+    overflow: hidden !important;
+}
 /* Unlike the onboarding page, this page's decorations live INSIDE the
    fixed header/footer bars, which each already clip their own children via
    their own `overflow: hidden` (see .tt-appbar / .tt-footer below) -- so,
@@ -266,6 +303,19 @@ div[data-testid="stTextInput"] > div:focus-within {
 }
 [class*="st-key-chat_scroll"][class*="st-key-chat_scroll"] {
     height: max(280px, calc(100vh - var(--tt-header-h) - var(--tt-footer-h) - 161px)) !important;
+}
+
+/* Live-reported: on a near-empty chat (just the greeting, no turns yet),
+   mouse-wheel/touchpad scroll over these columns still visibly dragged
+   their content up before snapping back -- the browser's elastic
+   "rubber-band" overscroll glow on an overflow:auto box, which Chromium
+   renders even when scrollHeight == clientHeight and there's nothing to
+   actually scroll. overscroll-behavior: contain stops that glow (and
+   stops the scroll gesture from chaining to the page behind it) without
+   touching the real scrolling these columns need once content genuinely
+   exceeds their height. */
+[class*="st-key-chat_scroll"], [class*="st-key-history_scroll"], [class*="st-key-progress_scroll"] {
+    overscroll-behavior: contain;
 }
 
 /* Thin scrollbar that's essentially invisible at rest and appears only
