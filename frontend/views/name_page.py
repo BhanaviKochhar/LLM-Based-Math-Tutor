@@ -1,6 +1,9 @@
 """frontend/views/name_page.py -- PAGE 1: onboarding (name + class)."""
 from __future__ import annotations
 
+import base64
+from pathlib import Path
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -12,6 +15,29 @@ from frontend.assets.onboarding_scene import (
 )
 from frontend.state import change_grade, ss
 from frontend.styles.scene_css import SCENE_CSS
+
+# The hero mascot: an animated wave loop (pairs naturally with the existing
+# "Hi there! 👋" speech bubble, the same greeting gesture the previous
+# hand-drawn robot's .tt-wave-arm did). Embedded as a <video> with a base64
+# data: URI rather than an <img>, for two reasons found live:
+#   1. The same bytes loaded via `<img src="data:image/svg+xml;base64,...">`
+#      (for the pack's SVG poses) render with an opaque WHITE box -- an
+#      artifact of that embedding method, confirmed reproducible in total
+#      isolation. A <video> does not have this problem.
+#   2. `<video src="file://...">` is blocked outright by Chromium ("Media
+#      load rejected by URL safety check"); a data: URI is not blocked and
+#      plays with real alpha transparency -- confirmed by screenshotting it
+#      over solid red vs solid blue and seeing the background show through
+#      cleanly both times, not a fixed box.
+_PANDI_WEBM = Path(__file__).resolve().parents[1] / "assets" / "pandi.webm"
+
+
+def _pandi_video(width_px: int = 160) -> str:
+    b64 = base64.b64encode(_PANDI_WEBM.read_bytes()).decode("ascii")
+    return (f'<video autoplay loop muted playsinline '
+           f'style="width:{width_px}px;max-width:none;height:auto;'
+           f'display:block;margin:0 auto;">'
+           f'<source src="data:video/webm;base64,{b64}" type="video/webm"></video>')
 
 
 # ===========================================================================
@@ -295,7 +321,7 @@ def render_name_page():
     st.markdown(
         f'<div class="tt-mascot-wrap">'
         f'<div class="tt-speech">Hi there! 👋</div>'
-        f'<div>{_MASCOT_SVG}</div></div>',
+        f'<div>{_pandi_video(160)}</div></div>',
         unsafe_allow_html=True,
     )
 
