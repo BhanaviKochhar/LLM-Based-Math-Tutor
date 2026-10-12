@@ -88,6 +88,26 @@ def _without_hint_if_exhausted(buttons: list[str], state: "TutorState") -> list[
         return buttons
     return [b for b in buttons if b != "Give me a hint"]
 
+
+def _invite_buttons(state: "TutorState") -> list[str]:
+    """"Give me a hint"/"Show me how" only make sense when there's an
+    actual protected answer to hint toward or reveal. Every call site that
+    offers this button set used to hardcode _BTN_AFTER_INVITE regardless of
+    state.is_math -- harmless for a SPECIFIC computable problem (the normal
+    case), but for a BROAD conceptual reply (e.g. "what is a fraction?",
+    state.is_math False, no computed_answer) it's a dangling promise: the
+    reply already showed its own worked example in the body text, so there
+    is nothing left to hint toward or "show the working" for. Live-reported:
+    a bare "fractions" question got exactly this -- a complete conceptual
+    explanation with buttons implying a withheld answer that never existed.
+    Gated on is_math AND a real computed_answer (not just is_math) since
+    diagnose()'s own "engaged" verdict -- the only path into
+    MODE_ACK_CONCEPTUAL -- can equally mean computed_answer is None despite
+    is_math being True."""
+    if not (state.is_math and state.computed_answer is not None):
+        return []
+    return _without_hint_if_exhausted(list(_BTN_AFTER_INVITE), state)
+
 # Fixed, non-generated message for MODE_HINT_EXHAUSTED -- deliberately NOT an
 # LLM call: the whole point of this state is to stop spending a call on a
 # hint the system has already told the student everything it will say
@@ -616,7 +636,7 @@ def start(question: str, grade: int, level: str = "intermediate",
                    computed_answer=computed_answer, is_math=is_math,
                    answer_type=answer_type)
     return s, Action(MODE_TEACH_INVITE, _d_teach_invite(s),
-                     buttons=list(_BTN_AFTER_INVITE))
+                     buttons=_invite_buttons(s))
 
 
 def start_followup(previous_question: str, question: str, grade: int,
@@ -638,7 +658,7 @@ def start_followup(previous_question: str, question: str, grade: int,
                    answer_type=answer_type)
     if not is_math:
         return s, Action(MODE_TEACH_INVITE, _d_teach_invite_conceptual,
-                         buttons=list(_BTN_AFTER_INVITE))
+                         buttons=_invite_buttons(s))
     directive = (
         f"For THIS reply: the child has changed the previous problem "
         f"(\"{previous_question}\") into a new one (\"{question}\"). In one "
@@ -649,7 +669,7 @@ def start_followup(previous_question: str, question: str, grade: int,
         "version themselves. Do NOT solve it and do NOT reveal the final "
         "answer."
     )
-    return s, Action(MODE_TEACH_INVITE, directive, buttons=list(_BTN_AFTER_INVITE))
+    return s, Action(MODE_TEACH_INVITE, directive, buttons=_invite_buttons(s))
 
 
 def step(state: TutorState, intent: str, turn: str | None = None):
@@ -691,17 +711,15 @@ def step(state: TutorState, intent: str, turn: str | None = None):
     # _d_confusion/_d_correction/_d_clarify directives above for why each is
     # kept distinct from MODE_HINT/ATTEMPT.
     if intent == "CONFUSION":
-        buttons = _BTN_AFTER_WRONG if state.attempts else _BTN_AFTER_INVITE
-        buttons = _without_hint_if_exhausted(buttons, state)
+        buttons = (_without_hint_if_exhausted(_BTN_AFTER_WRONG, state) if state.attempts
+                  else _invite_buttons(state))
         return state, Action(MODE_CONFUSION, _d_confusion, buttons=list(buttons))
 
     if intent == "CORRECTION":
-        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
-        return state, Action(MODE_CORRECTION, _d_correction, buttons=list(buttons))
+        return state, Action(MODE_CORRECTION, _d_correction, buttons=_invite_buttons(state))
 
     if intent == "CLARIFY":
-        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
-        return state, Action(MODE_CLARIFY, _d_clarify, buttons=list(buttons))
+        return state, Action(MODE_CLARIFY, _d_clarify, buttons=_invite_buttons(state))
 
     # ATTEMPT (and anything unrecognised) -> treat as an attempt
     return _handle_attempt(state, turn)
@@ -715,8 +733,18 @@ def _handle_solve(state: TutorState):
                              buttons=list(_BTN_TERMINAL), terminal=True,
                              outcome="shown")
     state.solve_redirect_used = True
-    buttons = _without_hint_if_exhausted(
-        ["I'll try", "Give me a hint", "Show me anyway"], state)
+    if state.is_math and state.computed_answer is not None:
+        buttons = _without_hint_if_exhausted(
+            ["I'll try", "Give me a hint", "Show me anyway"], state)
+    else:
+        # A cold solve request on a BROAD conceptual question (e.g. "show
+        # me how" on "fractions") has no protected answer to hint toward
+        # or "show anyway" -- see _invite_buttons' own docstring. The
+        # directive already falls back to the ordinary worked-example
+        # explanation in this case (eval/controller_walk.py's "broad-method
+        # vs specific-problem teaching directive selection" scenario); the
+        # buttons must match that.
+        buttons = []
     return state, Action(MODE_REDIRECT, _d_redirect(state), buttons=list(buttons))
 
 
@@ -730,9 +758,8 @@ def _handle_attempt(state: TutorState, turn: str | None):
                              outcome="solved")
 
     if verdict == "engaged":  # conceptual — can't grade, keep it supportive
-        buttons = _without_hint_if_exhausted(_BTN_AFTER_INVITE, state)
         return state, Action(MODE_ACK_CONCEPTUAL, _d_ack_conceptual(state),
-                             buttons=list(buttons))
+                             buttons=_invite_buttons(state))
 
     if verdict == "unclear":  # working shown but no single answer
         buttons = _without_hint_if_exhausted(_BTN_AFTER_WRONG, state)

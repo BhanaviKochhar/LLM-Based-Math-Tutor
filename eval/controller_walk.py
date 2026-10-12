@@ -563,6 +563,54 @@ check("a WRONG quotient+remainder attempt stays conservative (ack_conceptual, "
      a_qr2.mode == C.MODE_ACK_CONCEPTUAL and s_qr2.attempts == 0
      and not a_qr2.terminal)
 
+# 23) Live-reported: a bare "fractions" question (is_math=False, no
+# computed_answer -- a BROAD conceptual reply that already shows its own
+# worked example in the body text) still offered "Give me a hint"/"Show me
+# how" buttons, a dangling promise since there is no protected answer to
+# hint toward or reveal. Every call site that attaches this button set
+# must now be gated on there actually being one (controller._invite_buttons).
+scenario("23. hint/reveal buttons only appear when there's an actual protected answer")
+check("a broad conceptual start() offers NO hint/reveal buttons",
+     "Give me a hint" not in a_broad.buttons and "Show me how" not in a_broad.buttons)
+check("a specific computable start() still offers them, unaffected",
+     "Give me a hint" in a_specific.buttons and "Show me how" in a_specific.buttons)
+check("a cold 'Show me how' (REDIRECT) on a broad conceptual question also "
+     "offers no hint/reveal buttons -- same gate applies to _handle_solve",
+     a_broad2.buttons == [])
+check("a cold 'Show me how' (REDIRECT) on a specific problem still offers "
+     "them, unaffected", "Give me a hint" in a_specific2.buttons)
+
+s_concept, a_concept = C.start("what is a fraction", 3, "intermediate",
+                               computed_answer=None, is_math=False)
+check("start_followup's conceptual branch also offers no hint/reveal buttons",
+     "Give me a hint" not in a_follow_conceptual.buttons
+     and "Show me how" not in a_follow_conceptual.buttons)
+
+s_concept, a_concept = C.step(s_concept, "ATTEMPT", "a part of something?")
+check("MODE_ACK_CONCEPTUAL (the ordinary follow-up to a conceptual episode) "
+     "offers no hint/reveal buttons either -- same dangling-promise bug",
+     a_concept.mode == C.MODE_ACK_CONCEPTUAL and a_concept.buttons == [])
+
+s_concept2, a_concept2 = C.step(s_concept, "CONFUSION", "huh?")
+check("CONFUSION during a still-ungraded conceptual episode (0 attempts) "
+     "offers no hint/reveal buttons",
+     a_concept2.mode == C.MODE_CONFUSION and a_concept2.buttons == [])
+s_concept3, a_concept3 = C.step(s_concept, "CORRECTION", "no I meant something else")
+check("CORRECTION during a conceptual episode offers no hint/reveal buttons",
+     a_concept3.mode == C.MODE_CORRECTION and a_concept3.buttons == [])
+s_concept4, a_concept4 = C.step(s_concept, "CLARIFY", "huh what do you mean")
+check("CLARIFY during a conceptual episode offers no hint/reveal buttons",
+     a_concept4.mode == C.MODE_CLARIFY and a_concept4.buttons == [])
+
+# A categorical trusted answer (verdict "engaged" from a WRONG categorical
+# guess, scenario 21 above) DOES have a real protected answer -- the
+# gate must not over-trigger and strip buttons from that genuinely
+# different "engaged" case.
+check("a categorical episode's conservative 'engaged' wrong-guess case "
+     "(a real protected answer exists, just not confidently graded wrong) "
+     "still offers hint/reveal buttons -- the gate must not over-trigger",
+     "Give me a hint" in a_cat2.buttons)
+
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:
     raise SystemExit(1)
