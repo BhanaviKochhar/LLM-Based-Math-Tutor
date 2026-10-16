@@ -576,9 +576,9 @@ def test_client_fallback(monkeypatched=True) -> None:
             yield _FakeChunk("lo", finish="stop")
         return gen()
 
-    # Point every target at our fake client, regardless of missing keys.
+    # Point every target at one fake client (key "k1"), regardless of missing keys.
     orig = llm_client._client_for
-    llm_client._client_for = lambda target: _FakeClient(behaviour)
+    llm_client._client_for = lambda target: [("k1", _FakeClient(behaviour))]
     try:
         h = llm_client.StreamHandle()
         text = "".join(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
@@ -595,7 +595,7 @@ def test_client_fallback(monkeypatched=True) -> None:
 def test_client_skips_missing_keys() -> None:
     print("llm_client — missing keys skipped")
     orig = llm_client._client_for
-    llm_client._client_for = lambda target: None  # all keys "missing"
+    llm_client._client_for = lambda target: []  # all keys "missing"
     try:
         h = llm_client.StreamHandle()
         list(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
@@ -603,6 +603,52 @@ def test_client_skips_missing_keys() -> None:
         llm_client._client_for = orig
     check("no key -> not ok", not h.ok)
     check("attempts recorded", len(h.attempts) == 3 and all("skipped" in a for a in h.attempts))
+
+
+class _FakeRateLimitError(Exception):
+    status_code = 429
+
+
+def test_client_key_rotation_on_429() -> None:
+    print("llm_client — multi-key rotation: first key 429s, second key succeeds")
+
+    calls = []
+
+    def make_behaviour(key_id):
+        def behaviour(model):
+            calls.append(key_id)
+            if key_id == "k1":
+                raise _FakeRateLimitError("rate limited")
+            def gen():
+                yield _FakeChunk("Hi", finish="stop")
+            return gen()
+        return behaviour
+
+    fake_keys = [("k1", _FakeClient(make_behaviour("k1"))),
+                 ("k2", _FakeClient(make_behaviour("k2")))]
+
+    orig_client_for = llm_client._client_for
+    orig_retries = llm_client._MAX_RETRIES_PER_KEY
+    orig_rotation = dict(llm_client._rotation_counters)
+    orig_cooldown = dict(llm_client._key_cooldown_until)
+    llm_client._client_for = lambda target: fake_keys if target.name == "groq-direct" else []
+    llm_client._MAX_RETRIES_PER_KEY = 0  # no backoff sleep in a fast unit test
+    try:
+        h = llm_client.StreamHandle()
+        text = "".join(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
+    finally:
+        llm_client._client_for = orig_client_for
+        llm_client._MAX_RETRIES_PER_KEY = orig_retries
+        llm_client._rotation_counters.clear()
+        llm_client._rotation_counters.update(orig_rotation)
+        llm_client._key_cooldown_until.clear()
+        llm_client._key_cooldown_until.update(orig_cooldown)
+
+    check("first key tried", "k1" in calls)
+    check("second key tried after first key's 429", "k2" in calls
+          and calls.index("k2") > calls.index("k1"))
+    check("second key's response streamed through", text == "Hi")
+    check("handle committed to groq-direct on the second key", h.ok and h.provider == "groq-direct")
 
 
 # --------------------------------------------------------------- hints + levels
@@ -985,6 +1031,7 @@ def main() -> None:
     test_verifier_check()
     test_client_fallback()
     test_client_skips_missing_keys()
+    test_client_key_rotation_on_429()
     test_hints_and_levels()
     test_intent_keyword_fallback()
     test_conversation_resolver_deterministic_paths()
