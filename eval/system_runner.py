@@ -67,11 +67,21 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from eval.baseline_runner import _grade_of, _item_id, _student_turns, load_items
+from eval.score_transcripts import ANSWER_BEARING_MODES
 from scripts.llm import llm_client
 
 ROOT = Path(__file__).resolve().parent.parent
 
 _tls = threading.local()
+
+# A single-turn item's one real turn almost always opens the controller
+# into MODE_TEACH_INVITE (invite an attempt, don't reveal) -- a deliberate
+# pedagogical choice, not a failure (see run_journey). scope_refused/
+# safety_blocked are ALSO terminal-enough to leave alone: those short-
+# circuit before an episode even opens, so there is no open episode to
+# push toward reveal, and forcing one would be semantically wrong.
+_REFUSAL_MODES = {"scope_refused", "safety_blocked"}
+_FORCE_REVEAL_GIVE_UP_TEXT = "I don't know, please just show me the answer."
 
 
 def _level_of(item: dict) -> str | None:
@@ -184,11 +194,17 @@ def _reply_text(reply: dict) -> str:
     return (reply.get("text") if reply.get("kind") == "turn" else reply.get("reply")) or ""
 
 
-def run_turn(chat: dict, student_message: str, grade: int | None, ui_level: str | None) -> dict:
+def run_turn(chat: dict, student_message: str, grade: int | None, ui_level: str | None,
+            forced_intent: str | None = None) -> dict:
     """Run one system turn via the REAL frontend.episode.submit_turn -- the
     same call frontend/app.py's chat page makes per turn. submit_turn's own
     contract is "never raises"; the try/except below is a harness-side
-    guard against that contract being violated, not an expected path."""
+    guard against that contract being violated, not an expected path.
+
+    `forced_intent` bypasses intent classification exactly as a UI button
+    does (episode.py's own _LABEL_TO_INTENT mechanism) -- used by
+    run_journey to force a terminal reveal via "GIVE_UP" on a single-turn
+    item that opened non-terminally; never set for a real dataset turn."""
     from frontend import episode as ep
 
     t0 = time.perf_counter()
@@ -197,7 +213,8 @@ def run_turn(chat: dict, student_message: str, grade: int | None, ui_level: str 
     _tls.captured_error = None
     harness_error = None
     try:
-        reply = ep.submit_turn(chat, student_message, grade or 3, ui_level, active_turns)
+        reply = ep.submit_turn(chat, student_message, grade or 3, ui_level, active_turns,
+                               forced_intent=forced_intent)
     except Exception as exc:
         reply = {"role": "assistant", "kind": "chat", "question": student_message, "reply": ""}
         harness_error = repr(exc)
@@ -229,7 +246,24 @@ def run_journey(item_id: str, grade: int | None, ui_level: str | None,
     """Run every turn of one journey in order, system-only, in its own
     fresh chat + synthetic student identity (see module docstring). Stops
     early (and flags it) if a turn comes back not-ok, mirroring
-    baseline_runner.run_journey's same early-stop rule."""
+    baseline_runner.run_journey's same early-stop rule.
+
+    Single-turn items only (multi-turn journeys keep their own authored
+    turn sequence exactly as written -- forcing an extra turn onto those
+    would distort archetypes deliberately designed to end non-terminally):
+    if the one real turn opened the controller but didn't reach an
+    answer-bearing state (almost always MODE_TEACH_INVITE, a deliberate
+    cold-open, not a failure), force exactly one more turn with
+    forced_intent="GIVE_UP". controller.step's GIVE_UP branch is
+    UNCONDITIONAL -- always MODE_CO_SOLVE, terminal, in exactly one more
+    turn -- unlike "SOLVE"/"show me", which redirects instead on a COLD
+    first ask (state.attempts == 0) and would need a THIRD turn. Without
+    this, eval.score_transcripts correctly refuses to score a non-terminal
+    turn as either right or wrong, but single-turn items would then almost
+    never reach a scorable state at all -- this turn exists purely so a
+    final-answer comparison against baseline's one-shot answer is possible,
+    the same way a real child saying "I don't know" would also get shown
+    the answer rather than being left on teach_invite forever."""
     _tls.student_id = f"sysrun-{item_id}"
     chat = _new_chat(str(item_id))
     turns_out = []
@@ -240,6 +274,17 @@ def run_journey(item_id: str, grade: int | None, ui_level: str | None,
         if not result["ok"]:
             all_ok = False
             break  # no point continuing a conversation whose last turn produced nothing
+
+    if (all_ok and len(student_turns) == 1 and turns_out
+            and turns_out[-1].get("mode") is not None
+            and turns_out[-1].get("mode") not in ANSWER_BEARING_MODES
+            and turns_out[-1].get("mode") not in _REFUSAL_MODES):
+        follow_up = run_turn(chat, _FORCE_REVEAL_GIVE_UP_TEXT, grade, ui_level,
+                             forced_intent="GIVE_UP")
+        turns_out.append({"turn": len(turns_out) + 1, "synthetic": True, **follow_up})
+        if not follow_up["ok"]:
+            all_ok = False
+
     return {"grade": grade, "condition": "system", "all_turns_ok": all_ok, "turns": turns_out}
 
 

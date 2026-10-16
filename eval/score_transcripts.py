@@ -115,7 +115,12 @@ def _last_turn_text(journey: dict | None) -> str | None:
 # a system-condition transcript); baseline has no controller and no
 # pedagogical withholding, so for baseline a missing number is scored as
 # wrong, same as always.
-_ANSWER_BEARING_MODES = {"co_solve", "reveal", "diagnose_correct"}
+#
+# Public (not _-prefixed): eval/system_runner.py imports this same set to
+# decide whether a single-turn item's one real turn already reached a
+# scorable state, or needs a forced follow-up -- one canonical boundary,
+# defined once, instead of two definitions that could silently drift apart.
+ANSWER_BEARING_MODES = {"co_solve", "reveal", "diagnose_correct"}
 
 
 def _was_refused(journey: dict | None) -> bool | None:
@@ -196,7 +201,7 @@ def _score_curriculum(item: dict, journey: dict | None) -> dict:
         if cand and str(cand).lower() in low:
             return {"scorable": True, "correct": True, "path": "curriculum",
                     "matched_against": cand, "note": "text match (categorical/worded answer)"}
-    if model_val is None and mode is not None and mode not in _ANSWER_BEARING_MODES:
+    if model_val is None and mode is not None and mode not in ANSWER_BEARING_MODES:
         return {"scorable": False, "correct": None, "path": "curriculum", "mode": mode,
                 "note": "system hasn't revealed/confirmed an answer yet (pedagogical "
                        "non-terminal turn, not a wrong answer) -- a single-turn item run "
