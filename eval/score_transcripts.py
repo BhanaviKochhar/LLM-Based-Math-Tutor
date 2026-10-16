@@ -56,11 +56,14 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 
 from eval.baseline_runner import _grade_of, _item_id, load_items
 from eval.component_eval.results import write_result, write_summary_markdown
 from scripts.llm import response_parser, verifier
+
+_WS_RE = re.compile(r"\s+")
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -196,9 +199,16 @@ def _score_curriculum(item: dict, journey: dict | None) -> dict:
         if cand_val is not None and model_val is not None and verifier._close(cand_val, model_val):
             return {"scorable": True, "correct": True, "path": "curriculum",
                     "matched_against": cand, "model_value": str(model_val)}
-    low = text.lower()
+    # Whitespace-normalized (collapses Unicode space variants like U+202F
+    # NARROW NO-BREAK SPACE, which models sometimes emit after a comma in a
+    # listed answer -- e.g. "2, 4, 7, 9" rendered as "2, 4,..." failed
+    # a literal substring match even though the answer was exactly right).
+    low = _WS_RE.sub(" ", text.lower())
     for cand in candidates:
-        if cand and str(cand).lower() in low:
+        if not cand:
+            continue
+        cand_norm = _WS_RE.sub(" ", str(cand).lower())
+        if cand_norm in low:
             return {"scorable": True, "correct": True, "path": "curriculum",
                     "matched_against": cand, "note": "text match (categorical/worded answer)"}
     if model_val is None and mode is not None and mode not in ANSWER_BEARING_MODES:
