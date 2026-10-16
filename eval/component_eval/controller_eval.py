@@ -10,7 +10,7 @@ evaluator does NOT duplicate that logic in a third place (which would risk
 "test code that makes the benchmark pass artificially" by construction,
 since a reimplementation could silently diverge from the real assertions).
 Instead it RUNS those real suites and cross-references their actual
-pass/fail output against eval/datasets/controller/v1_scenarios.json's
+pass/fail output against eval/datasets/controller_scenarios.json's
 25-scenario index, by scenario_id -- giving a genuine per-scenario result
 traced to real execution, not a restatement.
 
@@ -35,7 +35,7 @@ from pathlib import Path
 from . import results
 
 ROOT = results.ROOT
-SCENARIOS_PATH = ROOT / "eval" / "datasets" / "controller" / "v1_scenarios.json"
+SCENARIOS_PATH = ROOT / "eval" / "datasets" / "controller_scenarios.json"
 
 _SCENARIO_HEADER_RE = re.compile(r"^(\d+)\.\s")
 _CHECK_LINE_RE = re.compile(r"^\s*(ok|FAIL)\s+(.*)$")
@@ -184,7 +184,7 @@ def run() -> dict:
         dataset_sources=[{"path": str(SCENARIOS_PATH.relative_to(ROOT)),
                           "version": scenarios_doc.get("schema_version"),
                           "item_count": len(scenarios)}],
-        config={"method": "cross-references eval/datasets/controller/v1_scenarios.json "
+        config={"method": "cross-references eval/datasets/controller_scenarios.json "
                "scenario_ids against REAL execution of eval/controller_walk.py "
                "(subprocess, output parsed by scenario header) and named "
                "functions in frontend/test_app.py (direct call, instrumented "

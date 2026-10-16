@@ -2,8 +2,8 @@
 
 Resolves the terminology ambiguity flagged in the preceding dataset-expansion
 pass around 'verifiable' vs. system-scorable (the HCF/LCM cases in
-eval/datasets/arithmetic/v2_phaseB_extension.jsonl and
-eval/datasets/curriculum_benchmark/v1_class5.jsonl).
+eval/datasets/arithmetic.jsonl and
+eval/datasets/curriculum_benchmark_class5.jsonl).
 
 RESOLUTION (documented here, not a silent redefinition):
 
@@ -40,9 +40,9 @@ RUBRIC_REQUIRED = "requires_human_rubric_evaluation"
 def classify_item(item: dict) -> str:
     """One of SCORABLE / VERIFIED_NOT_SYSTEM_SCORABLE / RUBRIC_REQUIRED.
 
-    Works for both eval/datasets/arithmetic/*.jsonl (always has
+    Works for both eval/datasets/arithmetic.jsonl (always has
     `verifiable`/`trusted_expression`) and
-    eval/datasets/curriculum_benchmark/v1_class*.jsonl (same two fields,
+    eval/datasets/curriculum_benchmark_class*.jsonl (same two fields,
     plus `verifiable: false` items that use `expected_key_idea` instead of
     `expected_answer`).
     """

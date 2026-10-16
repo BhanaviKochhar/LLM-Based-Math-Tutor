@@ -1,6 +1,9 @@
 """eval/component_eval/curriculum_benchmark_eval.py — C1-A (curriculum
-benchmark variant): trusted-computation scoring for the 175-item Class 1-5
-curriculum benchmark.
+benchmark variant): trusted-computation scoring for the full combined
+Class 1-5 curriculum benchmark (~935 items across the five per-class files;
+these files were merged from an earlier v1/v2 split in a prior
+consolidation round, so there is no longer a way to isolate just the
+original 175-item v1-only subset for scoring).
 
 Deterministic and offline, like arithmetic_eval.py -- same
 system_scorable / verified_not_system_scorable / requires_human_rubric
@@ -32,14 +35,14 @@ from .scoring_helpers import (
 
 ROOT = results.ROOT
 DATASET_FILES = [
-    ROOT / "eval" / "datasets" / "curriculum_benchmark" / f"v1_class{g}.jsonl"
+    ROOT / "eval" / "datasets" / f"curriculum_benchmark_class{g}.jsonl"
     for g in range(1, 6)
 ]
 
 
 def _load(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [json.loads(line) for line in f if line.strip() and not line.startswith("#")]
 
 
 def run() -> dict:

@@ -8,8 +8,7 @@ trusted_expression. This is fully deterministic and offline: no API call,
 no network.
 
 Datasets scored:
-    eval/datasets/arithmetic/v1_starter.jsonl        (15 items)
-    eval/datasets/arithmetic/v2_phaseB_extension.jsonl (6 items)
+    eval/datasets/arithmetic.jsonl (21 items)
 
 Run:
     python -m eval.component_eval.arithmetic_eval
@@ -30,14 +29,13 @@ from .scoring_helpers import (
 
 ROOT = results.ROOT
 DATASET_FILES = [
-    ROOT / "eval" / "datasets" / "arithmetic" / "v1_starter.jsonl",
-    ROOT / "eval" / "datasets" / "arithmetic" / "v2_phaseB_extension.jsonl",
+    ROOT / "eval" / "datasets" / "arithmetic.jsonl",
 ]
 
 
 def _load(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [json.loads(line) for line in f if line.strip() and not line.startswith("#")]
 
 
 def run() -> dict:

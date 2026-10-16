@@ -2,7 +2,7 @@
 
 LEGACY / HISTORICAL — this 36-item set predates the controller-integration
 stabilization and the richer, better-annotated datasets under
-eval/datasets/arithmetic/v1_starter.jsonl. It is consumed only by
+eval/datasets/arithmetic.jsonl. It is consumed only by
 eval/run_eval.py's baseline-vs-system comparison (also legacy — see that
 file's docstring), which calls through pipeline's old single-shot
 prepare()/TutorTurn path (scripts/llm/pipeline.py), NOT the controller-driven

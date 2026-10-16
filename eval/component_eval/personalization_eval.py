@@ -1,7 +1,7 @@
 """eval/component_eval/personalization_eval.py — C4: personalization
 evaluation.
 
-Most of eval/datasets/personalization/v1_starter.jsonl's 14 items describe
+Most of eval/datasets/personalization.jsonl's 14 items describe
 a PROSE-LEVEL difference (explanation depth, terminology register,
 scaffolding amount) that genuinely cannot be scored deterministically from
 code -- doing so would require live generation plus a human or LLM-judge
@@ -39,7 +39,7 @@ from pathlib import Path
 from . import results
 
 ROOT = results.ROOT
-DATASET_FILE = ROOT / "eval" / "datasets" / "personalization" / "v1_starter.jsonl"
+DATASET_FILE = ROOT / "eval" / "datasets" / "personalization.jsonl"
 
 # Which case_ids this module can check deterministically, and how.
 _DETERMINISTIC_CHECKS = {"pz-003", "pz-004", "pz-006", "pz-014"}
@@ -47,7 +47,7 @@ _DETERMINISTIC_CHECKS = {"pz-003", "pz-004", "pz-006", "pz-014"}
 
 def _load(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [json.loads(line) for line in f if line.strip() and not line.startswith("#")]
 
 
 def _check_cosolve_threshold(level: str, threshold: int) -> dict:

@@ -22,8 +22,7 @@ Categories handled per the task's explicit distinction:
                                                          not silently dropped
 
 Datasets scored:
-    eval/datasets/retrieval/v1_starter.jsonl   (29 queries)
-    eval/datasets/retrieval/v2_extended.jsonl  (20 queries)
+    eval/datasets/retrieval.jsonl (49 queries)
 
 Run:
     python -m eval.component_eval.retrieval_eval
@@ -37,8 +36,7 @@ from . import results
 
 ROOT = results.ROOT
 DATASET_FILES = [
-    ROOT / "eval" / "datasets" / "retrieval" / "v1_starter.jsonl",
-    ROOT / "eval" / "datasets" / "retrieval" / "v2_extended.jsonl",
+    ROOT / "eval" / "datasets" / "retrieval.jsonl",
 ]
 _NO_GROUND_TRUTH_CATEGORIES = {"grade_scope_mismatch", "out_of_corpus_topic"}
 TOP_K = 5
@@ -46,7 +44,7 @@ TOP_K = 5
 
 def _load(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [json.loads(line) for line in f if line.strip() and not line.startswith("#")]
 
 
 def _page_canonical_groups() -> dict[tuple, set]:

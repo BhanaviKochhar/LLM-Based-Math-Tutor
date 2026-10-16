@@ -18,8 +18,7 @@ Two stages, scored SEPARATELY (never conflated):
                            the cost estimate this module prints first.
 
 Datasets scored:
-    eval/datasets/extraction/v1_starter.jsonl   (14 items)
-    eval/datasets/extraction/v2_extended.jsonl  (15 items)
+    eval/datasets/extraction.jsonl (29 items)
 
 Run (deterministic stage only, default):
     python -m eval.component_eval.extraction_eval
@@ -37,14 +36,13 @@ from . import results
 
 ROOT = results.ROOT
 DATASET_FILES = [
-    ROOT / "eval" / "datasets" / "extraction" / "v1_starter.jsonl",
-    ROOT / "eval" / "datasets" / "extraction" / "v2_extended.jsonl",
+    ROOT / "eval" / "datasets" / "extraction.jsonl",
 ]
 
 
 def _load(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [json.loads(line) for line in f if line.strip() and not line.startswith("#")]
 
 
 def _load_all() -> tuple[list[dict], list[dict]]:
