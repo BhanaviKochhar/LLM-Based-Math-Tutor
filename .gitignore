@@ -3,6 +3,8 @@ data/chromadb/
 data/llm_runs.jsonl
 data/interaction_events.jsonl
 data/students.json
+eval/results/system_runs/student_tracker_scratch.json
+eval/results/system_runs/interaction_events_scratch.jsonl
 __pycache__/
 *.pyc
 .env

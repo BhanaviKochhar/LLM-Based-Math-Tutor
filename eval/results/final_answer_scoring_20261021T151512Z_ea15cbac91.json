@@ -1,0 +1,5595 @@
+{
+  "evaluator_name": "final_answer_scoring",
+  "run_timestamp_utc": "20261021T151512Z",
+  "git": {
+    "commit": "ea15cbac913cf6ee1df4c7dcd384f608f1f6f4e9",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\out_of_scope.jsonl",
+      "version": "out_of_scope",
+      "item_count": 277
+    }
+  ],
+  "config": {
+    "baseline_checkpoint": "eval/results/baseline_runs/out_of_scope.jsonl",
+    "system_checkpoint": "eval/results/system_runs/out_of_scope.jsonl"
+  },
+  "aggregate_metrics": {
+    "baseline": {
+      "overall": {
+        "category": "overall",
+        "n_total": 277,
+        "n_scorable": 277,
+        "n_correct": 52,
+        "correct_rate": 0.18772563176895307,
+        "wilson_95_lo": 0.14612708437868074,
+        "wilson_95_hi": 0.23786730961423203
+      },
+      "by_grade": []
+    },
+    "system": {
+      "overall": {
+        "category": "overall",
+        "n_total": 277,
+        "n_scorable": 277,
+        "n_correct": 213,
+        "correct_rate": 0.7689530685920578,
+        "wilson_95_lo": 0.7158394496186132,
+        "wilson_95_hi": 0.8147087312776644
+      },
+      "by_grade": []
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Automated final-answer correctness scoring; independently re-verified, never trusted from either runner's own 'ok' flag.",
+  "per_example_results": [
+    {
+      "item_id": "oos-001",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-001",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-002",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-002",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-003",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-003",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-004",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-004",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-005",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-005",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-006",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-006",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-007",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-007",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-008",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-008",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-009",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-009",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-010",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-010",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-011",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-011",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-012",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-012",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-013",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-013",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-014",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-014",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-015",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-015",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-016",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-016",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-017",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-017",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-018",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-018",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-019",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-019",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-020",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-020",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-021",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-021",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-022",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-022",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-023",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-023",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-024",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-024",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-025",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-025",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-026",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-026",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-027",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-027",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-028",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-028",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-029",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-029",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-030",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-030",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-031",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-031",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-032",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-032",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-033",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-033",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-034",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-034",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-035",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-035",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-036",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-036",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-037",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-037",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-038",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-038",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-039",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-039",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-040",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-040",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-041",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-041",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-042",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-042",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-043",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-043",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-044",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-044",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-045",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-045",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-046",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-046",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-047",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-047",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-048",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-048",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-049",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-049",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-050",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-050",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-051",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-051",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-052",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-052",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-053",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-053",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-054",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-054",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-055",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-055",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-056",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-056",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-057",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-057",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-058",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-058",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-059",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-059",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-060",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-060",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-061",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-061",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-062",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-062",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-063",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-063",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-064",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-064",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-065",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-065",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-066",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-066",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-067",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-067",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-068",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-068",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-069",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-069",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-070",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-070",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-071",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-071",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-072",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-072",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-073",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-073",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-074",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-074",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-075",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-075",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-076",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-076",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-077",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-077",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-078",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-078",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-079",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-079",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-080",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-080",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-081",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-081",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-082",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-082",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-083",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-083",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-084",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-084",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-085",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-085",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-086",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-086",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-087",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-087",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-088",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-088",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-089",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-089",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-090",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-090",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-091",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-091",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-092",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-092",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-093",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-093",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-094",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-094",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-095",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-095",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-096",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-096",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-097",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-097",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-098",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-098",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-099",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-099",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-100",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-100",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-101",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-101",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-102",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-102",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-103",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-103",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-104",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-104",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-105",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-105",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-106",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-106",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-107",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-107",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-108",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-108",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-109",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-109",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-110",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-110",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-111",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-111",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-112",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-112",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-113",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-113",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-114",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-114",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-115",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-115",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-116",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-116",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-117",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-117",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-118",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-118",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-119",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-119",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-120",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-120",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-121",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-121",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-122",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-122",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-123",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-123",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-124",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-124",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-125",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-125",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-126",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-126",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-127",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-127",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-128",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-128",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-129",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-129",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-130",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-130",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-131",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-131",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-132",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-132",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-133",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-133",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-134",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-134",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-135",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-135",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-136",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-136",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-137",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-137",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-138",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-138",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-139",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-139",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-140",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-140",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-141",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-141",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-142",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-142",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-143",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-143",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-144",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-144",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-145",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-145",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-146",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-146",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-147",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-147",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-148",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-148",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-149",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-149",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-150",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-150",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-151",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-151",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-152",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-152",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-153",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-153",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-154",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-154",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-155",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-155",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-156",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-156",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-157",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-157",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-158",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-158",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-159",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-159",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-160",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-160",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-161",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-161",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-162",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-162",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-163",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-163",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-164",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-164",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-165",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-165",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-166",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-166",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-167",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-167",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-168",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-168",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-169",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-169",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-170",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-170",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-171",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-171",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-172",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-172",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-173",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-173",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-174",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-174",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-175",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-175",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-176",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-176",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-177",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-177",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-178",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-178",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-179",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-179",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-180",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-180",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-181",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-181",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-182",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-182",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-183",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-183",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-184",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-184",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-185",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-185",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-186",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-186",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-187",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-187",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-188",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-188",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-189",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-189",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-190",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-190",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-191",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-191",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-192",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-192",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-193",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-193",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-194",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-194",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-195",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-195",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-196",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-196",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-197",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-197",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-198",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-198",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-199",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-199",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-200",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-200",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-201",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-201",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-202",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-202",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-203",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-203",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-204",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-204",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-205",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-205",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-206",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-206",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-207",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-207",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-208",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-208",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-209",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-209",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-210",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-210",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-211",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-211",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-212",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-212",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-213",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-213",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-214",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-214",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-215",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-215",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-216",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-216",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-217",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-217",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-218",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-218",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-219",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-219",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-220",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-220",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-221",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-221",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-222",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-222",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-223",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-223",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-224",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-224",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-225",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-225",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-226",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-226",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-227",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-227",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-228",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-228",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-229",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-229",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-230",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-230",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-231",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-231",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-232",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "refused": false,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-232",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": true,
+      "expected_refusal": true,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-233",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-233",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-234",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-234",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-235",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-235",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-236",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-236",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-237",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-237",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-238",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-238",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-239",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-239",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-240",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-240",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-241",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-241",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-242",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-242",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-243",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-243",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-244",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-244",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-245",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-245",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-246",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-246",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-247",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-247",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-248",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-248",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-249",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-249",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-250",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-250",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-251",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-251",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-252",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-252",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-253",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-253",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-254",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-254",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-255",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-255",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-256",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-256",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-257",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-257",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-258",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-258",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-259",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-259",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-260",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-260",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-261",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-261",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-262",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-262",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-263",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-263",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-264",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-264",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-265",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-265",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-266",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-266",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-267",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-267",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-268",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-268",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-269",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-269",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-270",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-270",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-271",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-271",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-272",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-272",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-273",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-273",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-274",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-274",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-275",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-275",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-276",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-276",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-277",
+      "grade": null,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    },
+    {
+      "item_id": "oos-277",
+      "grade": null,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "refused": false,
+      "expected_refusal": false,
+      "path": "out_of_scope"
+    }
+  ]
+}

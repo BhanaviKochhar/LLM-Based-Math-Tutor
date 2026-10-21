@@ -1,0 +1,3740 @@
+{
+  "evaluator_name": "final_answer_scoring",
+  "run_timestamp_utc": "20261021T151507Z",
+  "git": {
+    "commit": "ea15cbac913cf6ee1df4c7dcd384f608f1f6f4e9",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\curriculum_benchmark_class3.jsonl",
+      "version": "curriculum_benchmark_class3",
+      "item_count": 187
+    }
+  ],
+  "config": {
+    "baseline_checkpoint": "eval/results/baseline_runs/curriculum_benchmark_class3.jsonl",
+    "system_checkpoint": "eval/results/system_runs/curriculum_benchmark_class3.jsonl"
+  },
+  "aggregate_metrics": {
+    "baseline": {
+      "overall": {
+        "category": "overall",
+        "n_total": 187,
+        "n_scorable": 127,
+        "n_correct": 117,
+        "correct_rate": 0.9212598425196851,
+        "wilson_95_lo": 0.8611126194383686,
+        "wilson_95_hi": 0.9566701040990997
+      },
+      "by_grade": [
+        {
+          "category": "grade_3",
+          "n_total": 187,
+          "n_scorable": 127,
+          "n_correct": 117,
+          "correct_rate": 0.9212598425196851,
+          "wilson_95_lo": 0.8611126194383686,
+          "wilson_95_hi": 0.9566701040990997
+        }
+      ]
+    },
+    "system": {
+      "overall": {
+        "category": "overall",
+        "n_total": 187,
+        "n_scorable": 127,
+        "n_correct": 123,
+        "correct_rate": 0.968503937007874,
+        "wilson_95_lo": 0.9218114747018281,
+        "wilson_95_hi": 0.9876851991389076
+      },
+      "by_grade": [
+        {
+          "category": "grade_3",
+          "n_total": 187,
+          "n_scorable": 127,
+          "n_correct": 123,
+          "correct_rate": 0.968503937007874,
+          "wilson_95_lo": 0.9218114747018281,
+          "wilson_95_hi": 0.9876851991389076
+        }
+      ]
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Automated final-answer correctness scoring; independently re-verified, never trusted from either runner's own 'ok' flag.",
+  "per_example_results": [
+    {
+      "item_id": "cb-066",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "427",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-066",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "427",
+      "model_value": "427"
+    },
+    {
+      "item_id": "cb-067",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "598",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-067",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "598",
+      "model_value": "598"
+    },
+    {
+      "item_id": "cb-068",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "931",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-068",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "931",
+      "model_value": "931"
+    },
+    {
+      "item_id": "cb-069",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-069",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-070",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "model_value": "500"
+    },
+    {
+      "item_id": "cb-070",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "model_value": "500"
+    },
+    {
+      "item_id": "cb-071",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "634",
+      "model_value": "634"
+    },
+    {
+      "item_id": "cb-071",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "634",
+      "model_value": "634"
+    },
+    {
+      "item_id": "cb-072",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "841",
+      "model_value": "841"
+    },
+    {
+      "item_id": "cb-072",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "841",
+      "model_value": "841"
+    },
+    {
+      "item_id": "cb-073",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "263",
+      "model_value": "263"
+    },
+    {
+      "item_id": "cb-073",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "263",
+      "model_value": "263"
+    },
+    {
+      "item_id": "cb-074",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "263",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-074",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "263",
+      "model_value": "263"
+    },
+    {
+      "item_id": "cb-075",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "341",
+      "model_value": "341"
+    },
+    {
+      "item_id": "cb-075",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "341",
+      "model_value": "341"
+    },
+    {
+      "item_id": "cb-076",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "56",
+      "model_value": "56"
+    },
+    {
+      "item_id": "cb-076",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "56",
+      "model_value": "56"
+    },
+    {
+      "item_id": "cb-077",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "54",
+      "model_value": "54"
+    },
+    {
+      "item_id": "cb-077",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "54",
+      "model_value": "54"
+    },
+    {
+      "item_id": "cb-078",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "12",
+      "model_value": "12"
+    },
+    {
+      "item_id": "cb-078",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "12",
+      "model_value": "12"
+    },
+    {
+      "item_id": "cb-079",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "70",
+      "model_value": "70"
+    },
+    {
+      "item_id": "cb-079",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "70",
+      "model_value": "70"
+    },
+    {
+      "item_id": "cb-080",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-080",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-081",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-081",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-082",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-082",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-083",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "model_value": "5"
+    },
+    {
+      "item_id": "cb-083",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "model_value": "5"
+    },
+    {
+      "item_id": "cb-084",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "20",
+      "expected_any_of": [
+        "23/5",
+        "4 remainder 3",
+        "4 r 3"
+      ]
+    },
+    {
+      "item_id": "cb-084",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4 remainder 3",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-085",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "4",
+      "expected_any_of": [
+        "17/4"
+      ]
+    },
+    {
+      "item_id": "cb-085",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": "co_solve",
+      "model_value": "5",
+      "expected_any_of": [
+        "17/4"
+      ]
+    },
+    {
+      "item_id": "cb-086",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-086",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-087",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-087",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-088",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-088",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-089",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-089",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-090",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-090",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-091",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "100",
+      "model_value": "100"
+    },
+    {
+      "item_id": "cb-091",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "100",
+      "model_value": "100"
+    },
+    {
+      "item_id": "cb-092",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "200",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-092",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "200",
+      "model_value": "200"
+    },
+    {
+      "item_id": "cb-093",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-093",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-094",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-094",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-095",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-095",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-096",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4:30",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-096",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4:30",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-097",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4:30",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-097",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "note": "model refused"
+    },
+    {
+      "item_id": "cb-098",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "100",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-098",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "100",
+      "model_value": "100"
+    },
+    {
+      "item_id": "cb-099",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "23",
+      "model_value": "23"
+    },
+    {
+      "item_id": "cb-099",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "23",
+      "model_value": "23"
+    },
+    {
+      "item_id": "cb-100",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-100",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-488",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "374",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-488",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "374",
+      "model_value": "374"
+    },
+    {
+      "item_id": "cb-489",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "650",
+      "model_value": "650"
+    },
+    {
+      "item_id": "cb-489",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "650",
+      "model_value": "650"
+    },
+    {
+      "item_id": "cb-490",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-490",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-491",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "model_value": "500"
+    },
+    {
+      "item_id": "cb-491",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "model_value": "500"
+    },
+    {
+      "item_id": "cb-492",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-492",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "500",
+      "model_value": "500"
+    },
+    {
+      "item_id": "cb-493",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "300",
+      "model_value": "300"
+    },
+    {
+      "item_id": "cb-493",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "300",
+      "model_value": "300"
+    },
+    {
+      "item_id": "cb-494",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "158",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-494",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "158",
+      "model_value": "158"
+    },
+    {
+      "item_id": "cb-495",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-495",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-496",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "443",
+      "model_value": "443"
+    },
+    {
+      "item_id": "cb-496",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "443",
+      "model_value": "443"
+    },
+    {
+      "item_id": "cb-497",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "850",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-497",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "850",
+      "model_value": "850"
+    },
+    {
+      "item_id": "cb-498",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "400",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-498",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "400",
+      "model_value": "400"
+    },
+    {
+      "item_id": "cb-499",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "999",
+      "model_value": "999"
+    },
+    {
+      "item_id": "cb-499",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "999",
+      "model_value": "999"
+    },
+    {
+      "item_id": "cb-500",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "587",
+      "model_value": "587"
+    },
+    {
+      "item_id": "cb-500",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "587",
+      "model_value": "587"
+    },
+    {
+      "item_id": "cb-501",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "942",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-501",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "942",
+      "model_value": "942"
+    },
+    {
+      "item_id": "cb-502",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-502",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-503",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1003",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-503",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1003",
+      "model_value": "1003"
+    },
+    {
+      "item_id": "cb-504",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-504",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-505",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-505",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-506",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "220",
+      "model_value": "220"
+    },
+    {
+      "item_id": "cb-506",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "220",
+      "model_value": "220"
+    },
+    {
+      "item_id": "cb-507",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "434",
+      "model_value": "434"
+    },
+    {
+      "item_id": "cb-507",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "434",
+      "model_value": "434"
+    },
+    {
+      "item_id": "cb-508",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "616",
+      "model_value": "616"
+    },
+    {
+      "item_id": "cb-508",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "616",
+      "model_value": "616"
+    },
+    {
+      "item_id": "cb-509",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "721",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-509",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "721",
+      "model_value": "721"
+    },
+    {
+      "item_id": "cb-510",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "266",
+      "model_value": "266"
+    },
+    {
+      "item_id": "cb-510",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "266",
+      "model_value": "266"
+    },
+    {
+      "item_id": "cb-511",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "265",
+      "model_value": "265"
+    },
+    {
+      "item_id": "cb-511",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "265",
+      "model_value": "265"
+    },
+    {
+      "item_id": "cb-512",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "244",
+      "model_value": "244"
+    },
+    {
+      "item_id": "cb-512",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "244",
+      "model_value": "244"
+    },
+    {
+      "item_id": "cb-513",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "200",
+      "model_value": "200"
+    },
+    {
+      "item_id": "cb-513",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "200",
+      "model_value": "200"
+    },
+    {
+      "item_id": "cb-514",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "999",
+      "model_value": "999"
+    },
+    {
+      "item_id": "cb-514",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "999",
+      "model_value": "999"
+    },
+    {
+      "item_id": "cb-515",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "523",
+      "model_value": "523"
+    },
+    {
+      "item_id": "cb-515",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "523",
+      "model_value": "523"
+    },
+    {
+      "item_id": "cb-516",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "856",
+      "model_value": "856"
+    },
+    {
+      "item_id": "cb-516",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "856",
+      "model_value": "856"
+    },
+    {
+      "item_id": "cb-517",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "225",
+      "model_value": "225"
+    },
+    {
+      "item_id": "cb-517",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "225",
+      "model_value": "225"
+    },
+    {
+      "item_id": "cb-518",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "501",
+      "model_value": "501"
+    },
+    {
+      "item_id": "cb-518",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "501",
+      "model_value": "501"
+    },
+    {
+      "item_id": "cb-519",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "432",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-519",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "432",
+      "model_value": "432"
+    },
+    {
+      "item_id": "cb-520",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "475",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-520",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "475",
+      "model_value": "475"
+    },
+    {
+      "item_id": "cb-521",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-521",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-522",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "677",
+      "model_value": "677"
+    },
+    {
+      "item_id": "cb-522",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "677",
+      "model_value": "677"
+    },
+    {
+      "item_id": "cb-523",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-523",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-524",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "663",
+      "model_value": "663"
+    },
+    {
+      "item_id": "cb-524",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "663",
+      "model_value": "663"
+    },
+    {
+      "item_id": "cb-525",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "24",
+      "model_value": "24"
+    },
+    {
+      "item_id": "cb-525",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "24",
+      "model_value": "24"
+    },
+    {
+      "item_id": "cb-526",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "40",
+      "model_value": "40"
+    },
+    {
+      "item_id": "cb-526",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "40",
+      "model_value": "40"
+    },
+    {
+      "item_id": "cb-527",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "63",
+      "model_value": "63"
+    },
+    {
+      "item_id": "cb-527",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "63",
+      "model_value": "63"
+    },
+    {
+      "item_id": "cb-528",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "63",
+      "model_value": "63"
+    },
+    {
+      "item_id": "cb-528",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "63",
+      "model_value": "63"
+    },
+    {
+      "item_id": "cb-529",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-529",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-530",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "36",
+      "model_value": "36"
+    },
+    {
+      "item_id": "cb-530",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "36",
+      "model_value": "36"
+    },
+    {
+      "item_id": "cb-531",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "5",
+      "expected_any_of": [
+        "23",
+        "23"
+      ]
+    },
+    {
+      "item_id": "cb-531",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": "co_solve",
+      "model_value": null,
+      "expected_any_of": [
+        "23",
+        "23"
+      ]
+    },
+    {
+      "item_id": "cb-532",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-532",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-533",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "45",
+      "model_value": "45"
+    },
+    {
+      "item_id": "cb-533",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "45",
+      "model_value": "45"
+    },
+    {
+      "item_id": "cb-534",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "48",
+      "model_value": "48"
+    },
+    {
+      "item_id": "cb-534",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "48",
+      "model_value": "48"
+    },
+    {
+      "item_id": "cb-535",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "28",
+      "model_value": "28"
+    },
+    {
+      "item_id": "cb-535",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "28",
+      "model_value": "28"
+    },
+    {
+      "item_id": "cb-536",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-536",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-537",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-537",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-538",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-538",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-539",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-539",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-540",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "42",
+      "model_value": "42"
+    },
+    {
+      "item_id": "cb-540",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "42",
+      "model_value": "42"
+    },
+    {
+      "item_id": "cb-541",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-541",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-542",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-542",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "model_value": "4"
+    },
+    {
+      "item_id": "cb-543",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-543",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3",
+      "model_value": "3"
+    },
+    {
+      "item_id": "cb-544",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-544",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "model_value": "4"
+    },
+    {
+      "item_id": "cb-545",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-545",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-546",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "7",
+      "model_value": "7"
+    },
+    {
+      "item_id": "cb-546",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "7",
+      "model_value": "7"
+    },
+    {
+      "item_id": "cb-547",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-547",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-548",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "8",
+      "model_value": "8"
+    },
+    {
+      "item_id": "cb-548",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "8",
+      "model_value": "8"
+    },
+    {
+      "item_id": "cb-549",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-549",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-550",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-550",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "0",
+      "model_value": "0"
+    },
+    {
+      "item_id": "cb-551",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-551",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-552",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2",
+      "model_value": "2"
+    },
+    {
+      "item_id": "cb-552",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2",
+      "model_value": "2"
+    },
+    {
+      "item_id": "cb-553",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-553",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-554",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "9",
+      "model_value": "9"
+    },
+    {
+      "item_id": "cb-554",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "9",
+      "model_value": "9"
+    },
+    {
+      "item_id": "cb-555",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-555",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-556",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-556",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-557",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-557",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-558",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-558",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2",
+      "model_value": "2"
+    },
+    {
+      "item_id": "cb-559",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-559",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-560",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-560",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-561",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-561",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-562",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-562",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-563",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3",
+      "model_value": "3"
+    },
+    {
+      "item_id": "cb-563",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3",
+      "model_value": "3"
+    },
+    {
+      "item_id": "cb-564",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-564",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-565",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-565",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-566",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-566",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-567",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-567",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-568",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-568",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-569",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-569",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-570",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "300",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-570",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "300",
+      "model_value": "300"
+    },
+    {
+      "item_id": "cb-571",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "2",
+      "expected_any_of": [
+        "2000",
+        "2000"
+      ]
+    },
+    {
+      "item_id": "cb-571",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2000",
+      "model_value": "2000"
+    },
+    {
+      "item_id": "cb-572",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "400",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-572",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "400",
+      "model_value": "400"
+    },
+    {
+      "item_id": "cb-573",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-573",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-574",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-574",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-575",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-575",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-576",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "280",
+      "model_value": "280"
+    },
+    {
+      "item_id": "cb-576",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "280",
+      "model_value": "280"
+    },
+    {
+      "item_id": "cb-577",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5000",
+      "model_value": "5000"
+    },
+    {
+      "item_id": "cb-577",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5000",
+      "model_value": "5000"
+    },
+    {
+      "item_id": "cb-578",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-578",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-579",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "4",
+      "expected_any_of": [
+        "4000",
+        "4000"
+      ]
+    },
+    {
+      "item_id": "cb-579",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4000",
+      "model_value": "4000"
+    },
+    {
+      "item_id": "cb-580",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-580",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-581",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4500",
+      "model_value": "4500"
+    },
+    {
+      "item_id": "cb-581",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4500",
+      "model_value": "4500"
+    },
+    {
+      "item_id": "cb-582",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3500",
+      "model_value": "3500"
+    },
+    {
+      "item_id": "cb-582",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3500",
+      "model_value": "3500"
+    },
+    {
+      "item_id": "cb-583",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "3",
+      "expected_any_of": [
+        "3:20",
+        "3:20"
+      ]
+    },
+    {
+      "item_id": "cb-583",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3:20",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-584",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "10:45",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-584",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "10:45",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-585",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-585",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-586",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "46",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-586",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "46",
+      "model_value": "46"
+    },
+    {
+      "item_id": "cb-587",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "70",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-587",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "70",
+      "model_value": "70"
+    },
+    {
+      "item_id": "cb-588",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-588",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-589",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "15",
+      "expected_any_of": [
+        "8:15",
+        "8:15"
+      ]
+    },
+    {
+      "item_id": "cb-589",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "8:15",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-590",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-590",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "model_value": "5"
+    },
+    {
+      "item_id": "cb-591",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "30",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-591",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "30",
+      "model_value": "30"
+    },
+    {
+      "item_id": "cb-592",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-592",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-593",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-593",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-594",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "510",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-594",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "510",
+      "model_value": "510"
+    },
+    {
+      "item_id": "cb-595",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": null,
+      "expected_any_of": [
+        "6:27",
+        "6:27"
+      ]
+    },
+    {
+      "item_id": "cb-595",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "note": "model refused"
+    },
+    {
+      "item_id": "cb-596",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "509",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-596",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "509",
+      "model_value": "509"
+    },
+    {
+      "item_id": "cb-597",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "714",
+      "model_value": "714"
+    },
+    {
+      "item_id": "cb-597",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "714",
+      "model_value": "714"
+    },
+    {
+      "item_id": "cb-598",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-598",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-599",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-599",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-600",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-600",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-601",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-601",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-602",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "625",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-602",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "625",
+      "model_value": "625"
+    },
+    {
+      "item_id": "cb-603",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "577",
+      "model_value": "577"
+    },
+    {
+      "item_id": "cb-603",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "577",
+      "model_value": "577"
+    },
+    {
+      "item_id": "cb-604",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-604",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-605",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": "10",
+      "expected_any_of": [
+        "1100",
+        "1100"
+      ]
+    },
+    {
+      "item_id": "cb-605",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1100",
+      "model_value": "1100"
+    },
+    {
+      "item_id": "cb-606",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-606",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-607",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1137",
+      "model_value": "1137"
+    },
+    {
+      "item_id": "cb-607",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1137",
+      "model_value": "1137"
+    },
+    {
+      "item_id": "cb-608",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "42",
+      "model_value": "42"
+    },
+    {
+      "item_id": "cb-608",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "42",
+      "model_value": "42"
+    },
+    {
+      "item_id": "cb-609",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "40",
+      "model_value": "40"
+    },
+    {
+      "item_id": "cb-609",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "40",
+      "model_value": "40"
+    },
+    {
+      "item_id": "cb-610",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-610",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-611",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-611",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-612",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-612",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-613",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "132",
+      "model_value": "132"
+    },
+    {
+      "item_id": "cb-613",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "132",
+      "model_value": "132"
+    },
+    {
+      "item_id": "cb-614",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-614",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-615",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-615",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "6",
+      "model_value": "6"
+    },
+    {
+      "item_id": "cb-616",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-616",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-617",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1",
+      "model_value": "1"
+    },
+    {
+      "item_id": "cb-617",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1",
+      "model_value": "1"
+    },
+    {
+      "item_id": "cb-618",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-618",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-619",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "model_value": "5"
+    },
+    {
+      "item_id": "cb-619",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "5",
+      "model_value": "5"
+    },
+    {
+      "item_id": "cb-620",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-620",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "4",
+      "model_value": "4"
+    },
+    {
+      "item_id": "cb-621",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-621",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-622",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-622",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-623",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-623",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-624",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-624",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-625",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-625",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-626",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-626",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-627",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3000",
+      "model_value": "3000"
+    },
+    {
+      "item_id": "cb-627",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3000",
+      "model_value": "3000"
+    },
+    {
+      "item_id": "cb-628",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2500",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-628",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "2500",
+      "model_value": "2500"
+    },
+    {
+      "item_id": "cb-629",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-629",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-630",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-630",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-631",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-631",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-632",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3650",
+      "model_value": "3650"
+    },
+    {
+      "item_id": "cb-632",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "3650",
+      "model_value": "3650"
+    },
+    {
+      "item_id": "cb-633",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-633",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "1000",
+      "model_value": "1000"
+    },
+    {
+      "item_id": "cb-634",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "curriculum",
+      "mode": null,
+      "model_value": null,
+      "expected_any_of": [
+        "12:10",
+        "12:10"
+      ]
+    },
+    {
+      "item_id": "cb-634",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "12:10",
+      "note": "text match (categorical/worded answer)"
+    },
+    {
+      "item_id": "cb-635",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "22",
+      "model_value": "22"
+    },
+    {
+      "item_id": "cb-635",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "22",
+      "model_value": "22"
+    },
+    {
+      "item_id": "cb-636",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-636",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-637",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-637",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "15",
+      "model_value": "15"
+    },
+    {
+      "item_id": "cb-638",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "360",
+      "model_value": "360"
+    },
+    {
+      "item_id": "cb-638",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "curriculum",
+      "matched_against": "360",
+      "model_value": "360"
+    },
+    {
+      "item_id": "cb-639",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    },
+    {
+      "item_id": "cb-639",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- Track F territory)"
+    }
+  ]
+}

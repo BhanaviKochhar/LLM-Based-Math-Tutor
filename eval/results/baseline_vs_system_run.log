@@ -1,0 +1,108 @@
+=== 14:48:17 curriculum_benchmark_class1: baseline ===
+217 job(s) total, 0 already in checkpoint, 217 to run -> D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class1.jsonl (max_workers=38)
+Done: 217/217 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class1.jsonl
+=== 14:50:50 curriculum_benchmark_class1: system ===
+217 job(s) total, 0 already in checkpoint, 217 to run -> D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class1.jsonl (max_workers=38)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 217/217 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class1.jsonl
+=== 15:05:11 curriculum_benchmark_class2: baseline ===
+160 job(s) total, 0 already in checkpoint, 160 to run -> D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class2.jsonl (max_workers=38)
+Done: 160/160 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class2.jsonl
+=== 15:07:10 curriculum_benchmark_class2: system ===
+160 job(s) total, 0 already in checkpoint, 160 to run -> D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class2.jsonl (max_workers=38)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 160/160 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class2.jsonl
+=== 15:21:17 curriculum_benchmark_class3: baseline ===
+187 job(s) total, 0 already in checkpoint, 187 to run -> D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class3.jsonl (max_workers=38)
+Done: 187/187 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class3.jsonl
+=== 15:26:09 curriculum_benchmark_class3: system ===
+187 job(s) total, 0 already in checkpoint, 187 to run -> D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class3.jsonl (max_workers=38)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 144/187 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class3.jsonl
+=== 16:12:19 curriculum_benchmark_class4: baseline ===
+=== 02:59:37 RESUMED after quota reset + key14 removed (18 keys) ===
+=== 02:59:37 curriculum_benchmark_class3: system (retry 43 dropped) ===
+187 job(s) total, 144 already in checkpoint, 43 to run -> D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class3.jsonl (max_workers=36)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 187/187 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class3.jsonl
+=== 03:04:36 curriculum_benchmark_class4: baseline ===
+177 job(s) total, 76 already in checkpoint, 101 to run -> D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class4.jsonl (max_workers=36)
+Done: 177/177 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class4.jsonl
+=== 03:06:24 curriculum_benchmark_class4: system ===
+177 job(s) total, 0 already in checkpoint, 177 to run -> D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class4.jsonl (max_workers=36)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 177/177 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\system_runs\curriculum_benchmark_class4.jsonl
+=== 03:25:28 curriculum_benchmark_class5: baseline ===
+194 job(s) total, 0 already in checkpoint, 194 to run -> D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class5.jsonl (max_workers=36)
+Done: 194/194 journeys completed every turn ok. Checkpoint: D:\LLM-Based-Math-Tutor\eval\results\baseline_runs\curriculum_benchmark_class5.jsonl
+=== 03:37:04 curriculum_benchmark_class5: system ===
+=== 04:09:30 RESUMED with keys #16-18 excluded (15 keys, shared-org key hit TPD cap) ===
+=== 04:09:30 curriculum_benchmark_class5: system (retry 13 dropped) ===
+=== 04:19:05 RESUMED with max-workers=10 (15 keys, keys #16-18 still excluded) ===
+=== 04:19:05 curriculum_benchmark_class5: system (retry 3 dropped + remaining) ===
+=== 15:43:59 RESUMED all 18 keys healthy, default max-workers ===
+=== 15:43:59 curriculum_benchmark_class5: system (continuing from 5/194) ===
+Traceback (most recent call last):
+  File "D:\LLM-Based-Math-Tutor\eval\system_runner.py", line 69, in <module>
+    from eval.baseline_runner import _grade_of, _item_id, _student_turns, load_items
+ModuleNotFoundError: No module named 'eval'
+=== 15:44:41 curriculum_benchmark_class5: system (relaunch, fixed module invocation) ===
+=== 16:00:25 PAUSED by user, cleaned failed entries from checkpoint ===
+=== 18:15:42 RESUMED by user, keys healthy (18/18, fresh daily quota) ===
+=== 18:15:42 curriculum_benchmark_class5: system (continuing from 126/194, max-workers=20 to avoid repeat TPM saturation) ===
+=== 18:25:21 PAUSED by user, cleaned failed entries from checkpoint ===
+=== 18:26:39 RESUMED by user, keys healthy (18/18) ===
+=== 18:26:39 curriculum_benchmark_class5: system (continuing from 165/194, max-workers=12, further reduced since 20 stalled near the tail) ===
+=== 18:33:14 PAUSED by user for investigation; cleaned 3 failed entries, checkpoint at 165/194 ===
+=== 08:41:48 RESUMED by user (new day, 18/18 keys fresh quota) ===
+=== 08:41:48 curriculum_benchmark_class5: system (continuing from 165/194, max-workers=20) ===
+194 job(s) total, 165 already in checkpoint, 29 to run -> eval\results\system_runs\curriculum_benchmark_class5.jsonl (max_workers=20)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 194/194 journeys completed every turn ok. Checkpoint: eval\results\system_runs\curriculum_benchmark_class5.jsonl
+=== 08:48:11 out_of_scope: baseline ===
+277 job(s) total, 0 already in checkpoint, 277 to run -> eval\results\baseline_runs\out_of_scope.jsonl (max_workers=36)
+Done: 277/277 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\out_of_scope.jsonl
+=== 08:52:09 out_of_scope: system ===
+277 job(s) total, 0 already in checkpoint, 277 to run -> eval\results\system_runs\out_of_scope.jsonl (max_workers=20)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 277/277 journeys completed every turn ok. Checkpoint: eval\results\system_runs\out_of_scope.jsonl
+=== 09:06:38 multi_turn: baseline ===
+206 job(s) total, 0 already in checkpoint, 206 to run -> eval\results\baseline_runs\multi_turn.jsonl (max_workers=36)
+Done: 206/206 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\multi_turn.jsonl
+=== 09:24:45 multi_turn: system ===
+=== 09:48:17 PAUSED (same stall pattern recurring); cleaned failed entries, checkpoint at 17/206 ===
+=== 13:30:58 RESUMED by user (new day, 18/18 keys fresh quota) ===
+=== 13:30:58 multi_turn: system (continuing from 17/206, max-workers=20) ===
+=== 13:55:15 RESTARTED by user, checkpoint clean at 37/206 ===
+=== 14:18:41 RESUMED by user with live per-turn logging enabled ===
+=== 14:42:50 PAUSED by user ===
+=== 10:46:47 RESUMED by user (new day, 18/18 keys fresh quota) ===
+=== 10:50:13 RESUMED, live-log instrumentation removed, back to normal runner ===
+=== 12:06:38 RESUMED with live log restored temporarily ===
+=== 12:41:25 RESUMED sequentially (max-workers=1) to test whether removing concurrent key pressure avoids the stall ===
+=== 12:48:47 RESTARTED by user, sequential (max-workers=1) ===
+=== 12:58:22 RESTARTED unbuffered (-u) to diagnose a suspected warm-up hang after repeated forced kills ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 41 already in checkpoint, 165 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=1)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+=== 12:59:51 RESTARTED -- diagnosed as a transient post-kill ChromaDB file-handle race, not a real stuck lock ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 41 already in checkpoint, 165 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=1)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+=== 13:03:11 RESTARTED again -- isolated retrieval test for all 5 grades succeeded instantly, retrying real run ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 41 already in checkpoint, 165 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=1)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+=== 13:18:03 RETRYING real invocation after confirming imports/retrieval work fine in isolation 4/4 times ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 41 already in checkpoint, 165 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=1)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+=== 14:00:50 RESUMED at max-workers=20, abandoning sequential (confirmed not a scale bug, just normal congestion variance with no masking signal) ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 41 already in checkpoint, 165 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=20)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+=== 20:13:16 RESUMED at max-workers=20 -- real root cause found and fixed (RLock deadlock in _isolated_side_effects, see finding 7 resolution) ===
+Live per-turn log: D:\LLM-Based-Math-Tutor\eval\results\system_runs\multi_turn_live.log
+206 job(s) total, 42 already in checkpoint, 164 to run -> eval\results\system_runs\multi_turn.jsonl (max_workers=20)
+Warming up retrieval caches (single-threaded) before the concurrent run...
+Done: 206/206 journeys completed every turn ok. Checkpoint: eval\results\system_runs\multi_turn.jsonl

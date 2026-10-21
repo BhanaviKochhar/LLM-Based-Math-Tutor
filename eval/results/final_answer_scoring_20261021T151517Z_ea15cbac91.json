@@ -1,0 +1,4225 @@
+{
+  "evaluator_name": "final_answer_scoring",
+  "run_timestamp_utc": "20261021T151517Z",
+  "git": {
+    "commit": "ea15cbac913cf6ee1df4c7dcd384f608f1f6f4e9",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\multi_turn.json",
+      "version": "multi_turn",
+      "item_count": 206
+    }
+  ],
+  "config": {
+    "baseline_checkpoint": "eval/results/baseline_runs/multi_turn.jsonl",
+    "system_checkpoint": "eval/results/system_runs/multi_turn.jsonl"
+  },
+  "aggregate_metrics": {
+    "baseline": {
+      "overall": {
+        "category": "overall",
+        "n_total": 206,
+        "n_scorable": 121,
+        "n_correct": 84,
+        "correct_rate": 0.6942148760330579,
+        "wilson_95_lo": 0.6071955165392566,
+        "wilson_95_hi": 0.769281555206059
+      },
+      "by_grade": [
+        {
+          "category": "grade_1",
+          "n_total": 21,
+          "n_scorable": 12,
+          "n_correct": 12,
+          "correct_rate": 1.0,
+          "wilson_95_lo": 0.7574992425007574,
+          "wilson_95_hi": 0.9999999999999998
+        },
+        {
+          "category": "grade_2",
+          "n_total": 36,
+          "n_scorable": 18,
+          "n_correct": 11,
+          "correct_rate": 0.6111111111111112,
+          "wilson_95_lo": 0.3861866858065617,
+          "wilson_95_hi": 0.7969500807306884
+        },
+        {
+          "category": "grade_3",
+          "n_total": 45,
+          "n_scorable": 29,
+          "n_correct": 23,
+          "correct_rate": 0.7931034482758621,
+          "wilson_95_lo": 0.6160955339174229,
+          "wilson_95_hi": 0.9015406348441479
+        },
+        {
+          "category": "grade_4",
+          "n_total": 46,
+          "n_scorable": 32,
+          "n_correct": 22,
+          "correct_rate": 0.6875,
+          "wilson_95_lo": 0.5143300030196761,
+          "wilson_95_hi": 0.8204764788338126
+        },
+        {
+          "category": "grade_5",
+          "n_total": 58,
+          "n_scorable": 30,
+          "n_correct": 16,
+          "correct_rate": 0.5333333333333333,
+          "wilson_95_lo": 0.36142013281525043,
+          "wilson_95_hi": 0.6976787277587176
+        }
+      ]
+    },
+    "system": {
+      "overall": {
+        "category": "overall",
+        "n_total": 206,
+        "n_scorable": 64,
+        "n_correct": 39,
+        "correct_rate": 0.609375,
+        "wilson_95_lo": 0.48691694294402404,
+        "wilson_95_hi": 0.7194461145310356
+      },
+      "by_grade": [
+        {
+          "category": "grade_1",
+          "n_total": 21,
+          "n_scorable": 3,
+          "n_correct": 2,
+          "correct_rate": 0.6666666666666666,
+          "wilson_95_lo": 0.20765495512648788,
+          "wilson_95_hi": 0.9385096847238393
+        },
+        {
+          "category": "grade_2",
+          "n_total": 36,
+          "n_scorable": 16,
+          "n_correct": 13,
+          "correct_rate": 0.8125,
+          "wilson_95_lo": 0.5699064013154177,
+          "wilson_95_hi": 0.9340852122641323
+        },
+        {
+          "category": "grade_3",
+          "n_total": 45,
+          "n_scorable": 13,
+          "n_correct": 6,
+          "correct_rate": 0.46153846153846156,
+          "wilson_95_lo": 0.23205754301488138,
+          "wilson_95_hi": 0.7085656756816795
+        },
+        {
+          "category": "grade_4",
+          "n_total": 46,
+          "n_scorable": 19,
+          "n_correct": 10,
+          "correct_rate": 0.5263157894736842,
+          "wilson_95_lo": 0.31707482511825114,
+          "wilson_95_hi": 0.7267049451255145
+        },
+        {
+          "category": "grade_5",
+          "n_total": 58,
+          "n_scorable": 13,
+          "n_correct": 8,
+          "correct_rate": 0.6153846153846154,
+          "wilson_95_lo": 0.3552248097226855,
+          "wilson_95_hi": 0.8229055341876319
+        }
+      ]
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Automated final-answer correctness scoring; independently re-verified, never trusted from either runner's own 'ok' flag.",
+  "per_example_results": [
+    {
+      "item_id": "mt-001",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "56",
+      "reference_answer": "54"
+    },
+    {
+      "item_id": "mt-001",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-002",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-002",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "12",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-003",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-003",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1/2",
+      "reference_answer": "1/2"
+    },
+    {
+      "item_id": "mt-004",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-004",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-005",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "27",
+      "reference_answer": "26"
+    },
+    {
+      "item_id": "mt-005",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "26",
+      "reference_answer": "26"
+    },
+    {
+      "item_id": "mt-006",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-006",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-007",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-007",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-008",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "52",
+      "reference_answer": "35 then 52"
+    },
+    {
+      "item_id": "mt-008",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "52",
+      "reference_answer": "35 then 52"
+    },
+    {
+      "item_id": "mt-009",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "56",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-009",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-010",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "7, then 5"
+    },
+    {
+      "item_id": "mt-010",
+      "grade": 1,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "7, then 5"
+    },
+    {
+      "item_id": "mt-011",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-011",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-012",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "47",
+      "reference_answer": "47"
+    },
+    {
+      "item_id": "mt-012",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-013",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-013",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-014",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-014",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "0",
+      "reference_answer": "0"
+    },
+    {
+      "item_id": "mt-015",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-015",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-016",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-016",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "8 then 6"
+    },
+    {
+      "item_id": "mt-017",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-017",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-018",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-018",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-019",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-019",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-020",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-020",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-021",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-021",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-022",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-022",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-023",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-023",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-024",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-024",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-025",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-025",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-026",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-026",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-027",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "16",
+      "reference_answer": "16"
+    },
+    {
+      "item_id": "mt-027",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-028",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-028",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-029",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-029",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-030",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-030",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-031",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-031",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-032",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "19",
+      "reference_answer": "19"
+    },
+    {
+      "item_id": "mt-032",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-033",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-033",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-034",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-034",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-035",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "8",
+      "reference_answer": "3/4"
+    },
+    {
+      "item_id": "mt-035",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-036",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "yes, since 42 divided by 6 is 7"
+    },
+    {
+      "item_id": "mt-036",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-037",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-037",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-038",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "3"
+    },
+    {
+      "item_id": "mt-038",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-039",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-039",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-040",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "180",
+      "reference_answer": "obtuse; 95 degrees also obtuse; 89 degrees acute"
+    },
+    {
+      "item_id": "mt-040",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-041",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-041",
+      "grade": 1,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-042",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "20",
+      "reference_answer": "20"
+    },
+    {
+      "item_id": "mt-042",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "20",
+      "reference_answer": "20"
+    },
+    {
+      "item_id": "mt-043",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "24"
+    },
+    {
+      "item_id": "mt-043",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-044",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "26",
+      "reference_answer": "26"
+    },
+    {
+      "item_id": "mt-044",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-045",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "42",
+      "reference_answer": "42"
+    },
+    {
+      "item_id": "mt-045",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "55",
+      "reference_answer": "42"
+    },
+    {
+      "item_id": "mt-046",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "17/30",
+      "reference_answer": "5/6"
+    },
+    {
+      "item_id": "mt-046",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-047",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-047",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "20",
+      "reference_answer": "4:10"
+    },
+    {
+      "item_id": "mt-048",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "48",
+      "reference_answer": "48"
+    },
+    {
+      "item_id": "mt-048",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-049",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "1, 2, 3, 4, 6, 12"
+    },
+    {
+      "item_id": "mt-049",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-050",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "260",
+      "reference_answer": "260"
+    },
+    {
+      "item_id": "mt-050",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "260",
+      "reference_answer": "260"
+    },
+    {
+      "item_id": "mt-051",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-051",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-052",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-052",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-053",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2040",
+      "reference_answer": "2040"
+    },
+    {
+      "item_id": "mt-053",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-054",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-054",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-055",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "17"
+    },
+    {
+      "item_id": "mt-055",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "17",
+      "reference_answer": "17"
+    },
+    {
+      "item_id": "mt-056",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "3"
+    },
+    {
+      "item_id": "mt-056",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-057",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "61",
+      "reference_answer": "61"
+    },
+    {
+      "item_id": "mt-057",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "61",
+      "reference_answer": "61"
+    },
+    {
+      "item_id": "mt-058",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "35",
+      "reference_answer": "35"
+    },
+    {
+      "item_id": "mt-058",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-059",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1300",
+      "reference_answer": "1300"
+    },
+    {
+      "item_id": "mt-059",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-060",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "7"
+    },
+    {
+      "item_id": "mt-060",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "7"
+    },
+    {
+      "item_id": "mt-061",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "25",
+      "reference_answer": "25"
+    },
+    {
+      "item_id": "mt-061",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-062",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-062",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-063",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-063",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "2"
+    },
+    {
+      "item_id": "mt-064",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "8"
+    },
+    {
+      "item_id": "mt-064",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "8"
+    },
+    {
+      "item_id": "mt-065",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-065",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-066",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-066",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-067",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "7"
+    },
+    {
+      "item_id": "mt-067",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-068",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "12",
+      "reference_answer": "12"
+    },
+    {
+      "item_id": "mt-068",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-069",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-069",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-070",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1",
+      "reference_answer": "17"
+    },
+    {
+      "item_id": "mt-070",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-071",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-071",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-072",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-072",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-073",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "16",
+      "reference_answer": "1/6"
+    },
+    {
+      "item_id": "mt-073",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "1/6"
+    },
+    {
+      "item_id": "mt-074",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-074",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-075",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "45",
+      "reference_answer": "45"
+    },
+    {
+      "item_id": "mt-075",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-076",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-076",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-077",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-077",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-078",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-078",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-079",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "68",
+      "reference_answer": "86"
+    },
+    {
+      "item_id": "mt-079",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "86",
+      "reference_answer": "86"
+    },
+    {
+      "item_id": "mt-080",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-080",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-081",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "7:10"
+    },
+    {
+      "item_id": "mt-081",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-082",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-082",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-083",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-083",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-084",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-084",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-085",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-085",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-086",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1",
+      "reference_answer": "1 m 50 cm"
+    },
+    {
+      "item_id": "mt-086",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "240",
+      "reference_answer": "1 m 50 cm"
+    },
+    {
+      "item_id": "mt-087",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-087",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "61",
+      "reference_answer": "61"
+    },
+    {
+      "item_id": "mt-088",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "18",
+      "reference_answer": "18"
+    },
+    {
+      "item_id": "mt-088",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "18",
+      "reference_answer": "18"
+    },
+    {
+      "item_id": "mt-089",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5/6",
+      "reference_answer": "5/6"
+    },
+    {
+      "item_id": "mt-089",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-090",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "27",
+      "reference_answer": "27"
+    },
+    {
+      "item_id": "mt-090",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-091",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-091",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-092",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "35",
+      "reference_answer": "35750"
+    },
+    {
+      "item_id": "mt-092",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-093",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-093",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-094",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "70",
+      "reference_answer": "70"
+    },
+    {
+      "item_id": "mt-094",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-095",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "9 remainder 2"
+    },
+    {
+      "item_id": "mt-095",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-096",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-096",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-097",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "34",
+      "reference_answer": "34"
+    },
+    {
+      "item_id": "mt-097",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-098",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "15/2",
+      "reference_answer": "5000"
+    },
+    {
+      "item_id": "mt-098",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "5000"
+    },
+    {
+      "item_id": "mt-099",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "15",
+      "reference_answer": "15"
+    },
+    {
+      "item_id": "mt-099",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-100",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-100",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "83",
+      "reference_answer": "83"
+    },
+    {
+      "item_id": "mt-101",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-101",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-102",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "30",
+      "reference_answer": "30"
+    },
+    {
+      "item_id": "mt-102",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-103",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-103",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "24"
+    },
+    {
+      "item_id": "mt-104",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "10",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-104",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-105",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "410",
+      "reference_answer": "4 m 10 cm"
+    },
+    {
+      "item_id": "mt-105",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-106",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "52714",
+      "reference_answer": "52714"
+    },
+    {
+      "item_id": "mt-106",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "52714",
+      "reference_answer": "52714"
+    },
+    {
+      "item_id": "mt-107",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-107",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-108",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "72"
+    },
+    {
+      "item_id": "mt-108",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "72",
+      "reference_answer": "72"
+    },
+    {
+      "item_id": "mt-109",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "96",
+      "reference_answer": "96"
+    },
+    {
+      "item_id": "mt-109",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-110",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-110",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-111",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-111",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-112",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "41238",
+      "reference_answer": "41238"
+    },
+    {
+      "item_id": "mt-112",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-113",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-113",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-114",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "26",
+      "reference_answer": "26"
+    },
+    {
+      "item_id": "mt-114",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "14",
+      "reference_answer": "26"
+    },
+    {
+      "item_id": "mt-115",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "11",
+      "reference_answer": "11"
+    },
+    {
+      "item_id": "mt-115",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-116",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "108",
+      "reference_answer": "108"
+    },
+    {
+      "item_id": "mt-116",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "108",
+      "reference_answer": "108"
+    },
+    {
+      "item_id": "mt-117",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "25",
+      "reference_answer": "25"
+    },
+    {
+      "item_id": "mt-117",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "25"
+    },
+    {
+      "item_id": "mt-118",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "9",
+      "reference_answer": "9"
+    },
+    {
+      "item_id": "mt-118",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-119",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "9",
+      "reference_answer": "9"
+    },
+    {
+      "item_id": "mt-119",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-120",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "28"
+    },
+    {
+      "item_id": "mt-120",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "28",
+      "reference_answer": "28"
+    },
+    {
+      "item_id": "mt-121",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "54",
+      "reference_answer": "54"
+    },
+    {
+      "item_id": "mt-121",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-122",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6 remainder 3"
+    },
+    {
+      "item_id": "mt-122",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-123",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-123",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-124",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "22",
+      "reference_answer": "22"
+    },
+    {
+      "item_id": "mt-124",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-125",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-125",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-126",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "15",
+      "reference_answer": "15"
+    },
+    {
+      "item_id": "mt-126",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "15",
+      "reference_answer": "15"
+    },
+    {
+      "item_id": "mt-127",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "35",
+      "reference_answer": "35"
+    },
+    {
+      "item_id": "mt-127",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-128",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-128",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "78",
+      "reference_answer": "58 then 78"
+    },
+    {
+      "item_id": "mt-129",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "48",
+      "reference_answer": "12 then 48"
+    },
+    {
+      "item_id": "mt-129",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "48",
+      "reference_answer": "12 then 48"
+    },
+    {
+      "item_id": "mt-130",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "58",
+      "reference_answer": "50 then 58"
+    },
+    {
+      "item_id": "mt-130",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-131",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1/4",
+      "reference_answer": "1/4 then 1/4 as a percentage-free decimal check"
+    },
+    {
+      "item_id": "mt-131",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "20",
+      "reference_answer": "1/4 then 1/4 as a percentage-free decimal check"
+    },
+    {
+      "item_id": "mt-132",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-132",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-133",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "108",
+      "reference_answer": "56 then 108"
+    },
+    {
+      "item_id": "mt-133",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "108",
+      "reference_answer": "56 then 108"
+    },
+    {
+      "item_id": "mt-134",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "8",
+      "reference_answer": "34 then 8"
+    },
+    {
+      "item_id": "mt-134",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "8",
+      "reference_answer": "34 then 8"
+    },
+    {
+      "item_id": "mt-135",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5/8",
+      "reference_answer": "3/8 then 5/8"
+    },
+    {
+      "item_id": "mt-135",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "3/8 then 5/8"
+    },
+    {
+      "item_id": "mt-136",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3/13",
+      "reference_answer": "4 remainder 2 then 0 remainder 6"
+    },
+    {
+      "item_id": "mt-136",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-137",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2400",
+      "reference_answer": "24 then 2400"
+    },
+    {
+      "item_id": "mt-137",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2400",
+      "reference_answer": "24 then 2400"
+    },
+    {
+      "item_id": "mt-138",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-138",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-139",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "38",
+      "reference_answer": "45 then 38"
+    },
+    {
+      "item_id": "mt-139",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-140",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "18 then 24"
+    },
+    {
+      "item_id": "mt-140",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "18 then 24"
+    },
+    {
+      "item_id": "mt-141",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-141",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-142",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7/8",
+      "reference_answer": "5/8 then 7/8"
+    },
+    {
+      "item_id": "mt-142",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7/8",
+      "reference_answer": "5/8 then 7/8"
+    },
+    {
+      "item_id": "mt-143",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "26 then 6"
+    },
+    {
+      "item_id": "mt-143",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "26 then 6"
+    },
+    {
+      "item_id": "mt-144",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-144",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-145",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-145",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-146",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-146",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-147",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-147",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-148",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "9",
+      "reference_answer": "7 then 9"
+    },
+    {
+      "item_id": "mt-148",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-149",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-149",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-150",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-150",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "36",
+      "reference_answer": "20"
+    },
+    {
+      "item_id": "mt-151",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "24 then 10"
+    },
+    {
+      "item_id": "mt-151",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-152",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-152",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-153",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-153",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-154",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "60",
+      "reference_answer": "60"
+    },
+    {
+      "item_id": "mt-154",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-155",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "12",
+      "reference_answer": "48 then 12"
+    },
+    {
+      "item_id": "mt-155",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-156",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-156",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-157",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4"
+    },
+    {
+      "item_id": "mt-157",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-158",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-158",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-159",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7",
+      "reference_answer": "7"
+    },
+    {
+      "item_id": "mt-159",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-160",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-160",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-161",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "9",
+      "reference_answer": "9"
+    },
+    {
+      "item_id": "mt-161",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-162",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "3"
+    },
+    {
+      "item_id": "mt-162",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "3"
+    },
+    {
+      "item_id": "mt-163",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "47",
+      "reference_answer": "47"
+    },
+    {
+      "item_id": "mt-163",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-164",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-164",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-165",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-165",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-166",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "36",
+      "reference_answer": "36"
+    },
+    {
+      "item_id": "mt-166",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3",
+      "reference_answer": "36"
+    },
+    {
+      "item_id": "mt-167",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "182",
+      "reference_answer": "182"
+    },
+    {
+      "item_id": "mt-167",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "182",
+      "reference_answer": "182"
+    },
+    {
+      "item_id": "mt-168",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-168",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-169",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "6 remainder 2"
+    },
+    {
+      "item_id": "mt-169",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "6 remainder 2"
+    },
+    {
+      "item_id": "mt-170",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "148",
+      "reference_answer": "148500"
+    },
+    {
+      "item_id": "mt-170",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "148500",
+      "reference_answer": "148500"
+    },
+    {
+      "item_id": "mt-171",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "3/8",
+      "reference_answer": "3/8"
+    },
+    {
+      "item_id": "mt-171",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "7/12",
+      "reference_answer": "3/8"
+    },
+    {
+      "item_id": "mt-172",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-172",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "60",
+      "reference_answer": "54"
+    },
+    {
+      "item_id": "mt-173",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-173",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "64",
+      "reference_answer": "216"
+    },
+    {
+      "item_id": "mt-174",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-174",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-175",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "35",
+      "reference_answer": "35"
+    },
+    {
+      "item_id": "mt-175",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "32",
+      "reference_answer": "35"
+    },
+    {
+      "item_id": "mt-176",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "8",
+      "reference_answer": "8"
+    },
+    {
+      "item_id": "mt-176",
+      "grade": 1,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "8"
+    },
+    {
+      "item_id": "mt-177",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "10",
+      "reference_answer": "27"
+    },
+    {
+      "item_id": "mt-177",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "27",
+      "reference_answer": "27"
+    },
+    {
+      "item_id": "mt-178",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-178",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-179",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "56",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-179",
+      "grade": 3,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "24",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-180",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "64",
+      "reference_answer": "215"
+    },
+    {
+      "item_id": "mt-180",
+      "grade": 5,
+      "condition": "system",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "215",
+      "reference_answer": "215"
+    },
+    {
+      "item_id": "mt-181",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "14",
+      "reference_answer": "1/4"
+    },
+    {
+      "item_id": "mt-181",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1/2",
+      "reference_answer": "1/4"
+    },
+    {
+      "item_id": "mt-182",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-182",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-183",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "18",
+      "reference_answer": "18"
+    },
+    {
+      "item_id": "mt-183",
+      "grade": 2,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "12",
+      "reference_answer": "18"
+    },
+    {
+      "item_id": "mt-184",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-184",
+      "grade": 4,
+      "condition": "system",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "26",
+      "reference_answer": "30"
+    },
+    {
+      "item_id": "mt-185",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "11",
+      "reference_answer": "56"
+    },
+    {
+      "item_id": "mt-185",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-186",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-186",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-187",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-187",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-188",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1/2",
+      "reference_answer": "45"
+    },
+    {
+      "item_id": "mt-188",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-189",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "5",
+      "reference_answer": "72"
+    },
+    {
+      "item_id": "mt-189",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-190",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "32",
+      "reference_answer": "6"
+    },
+    {
+      "item_id": "mt-190",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-191",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "8"
+    },
+    {
+      "item_id": "mt-191",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-192",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": true,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "4",
+      "reference_answer": "4:45"
+    },
+    {
+      "item_id": "mt-192",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-193",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-193",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-194",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "6",
+      "reference_answer": "18"
+    },
+    {
+      "item_id": "mt-194",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-195",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-195",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-196",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "13",
+      "reference_answer": "60"
+    },
+    {
+      "item_id": "mt-196",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-197",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-197",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-198",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "0",
+      "reference_answer": "21250"
+    },
+    {
+      "item_id": "mt-198",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-199",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "1",
+      "reference_answer": "81"
+    },
+    {
+      "item_id": "mt-199",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-200",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "6.25"
+    },
+    {
+      "item_id": "mt-200",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-201",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "reference_answer has no extractable number to compare against"
+    },
+    {
+      "item_id": "mt-201",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-202",
+      "grade": 4,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "2",
+      "reference_answer": "0 (a circle has no straight sides)"
+    },
+    {
+      "item_id": "mt-202",
+      "grade": 4,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-203",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-203",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-204",
+      "grade": 3,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-204",
+      "grade": 3,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-205",
+      "grade": 1,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-205",
+      "grade": 1,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    },
+    {
+      "item_id": "mt-206",
+      "grade": 5,
+      "condition": "baseline",
+      "scorable": true,
+      "correct": false,
+      "path": "multi_turn",
+      "best_effort": true,
+      "model_value": "10",
+      "reference_answer": "40"
+    },
+    {
+      "item_id": "mt-206",
+      "grade": 5,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "multi_turn",
+      "note": "couldn't extract a final number from the response"
+    }
+  ]
+}
