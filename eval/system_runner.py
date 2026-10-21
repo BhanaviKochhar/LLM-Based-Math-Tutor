@@ -150,7 +150,13 @@ def _isolated_side_effects():
         "reset": student_tracker.reset,
     }
 
-    lock = threading.Lock()
+    # RLock, not Lock: classify() calls stats() internally (see
+    # scripts/llm/student_tracker.py), and both get wrapped below with this
+    # same lock -- a plain Lock would make the thread deadlock on itself
+    # the moment classify() reaches its own internal stats() call. Confirmed
+    # as the actual cause of a run hanging indefinitely (zero CPU, zero
+    # network) on whichever turn's code path happened to call classify().
+    lock = threading.RLock()
 
     def _locked(fn):
         def wrapper(*a, **kw):
