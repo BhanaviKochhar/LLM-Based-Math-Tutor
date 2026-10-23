@@ -367,7 +367,9 @@ def test_out_of_scope() -> None:
     # error; boundary_case is an existing field on these items and is left
     # untouched per the task's instructions, so these three are named here
     # explicitly rather than silently reclassified.
-    _KNOWN_LIVE_GATE_GAPS = {"oos-010", "oos-016", "oos-018"}
+    # oos-016 left this set on 2026-10-23: scope.py's number-bases concept
+    # rule now catches "binary".
+    _KNOWN_LIVE_GATE_GAPS = {"oos-010", "oos-018"}
 
     from scripts.llm import scope
     mismatches = []

@@ -165,12 +165,33 @@ _KEYWORDS = [
 ]
 
 
+# Giving up AND asking to be told, in one message ("I don't know, just tell
+# me", "this is boring, just give me the answer"). The few-shot examples
+# teach "just tell me" -> SOLVE and "i dont know" -> GIVE_UP, so the
+# classifier read the combination as SOLVE, which redirects a cold ask once
+# ("try it first") -- 13 multi-turn give-up turns in the paper-eval v1 run
+# in the paper-eval v1 run. The giving-up half decides it: a child who says they don't
+# know and asks to be shown has given up, not asked to be taught the method.
+_GIVE_UP_SIGNAL = (r"(?:i\s+(?:still\s+|really\s+)?(?:don'?t|do\s+not|dont)\s+know|\bidk\b|no\s+idea|"
+                   r"give\s+up|too\s+hard|boring|can'?t\s+(?:do|figure|work|get)|"
+                   r"(?:don'?t|dont)\s+want\s+to\s+(?:guess|try|think))")
+_REVEAL_REQUEST = r"(?:(?:tell|show|give)\s+me|what'?s\s+the\s+answer|what\s+is\s+the\s+answer|explain\s+it)\b"
+_GIVE_UP_REQUEST = re.compile(
+    rf"{_GIVE_UP_SIGNAL}.*\b{_REVEAL_REQUEST}|\b{_REVEAL_REQUEST}.*{_GIVE_UP_SIGNAL}",
+    re.IGNORECASE | re.DOTALL,
+)
+# "I don't know where to start, give me a hint" still wants to keep trying.
+_HINT_REQUEST = re.compile(r"\b(?:hint|clue)s?\b", re.IGNORECASE)
+
+
 def _prefilter(turn: str) -> str | None:
     t = (turn or "").strip()
     if not t:
         return None
     if _CORRECTION_PHRASE.fullmatch(t):
         return "CORRECTION"
+    if _GIVE_UP_REQUEST.search(t) and not _HINT_REQUEST.search(t):
+        return "GIVE_UP"
     if _BARE_EXPR.match(t):
         return "ATTEMPT"
     return None

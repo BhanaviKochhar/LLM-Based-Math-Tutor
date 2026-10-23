@@ -81,4 +81,12 @@ The detailed breakdown of topics, subtopics, concepts, and skill levels for **Cl
 | **Area, Perimeter & Volume** | Standard Formulas, 3D Cuboids | Area of rectangle ($\text{L} \times \text{B}$) and square ($\text{side}^2$), intro to Volume (counting $1\text{ cm}^3$ cubes, $\text{L} \times \text{B} \times \text{H}$). | **Dimensional Quantifications:** Calculating 2D surface areas and 3D volumetric space using algebraic formulas. |
 | **Data & Mapping Skills** | Maps, Scales, Tally Marks Frequency | Reading scale maps (e.g., $1\text{ cm} = 10\text{ km}$), drawing simple floor plans, tally mark frequency tables. | **Spatial Mapping & Statistics:** Interpreting structural spatial blueprints and statistical frequency. |
 
+### Additions beyond the NCERT textbooks (project decision)
+
+Not part of the NCERT Class 1-5 textbooks or this tutor's corpus, but taught at this level in Indian schools, so treated as in scope (decided 2026-10-23). The tutor answers these from general maths knowledge, with no textbook passage to ground them.
+
+| Topic | Subtopics | Key Concepts Covered | Conceptual & Skill Level |
+| --- | --- | --- | --- |
+| **Percentages** (Class 5) | Meaning of percent, Percent of a quantity | "Per hundred" ($25\% = \frac{25}{100}$), finding a simple percentage of a number (10%, 25%, 50%), everyday discounts. | **Proportional Reasoning:** Connecting hundredths and fractions to the language of percent. |
+
 ---

@@ -484,6 +484,12 @@ rather than needing to be re-authored from scratch.
 The evaluation datasets were generated with AI assistance (Claude) and every item was reviewed
 by hand by the project team.
 
+Class 5 percentages are treated as in scope even though the NCERT textbooks don't cover them
+(see "Additions beyond the NCERT textbooks" in `docs/verified_ncert_class_1_5_topics.md`), so
+the eight percentage items in `eval/datasets/out_of_scope.jsonl` (oos-092 to oos-099) are
+in-scope probes that must be answered, not refused. They were relabelled after the
+`paper-eval-v1` run; baseline and system are scored against the same labels.
+
 ---
 
 ## 10. Dependencies

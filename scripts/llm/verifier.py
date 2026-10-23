@@ -574,6 +574,17 @@ def solve(question: str, grade: int | None = None, extract_fn=None):
     return answer, True
 
 
+_CLOCK_TARGET_RE = re.compile(r"\bwhat\s+time\b|\bclock\s+(?:will\s+)?shows?\b|\b24[\s-]hour\b",
+                              re.IGNORECASE)
+
+
+def asks_for_clock_time(question: str | None) -> bool:
+    """True when the answer the question wants is a clock time ("what time
+    will it be", "what will the clock show"), as opposed to a duration
+    ("how long", "how many minutes"), which plain arithmetic answers fine."""
+    return bool(_CLOCK_TARGET_RE.search(question or ""))
+
+
 def solve_with_type(question: str, grade: int | None = None, extract_fn=None,
                     categorical_extract_fn=None, function_extract_fn=None):
     """Like solve(), but for the controller's actual grading path: tries,
@@ -598,6 +609,19 @@ def solve_with_type(question: str, grade: int | None = None, extract_fn=None,
                                                fraction/decimal intent, AND no clean q/r pair)
         (None, False, "numeric")           -> neither arithmetic nor a checkable short fact
     """
+    if asks_for_clock_time(question):
+        # A what-time question goes to time_add FIRST. The arithmetic
+        # extractor happily turns "8:20 plus 50 minutes" into minutes after
+        # midnight (8*60+20+50 = 550), which then got injected as the
+        # trusted answer -- "Answer: 550" for 9:10 on 5 of 19 clock items in
+        # the paper-eval v1 run, with the post-check reporting a match.
+        # If time_add can't express it, inject nothing rather than a count
+        # of minutes.
+        func = compute_function(question, extract_fn=function_extract_fn)
+        if func.verifiable and func.value is not None and func.answer_type == "time":
+            return str(func.value), True, "time"
+        return None, True, "numeric"
+
     comp = compute(question, extract_fn=extract_fn)
     if comp.verifiable and comp.value is not None:
         answer = _grade_appropriate_answer(comp.expression, comp.value, question=question)

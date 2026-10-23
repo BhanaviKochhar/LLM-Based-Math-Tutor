@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 from scripts.llm import llm_client, response_parser
@@ -82,7 +83,13 @@ def run_turn(
     updated history (student turn + baseline's own reply appended) the
     caller passes into the next turn."""
     messages = build_messages(grade, history, student_message)
+    # Whole-call wall clock, the same way system_runner times submit_turn:
+    # result["latency_s"] only covers the attempt that finally succeeded, so
+    # time spent on rate-limited keys was invisible for baseline but counted
+    # for system.
+    t0 = time.perf_counter()
     result = llm_client.chat(messages, params=params or BASELINE_PARAMS, targets=targets)
+    result["turn_wall_s"] = round(time.perf_counter() - t0, 3)
     raw_text = result.get("text") or ""
     # Same cosmetic cleanup the production pipeline applies before storing/
     # displaying a reply (response_parser.py, step 10) -- stray LaTeX and
@@ -122,6 +129,11 @@ def run_journey(
             "provider": result.get("provider"),
             "model_id": result.get("model_id"),
             "latency_s": result.get("latency_s"),
+            "turn_wall_s": result.get("turn_wall_s"),
+            "ttft_s": result.get("ttft_s"),
+            "rate_limited_attempts": result.get("rate_limited_attempts"),
+            "noisy": bool(result.get("rate_limited_attempts")),
+            "llm_calls": 1,
             "finish_reason": result.get("finish_reason"),
             "error": result.get("error"),
         })

@@ -70,7 +70,11 @@ BEYOND_PRIMARY_TOPICS: tuple[tuple[str, str], ...] = (
      "trigonometry"),
     (r"\bquadratic\b", "quadratic equations"),
     (r"\bsquare\s*roots?\b|\bcube\s*roots?\b", "roots (square/cube root)"),
-    (r"\bpercentages?\b|\bpercent\b|%", "percentages"),
+    # Percentages are deliberately NOT here: Class 5 percentages are in
+    # scope by project decision (docs/verified_ncert_class_1_5_topics.md,
+    # "Additions beyond the NCERT textbooks"). Interest on money is the
+    # Class 7 use of them that stays out.
+    (r"\b(?:simple|compound)\s+interest\b|\binterest\s+rate\b|\brate\s+of\s+interest\b", "interest"),
     (r"\bprobabilit\w*\b", "probability"),
     # "mean"/"mode"/"average" deliberately excluded as BARE triggers: all
     # three collide too easily with ordinary phrasing a Class 1-5 child
@@ -90,6 +94,45 @@ BEYOND_PRIMARY_TOPICS: tuple[tuple[str, str], ...] = (
     (r"\bpermutations?\b|\bcombinations?\b(?=.{0,20}\bchoose\b)", "permutations/combinations"),
 )
 _COMPILED_TOPICS = [(re.compile(p, re.IGNORECASE), label) for p, label in BEYOND_PRIMARY_TOPICS]
+
+# Beyond-primary CONCEPTS asked in plain words, with no topic name to catch
+# ("If a number multiplied by itself gives 81...", "the ratio of boys to
+# girls is 3:2", "how likely is it to be red"). The topic patterns above
+# only see vocabulary; v1 of the paper evaluation found the gate let 41 of
+# 51 such disguised questions through. Each entry names the IDEA in words a
+# primary textbook never uses for its own content, never a single everyday
+# word -- every pattern is checked offline (eval/scope_audit.py) against all
+# 935 in-scope curriculum items and the in-scope probes before it ships.
+BEYOND_PRIMARY_CONCEPTS: tuple[tuple[str, str], ...] = (
+    (r"\bratios?\b|\bproportional\b|\bin\s+(?:direct|inverse)\s+proportion\b|"
+     r"(?<![\d:])\b\d{1,2}\s*:\s*\d\b(?![\d:])", "ratio and proportion"),
+    (r"\bhow\s+likely\b|\bchances?\s+(?:of|that)\b|\blikelihood\b", "probability"),
+    (r"\b(?:in\s+)?how\s+many\s+(?:different\s+)?(?:ways|orders|arrangements)\b"
+     r"(?=.{0,60}\b(?:arrange|order|seat|line\s*up|row|pick|choose|select)\w*\b)|"
+     # The word only: a child's excited "so 12!" is not 12 factorial.
+     r"\bfactorial\b", "permutations/combinations"),
+    # Not "squared"/"cubed": Class 5 area and volume use them ("6 cubed",
+    # mt-173); an unknown squared is caught by the letter rule below.
+    (r"\bmultiplied\s+by\s+itself\b|\bby\s+itself\b.{0,30}\btimes\b|\braised\s+to\b|"
+     r"\bto\s+the\s+power\b|\bto\s+what\s+power\b|"
+     r"\bhow\s+many\s+\w+\s+(?:are\s+)?multiplied\s+together\b|\bkeep\s+doubling\b",
+     "exponents/roots"),
+    (r"\bnegative\s+(?:numbers?|results?|values?|integers?)\b|\bbelow\s+zero\b|"
+     r"(?:^|[\s(=+*/×÷])-\d", "negative numbers"),
+    (r"\bcoordinates?\b|\(\s*-?\d+\s*,\s*-?\d+\s*\)", "coordinate geometry"),
+    (r"\b(?:sin|cos|tan)\s*\(", "trigonometry"),
+    (r"\bhypotenuse\b|\bpythagor\w*\b|"
+     r"\bright[\s-]angled?\s+triangle\b.{0,80}\b(?:longest|third|slanted)\s+side\b", "Pythagorean theorem"),
+    (r"\bbinary\b|\bbase[\s-](?:2|two|8|eight|16|sixteen)\b", "number bases"),
+    (r"\b(?:intersection|union)\b|\boverlapping\s+circles\b", "set theory"),
+    (r"\b(?:tiny|infinitely\s+small)\s+pieces\b|\bat\s+(?:one|that|a\s+single)\s+(?:exact\s+)?(?:moment|instant)\b|"
+     r"\brate\b.{0,40}\bkeeps\s+changing\b|\binstantaneous\b", "calculus"),
+    (r"\b(?:a|one|another|the\s+same)\s+letter\b.{0,40}\b(?:squared|power|times|multiplied)\b|"
+     r"\bletters?\s+(?:stand|stands)\s+for\b", "algebra"),
+    (r"\bsame\s+number\s+of\s+(?:readings|values|scores|numbers)\s+above\b|\blands?\s+exactly\s+in\s+the\s+middle\b",
+     "statistics"),
+)
+_COMPILED_CONCEPTS = [(re.compile(p, re.IGNORECASE), label) for p, label in BEYOND_PRIMARY_CONCEPTS]
 
 # Non-maths subjects -- a DIFFERENT, stricter case than the beyond-primary
 # MATH topics above: the system prompt's own existing policy for these is
@@ -122,8 +165,22 @@ NON_MATH_SUBJECTS: tuple[tuple[str, str], ...] = (
      r"\bessay\b|\bparagraph\s+writing\b|\bspelling\s+of\b", "language arts"),
     (r"\bcomputer\s+programming\b|\bcoding\b|\bpython\b|\bjavascript\b|"
      r"\bwebsite\b|\bapp\s+development\b", "computer science"),
-    (r"\bcricket\s+(?:score|rules|match)\b|\bfootball\s+(?:rules|match)\b|"
-     r"\bmovies?\b|\bcartoons?\b|\bvideo\s+games?\b", "general/entertainment"),
+    # Sports and entertainment are refused only when they are what the
+    # child is asking ABOUT (the rules, a favourite, a story), never when
+    # they are a word problem's setting -- "A movie starts at 3:00 and lasts
+    # 90 minutes" and "A football match has two 45-minute halves" are
+    # ordinary time problems the v1 run wrongly refused (cb-097, cb-718).
+    (r"\b(?:cricket|football|soccer|hockey|kabaddi|tennis|badminton|basketball|chess)\b"
+     r"[^.?!]{0,40}\brules?\b|"
+     r"\brules?\b[^.?!]{0,25}\b(?:cricket|football|soccer|hockey|kabaddi|tennis|badminton|basketball|chess)\b|"
+     r"\bwhat\s+counts\s+as\s+(?:an?\s+)?['\"‘“]?(?:out|wicket|goal|foul|offside|run)\b|"
+     # "YOUR favourite" -- a survey problem ("9 children picked football
+     # as their favourite sport") is ordinary data handling (cb-457).
+     r"\byour\s+favou?rite\s+(?:movies?|films?|cartoons?|shows?|video\s+games?|games?|sports?|teams?|players?|songs?)\b|"
+     r"\b(?:movie|film|cartoon)s?\s+(?:is\s+|was\s+)?about\b|"
+     r"\b(?:story|plot|characters?|actors?)\s+(?:of|in)\s+(?:a|the|my|your|that|this)?\s*(?:movie|film|cartoon|tv\s+show)s?\b|"
+     r"\b(?:play|recommend|suggest)\w*\s+(?:a\s+|some\s+)?(?:video\s+games?|movies?|cartoons?)\b",
+     "general/entertainment"),
 )
 _COMPILED_NON_MATH = [(re.compile(p, re.IGNORECASE), label) for p, label in NON_MATH_SUBJECTS]
 
@@ -173,13 +230,18 @@ class ScopeResult:
     topic: str | None = None       # the matched beyond-primary topic, if any
     allow_gloss: bool = False      # True iff a short "what is X" gloss is OK
     fallback_text: str | None = None  # set iff in_scope is False and not allow_gloss
+    matched_term: str | None = None   # the child's own words that matched ("median")
 
 
-def _find_topic(text: str) -> str | None:
+def _find_topic(text: str) -> tuple[str, str] | None:
+    """(topic label, the matched words) for the first beyond-primary topic
+    named, else the first beyond-primary concept described in plain words."""
     t = text or ""
-    for pattern, label in _COMPILED_TOPICS:
-        if pattern.search(t):
-            return label
+    for compiled in (_COMPILED_TOPICS, _COMPILED_CONCEPTS):
+        for pattern, label in compiled:
+            m = pattern.search(t)
+            if m:
+                return label, m.group(0).strip()
     return None
 
 
@@ -207,20 +269,21 @@ def check(text: str) -> ScopeResult:
         return ScopeResult(in_scope=False, topic=non_math, allow_gloss=False,
                            fallback_text=REFUSAL_TEXT)
 
-    topic = _find_topic(text)
-    if topic is None:
+    found = _find_topic(text)
+    if found is None:
         return ScopeResult(in_scope=True)
+    topic, term = found
 
     t = (text or "").strip()
     if _SOLVE_SIGNAL_RE.search(t):
         return ScopeResult(in_scope=False, topic=topic, allow_gloss=False,
-                           fallback_text=REFUSAL_TEXT)
+                           fallback_text=REFUSAL_TEXT, matched_term=term)
     if _is_bare_definition(t):
-        return ScopeResult(in_scope=False, topic=topic, allow_gloss=True)
+        return ScopeResult(in_scope=False, topic=topic, allow_gloss=True, matched_term=term)
     # Names a beyond-primary topic without being a clean bare-definition ask
     # (extra content mixed in) -- conservative default is REFUSE, not GLOSS.
     return ScopeResult(in_scope=False, topic=topic, allow_gloss=False,
-                       fallback_text=REFUSAL_TEXT)
+                       fallback_text=REFUSAL_TEXT, matched_term=term)
 
 
 _GLOSS_SYSTEM = (
@@ -265,11 +328,26 @@ def generate_gloss(topic: str, chat_fn=None) -> str:
     # failure mode already hardened against in verifier.py's extractor and
     # hints.py (see their own comments). A short gloss still only costs a
     # few hundred tokens even with headroom to spare.
-    fn = chat_fn or (lambda msgs: llm_client.chat(
-        msgs, params={"temperature": 0.3, "max_tokens": 400}))
-    result = fn(messages)
-    text = (result.get("text") or "").strip() if isinstance(result, dict) else (result or "").strip()
-    if not text:
+    def call(max_tokens: int) -> str:
+        fn = chat_fn or (lambda msgs: llm_client.chat(
+            msgs, params={"temperature": 0.3, "max_tokens": max_tokens}))
+        result = fn(messages)
+        return (result.get("text") or "").strip() if isinstance(result, dict) else (result or "").strip()
+
+    # A gloss cut off mid-word ("A logarith", seen in the v1 evaluation) is
+    # worse than the fixed fallback: retry once with more room for the
+    # model's hidden reasoning, then fall back.
+    text = call(400)
+    if not text or _looks_cut_off(text):
+        text = call(800)
+    if not text or _looks_cut_off(text):
         text = (f"{topic.capitalize()} is something you'll learn more about "
                 "in a later class!")
     return text
+
+
+_COMPLETE_ENDING_RE = re.compile(r"[.!?)\"'’”]\s*$|[\U0001F300-\U0001FAFF☀-➿️]\s*$")
+
+
+def _looks_cut_off(text: str) -> bool:
+    return not _COMPLETE_ENDING_RE.search(text)

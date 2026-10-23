@@ -84,6 +84,9 @@ _LATEX_SIMPLE_REPLACEMENTS = (
 # rather than shown raw, so an unanticipated LaTeX construct degrades to a
 # missing word instead of a literal "\something" a child can't read.
 _LATEX_STRAY_COMMAND_RE = re.compile(r"\\[a-zA-Z]+")
+_LATEX_DELIMITER_RE = re.compile(r"\\[()\[\]]")
+_LATEX_SPACING_RE = re.compile(r"\\[,;:!]")
+_LATEX_DEGREE_RE = re.compile(r"\^\s*(?:\{\s*\\circ\s*\}|\\circ)")
 
 
 def strip_latex(text: str) -> str:
@@ -97,8 +100,15 @@ def strip_latex(text: str) -> str:
         t = _LATEX_FRAC_RE.sub(
             lambda m: f"{m.group(1).strip()}/{m.group(2).strip()}", t)
     t = _LATEX_SQRT_RE.sub(r"sqrt(\1)", t)
+    # "60^\circ" -> "60°" (v1 showed a bare "60^" once \circ was dropped).
+    t = _LATEX_DEGREE_RE.sub("°", t)
     for pattern, repl in _LATEX_SIMPLE_REPLACEMENTS:
         t = pattern.sub(repl, t)
+    # Math delimiters \( \) \[ \] and spacing commands \, \; \: \! are not
+    # letter commands, so _LATEX_STRAY_COMMAND_RE never caught them: v1
+    # showed "\(2 ÷ 2 = 1\)" raw on 16 system turns in the paper-eval v1 run.
+    t = _LATEX_DELIMITER_RE.sub("", t)
+    t = _LATEX_SPACING_RE.sub("", t)
     t = _LATEX_STRAY_COMMAND_RE.sub("", t)
     t = t.replace("$", "")
     # Leftover braces from a construct not explicitly handled above read as

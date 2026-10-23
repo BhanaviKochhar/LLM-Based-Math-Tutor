@@ -206,6 +206,14 @@ class StreamHandle:
         self.completion_tokens = None
         self.error = None
         self.attempts: list[str] = []  # human-readable trail of what was tried
+        # Wall-clock timing across EVERY key/attempt, not just the one that
+        # succeeded (latency_s above): when the call started, how long until
+        # the first token, how long in total, and how many attempts hit a
+        # rate limit -- so a turn can be reported as clean (0) or noisy.
+        self.t_start = None
+        self.ttft_s = None
+        self.wall_s = None
+        self.rate_limited_attempts = 0
 
     def as_result(self) -> dict:
         """Shaped exactly like common.chat()'s result dict, so common.log_run
@@ -221,7 +229,34 @@ class StreamHandle:
             "completion_tokens": self.completion_tokens,
             "error": self.error,
             "attempts": self.attempts,
+            "ttft_s": self.ttft_s,
+            "wall_s": self.wall_s,
+            "rate_limited_attempts": self.rate_limited_attempts,
         }
+
+
+# Per-thread record of every LLM call made while recording is on -- lets the
+# evaluation harness split one tutoring turn's time into its helper calls
+# (intent, resolver, verifier...) and the final generation, without the
+# production code knowing anything about the harness.
+_recorder = threading.local()
+
+
+def start_call_recording() -> None:
+    _recorder.calls = []
+
+
+def stop_call_recording() -> list[dict]:
+    calls = getattr(_recorder, "calls", None) or []
+    _recorder.calls = None
+    return calls
+
+
+def _record_call(h: "StreamHandle", purpose: str) -> None:
+    calls = getattr(_recorder, "calls", None)
+    if calls is not None:
+        calls.append({"purpose": purpose, "ok": h.ok, "wall_s": h.wall_s, "ttft_s": h.ttft_s,
+                      "rate_limited_attempts": h.rate_limited_attempts, "provider": h.provider})
 
 
 def _stream_once(client, target: "Target", messages, params, h: "StreamHandle"):
@@ -247,6 +282,8 @@ def _stream_once(client, target: "Target", messages, params, h: "StreamHandle"):
             delta = getattr(choice, "delta", None)
             piece = getattr(delta, "content", None) if delta else None
             if piece:
+                if not started and h.ttft_s is None and h.t_start is not None:
+                    h.ttft_s = round(time.perf_counter() - h.t_start, 3)
                 started = True
                 h.text += piece
                 yield piece
@@ -274,16 +311,29 @@ def _stream_once(client, target: "Target", messages, params, h: "StreamHandle"):
         return "error", None
 
 
-def stream(messages, params=None, targets=None, handle=None):
+def stream(messages, params=None, targets=None, handle=None, purpose: str = "generation"):
     """Yield text deltas from the first target/key that responds.
 
     Note: token counts aren't captured while streaming (providers differ on
     `stream_options` support, and we favour portability over usage stats in
     the live path). Use chat() when you don't need streaming.
+
+    `purpose` only labels the call for the harness's per-turn timing record
+    (see start_call_recording): "generation" for the tutor's reply, "aux"
+    for helper calls made through chat().
     """
     params = {**DEFAULT_PARAMS, **(params or {})}
     targets = targets or default_targets()
     h = handle if handle is not None else StreamHandle()
+    h.t_start = time.perf_counter()
+    try:
+        yield from _stream_targets(messages, params, targets, h)
+    finally:
+        h.wall_s = round(time.perf_counter() - h.t_start, 3)
+        _record_call(h, purpose)
+
+
+def _stream_targets(messages, params, targets, h: "StreamHandle"):
 
     for target in targets:
         clients = _client_for(target)
@@ -309,6 +359,8 @@ def stream(messages, params=None, targets=None, handle=None):
                     return
                 if outcome == "committed_error":
                     return
+                if outcome == "rate_limited":
+                    h.rate_limited_attempts += 1
                 if outcome == "rate_limited" and attempt < _MAX_RETRIES_PER_KEY:
                     backoff = retry_after if retry_after is not None else min(
                         _BACKOFF_BASE_S * (2 ** attempt), _BACKOFF_CAP_S)
@@ -327,7 +379,7 @@ def stream(messages, params=None, targets=None, handle=None):
 def chat(messages, params=None, targets=None) -> dict:
     """Non-streaming convenience built on stream(). Returns a result dict."""
     h = StreamHandle()
-    for _ in stream(messages, params=params, targets=targets, handle=h):
+    for _ in stream(messages, params=params, targets=targets, handle=h, purpose="aux"):
         pass
     return h.as_result()
 

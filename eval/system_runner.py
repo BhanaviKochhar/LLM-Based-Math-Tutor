@@ -80,8 +80,15 @@ _tls = threading.local()
 # safety_blocked are ALSO terminal-enough to leave alone: those short-
 # circuit before an episode even opens, so there is no open episode to
 # push toward reveal, and forcing one would be semantically wrong.
-_REFUSAL_MODES = {"scope_refused", "safety_blocked"}
-_FORCE_REVEAL_GIVE_UP_TEXT = "I don't know, please just show me the answer."
+# "clarify": a vague opener gets a clarifying question and opens NO
+# episode (conversation_resolver.classify_opener), so there is nothing to reveal and
+# a forced give-up would be read as a brand-new question.
+_REFUSAL_MODES = {"scope_refused", "safety_blocked", "clarify"}
+# v1 sent "I don't know, please just show me the answer." -- but the first
+# reply often ends with the tutor's OWN practice question, so that text read
+# as giving up on the practice question, and the judge marked the reveal of
+# the ORIGINAL question as answering the wrong one (cb-374, cb-800, cb-891).
+_FORCE_REVEAL_GIVE_UP_TEXT = "I don't know how to do the question I asked. Please just show me its answer."
 
 
 def _level_of(item: dict) -> str | None:
@@ -218,14 +225,18 @@ def run_turn(chat: dict, student_message: str, grade: int | None, ui_level: str 
     active_turns = ep.build_active_turns(chat["messages"][:-1])
     _tls.captured_error = None
     harness_error = None
+    llm_client.start_call_recording()
     try:
         reply = ep.submit_turn(chat, student_message, grade or 3, ui_level, active_turns,
                                forced_intent=forced_intent)
     except Exception as exc:
         reply = {"role": "assistant", "kind": "chat", "question": student_message, "reply": ""}
         harness_error = repr(exc)
+    finally:
+        calls = llm_client.stop_call_recording()
     chat["messages"].append(reply)
     latency_s = time.perf_counter() - t0
+    timing = _split_timing(latency_s, calls)
     text = _reply_text(reply)
     # submit_turn itself never raises -- an internal advance_episode/
     # start_episode failure is caught there and replaced with a generic
@@ -243,8 +254,29 @@ def run_turn(chat: dict, student_message: str, grade: int | None, ui_level: str 
         "outcome": reply.get("outcome"),
         "verify": reply.get("verify"),
         "latency_s": latency_s,
+        **timing,
         "error": harness_error,
     }
+
+
+def _split_timing(turn_s: float, calls: list[dict]) -> dict:
+    """Split one turn's wall clock into the helper LLM calls and local work
+    before the reply (intent, resolver, verifier, retrieval...) and the
+    final generation itself, and tag the turn clean
+    or noisy by whether ANY call hit a rate limit."""
+    gens = [c for c in calls if c["purpose"] == "generation"]
+    final = gens[-1] if gens else None
+    rate_limited = sum(c.get("rate_limited_attempts") or 0 for c in calls)
+    out = {"turn_wall_s": round(turn_s, 3), "llm_calls": len(calls),
+           "rate_limited_attempts": rate_limited, "noisy": rate_limited > 0,
+           "generation_wall_s": None, "generation_ttft_s": None,
+           "pre_generation_s": None, "ttft_s": None}
+    if final and final.get("wall_s") is not None:
+        pre = max(turn_s - final["wall_s"], 0.0)
+        out.update(generation_wall_s=final["wall_s"], generation_ttft_s=final.get("ttft_s"),
+                   pre_generation_s=round(pre, 3),
+                   ttft_s=round(pre + final["ttft_s"], 3) if final.get("ttft_s") is not None else None)
+    return out
 
 
 def run_journey(item_id: str, grade: int | None, ui_level: str | None,

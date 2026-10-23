@@ -1,0 +1,39 @@
+# eval/datasets/held_out_openers.jsonl -- held-out FIRST messages of a
+#   session, written the way a real Class 1-5 child types (misspellings,
+#   no punctuation, odd grammar, mixed Hindi-English words), for validating
+#   the session-opener router (conversation_resolver.classify_opener: a
+#   real question vs too vague to act on). Written 2026-10-23 BEFORE the router prompt was written, frozen
+#   from then on; none copied from another dataset.
+# Fields: case_id, grade, question, expected (NEW = a maths task or topic can
+#   be identified despite the spelling, so start teaching; CLARIFY = nothing
+#   to act on without more information), note.
+{"case_id": "ho-op-01", "grade": 2, "expected": "NEW", "question": "how do u ad fracshuns", "note": "misspelled topic: adding fractions"}
+{"case_id": "ho-op-02", "grade": 1, "expected": "NEW", "question": "wat is haf of ten", "note": "misspelled, number as a word"}
+{"case_id": "ho-op-03", "grade": 3, "expected": "NEW", "question": "multiplikashun tabel of seven pls", "note": "misspelled request for the 7 times table"}
+{"case_id": "ho-op-04", "grade": 4, "expected": "NEW", "question": "perimetr of squar how", "note": "odd word order, misspelled topic"}
+{"case_id": "ho-op-05", "grade": 1, "expected": "NEW", "question": "teach me counting", "note": "plain topic request"}
+{"case_id": "ho-op-06", "grade": 5, "expected": "NEW", "question": "wat r factrs", "note": "text-speak definition question"}
+{"case_id": "ho-op-07", "grade": 2, "expected": "NEW", "question": "i want to lern subtracshun", "note": "misspelled topic request"}
+{"case_id": "ho-op-08", "grade": 3, "expected": "NEW", "question": "clock time kaise padhte hai", "note": "Hindi-English: how do you read clock time"}
+{"case_id": "ho-op-09", "grade": 4, "expected": "NEW", "question": "what is a right angel", "note": "misspelling that is a different real word"}
+{"case_id": "ho-op-10", "grade": 1, "expected": "NEW", "question": "shapes!!!", "note": "single topic word with excitement"}
+{"case_id": "ho-op-11", "grade": 5, "expected": "NEW", "question": "decimal to fraction how u change", "note": "odd grammar, clear topic"}
+{"case_id": "ho-op-12", "grade": 2, "expected": "NEW", "question": "whats bigger a liter or a mililiter", "note": "misspelled but a complete comparison question"}
+{"case_id": "ho-op-13", "grade": 3, "expected": "NEW", "question": "devide by too means wat", "note": "heavily misspelled: what does dividing by two mean"}
+{"case_id": "ho-op-14", "grade": 4, "expected": "NEW", "question": "how many sides octagon have", "note": "missing words, complete question"}
+{"case_id": "ho-op-15", "grade": 5, "expected": "NEW", "question": "explane volume of cuboid", "note": "misspelled instruction"}
+{"case_id": "ho-op-16", "grade": 2, "expected": "CLARIFY", "question": "the big one is it more", "note": "refers to something never mentioned"}
+{"case_id": "ho-op-17", "grade": 3, "expected": "CLARIFY", "question": "do the thing", "note": "no task named"}
+{"case_id": "ho-op-18", "grade": 1, "expected": "CLARIFY", "question": "is this rite", "note": "'this' has no referent at session start"}
+{"case_id": "ho-op-19", "grade": 4, "expected": "CLARIFY", "question": "what about the 2nd one", "note": "refers to a list that does not exist"}
+{"case_id": "ho-op-20", "grade": 5, "expected": "CLARIFY", "question": "my homework", "note": "no question or topic named"}
+{"case_id": "ho-op-21", "grade": 2, "expected": "CLARIFY", "question": "i dont get it", "note": "confusion with nothing yet explained"}
+{"case_id": "ho-op-22", "grade": 3, "expected": "CLARIFY", "question": "same like yesterday", "note": "refers to an earlier session"}
+{"case_id": "ho-op-23", "grade": 4, "expected": "CLARIFY", "question": "how much is it", "note": "'it' has no referent"}
+{"case_id": "ho-op-24", "grade": 1, "expected": "CLARIFY", "question": "hiii", "note": "greeting only"}
+{"case_id": "ho-op-25", "grade": 5, "expected": "CLARIFY", "question": "can u check mine", "note": "nothing given to check"}
+{"case_id": "ho-op-26", "grade": 3, "expected": "CLARIFY", "question": "which is more", "note": "no two things named"}
+{"case_id": "ho-op-27", "grade": 2, "expected": "CLARIFY", "question": "what is the answer", "note": "no question given"}
+{"case_id": "ho-op-28", "grade": 4, "expected": "CLARIFY", "question": "ma'am gave sum in class", "note": "mentions a sum but does not say it"}
+{"case_id": "ho-op-29", "grade": 5, "expected": "CLARIFY", "question": "is that the same as the other way", "note": "two references with no referent"}
+{"case_id": "ho-op-30", "grade": 1, "expected": "CLARIFY", "question": "how many", "note": "fragment, nothing counted"}

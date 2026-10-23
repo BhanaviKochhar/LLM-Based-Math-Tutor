@@ -1250,8 +1250,58 @@ def test_blocked_input_is_redacted_in_stored_messages() -> None:
          chat2["messages"][0]["text"] == "What is 2 + 2?")
 
 
+def test_vague_opener_clarifies_without_opening_an_episode() -> None:
+    """A first message with nothing to act on gets a
+    clarifying question and opens NO episode, so the child's next message
+    (the real problem) starts a fresh, gradable one."""
+    print("Vague opener -> clarify, no episode; next message starts a real one")
+
+    class _Fragment:
+        mode = "FRAGMENT"; resolved_question = "Which is the bigger one?"; retrieval_query = ""
+        use_rag = False; use_verifier = False; changed = False
+
+    class _New:
+        mode = "NEW"; resolved_question = "15 pencils and 4 more, how many?"
+        retrieval_query = resolved_question; use_rag = False; use_verifier = True; changed = False
+
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": "Which is the bigger one?"})
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Fragment()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Which two things do you mean?")):
+        reply = app.submit_turn(chat, "Which is the bigger one?", 2, "on_track", [])
+    check("the reply is a clarifying question", reply.get("mode") == C.MODE_CLARIFY)
+    check("no episode is opened by a vague opener", chat["episode"] is None)
+
+    chat["messages"].append(reply)
+    chat["messages"].append({"role": "user", "text": "15 pencils and 4 more, how many?"})
+    history = [{"role": "user", "content": "Which is the bigger one?"},
+               {"role": "assistant", "content": "Which two things do you mean?"}]
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _New()), \
+         _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("19", True, "numeric")), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add them. What do you get?")):
+        reply = app.submit_turn(chat, "15 pencils and 4 more, how many?", 2, "on_track", history)
+    check("the concrete follow-up opens a gradable episode",
+         chat["episode"] is not None and chat["episode"]["state"].computed_answer == "19")
+
+    # A FRAGMENT later in a conversation is NOT an opener: unchanged path.
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": "what about that"})
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Fragment()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's look at it.")):
+        reply = app.submit_turn(chat, "what about that", 2, "on_track", history)
+    check("a mid-conversation fragment still opens an episode as before",
+         chat["episode"] is not None and reply.get("mode") == C.MODE_TEACH_INVITE)
+
+
 def main() -> None:
     test_generation_failure_rolls_back_state()
+    test_vague_opener_clarifies_without_opening_an_episode()
     test_hint_lifecycle_integration()
     test_empty_generation_treated_as_failure()
     test_start_episode_does_not_commit_on_failure()

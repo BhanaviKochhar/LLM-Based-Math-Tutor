@@ -78,6 +78,11 @@ def test_strip_latex_converts_to_plain_text() -> None:
          == "(1/4) + (1/2) = (3/4)")
     check("a None/empty input is returned as-is, not crashed on",
          sl("") == "" and sl(None) is None)
+    check(r"\( \) and \[ \] delimiters are dropped (paper-eval v1: 16 system turns showed them raw)",
+         sl(r"So \(2 ÷ 2 = 1\) litre.") == "So 2 ÷ 2 = 1 litre." and "\\" not in sl("\\[\n6 x 6 = 36\n\\]"))
+    check(r"spacing commands \, \; \! are dropped, keeping digit groups together",
+         sl(r"100\,000 and 4,\;8\!8") == "100000 and 4,88")
+    check(r"^\circ becomes a degree sign", sl(r"180^\circ - 120^{\circ} = 60^\circ") == "180° - 120° = 60°")
 
 
 def test_collapse_excess_blank_lines() -> None:
@@ -397,6 +402,24 @@ def test_verifier_function_registry() -> None:
     check("time_add(3, 30, 45) -> 4:15, time",
          comp.verifiable and comp.value == "4:15" and comp.answer_type == "time")
 
+    # In the paper-eval v1 run arithmetic was tried first, so a what-time
+    # question got a minutes-after-midnight answer injected ("Answer: 550").
+    minutes_math = lambda q: "8*60+20+50"
+    ans = verifier.solve_with_type("If it is 8:20 now, what time will it be in 50 minutes?",
+                                   extract_fn=minutes_math,
+                                   function_extract_fn=lambda q: "time_add(8, 20, 50)")
+    check("a what-time question uses time_add even when arithmetic could produce minutes",
+         ans == ("9:10", True, "time"))
+    ans = verifier.solve_with_type("If it is 8:20 now, what time will it be in 50 minutes?",
+                                   extract_fn=minutes_math, function_extract_fn=lambda q: "NONE")
+    check("if time_add can't express it, nothing is injected -- never 550 minutes",
+         ans == (None, True, "numeric"))
+    ans = verifier.solve_with_type("A school assembly starts at 2:45 PM and ends at 4:30 PM. How long is it in minutes?",
+                                   extract_fn=lambda q: "(16*60+30)-(14*60+45)",
+                                   function_extract_fn=lambda q: "NONE")
+    check("a how-long question still uses arithmetic (a duration in minutes is the right answer)",
+         ans[0] == "105" and ans[2] == "numeric")
+
     comp = verifier.compute_function("What is 2 + 3?", extract_fn=lambda q: "NONE")
     check("ordinary arithmetic is correctly declined (handled by the numeric path instead)",
          not comp.verifiable)
@@ -634,8 +657,11 @@ def test_client_key_rotation_on_429() -> None:
     llm_client._client_for = lambda target: fake_keys if target.name == "groq-direct" else []
     llm_client._MAX_RETRIES_PER_KEY = 0  # no backoff sleep in a fast unit test
     try:
+        llm_client.start_call_recording()
         h = llm_client.StreamHandle()
         text = "".join(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
+        aux = llm_client.chat([{"role": "user", "content": "hi"}])
+        recorded = llm_client.stop_call_recording()
     finally:
         llm_client._client_for = orig_client_for
         llm_client._MAX_RETRIES_PER_KEY = orig_retries
@@ -649,6 +675,16 @@ def test_client_key_rotation_on_429() -> None:
           and calls.index("k2") > calls.index("k1"))
     check("second key's response streamed through", text == "Hi")
     check("handle committed to groq-direct on the second key", h.ok and h.provider == "groq-direct")
+    # Timing across every attempt, not just the one that worked.
+    check("the rate-limited attempt is counted (a 'noisy' call)", h.rate_limited_attempts == 1)
+    check("time to first token and total wall time are recorded, TTFT <= wall",
+         h.ttft_s is not None and h.wall_s is not None and h.ttft_s <= h.wall_s)
+    check("chat() returns the same timing fields",
+         {"ttft_s", "wall_s", "rate_limited_attempts"} <= set(aux))
+    check("the per-thread recorder logs both calls, labelled generation vs aux",
+         [c["purpose"] for c in recorded] == ["generation", "aux"])
+    check("recording is off again after stop_call_recording()",
+         llm_client.stop_call_recording() == [])
 
 
 # --------------------------------------------------------------- hints + levels
@@ -1016,6 +1052,74 @@ def test_beginner_level_requires_showing_substep_method() -> None:
          "method that gets you there" in system_int.lower())
 
 
+def test_system_prompt_paper_eval_v2_fixes() -> None:
+    """Prompt changes after the paper-eval v1 run (off-topic context, several
+    valid answers, Answer line before practice; Class 5
+    percentages in scope), checked on the prompt actually sent."""
+    print("prompt_registry — context, multiple answers, Answer line, percentages")
+    messages = prompt_registry.build_messages(
+        "Name one round object you can find in your kitchen.", 1, [],
+        version="v5-personalized", level="intermediate", computed_answer="9:10",
+    )
+    system = messages[0]["content"].lower()
+    check("no longer tells the model to refuse when the context is off-topic (cb-181)",
+         "totally different (non-maths) topic" not in system)
+    check("answers an ordinary question from everyday knowledge when the context doesn't cover it",
+         "doesn't cover it" in system and "everyday knowledge" in system)
+    check("still forbids inventing a textbook definition or rule",
+         "never invent a textbook definition" in system)
+    check("asks for every valid answer when there is more than one (cb-290)",
+         "more than one correct answer" in system and "never present one" in system)
+    check("the Answer line comes before any practice question (cb-819)",
+         'put "answer: 9:10" on its own line right after the working' in system
+         and "never before it" in system and 'end with: "answer:' not in system)
+    check("simple Class 5 percentages are listed as allowed maths", "simple percentages in class 5" in system)
+
+
+def test_paper_eval_v2_controller_fixes() -> None:
+    """Reading a stated result after working; give-up requests; session openers."""
+    print("controller/intent/resolver — stated results, give-ups, openers")
+    sa = controller._student_answer
+    check("a result stated after working is read ('so 8 times 6 is 48')",
+         sa("Oh, area is length times width, so 8 times 6 is 48") == "48")
+    check("'so 26' after a bracketed expression is read",
+         sa("Oh right, perimeter is 2 times (8 plus 5), so 26") == "26")
+    check("'That's 7.' is read", sa("Oh ok, so it's just asking 56 divided by 8. That's 7.") == "7")
+    check("working with no stated result is still unclear (never mis-graded)", sa("I added 4 and 5") is None)
+    check("a 'how' question is still never an answer", sa("how is 26 the answer") is None)
+    check("diagnose grades the stated result as correct",
+         controller.diagnose("so 8 times 6 is 48", "48", True) == "correct")
+    no_llm = lambda t: (_ for _ in ()).throw(AssertionError("prefilter should decide this"))
+    for text in ["I don't know, just tell me.", "meh, this is boring, just give me the answer",
+                 "I give up, what's the answer?", "I have no idea, can you just explain it?"]:
+        check(f"{text!r} -> GIVE_UP without an LLM call",
+             intent.classify_intent(text, classify_fn=no_llm) == "GIVE_UP")
+    check("a hint request with 'I don't know' stays a hint, not a give-up",
+         intent._prefilter("I don't know where to start, give me a hint.") is None)
+    check("'just tell me' alone is not forced to GIVE_UP (still the classifier's call)",
+         intent._prefilter("just tell me") is None)
+
+    # The session-opener router (conversation_resolver.classify_opener).
+    co = conversation_resolver.classify_opener
+    boom = lambda msgs: (_ for _ in ()).throw(AssertionError("no model call expected"))
+    check("an opener with a quantity is NEW with no model call",
+         co("There are 15 pencils in a box and 4 more are added, how many now?", chat_fn=boom) == "NEW")
+    calls = []
+    co("what about the 2nd one", chat_fn=lambda m: calls.append(m) or {"text": "CLARIFY"})
+    check("an ordinal ('2nd') is not a quantity -- the model decides", len(calls) == 1)
+    check("the model's CLARIFY is returned", co("Which is the bigger one?", chat_fn=lambda m: {"text": "CLARIFY"}) == "CLARIFY")
+    check("the last label wins in a chatty reply",
+         co("circles?", chat_fn=lambda m: {"text": "Not CLARIFY -- a topic word, so NEW"}) == "NEW")
+    check("a failed call falls back to NEW (the v1 behaviour)",
+         co("Which is the bigger one?", chat_fn=lambda m: (_ for _ in ()).throw(RuntimeError("429"))) == "NEW")
+    check("spelling is called out as never making a message CLARIFY",
+         "never make a message CLARIFY" in conversation_resolver._OPENER_SYSTEM)
+    r = conversation_resolver.resolve_question("Which is the bigger one?", None,
+                                               opener_fn=lambda m: {"text": "CLARIFY"})
+    check("resolve_question routes a vague opener to FRAGMENT, no RAG/verifier",
+         r.mode == "FRAGMENT" and not r.use_rag and not r.use_verifier)
+
+
 def main() -> None:
     test_response_parser()
     test_strip_latex_converts_to_plain_text()
@@ -1042,6 +1146,8 @@ def main() -> None:
     test_system_prompt_requires_self_contained_explanations()
     test_system_prompt_allows_simple_out_of_grade_explanations()
     test_beginner_level_requires_showing_substep_method()
+    test_system_prompt_paper_eval_v2_fixes()
+    test_paper_eval_v2_controller_fixes()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

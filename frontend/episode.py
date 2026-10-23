@@ -452,6 +452,18 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
     resolution = pipeline.resolve_conversation(question, active_turns, grade=grade)
     level = pipeline.resolve_level(_student_id(), ui_level)
 
+    is_opener = not any(t.get("role") == "user" for t in (active_turns or []))
+    if is_opener and getattr(resolution, "mode", "NEW") == "FRAGMENT":
+        # A first message with nothing to act on ("Which is the bigger
+        # one?"): ask what the child means, and open NO episode, so their
+        # next message -- usually the actual problem -- starts a fresh,
+        # gradable one through the normal path.
+        state, _ = C.start(question, grade, level)
+        state, action = C.step(state, "CLARIFY", question)
+        scratch = {"state": state, "chunks": [], "source": "", "hints_shown": [],
+                   "msg_start": len(chat["messages"]) - 1}
+        return _apply_action(chat, scratch, action, active_turns)  # chat["episode"] untouched
+
     chunks_meta = (retrieve_with_metadata(resolution.retrieval_query, grade)
                   if resolution.use_rag else [])
     chunks = [c.get("text", "") for c in chunks_meta]
@@ -671,7 +683,9 @@ def submit_turn(
         # multi-purpose tutoring prompt, whose prose "no formulas, no
         # worked example" rule was NOT reliably followed (confirmed live:
         # "what is algebra" got a full worked example anyway).
-        gloss_text = scope.generate_gloss(scope_check.topic)
+        # The child's own word ("median"), not the topic label
+        # ("statistics"): v1 glossed "What is a median?" as statistics.
+        gloss_text = scope.generate_gloss(scope_check.matched_term or scope_check.topic)
         telemetry.log_interaction(
             chat_id=chat.get("id"), student_id=_student_id(),
             controller_mode="scope_gloss", terminal=False,

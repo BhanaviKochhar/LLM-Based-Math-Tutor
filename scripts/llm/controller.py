@@ -176,6 +176,14 @@ _OVER_FRACTION_RE = re.compile(r"\b(\d+)\s+over\s+(\d+)\b", re.IGNORECASE)
 # don't contain "how".
 _PROCEDURAL_Q_RE = re.compile(r"\bhow\b", re.IGNORECASE)
 
+# "so 26", "is 48", "makes 12", "gives 7", "equals 9" -- a result stated
+# after working. Requires the number DIRECTLY after the word, so a question
+# like "is it 12?" never matches here (it has exactly one number anyway).
+_STATED_RESULT_RE = re.compile(
+    r"\b(?:so|is|makes|gives|equals|get|got|that'?s|it'?s|thats|its)\s+(?:the\s+answer\s+is\s+)?("
+    + _NUM.pattern + r")",
+    re.IGNORECASE)
+
 
 def _student_answer(turn: str) -> str | None:
     """Best-effort: the number the student is offering as their answer.
@@ -202,7 +210,15 @@ def _student_answer(turn: str) -> str | None:
     nums = _NUM.findall(t)
     if len(nums) == 1:
         return re.sub(r"\s+", "", nums[0])
-    return None  # 0 numbers, or ambiguous multi-number working
+    # Working followed by a stated result: "area is length times width, so
+    # 8 times 6 is 48", "4 times 510 is 2040", "2 times (8 plus 5), so 26".
+    # The number right after the LAST so/is/makes/gives/equals is the
+    # child's answer. Without this, 29 correct multi-turn answers in the
+    # paper-eval v1 run got "what's your answer?".
+    stated = list(_STATED_RESULT_RE.finditer(t))
+    if stated:
+        return re.sub(r"\s+", "", stated[-1].group(1))
+    return None  # 0 numbers, or ambiguous multi-number working with no stated result
 
 
 _SENTENCE_RE = re.compile(r"[^.!?]+[.!?]+|[^.!?]+$")
