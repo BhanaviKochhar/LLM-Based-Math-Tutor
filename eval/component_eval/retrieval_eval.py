@@ -22,7 +22,7 @@ Categories handled per the task's explicit distinction:
                                                          not silently dropped
 
 Datasets scored:
-    eval/datasets/retrieval.jsonl (49 queries)
+    eval/datasets/retrieval.jsonl (100 queries, 20 per grade)
 
 Run:
     python -m eval.component_eval.retrieval_eval

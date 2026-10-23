@@ -476,10 +476,13 @@ above and extended continuously as the system changes. An **earlier framework**
 work, self-marked `LEGACY`/superseded in its own docstrings and commit history (`git log` —
 "Mark legacy baseline-vs-system eval harness as superseded") because it predates the
 controller-driven live generation path and several of `verifier.py`'s current answer types. It's
-kept for historical traceability, not run day-to-day. `eval/datasets/*` holds well-schemaed,
-provenance-tagged question sets (retrieval, extraction, curriculum benchmark, out-of-scope,
-multi-turn, personalization, conceptual) — several of these feed the next, larger evaluation
-pass directly rather than needing to be re-authored from scratch.
+kept for historical traceability, not run day-to-day. `eval/datasets/*` holds well-schemaed
+question sets (retrieval, extraction, curriculum benchmark, out-of-scope, multi-turn,
+personalization, conceptual) — several of these feed the next, larger evaluation pass directly
+rather than needing to be re-authored from scratch.
+
+The evaluation datasets were generated with AI assistance (Claude) and every item was reviewed
+by hand by the project team.
 
 ---
 

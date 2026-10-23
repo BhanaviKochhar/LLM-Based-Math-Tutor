@@ -56,7 +56,7 @@ def _unique_ids(rows: list[dict], field: str) -> bool:
 def test_arithmetic() -> None:
     """eval/datasets/arithmetic.jsonl -- the single consolidated arithmetic
     accuracy dataset (former v1_starter.jsonl + v2_phaseB_extension.jsonl,
-    merged; no more per-version split or provenance/review_status tags)."""
+    merged; no more per-version split)."""
     print("arithmetic.jsonl")
     path = DATASETS / "arithmetic.jsonl"
     rows = _load_jsonl(path)
