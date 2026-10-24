@@ -29,6 +29,8 @@ RESOLUTION (documented here, not a silent redefinition):
 """
 from __future__ import annotations
 
+import re
+
 from scripts.llm import verifier
 
 # Scoring-time classification labels (not dataset fields).
@@ -84,11 +86,30 @@ def score_trusted_computation(item: dict) -> dict:
     # not what gets "extracted".
     question_text = item.get("question") or te
     try:
-        answer, is_math = verifier.solve(question_text, extract_fn=lambda q: te)
+        # solve_with_type is the path the live controller grades with: it
+        # adds the quotient-remainder fallback, the function registry
+        # (LCM/HCF/factors/angle type/clock time), exact rounding and the
+        # open-question rule that the older solve() never tries, so scoring
+        # through solve() under-counted what the system actually computes.
+        # Every extractor is forced to the known-good expression: no LLM
+        # call. A registry call ("hcf(30, 45)") goes only to the function
+        # extractor, as in production, where the arithmetic extractor
+        # answers NONE for it; forced into the arithmetic slot, its first
+        # number would be read as the answer.
+        is_function_call = bool(re.match(r"^\s*[a-z_]+\s*\(", te, re.IGNORECASE))
+        answer, is_math, _ = verifier.solve_with_type(
+            question_text, extract_fn=lambda q: "NONE" if is_function_call else te,
+            function_extract_fn=lambda q: te, categorical_extract_fn=lambda q: te)
     except Exception as e:
         return {"outcome": "error", "computed": None, "detail": repr(e)}
 
     expected = item.get("expected_answer")
+    if expected is None and answer is not None and re.fullmatch(r"\d+ remainder \d+", str(answer)):
+        # A null expected_answer marks a non-exact division whose exact
+        # fraction must not be injected; solve_with_type answers it in the
+        # quotient-and-remainder form a primary child is taught instead.
+        return {"outcome": "match", "computed": answer,
+               "detail": "quotient-remainder answer for a withheld non-exact division"}
     if answer is None and expected is None:
         return {"outcome": "match", "computed": None,
                "detail": "both None (withheld remainder/non-exact-division case)"}

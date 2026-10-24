@@ -72,8 +72,9 @@ def test_score_trusted_computation() -> None:
     # instead of colliding with that unrelated gate.
     check("fraction equivalence ((1/2)*1 == 2/4) is recognised as a match via verifier._close",
          score_trusted_computation({"trusted_expression": "(1/2)*1", "expected_answer": "2/4"})["outcome"] == "match")
-    check("both sides None (withheld non-exact division) is a MATCH, not a failure",
-         score_trusted_computation({"trusted_expression": "20/3", "expected_answer": None})["outcome"] == "match")
+    r = score_trusted_computation({"trusted_expression": "20/3", "expected_answer": None})
+    check("a withheld non-exact division answered as quotient and remainder is a MATCH, not a failure",
+         r["outcome"] == "match" and r["computed"] == "6 remainder 2")
     check("computed None vs a stated expected_answer is a MISMATCH "
          "(the bare-fraction-looks-like-division edge case, e.g. ar-020/cb-158)",
          score_trusted_computation({"trusted_expression": "3/10", "expected_answer": "0.3"})["outcome"] == "mismatch")

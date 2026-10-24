@@ -414,6 +414,30 @@ def test_verifier_function_registry() -> None:
                                    extract_fn=minutes_math, function_extract_fn=lambda q: "NONE")
     check("if time_add can't express it, nothing is injected -- never 550 minutes",
          ans == (None, True, "numeric"))
+    no_extract = lambda q: (_ for _ in ()).throw(AssertionError("extractor should not be called"))
+    check("'round N to the nearest thousand' is computed in code, half up (v1 injected 4,88,129)",
+         verifier.solve_with_type("Round 4,87,629 to the nearest thousand.", extract_fn=no_extract)
+         == ("488000", True, "numeric"))
+    check("a half rounds up (350 to the nearest hundred is 400)",
+         verifier.round_to_nearest("Round 350 to the nearest hundred.") == "400")
+    check("ten thousand and lakh places",
+         verifier.round_to_nearest("Round 9,99,500 to the nearest thousand") == "1000000"
+         and verifier.round_to_nearest("round 64,999 to the nearest ten thousand") == "60000"
+         and verifier.round_to_nearest("Round 3,49,999 to the nearest lakh") == "300000")
+    check("other rounding wordings are left to the existing path",
+         verifier.round_to_nearest("Estimate the sum of 2,870 and 4,150 by rounding each to the nearest hundred") is None)
+    check("'what could the number be' gets no single injected answer",
+         verifier.solve_with_type("A 5-digit number rounds to 60,000 when rounded to the nearest ten thousand. "
+                                  "What could the number be?", extract_fn=no_extract) == (None, True, "numeric"))
+    check("an ordinary question is not treated as open",
+         not verifier.asks_open_answer("What is 8 times 7?"))
+    check("a function call from the arithmetic extractor is not salvaged as a number",
+         not verifier.compute("What is the HCF of 30 and 45?", extract_fn=lambda q: "hcf(30, 45)").verifiable)
+    check("so solve_with_type answers it through the function registry",
+         verifier.solve_with_type("What is the HCF of 30 and 45?", extract_fn=lambda q: "hcf(30, 45)",
+                                  function_extract_fn=lambda q: "hcf(30, 45)")[0] == "15")
+    check("bracketed arithmetic is still arithmetic",
+         verifier.compute("2 times (8 plus 5)", extract_fn=lambda q: "2*(8+5)").value == 26)
     ans = verifier.solve_with_type("A school assembly starts at 2:45 PM and ends at 4:30 PM. How long is it in minutes?",
                                    extract_fn=lambda q: "(16*60+30)-(14*60+45)",
                                    function_extract_fn=lambda q: "NONE")

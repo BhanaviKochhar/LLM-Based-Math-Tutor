@@ -354,6 +354,9 @@ def _expression_candidates(raw: str):
             yield c
 
 
+_FUNCTION_CALL_START_RE = re.compile(r"^\s*[a-z_]+\s*\(", re.IGNORECASE)
+
+
 def compute(question: str, extract_fn=None) -> Computation:
     """Ground-truth Computation for `question`, robust to noisy extractor output."""
     extract_fn = extract_fn or _default_extractor
@@ -362,6 +365,11 @@ def compute(question: str, extract_fn=None) -> Computation:
         return Computation(verifiable=False)
     if re.search(r"\bNONE\b", raw, re.IGNORECASE):
         return Computation(verifiable=False)
+    if _FUNCTION_CALL_START_RE.match(raw):
+        # "hcf(30, 45)" is not arithmetic: salvaging its first number would
+        # inject 30 as the answer. Leave it to compute_function, which
+        # evaluates the registry call exactly.
+        return Computation(verifiable=False, expression=raw)
     for cand in _expression_candidates(raw):
         val = _safe_eval(cand)
         if val is not None:
@@ -585,6 +593,35 @@ def asks_for_clock_time(question: str | None) -> bool:
     return bool(_CLOCK_TARGET_RE.search(question or ""))
 
 
+_OPEN_ANSWER_RE = re.compile(
+    r"\b(?:what|which)\s+(?:\w+\s+){0,2}(?:could|might)\b|\b(?:could|might)\s+(?:it|they|the\s+\w+)\s+be\b",
+    re.IGNORECASE)
+
+
+def asks_open_answer(question: str | None) -> bool:
+    """True when the question asks what something COULD or MIGHT be -- an
+    open question with several valid answers, not one to inject."""
+    return bool(_OPEN_ANSWER_RE.search(question or ""))
+
+
+_ROUND_UNITS = {"ten thousand": 10_000, "lakh": 100_000, "thousand": 1_000, "hundred": 100, "ten": 10}
+_ROUND_RE = re.compile(
+    r"\bround(?:ed|ing)?\s+(?:off\s+)?(\d[\d,]*)\s+(?:off\s+)?to\s+the\s+nearest\s+"
+    r"(ten\s+thousand|lakh|thousand|hundred|ten)\b",
+    re.IGNORECASE)
+
+
+def round_to_nearest(question: str | None) -> str | None:
+    """The exact answer to "round N to the nearest <place>" (half rounds up,
+    as NCERT teaches), or None when the question isn't that shape."""
+    m = _ROUND_RE.search(question or "")
+    if not m:
+        return None
+    n = int(m.group(1).replace(",", ""))
+    unit = _ROUND_UNITS[re.sub(r"\s+", " ", m.group(2).lower())]
+    return str((n + unit // 2) // unit * unit)
+
+
 def solve_with_type(question: str, grade: int | None = None, extract_fn=None,
                     categorical_extract_fn=None, function_extract_fn=None):
     """Like solve(), but for the controller's actual grading path: tries,
@@ -609,6 +646,18 @@ def solve_with_type(question: str, grade: int | None = None, extract_fn=None,
                                                fraction/decimal intent, AND no clean q/r pair)
         (None, False, "numeric")           -> neither arithmetic nor a checkable short fact
     """
+    if asks_open_answer(question):
+        # "What COULD the number be?" has many valid answers; injecting one
+        # computed value as THE answer pushed the tutor to present a single
+        # answer (v1: 58,732 for a number that rounds to 60,000).
+        return None, True, "numeric"
+
+    rounded = round_to_nearest(question)
+    if rounded is not None:
+        # Computed exactly here, not by the extractor: v1 injected 4,88,129
+        # for "Round 4,87,629 to the nearest thousand".
+        return rounded, True, "numeric"
+
     if asks_for_clock_time(question):
         # A what-time question goes to time_add FIRST. The arithmetic
         # extractor happily turns "8:20 plus 50 minutes" into minutes after
