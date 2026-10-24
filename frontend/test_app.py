@@ -1299,8 +1299,46 @@ def test_vague_opener_clarifies_without_opening_an_episode() -> None:
          chat["episode"] is not None and reply.get("mode") == C.MODE_TEACH_INVITE)
 
 
+def test_small_model_scope_check_refuses_new_problem() -> None:
+    """A new problem the small-model scope check judges beyond Class 5 gets
+    the fixed refusal and opens no episode; one it clears opens normally."""
+    print("Small-model scope check on a new problem")
+    from scripts.llm import scope
+
+    class _New:
+        mode = "NEW"; resolved_question = "In how many ways can 4 friends stand in a line?"
+        retrieval_query = resolved_question; use_rag = False; use_verifier = False; changed = False
+
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": _New.resolved_question})
+    with _Patch(scope, "needs_beyond_primary", lambda *a, **kw: True), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _New()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: (_ for _ in ()).throw(AssertionError("no generation"))):
+        reply = app.submit_turn(chat, _New.resolved_question, 5, "on_track", [])
+    check("judged beyond Class 5 -> the fixed refusal", reply.get("mode") == "scope_refused"
+          and reply.get("text") == scope.REFUSAL_TEXT)
+    check("no episode is opened", chat["episode"] is None)
+
+    class _Checked(_New):
+        scope_checked = True
+    with _Patch(scope, "needs_beyond_primary", lambda *a, **kw: (_ for _ in ()).throw(AssertionError("asked twice"))), \
+         _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Checked()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's think about it.")):
+        reply = app.submit_turn(chat, _New.resolved_question, 5, "on_track", [])
+    check("an opener the router already judged is not sent to the small model again",
+          chat["episode"] is not None)
+
+
 def main() -> None:
+    # Unit tests never call the network: the small-model scope check is a
+    # stand-in that clears everything, except where a test patches it.
+    from scripts.llm import scope
+    scope.needs_beyond_primary = lambda *a, **kw: False
     test_generation_failure_rolls_back_state()
+    test_small_model_scope_check_refuses_new_problem()
     test_vague_opener_clarifies_without_opening_an_episode()
     test_hint_lifecycle_integration()
     test_empty_generation_treated_as_failure()

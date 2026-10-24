@@ -187,10 +187,28 @@ def write_workbook(path: Path, rows: list[list]) -> None:
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rater", default=None,
+                        help="write ONE extra blank sheet (e.g. C) with the same rows; the key and "
+                             "any filled sheets are left untouched")
+    args = parser.parse_args()
+
     rng = random.Random(SEED)
     selection = select(rng)
     rows, key = build_rows(selection, rng)
     OUT.mkdir(parents=True, exist_ok=True)
+    if args.rater:
+        existing = json.load(open(OUT / "rating_key.json", encoding="utf-8"))["rows"]
+        if [(k["row"], k["item_id"], k["condition"]) for k in existing] != \
+           [(k["row"], k["item_id"], k["condition"]) for k in key]:
+            raise SystemExit("rows differ from rating_key.json -- refusing to write a mismatched sheet")
+        path = OUT / f"rating_sheet_rater_{args.rater}.xlsx"
+        if path.exists():
+            raise SystemExit(f"{path} already exists -- not overwriting it")
+        write_workbook(path, rows)
+        print(f"wrote {path} ({len(rows)} rows, same as rating_key.json)")
+        return
     for rater in ("A", "B"):
         write_workbook(OUT / f"rating_sheet_rater_{rater}.xlsx", rows)
     with open(OUT / "rating_key.json", "w", encoding="utf-8") as f:

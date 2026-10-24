@@ -351,3 +351,80 @@ _COMPLETE_ENDING_RE = re.compile(r"[.!?)\"'’”]\s*$|[\U0001F300-\U0001FAFF☀
 
 def _looks_cut_off(text: str) -> bool:
     return not _COMPLETE_ENDING_RE.search(text)
+
+
+# ------------------------------------------------------------ small-model check
+# The word rules above only see phrasings someone listed. On 40 fresh
+# disguised questions written by a person who never saw them they stopped 4,
+# so a second, concept-level check by a SMALL model (its own Groq rate
+# limits) runs after them -- but only where a new problem starts (a
+# session opener, a new question, a changed problem), never on attempts,
+# hints, confusion or give-ups, which cannot bring in a new topic. Bare
+# arithmetic skips it, and any failure means "in scope" (the word rules'
+# verdict stands). The prompt is written from the Class 1-5 topic list
+# (docs/verified_ncert_class_1_5_topics.md) and the beyond-primary topics
+# above, never from test questions.
+SCOPE_MODEL = "openai/gpt-oss-20b"
+SCOPE_PARAMS = {"temperature": 0.0, "max_tokens": 600, "top_p": 1.0, "reasoning_effort": "medium"}
+
+CLASS_1_5_MATHS = (
+    "counting and numbers up to lakhs and crores, place value, comparing and ordering, "
+    "rounding and estimation; adding, subtracting, multiplying and dividing whole numbers "
+    "(including remainders and missing-number boxes like 4 + _ = 9); fractions and decimals; "
+    "simple percentages (Class 5); factors, multiples, LCM, HCF, prime and composite numbers; "
+    "shapes, nets, symmetry, angles (right, acute, obtuse); perimeter, area and volume by "
+    "formula; length, weight, capacity, money, time and the calendar; patterns; tally marks, "
+    "pictographs, bar graphs and maps with a scale")
+BEYOND_CLASS_5_MATHS = (
+    "algebra (finding an unknown from an equation, unknowns on both sides, two unknowns at "
+    "once), ratio and proportion, probability and chance, counting arrangements or choices "
+    "(permutations, combinations, factorials), powers and exponents, square and cube roots, "
+    "negative numbers, coordinates and graphs of rules, Pythagoras and trigonometry, "
+    "median, mode, spread and standard deviation, sets and Venn diagrams, calculus "
+    "(rates of change, adding up tiny pieces, limits), interest on money, number systems "
+    "other than base ten, matrices, vectors, pi and the circumference of a circle, and "
+    "physics formulas")
+_BEYOND_SYSTEM = (
+    "You check one message a Class {grade} child (India, NCERT) sent to a primary maths tutor. "
+    "Class 1-5 maths covers: " + CLASS_1_5_MATHS + ".\n"
+    "Maths beyond Class 5 includes: " + BEYOND_CLASS_5_MATHS + ".\n"
+    "Answer ADVANCED only if answering the message properly needs maths beyond Class 5, "
+    "even when it is asked in simple words without naming the topic. A question a Class 1-5 "
+    "child can solve with the maths above is IN_SCOPE, even if it sounds hard, uses big "
+    "numbers, or mentions sport, films or money. Non-maths questions are IN_SCOPE here "
+    "(another check handles them).\nReply with one word: ADVANCED or IN_SCOPE."
+)
+_PLAIN_ARITHMETIC_RE = re.compile(
+    r"^\s*(?:(?:what\s+is|what's|whats|calculate|find|work\s+out|solve|compute)\s+)?"
+    r"[\d\s,.+\-*/x×÷()=]+"
+    r"(?:\s*(?:plus|minus|times|multiplied\s+by|divided\s+by|and)\s*[\d\s,.+\-*/x×÷()]+)*"
+    r"\s*[?.!]*\s*$",
+    re.IGNORECASE)
+
+
+def is_plain_arithmetic(text: str) -> bool:
+    """A bare sum ("What is 23 + 45?", "divide 20 by 4" is NOT bare) is in
+    scope for certain -- no model call. A leading minus sign is never bare:
+    negative numbers are beyond Class 5 (the word rules catch those)."""
+    t = (text or "").strip()
+    return bool(_PLAIN_ARITHMETIC_RE.match(t)) and bool(re.search(r"\d", t)) and not re.match(r"^\s*-", t)
+
+
+def needs_beyond_primary(text: str, grade: int = 3, chat_fn=None) -> bool:
+    """True if the small model judges that answering needs maths beyond
+    Class 5. chat_fn(messages) is injectable for tests; never raises, and
+    any failure returns False (the word rules' verdict stands)."""
+    if is_plain_arithmetic(text):
+        return False
+    messages = [{"role": "system", "content": _BEYOND_SYSTEM.replace("{grade}", str(grade))},
+                {"role": "user", "content": text or ""}]
+    try:
+        if chat_fn is None:
+            from . import llm_client
+            targets = [llm_client.Target("groq-scope", llm_client.GROQ_URL, "GROQ_API_KEY", SCOPE_MODEL)]
+            chat_fn = lambda msgs: llm_client.chat(msgs, params=SCOPE_PARAMS, targets=targets)
+        reply = (chat_fn(messages).get("text") or "").upper()
+    except Exception:
+        return False
+    found = re.findall(r"\b(ADVANCED|IN_SCOPE)\b", reply)
+    return bool(found) and found[-1] == "ADVANCED"

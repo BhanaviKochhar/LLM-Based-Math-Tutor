@@ -432,6 +432,41 @@ def _apply_action(chat, episode, action, active_turns) -> dict:
     }
 
 
+def _needs_beyond_primary(resolution, grade: int) -> bool:
+    """The small-model scope check for a message that starts a new problem
+    (scripts/llm/scope.needs_beyond_primary). Skipped when the opener router
+    already answered it in the same call it makes for number-free openers."""
+    from scripts.llm import scope
+
+    if getattr(resolution, "mode", "") == "BEYOND_PRIMARY":
+        return True
+    if getattr(resolution, "scope_checked", False):
+        return False
+    text = getattr(resolution, "resolved_question", "") or getattr(resolution, "original", "")
+    return scope.needs_beyond_primary(text, grade=grade)
+
+
+def _scope_refusal(chat) -> dict:
+    """The same reply the word rules give in submit_turn: the fixed refusal,
+    with no LLM generation and no episode change."""
+    from scripts.llm import scope, telemetry
+
+    telemetry.log_interaction(
+        chat_id=chat.get("id"), student_id=_student_id(),
+        controller_mode="scope_refused", terminal=False,
+        input_safety={"checked": True, "blocked": False},
+        output_safety={"checked": False, "blocked": False},
+    )
+    return {
+        "role": "assistant", "kind": "turn", "mode": "scope_refused",
+        "text": scope.REFUSAL_TEXT, "buttons": [], "terminal": False,
+        "outcome": None, "hint_number": None, "source": "", "verify": None,
+        "self_check_issues": [],
+        "safety": {"input_checked": True, "input_blocked": False,
+                   "output_checked": False, "output_blocked": False},
+    }
+
+
 def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) -> dict:
     """Begin a new tutoring episode: resolve conversational context, ground it
     in retrieval, compute the trusted answer first (compute-first), then let
@@ -463,6 +498,9 @@ def start_episode(chat, question: str, grade: int, ui_level: str, active_turns) 
         scratch = {"state": state, "chunks": [], "source": "", "hints_shown": [],
                    "msg_start": len(chat["messages"]) - 1}
         return _apply_action(chat, scratch, action, active_turns)  # chat["episode"] untouched
+
+    if _needs_beyond_primary(resolution, grade):
+        return _scope_refusal(chat)  # no episode opened
 
     chunks_meta = (retrieve_with_metadata(resolution.retrieval_query, grade)
                   if resolution.use_rag else [])
@@ -527,6 +565,11 @@ def _advance_math_followup(chat, episode, text, grade, active_turns) -> dict:
         episode["state"] = new_state
         reply["continues_episode"] = True
         return reply
+
+    if _needs_beyond_primary(resolution, grade):
+        # The changed problem needs maths beyond Class 5: refuse it and keep
+        # the current problem open.
+        return _scope_refusal(chat)
 
     if resolution.use_verifier:
         computed_answer, is_math, answer_type = pipeline.compute_trusted_answer(

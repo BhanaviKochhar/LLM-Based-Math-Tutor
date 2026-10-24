@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from . import (controller, conversation_resolver, hints, intent, llm_client,
               pipeline, prompt_registry, response_parser, safety,
-              student_tracker, topics, verifier)
+              scope, student_tracker, topics, verifier)
 
 _passed = 0
 _failed = 0
@@ -1137,11 +1137,29 @@ def test_paper_eval_v2_controller_fixes() -> None:
     check("a failed call falls back to NEW (the v1 behaviour)",
          co("Which is the bigger one?", chat_fn=lambda m: (_ for _ in ()).throw(RuntimeError("429"))) == "NEW")
     check("spelling is called out as never making a message CLARIFY",
-         "never make a message CLARIFY" in conversation_resolver._OPENER_SYSTEM)
+         "never make a message CLARIFY" in conversation_resolver._opener_system(3))
     r = conversation_resolver.resolve_question("Which is the bigger one?", None,
                                                opener_fn=lambda m: {"text": "CLARIFY"})
     check("resolve_question routes a vague opener to FRAGMENT, no RAG/verifier",
          r.mode == "FRAGMENT" and not r.use_rag and not r.use_verifier)
+    r = conversation_resolver.resolve_question("how likely is it to pick a red sweet", None,
+                                               opener_fn=lambda m: {"text": "ADVANCED"})
+    check("the same opener call can mark a message beyond Class 5",
+         r.mode == "BEYOND_PRIMARY" and r.scope_checked)
+    r = conversation_resolver.resolve_question("15 pencils and 4 more, how many?", None, opener_fn=boom)
+    check("an opener with a quantity is NEW without a call, and still needs the scope check",
+         r.mode == "NEW" and not r.scope_checked)
+
+    # The small-model scope check (scope.needs_beyond_primary).
+    nb = scope.needs_beyond_primary
+    check("bare arithmetic skips the model", not nb("What is 23 + 45?", chat_fn=boom))
+    check("the model's ADVANCED is a refusal",
+         nb("In how many ways can 4 friends stand in a line?", chat_fn=lambda m: {"text": "ADVANCED"}))
+    check("the model's IN_SCOPE passes", not nb("Name a round fruit.", chat_fn=lambda m: {"text": "IN_SCOPE"}))
+    check("a failed call leaves the word rules' verdict (in scope)",
+         not nb("A tricky question", chat_fn=lambda m: (_ for _ in ()).throw(RuntimeError("429"))))
+    check("the scope prompt carries the Class 1-5 topic list, not test questions",
+         "missing-number boxes" in scope._BEYOND_SYSTEM and "percentages" in scope._BEYOND_SYSTEM)
 
 
 def main() -> None:

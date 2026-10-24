@@ -33,6 +33,7 @@ MODES = {
     "CONFUSION",
     "CORRECTION",
     "FRAGMENT",
+    "BEYOND_PRIMARY",
 }
 
 _ROUTER_SYSTEM_TEMPLATE = """You are a conversation router for a Class {grade} maths tutor.
@@ -87,6 +88,9 @@ class Resolution:
     changed: bool
     use_rag: bool
     use_verifier: bool
+    # True when the opener router already judged whether the message needs
+    # maths beyond Class 5, so the caller must not ask the small model again.
+    scope_checked: bool = False
 
     @property
     def conversational(self) -> bool:
@@ -262,35 +266,45 @@ def _llm_route(question: str, active_turns: list[dict] | None,
 
 # ---------------------------------------------------------------- openers
 # Routes a session's FIRST message: NEW (a maths task or topic can be
-# identified -- however it is spelled) or CLARIFY (nothing to act on without
-# more information). Hybrid, cheapest first:
+# identified -- however it is spelled), CLARIFY (nothing to act on without
+# more information) or ADVANCED (it needs maths beyond Class 5). Hybrid,
+# cheapest first:
 #   1. a message with a quantity in it ("15 pencils and 4 more") is a real
-#      problem -- no call. An ordinal ("the 2nd one") is not a quantity.
+#      problem -- no call here (the caller runs scope.needs_beyond_primary
+#      on it). An ordinal ("the 2nd one") is not a quantity.
 #   2. anything else: one short call to a SMALL model (gpt-oss-20b, its own
-#      Groq rate limits). A rules-only detector was rejected: it would have
-#      asked "Name a fruit that is round" to clarify ("that" read as a
-#      reference) and can't see that "circles?" is a topic but "I'm stuck."
-#      is not.
+#      Groq rate limits, low reasoning effort) that answers both questions
+#      at once, so a number-free opener never needs a second scope call. A
+#      rules-only detector was rejected: it would have asked "Name a fruit
+#      that is round" to clarify ("that" read as a reference) and can't see
+#      that "circles?" is a topic but "I'm stuck." is not.
 #   3. any failure -> NEW, i.e. exactly the v1 behaviour.
 OPENER_MODEL = "openai/gpt-oss-20b"
 _HAS_QUANTITY = re.compile(r"\d(?!\d*\s*(?:st|nd|rd|th)\b)")
 
-_OPENER_SYSTEM = """A Class {grade} child (India, NCERT maths) has just opened a maths \
-tutoring chat. This is their FIRST message: there is no earlier conversation, and the \
-tutor cannot see their book, homework or anything they did before.
 
-Answer NEW if the tutor could start helping right away -- even if the message is badly \
-spelled, in broken grammar, mixes Hindi and English, or is just a topic word \
-("fractions", "tables"). This includes questions about everyday things, the child's own \
-home, classroom, body or surroundings ("name something at home that is round", "is my \
-arm longer than my finger"), days, months and seasons, and general "why" questions: the \
-tutor answers those from general knowledge, so nothing is missing.
-Answer CLARIFY only if the message depends on one SPECIFIC thing that was never given: a \
-particular problem, sum, answer, number, list or earlier conversation it points to ("it", \
-"this one", "the other way", "mine", "my homework", "the same as before", "the answer"), \
-or it is only a greeting or a feeling with no question at all.
-Spelling, grammar and punctuation never make a message CLARIFY.
-Reply with one word: NEW or CLARIFY."""
+def _opener_system(grade: int) -> str:
+    from . import scope
+    return (f"A Class {grade} child (India, NCERT maths) has just opened a maths tutoring chat. "
+            "This is their FIRST message: there is no earlier conversation, and the tutor cannot "
+            "see their book, homework or anything they did before.\n\n"
+            "Answer ADVANCED if answering it properly needs maths beyond Class 5, even when it is "
+            "asked in simple words without naming the topic. Class 1-5 maths covers: "
+            + scope.CLASS_1_5_MATHS + ". Maths beyond Class 5 includes: "
+            + scope.BEYOND_CLASS_5_MATHS + ".\n"
+            "Otherwise answer NEW if the tutor could start helping right away -- even if the "
+            "message is badly spelled, in broken grammar, mixes Hindi and English, or is just a "
+            'topic word ("fractions", "tables"). This includes questions about everyday things, '
+            "the child's own home, classroom, body or surroundings (\"name something at home that "
+            'is round", "is my arm longer than my finger"), days, months and seasons, and general '
+            '"why" questions: the tutor answers those from general knowledge, so nothing is missing.\n'
+            "Answer CLARIFY only if the message depends on one SPECIFIC thing that was never given: "
+            "a particular problem, sum, answer, number, list or earlier conversation it points to "
+            '("it", "this one", "the other way", "mine", "my homework", "the same as before", '
+            '"the answer"), or it is only a greeting or a feeling with no question at all.\n'
+            "Spelling, grammar and punctuation never make a message CLARIFY.\n"
+            "Reply with one word: NEW, CLARIFY or ADVANCED.")
+
 
 _OPENER_FEWSHOT = [
     ("hw 2 do long divison", "NEW"),
@@ -305,26 +319,28 @@ _OPENER_FEWSHOT = [
 
 
 def classify_opener(question: str, grade: int = 3, chat_fn=None) -> str:
-    """'NEW' or 'CLARIFY' for a session's first message. chat_fn(messages)
-    is injectable for tests; never raises."""
+    """'NEW', 'CLARIFY' or 'ADVANCED' for a session's first message.
+    chat_fn(messages) is injectable for tests; never raises. A message with
+    a quantity returns 'NEW' without a call (scope is then checked by the
+    caller)."""
     if _HAS_QUANTITY.search(question or ""):
         return "NEW"
-    messages = [{"role": "system", "content": _OPENER_SYSTEM.replace("{grade}", str(grade))}]
+    messages = [{"role": "system", "content": _opener_system(grade)}]
     for ex, lab in _OPENER_FEWSHOT:
         messages += [{"role": "user", "content": ex}, {"role": "assistant", "content": lab}]
     messages.append({"role": "user", "content": question})
     try:
         if chat_fn is None:
-            from . import llm_client
+            from . import llm_client, scope
             # Its own target name: llm_client keys 429 cooldowns by target
-            # name, and Groq limits are per model.
+            # name, and Groq limits are per model. Same settings as the scope
+            # check, since this call also makes the scope judgement.
             targets = [llm_client.Target("groq-opener", llm_client.GROQ_URL, "GROQ_API_KEY", OPENER_MODEL)]
-            chat_fn = lambda msgs: llm_client.chat(
-                msgs, params={"temperature": 0.0, "max_tokens": 300, "top_p": 1.0}, targets=targets)
+            chat_fn = lambda msgs: llm_client.chat(msgs, params=scope.SCOPE_PARAMS, targets=targets)
         text = (chat_fn(messages).get("text") or "").upper()
     except Exception:
         return "NEW"
-    found = re.findall(r"\b(NEW|CLARIFY)\b", text)
+    found = re.findall(r"\b(NEW|CLARIFY|ADVANCED)\b", text)
     return found[-1] if found else "NEW"
 
 
@@ -346,10 +362,17 @@ def resolve_question(
         # and the child's next, concrete problem was then never graded
         # in the paper-eval v1 run. FRAGMENT here makes the caller ask what
         # the child means without opening an episode.
-        if classify_opener(original, grade=grade, chat_fn=opener_fn) == "CLARIFY":
-            return Resolution(original, original, "", "FRAGMENT", 0.9, False, False, False)
+        asked_model = not _HAS_QUANTITY.search(original)
+        label = classify_opener(original, grade=grade, chat_fn=opener_fn)
+        if label == "CLARIFY":
+            return Resolution(original, original, "", "FRAGMENT", 0.9, False, False, False,
+                              scope_checked=True)
+        if label == "ADVANCED":
+            return Resolution(original, original, "", "BEYOND_PRIMARY", 0.9, False, False, False,
+                              scope_checked=True)
         return Resolution(
-            original, original, original, "NEW", 1.0, False, True, True
+            original, original, original, "NEW", 1.0, False, True, True,
+            scope_checked=asked_model,
         )
 
     # Generic conversational-act guardrails. These are NOT maths scenarios:
