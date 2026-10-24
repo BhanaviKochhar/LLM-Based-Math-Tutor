@@ -29,7 +29,12 @@ from scripts.llm import llm_client
 
 ROOT = Path(__file__).resolve().parent.parent
 HR = ROOT / "eval" / "human_ratings"
-CHECKPOINT = ROOT / "eval" / "results" / "judge_runs" / "calibration_v1.jsonl"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+# One saved-verdicts file per judge prompt version (calibration_v1.jsonl was
+# produced by version 1, before JUDGE_PROMPT_VERSION existed).
+def checkpoint_path(model: str = judge.JUDGE_MODEL) -> Path:
+    suffix = "" if model == judge.JUDGE_MODEL else "_" + model.split("/")[-1]
+    return ROOT / "eval" / "results" / "judge_runs" / f"calibration_v{judge.JUDGE_PROMPT_VERSION}{suffix}.jsonl"
 
 
 def _sources() -> tuple[dict, dict]:
@@ -60,9 +65,15 @@ def _answer_correct(verdict: dict, item: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rater", default="A")
+    parser.add_argument("--rows", choices=("all", "odd", "even"), default="all",
+                        help="odd = development half, even = test half (split fixed in advance)")
+    parser.add_argument("--model", default=judge.JUDGE_MODEL,
+                        help="judge model (same instructions); its verdicts get their own file")
     args = parser.parse_args()
 
     key = json.load(open(HR / "rating_key.json", encoding="utf-8"))["rows"]
+    if args.rows != "all":
+        key = [k for k in key if k["row"] % 2 == (1 if args.rows == "odd" else 0)]
     items, _ = _sources()
     ckpts: dict[tuple, dict] = {}
 
@@ -75,12 +86,24 @@ def main() -> None:
     jobs = [{"id": str(k["row"]), "row": k["row"]} for k in key]
     by_row = {k["row"]: k for k in key}
 
+    if args.model == judge.JUDGE_MODEL:
+        targets = judge.JUDGE_TARGETS
+    elif args.model.startswith("gemini"):
+        # Google AI Studio's OpenAI-compatible endpoint; GEMINI_API_KEYS
+        # (comma-separated) rotates across keys like GROQ_API_KEYS.
+        targets = [llm_client.Target("gemini-judge", GEMINI_URL, "GEMINI_API_KEY", args.model)]
+    else:
+        targets = [llm_client.Target("groq-judge-" + args.model.split("/")[-1], llm_client.GROQ_URL,
+                                     "GROQ_API_KEY", args.model)]
+    chat = lambda msgs: llm_client.chat(msgs, params=judge.JUDGE_PARAMS, targets=targets)
+
     def call_fn(job):
         item, j = journey(by_row[job["row"]])
-        return judge.judge_one(item, j)
+        return judge.judge_one(item, j, chat_fn=chat)
 
-    CHECKPOINT.parent.mkdir(parents=True, exist_ok=True)
-    results = {int(r["id"]): r for r in llm_client.run_batch(jobs, call_fn, checkpoint_path=CHECKPOINT, max_workers=8)}
+    ckpt = checkpoint_path(args.model)
+    ckpt.parent.mkdir(parents=True, exist_ok=True)
+    results = {int(r["id"]): r for r in llm_client.run_batch(jobs, call_fn, checkpoint_path=ckpt, max_workers=8)}
 
     human = {x["row"]: x for x in load_sheet(args.rater)}
     pairs = []
@@ -114,7 +137,8 @@ def main() -> None:
                         "human": sum(p["h_halluc"] == "yes" for p in pairs),
                         "both": sum(p["j_halluc"] == p["h_halluc"] == "yes" for p in pairs)}
 
-    lines = [f"# Judge calibration against rater {args.rater}", "", f"judge: {judge.JUDGE_MODEL}",
+    lines = [f"# Judge calibration against rater {args.rater} ({args.rows} rows)", "",
+             f"judge: {args.model}, prompt version {judge.JUDGE_PROMPT_VERSION}",
              f"replies judged: {metrics['judged']}/{metrics['of']}", ""]
     for name in ("hallucination", "key_idea", "teaches_beyond_class_5", "answer_correct", *RUBRIC):
         k, n = metrics[name]
@@ -128,7 +152,8 @@ def main() -> None:
                          f"judge quote: {str(p['j_quote'])[:100]!r}; human quote: {str(p['h_quote'])[:100]!r}")
     print("\n".join(lines))
     path = write_result("judge_calibration", dataset_sources=[{"path": str(HR)}],
-                        config={"rater": args.rater, "judge": judge.JUDGE_MODEL}, per_example_results=pairs,
+                        config={"rater": args.rater, "rows": args.rows, "judge": args.model,
+                                "judge_prompt_version": judge.JUDGE_PROMPT_VERSION}, per_example_results=pairs,
                         aggregate_metrics=metrics, notes="LLM judge vs blind human ratings.")
     write_summary_markdown(path, lines)
     print(f"\nRaw: {path}")

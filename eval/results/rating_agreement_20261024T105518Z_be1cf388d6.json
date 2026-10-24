@@ -1,0 +1,106 @@
+{
+  "evaluator_name": "rating_agreement",
+  "run_timestamp_utc": "20261024T105518Z",
+  "git": {
+    "commit": "be1cf388d69d1f6e49cc0a9c7db570b7bc8a6841",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "D:\\LLM-Based-Math-Tutor\\eval\\human_ratings"
+    }
+  ],
+  "config": {},
+  "aggregate_metrics": {
+    "rater_A": {
+      "rows": 150,
+      "blank_cells": 0,
+      "dominant_share": {
+        "correctness": 0.87,
+        "grade_fit": 0.62,
+        "clarity": 0.49,
+        "restraint": 0.4
+      },
+      "objective_agreement": [
+        54,
+        56
+      ],
+      "contradictions": [
+        9,
+        64,
+        80,
+        112
+      ],
+      "flag_without_quote": [],
+      "hallucination_flags": 9
+    },
+    "rater_B": {
+      "rows": 150,
+      "blank_cells": 0,
+      "dominant_share": {
+        "correctness": 0.81,
+        "grade_fit": 0.43,
+        "clarity": 0.47,
+        "restraint": 0.35
+      },
+      "objective_agreement": [
+        55,
+        56
+      ],
+      "contradictions": [],
+      "flag_without_quote": [],
+      "hallucination_flags": 8
+    },
+    "agreement": {
+      "correct": 0.9169251218431547,
+      "key_idea": 0.9506957379204557,
+      "teaches": 0.9606195851929641,
+      "halluc": 0.688279301745636,
+      "correctness": 0.5178197064989518,
+      "grade_fit": 0.8160000000000001,
+      "clarity": 0.7423191278493557,
+      "restraint": 0.8369712888325334
+    },
+    "hallucination_disagreements": [
+      [
+        12,
+        "No",
+        "Yes",
+        "After moving one step back, you will see 14 stones."
+      ],
+      [
+        26,
+        "Yes",
+        "No",
+        "1,03,33,32"
+      ],
+      [
+        32,
+        "No",
+        "Yes",
+        "this works because \\(sqrt(ab)= sqrt(a)\\,sqrt(b)\\) when we allow the new symbol \\(i\\)"
+      ],
+      [
+        41,
+        "Yes",
+        "No",
+        "the map tells us that 4 cm on the map = 2 km on the ground"
+      ],
+      [
+        123,
+        "Yes",
+        "No",
+        "| | | 5 | . | 0 | 5 |"
+      ]
+    ]
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Human rating quality checks and inter-rater agreement.",
+  "per_example_results": []
+}

@@ -42,7 +42,12 @@ JUDGE_MODEL = "qwen/qwen3.8-27b"
 # name, and Groq limits are per model, so a judge 429 must not cool a key
 # down for the tutor model. No Hugging Face fallback: the judge model stays fixed.
 JUDGE_TARGETS = [llm_client.Target("groq-judge", llm_client.GROQ_URL, "GROQ_API_KEY", JUDGE_MODEL)]
-JUDGE_PARAMS = {"temperature": 0.0, "max_tokens": 700}
+JUDGE_PARAMS = {"temperature": 0.0, "max_tokens": 1500}
+# Bumped whenever the judge's instructions change, and recorded in every
+# result, so each verdict traces to the exact prompt that produced it.
+# 1: first calibration (2026-10-24). 2: itemised hallucination checks, and the
+# model may reason before answering (no "/no_think"; measured: same tokens per call).
+JUDGE_PROMPT_VERSION = 2
 
 JUDGE_SYSTEM = """You grade one maths-tutor reply to a primary-school child (India, NCERT Class 1-5). \
 Judge only the reply's text. Be strict and literal.
@@ -53,10 +58,17 @@ Rubric, 1-5 each (5 best):
 - clarity: 5 short, ordered, easy to follow; 3 followable but long or cluttered; 1 confusing.
 - restraint: 5 answers what was asked, no padding or off-topic content; 3 some padding; 1 mostly padding, or teaches content beyond Class 5 that was not needed.
 
-hallucination: true only if the reply states something false as fact (a wrong number, rule, \
-definition, method step or real-world fact). Quote the false words exactly and say why they are false. \
-Rounding, simplification for a child, and a wrong final answer already counted under correctness do not count \
-unless a false claim is stated.
+hallucination: true if ANY sentence states something false as fact. Check every one of these, one by one:
+- every number and calculation, including side remarks ("a little less than", "about", "nearly");
+- how each number is written (digit grouping such as 10,33,332, decimal points, tables or layouts \
+whose digits read wrongly);
+- every rule, definition, method step and unit conversion;
+- every real-world fact about objects, shapes, time, money or measures;
+- any value the tutor made up as an example (a scale, a quantity, a price) but then states as if the \
+question gave it.
+Quote the false words exactly and say why they are false. Not hallucinations: simplification suitable \
+for a child that stays true, a formula that is only badly formatted but not wrong, and a wrong final \
+answer with no false statement behind it (that counts under correctness).
 
 committed_answer: the final answer the reply commits to, copied briefly; "NONE" if it gives none \
 (a refusal, or only a hint or question back).
@@ -97,7 +109,7 @@ def build_messages(item: dict, journey: dict) -> list[dict]:
     user = (f"Class {_grade_of(item) or 'unknown'}.\n"
             + (f"Earlier in the conversation:\n{convo}\n\n" if convo else "")
             + f"Child's message: {last['student']}\n\n{item_context(item)}\n\n"
-            f"Reply to grade:\n<<<\n{last.get('response') or ''}\n>>>\n/no_think")
+            f"Reply to grade:\n<<<\n{last.get('response') or ''}\n>>>")
     return [{"role": "system", "content": JUDGE_SYSTEM}, {"role": "user", "content": user}]
 
 
