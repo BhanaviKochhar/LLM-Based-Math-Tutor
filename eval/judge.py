@@ -19,7 +19,7 @@ returns JSON:
                      without a quoted false claim and a reason is rejected
 
 The judge is trusted only after it agrees with blind human ratings
-(Cohen's kappa on eval/human_ratings/).
+(Cohen's kappa on eval/blind_ratings/).
 
 CLI:
     python -m eval.judge --dataset eval/datasets/curriculum_benchmark_class3.jsonl \\

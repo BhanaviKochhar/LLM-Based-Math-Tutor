@@ -1,5 +1,5 @@
 """eval/judge_calibration.py -- does the LLM judge (eval/judge.py) agree with
-a careful human rater on the blind rating sheet (eval/human_ratings/)?
+a careful human rater on the blind rating sheet (eval/blind_ratings/)?
 
 Runs the judge on the same 150 replies the humans rated (resumable
 checkpoint), then compares with one rater's sheet:
@@ -28,7 +28,7 @@ from eval.score_transcripts import _load_checkpoint, ground_truth_candidates
 from scripts.llm import llm_client
 
 ROOT = Path(__file__).resolve().parent.parent
-HR = ROOT / "eval" / "human_ratings"
+HR = ROOT / "eval" / "blind_ratings"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 # One saved-verdicts file per judge prompt version (calibration_v1.jsonl was
 # produced by version 1, before JUDGE_PROMPT_VERSION existed).
@@ -69,6 +69,8 @@ def main() -> None:
                         help="odd = development half, even = test half (split fixed in advance)")
     parser.add_argument("--model", default=judge.JUDGE_MODEL,
                         help="judge model (same instructions); its verdicts get their own file")
+    parser.add_argument("--max-workers", type=int, default=8,
+                        help="lower it for providers with tight per-minute limits")
     args = parser.parse_args()
 
     key = json.load(open(HR / "rating_key.json", encoding="utf-8"))["rows"]
@@ -95,7 +97,8 @@ def main() -> None:
     else:
         targets = [llm_client.Target("groq-judge-" + args.model.split("/")[-1], llm_client.GROQ_URL,
                                      "GROQ_API_KEY", args.model)]
-    chat = lambda msgs: llm_client.chat(msgs, params=judge.JUDGE_PARAMS, targets=targets)
+    params = {**judge.JUDGE_PARAMS, "frequency_penalty": None} if args.model.startswith("gemini") else judge.JUDGE_PARAMS
+    chat = lambda msgs: llm_client.chat(msgs, params=params, targets=targets)
 
     def call_fn(job):
         item, j = journey(by_row[job["row"]])
@@ -103,7 +106,7 @@ def main() -> None:
 
     ckpt = checkpoint_path(args.model)
     ckpt.parent.mkdir(parents=True, exist_ok=True)
-    results = {int(r["id"]): r for r in llm_client.run_batch(jobs, call_fn, checkpoint_path=ckpt, max_workers=8)}
+    results = {int(r["id"]): r for r in llm_client.run_batch(jobs, call_fn, checkpoint_path=ckpt, max_workers=args.max_workers)}
 
     human = {x["row"]: x for x in load_sheet(args.rater)}
     pairs = []

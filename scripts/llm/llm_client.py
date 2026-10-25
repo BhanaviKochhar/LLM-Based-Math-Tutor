@@ -322,7 +322,8 @@ def stream(messages, params=None, targets=None, handle=None, purpose: str = "gen
     (see start_call_recording): "generation" for the tutor's reply, "aux"
     for helper calls made through chat().
     """
-    params = {**DEFAULT_PARAMS, **(params or {})}
+    # A None value drops that default (some providers reject e.g. frequency_penalty).
+    params = {k: v for k, v in {**DEFAULT_PARAMS, **(params or {})}.items() if v is not None}
     targets = targets or default_targets()
     h = handle if handle is not None else StreamHandle()
     h.t_start = time.perf_counter()

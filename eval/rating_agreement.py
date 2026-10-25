@@ -1,5 +1,5 @@
 """eval/rating_agreement.py -- quality and agreement of the blind human
-ratings in eval/human_ratings/ (two raters, the same 150 replies).
+ratings in eval/blind_ratings/ (two raters, the same 150 replies).
 
 Quality checks that do not depend on trusting either rater:
   - completeness (blank cells);
@@ -29,7 +29,7 @@ from eval.component_eval.results import write_result, write_summary_markdown
 from eval.score_transcripts import _load_checkpoint, ground_truth_candidates
 
 ROOT = Path(__file__).resolve().parent.parent
-HR = ROOT / "eval" / "human_ratings"
+HR = ROOT / "eval" / "blind_ratings"
 COLS = ["row", "class", "msg", "convo", "truth", "reply", "committed", "correct", "key_idea",
         "teaches", "correctness", "grade_fit", "clarity", "restraint", "halluc", "quote", "notes"]
 RUBRIC = ["correctness", "grade_fit", "clarity", "restraint"]

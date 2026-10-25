@@ -11,9 +11,9 @@ no condition shown:
   15 out-of-scope items (5 gloss, 7 decline incl. boundary cases, 3 probes)
   10 multi_turn conversations (the final turn, with the conversation so far)
 
-Writes one workbook per rater (eval/human_ratings/rating_sheet_rater_A.xlsx,
+Writes one workbook per rater (eval/blind_ratings/rating_sheet_rater_A.xlsx,
 ..._B.xlsx -- identical rows, rated independently) and the answer key
-(eval/human_ratings/rating_key.json: sheet row -> item id, condition). Raters
+(eval/blind_ratings/rating_key.json: sheet row -> item id, condition). Raters
 must not open the key. Same rubric text as the judge.
 
 Run once:  python -m eval.make_rating_sheet
@@ -37,7 +37,7 @@ from eval.score_transcripts import _load_checkpoint, ground_truth_candidates, sc
 ROOT = Path(__file__).resolve().parent.parent
 DATASETS = ROOT / "eval" / "datasets"
 RUNS = ROOT / "eval" / "results"
-OUT = ROOT / "eval" / "human_ratings"
+OUT = ROOT / "eval" / "blind_ratings"
 SEED = 20261023
 
 
