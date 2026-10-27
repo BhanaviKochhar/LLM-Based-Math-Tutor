@@ -54,9 +54,11 @@ def render_picker_page():
     except Exception:
         notice("err", "We couldn't load your children's profiles. Please try again.")
         kids = None
-    if kids == []:
+    if kids == [] and not account.is_admin():
         account.start_adding_child(can_go_back=False)
         st.rerun()
+    if kids == []:
+        st.markdown('<p class="tt-sub">No children added yet.</p>', unsafe_allow_html=True)
 
     managing = ss.get("_manage_children", False)
     if kids:
@@ -73,7 +75,7 @@ def render_picker_page():
 
     if not managing:
         if st.button("+ Add a child", key="outline_add", use_container_width=True):
-            account.start_adding_child(can_go_back=bool(kids))
+            account.start_adding_child(can_go_back=bool(kids) or account.is_admin())
             st.rerun()
 
     if not managing and account.is_admin():

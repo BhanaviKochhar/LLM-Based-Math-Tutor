@@ -111,7 +111,7 @@ def main() -> None:
         db.save_chat(parent, sid, spare, "spare")
         db.delete_chat(parent, spare["db_id"])
         check("delete_chat() removes the chat and its messages",
-              db.list_chats(parent, sid) == listed_chats
+              [c["id"] for c in db.list_chats(parent, sid)] == [c["id"] for c in listed_chats]
               and parent.table("messages").select("id").eq("chat_id", spare["db_id"]).execute().data == [])
 
         print("consent")

@@ -210,7 +210,8 @@ def agree_to_current_consent() -> None:
 def _route_after_login() -> None:
     from scripts.llm import db
     # No children yet: the name page asks for the first (see create_child).
-    ss.page = "pick" if db.list_children(ss.db_client) else "name"
+    # An admin goes to the picker regardless, where the dashboard link is.
+    ss.page = "pick" if db.list_children(ss.db_client) or is_admin() else "name"
 
 
 def register(email: str, password: str, redirect_to: str | None, consent_at: str) -> bool:
