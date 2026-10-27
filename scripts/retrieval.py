@@ -14,6 +14,7 @@ Smoke test (from project root):
 
 import json
 import re
+import threading
 from functools import lru_cache
 from pathlib import Path
 
@@ -151,10 +152,52 @@ def _bm25_for_grades(grades: tuple[int, ...]) -> tuple[BM25Okapi, list[int]]:
     return BM25Okapi(corpus), indices
 
 
+_BUILD_BATCH = 100
+_build_lock = threading.Lock()
+
+
+def build_index(path: Path = CHROMADB_DIR):
+    """(Re)build the ChromaDB collection from data/extracted_json.
+
+    data/chromadb is gitignored, so a fresh host (CI, Streamlit Cloud) has no
+    index. This builds one with the same ids, documents and metadata as
+    scripts/load_chromadb.py, but lets Chroma embed with its built-in
+    all-MiniLM-L6-v2 -- the embedding function every query here already
+    uses -- so the host needs no torch or sentence-transformers."""
+    client = chromadb.PersistentClient(path=str(path))
+    try:
+        client.delete_collection(COLLECTION_NAME)
+    except Exception:
+        pass
+    col = client.create_collection(COLLECTION_NAME)
+    chunks = _load_chunks()
+    for start in range(0, len(chunks), _BUILD_BATCH):
+        batch = chunks[start:start + _BUILD_BATCH]
+        col.add(
+            ids=[f"chunk_{start + j}" for j in range(len(batch))],
+            documents=[c["text"] for c in batch],
+            metadatas=[{"grade": c["grade"],
+                        "page": c["page"],
+                        "topic": c.get("topic") or "",
+                        "type": c.get("type") or "",
+                        "source": c.get("source", "NCERT")} for c in batch],
+        )
+    return col
+
+
 @lru_cache(maxsize=1)
 def _chroma_collection():
-    client = chromadb.PersistentClient(path=str(CHROMADB_DIR))
-    return client.get_collection(COLLECTION_NAME)
+    # Locked so two sessions starting at once on a fresh host build once.
+    # A missing or partial collection (an interrupted build) is rebuilt.
+    with _build_lock:
+        client = chromadb.PersistentClient(path=str(CHROMADB_DIR))
+        try:
+            col = client.get_collection(COLLECTION_NAME)
+            if col.count() == len(_load_chunks()):
+                return col
+        except Exception:
+            pass
+        return build_index()
 
 
 # ---------------------------------------------------------------------------

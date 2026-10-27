@@ -46,18 +46,19 @@ jobs:
             ~/.cache/chroma
           key: models-all-MiniLM-L6-v2
 
-      # data/chromadb is gitignored, so the index is built here and reused
-      # until the chunks, the build script or the chromadb release change.
+      # data/chromadb is gitignored, so the index is built here, the same way
+      # the deployed app builds it, and reused until the chunks, the
+      # retrieval module or the chromadb release change.
       - name: Cache ChromaDB index
         id: index-cache
         uses: actions/cache@v4
         with:
           path: data/chromadb
-          key: chromadb-${{ steps.install.outputs.chromadb }}-${{ hashFiles('data/extracted_json/ncert_chunks.json', 'scripts/load_chromadb.py') }}
+          key: chromadb-${{ steps.install.outputs.chromadb }}-${{ hashFiles('data/extracted_json/ncert_chunks.json', 'scripts/retrieval.py') }}
 
       - name: Build ChromaDB index
         if: steps.index-cache.outputs.cache-hit != 'true'
-        run: python scripts/load_chromadb.py
+        run: python -c "from scripts.retrieval import build_index; build_index()"
 
       - name: frontend.test_app
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
@@ -90,3 +91,44 @@ jobs:
       - name: eval.component_eval.test_component_eval
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: python -m eval.component_eval.test_component_eval
+
+  # The deployed app installs only frontend/requirements.txt. Check that set
+  # on its own: a clean install, the startup index build, and the suites that
+  # exercise the app and retrieval.
+  deploy-packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GROQ_API_KEY: ""
+      GROQ_API_KEYS: ""
+      HF_TOKEN: ""
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: frontend/requirements.txt
+
+      - name: Install deploy packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r frontend/requirements.txt
+
+      - name: Cache embedding model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/chroma
+          key: models-chroma-all-MiniLM-L6-v2
+
+      - name: Build ChromaDB index
+        run: python -c "from scripts.retrieval import build_index; build_index()"
+
+      - name: frontend.test_app
+        run: python -m frontend.test_app
+
+      - name: scripts.test_retrieval
+        if: ${{ !cancelled() }}
+        run: python -m scripts.test_retrieval

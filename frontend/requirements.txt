@@ -1,0 +1,15 @@
+# Packages the deployed app needs, pinned to the releases the test suites
+# passed on. Streamlit Community Cloud reads this file (next to the entry
+# point, frontend/app.py) instead of the root requirements.txt, which stays
+# the full set for local work, the PDF parser and the eval scripts.
+#
+# No torch or sentence-transformers: the index is built at startup with
+# Chroma's built-in embedding model (see scripts/retrieval.py build_index).
+
+streamlit==1.66.1
+chromadb==1.5.9
+onnxruntime==1.31.1    # runs Chroma's built-in all-MiniLM-L6-v2
+rank-bm25==0.2.2
+openai==3.39.0
+python-dotenv==1.2.4
+sympy==1.14.0

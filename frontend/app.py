@@ -83,6 +83,19 @@ from frontend.views.main_page import render_chat_reply, render_main_page, render
 init_session_state()
 inject_global_css()
 
+
+# A fresh host has no data/chromadb (it is gitignored), so the first run
+# builds it from data/extracted_json. Once per server process, and only under
+# `streamlit run`, never when tests import this module.
+@st.cache_resource(show_spinner="Getting the maths books ready… (first visit after a restart takes a minute or two)")
+def _warm_retrieval_index():
+    from scripts import retrieval
+    retrieval._chroma_collection()
+
+
+if not MOCK_MODE and st.runtime.exists():
+    _warm_retrieval_index()
+
 # ===========================================================================
 # Router
 #
