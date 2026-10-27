@@ -273,3 +273,35 @@ def save_chat(client, student_id: str, chat: dict, title: str) -> None:
 def delete_chat(client, chat_id: str) -> None:
     """Removes the chat; its messages go with it (on delete cascade)."""
     client.table("chats").delete().eq("id", chat_id).execute()
+
+
+# ---------------------------------------------------------------------------
+# Textbook search (the meaning-based half of scripts/retrieval.py)
+# ---------------------------------------------------------------------------
+_public_client = None
+_public_lock = threading.Lock()
+
+
+def public_client():
+    """One shared client with no login, for public data (the textbook
+    chunks). Safe to share between sessions: it never signs in."""
+    global _public_client
+    with _public_lock:
+        if _public_client is None:
+            _public_client = new_client()
+        return _public_client
+
+
+def chunk_count() -> int:
+    return public_client().table("chunks").select("id", count="exact", head=True).execute().count
+
+
+def match_chunks(query_embedding: list[float], grades: tuple[int, ...],
+                 min_page: int, match_count: int) -> list[int]:
+    """Chunk ids nearest the query in the given grades past min_page,
+    nearest first (supabase/schema.sql match_chunks)."""
+    rows = public_client().rpc("match_chunks", {
+        "query_embedding": query_embedding, "grades": list(grades),
+        "min_page": min_page, "match_count": match_count,
+    }).execute().data
+    return [r["id"] for r in rows]

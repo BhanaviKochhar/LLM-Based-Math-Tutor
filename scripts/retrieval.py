@@ -13,6 +13,7 @@ Smoke test (from project root):
 """
 
 import json
+import logging
 import re
 import threading
 from functools import lru_cache
@@ -28,6 +29,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CHUNKS_JSON = PROJECT_ROOT / "data" / "extracted_json" / "ncert_chunks.json"
 CHROMADB_DIR = PROJECT_ROOT / "data" / "chromadb"
 COLLECTION_NAME = "ncert_math"
+
+log = logging.getLogger(__name__)
 
 TOP_K_PER_RETRIEVER = 20   # candidates from each retriever before fusion
 TOP_K_FINAL = 3            # team contract: exactly 3 strings
@@ -244,6 +247,92 @@ def _chroma_ranked(question: str, grades: tuple[int, ...], k: int) -> list[int]:
     return _canonicalize(hits, grades)
 
 
+# ---------------------------------------------------------------------------
+# The meaning-based half in Supabase (pgvector). Same model, grade window,
+# front-matter rule and distance as the Chroma path above; the database only
+# replaces the local index (supabase/schema.sql match_chunks). Chroma stays
+# the path wherever Supabase isn't configured -- local runs and CI -- and
+# while the chunks haven't all been uploaded yet.
+# ---------------------------------------------------------------------------
+@lru_cache(maxsize=1)
+def _query_embedder():
+    """Chroma's built-in all-MiniLM-L6-v2: the same function the Chroma
+    collection embeds queries with, used here without the collection."""
+    from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+    return DefaultEmbeddingFunction()
+
+
+def _embed(text: str) -> list[float]:
+    return [float(x) for x in _query_embedder()([text])[0]]
+
+
+def _supabase_configured() -> bool:
+    try:
+        from scripts.llm import db
+    except ImportError:  # run as a plain script (python scripts/retrieval.py)
+        return False
+    return db.configured()
+
+
+_all_chunks_uploaded: bool | None = None
+
+
+def _supabase_has_all_chunks() -> bool:
+    """Whether every chunk is in Supabase. Only a completed check is
+    remembered; one that fails (database unreachable) raises and is tried
+    again on the next question. A refusal from the database itself -- the
+    table not created yet -- counts as "not uploaded", so the local index
+    is used rather than keyword search alone."""
+    global _all_chunks_uploaded
+    if _all_chunks_uploaded is None:
+        from postgrest.exceptions import APIError
+
+        from scripts.llm import db
+        try:
+            _all_chunks_uploaded = db.chunk_count() == len(_load_chunks())
+        except APIError:
+            _all_chunks_uploaded = False
+    return _all_chunks_uploaded
+
+
+def _supabase_ranked(question: str, grades: tuple[int, ...], k: int) -> list[int]:
+    from scripts.llm import db
+    # Same over-fetch and post-filtering as _chroma_ranked.
+    hits = db.match_chunks(_embed(question), grades, FRONT_MATTER_MAX_PAGE, k * 2)
+    content = _content_indices()
+    hits = [i for i in hits if i in content][:k]
+    return _canonicalize(hits, grades)
+
+
+def _dense_ranked(question: str, grades: tuple[int, ...], k: int) -> list[int]:
+    if not _supabase_configured():
+        return _chroma_ranked(question, grades, k)
+    try:
+        if _supabase_has_all_chunks():
+            return _supabase_ranked(question, grades, k)
+    except Exception as exc:
+        # The child still gets an answer: this one question is ranked by the
+        # keyword half alone.
+        log.warning("textbook search unreachable, using keyword search alone: %s", exc)
+        return []
+    return _chroma_ranked(question, grades, k)
+
+
+def warm_up() -> None:
+    """Load what the first question needs: the embedding model when the
+    vectors are in Supabase, otherwise the local Chroma index (built if
+    missing)."""
+    if _supabase_configured():
+        try:
+            ready = _supabase_has_all_chunks()
+        except Exception:
+            ready = True  # unreachable for now; questions use keyword search until it's back
+        if ready:
+            _embed("warm up")
+            return
+    _chroma_collection()
+
+
 def _rrf_fuse(rankings: list[list[int]], k: int = RRF_K) -> list[int]:
     scores: dict[int, float] = {}
     for ranking in rankings:
@@ -262,7 +351,7 @@ def retrieve(question: str, grade: int, top_k: int = TOP_K_FINAL) -> list[str]:
 
     grades = _grade_filter(grade)
     bm25_hits = _bm25_ranked(question, grades, TOP_K_PER_RETRIEVER)
-    dense_hits = _chroma_ranked(question, grades, TOP_K_PER_RETRIEVER)
+    dense_hits = _dense_ranked(question, grades, TOP_K_PER_RETRIEVER)
     fused = _rrf_fuse([bm25_hits, dense_hits])
     chunks = _load_chunks()
     return [chunks[i]["text"] for i in fused[:top_k]]
@@ -277,7 +366,7 @@ def retrieve_with_metadata(question: str, grade: int, top_k: int = TOP_K_FINAL) 
 
     grades = _grade_filter(grade)
     bm25_hits = _bm25_ranked(question, grades, TOP_K_PER_RETRIEVER)
-    dense_hits = _chroma_ranked(question, grades, TOP_K_PER_RETRIEVER)
+    dense_hits = _dense_ranked(question, grades, TOP_K_PER_RETRIEVER)
     fused = _rrf_fuse([bm25_hits, dense_hits])
     chunks = _load_chunks()
     return [chunks[i] for i in fused[:top_k]]

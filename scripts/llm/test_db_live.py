@@ -182,6 +182,33 @@ def main() -> None:
         db.sign_out(parent)
         print("throwaway child profile removed")
 
+    print("textbook search")
+    from scripts import retrieval
+    chunks = retrieval._load_chunks()
+    uploaded = db.chunk_count()
+    if uploaded == 0:
+        print("  skip textbook search checks (run scripts/upload_chunks.py first)")
+    else:
+        check(f"every chunk is uploaded ({uploaded} of {len(chunks)})", uploaded == len(chunks))
+        anon = db.new_client()
+        try:
+            anon.table("chunks").update({"page": 0}).eq("id", 0).execute()
+            unchanged = anon.table("chunks").select("page").eq("id", 0).execute().data
+            check("the public key cannot change the textbook",
+                  unchanged == [{"page": chunks[0]["page"]}])
+        except Exception:
+            check("the public key cannot change the textbook", True)
+        ids = db.match_chunks(retrieval._embed("how many sides does a triangle have"), (2, 3),
+                              retrieval.FRONT_MATTER_MAX_PAGE, 10)
+        check("match_chunks returns 10 chunks, all in classes 2-3 and past the front matter",
+              len(ids) == 10 and all(chunks[i]["grade"] in (2, 3)
+                                     and chunks[i]["page"] > retrieval.FRONT_MATTER_MAX_PAGE
+                                     for i in ids))
+        retrieval._all_chunks_uploaded = None
+        hits = retrieval.retrieve_with_metadata("how many sides does a triangle have", 3)
+        check("the whole retrieval runs through Supabase and returns 3 chunks",
+              retrieval._all_chunks_uploaded is True and len(hits) == 3)
+
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

@@ -137,3 +137,54 @@ create policy "own messages" on public.messages
     with check (exists (select 1 from public.chats c
                         join public.students s on s.id = c.student_id
                         where c.id = chat_id and s.parent_account_id = (select auth.uid())));
+
+-- Textbook search: the meaning-based half of scripts/retrieval.py. One row per
+-- chunk of data/extracted_json/ncert_chunks.json (id = its position there,
+-- the same number as Chroma's chunk_<id>), with its all-MiniLM-L6-v2 vector.
+-- The text itself stays in the JSON file the app already ships. Textbook
+-- content, not personal data: everyone can read it, including guests; nobody
+-- can change it through the app (scripts/upload_chunks.py writes it with the
+-- secret key).
+
+create extension if not exists vector with schema extensions;
+
+create table if not exists public.chunks (
+    id         int primary key,
+    grade      smallint not null,
+    page       int not null,
+    embedding  extensions.vector(384) not null
+);
+
+revoke all on public.chunks from anon, authenticated;
+grant select on public.chunks to anon, authenticated;
+-- scripts/upload_chunks.py writes with the secret key (role service_role),
+-- which also gets no access to new tables in this project unless granted.
+grant select, insert, update, delete on public.chunks to service_role;
+
+alter table public.chunks enable row level security;
+
+drop policy if exists "textbook is public" on public.chunks;
+create policy "textbook is public" on public.chunks
+    for select to anon, authenticated
+    using (true);
+
+-- The same search Chroma does: chunks in the given grades, past the front
+-- matter, nearest first by L2 distance (Chroma's "l2" space). Exact search:
+-- at a few thousand rows a full scan takes milliseconds.
+create or replace function public.match_chunks(
+    query_embedding extensions.vector(384), grades int[], min_page int, match_count int)
+returns table (id int, distance float8)
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+    select c.id, (c.embedding operator(extensions.<->) query_embedding)::float8 as distance
+    from public.chunks c
+    where c.grade = any(grades) and c.page > min_page
+    order by c.embedding operator(extensions.<->) query_embedding, c.id
+    limit match_count;
+$$;
+
+revoke execute on function public.match_chunks(extensions.vector, int[], int, int) from public;
+grant execute on function public.match_chunks(extensions.vector, int[], int, int) to anon, authenticated;

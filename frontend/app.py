@@ -88,13 +88,15 @@ init_session_state()
 inject_global_css()
 
 
-# A fresh host has no data/chromadb (it is gitignored), so the first run
-# builds it from data/extracted_json. Once per server process, and only under
-# `streamlit run`, never when tests import this module.
-@st.cache_resource(show_spinner="Getting the maths books ready… (first visit after a restart takes a minute or two)")
+# Load the textbook search before the first question: the embedding model when
+# the vectors are in Supabase, otherwise the local Chroma index, which a fresh
+# host (data/chromadb is gitignored) builds from data/extracted_json. Once per
+# server process, and only under `streamlit run`, never when tests import
+# this module.
+@st.cache_resource(show_spinner="Getting the maths books ready…")
 def _warm_retrieval_index():
     from scripts import retrieval
-    retrieval._chroma_collection()
+    retrieval.warm_up()
 
 
 if not MOCK_MODE and st.runtime.exists():
