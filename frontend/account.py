@@ -23,7 +23,7 @@ from frontend.state import change_grade, ss
 # Per-child session state, dropped on Switch and Log out so nothing of one
 # child's session (chats, name, open problem) carries over to the next.
 _CHILD_KEYS = ("student_id", "name", "name_field", "chats", "active", "chat_seq",
-               "_show_grade_picker", "_add_child_back")
+               "_show_grade_picker", "_add_child_back", "_confirm_delete_chat")
 
 
 def accounts_enabled() -> bool:
@@ -48,9 +48,25 @@ def log_in(email: str, password: str) -> None:
     db.sign_in(client, email.strip(), password)
     ss.db_client = client
     ss.account = "parent"
-    if db.list_children(client):
-        ss.page = "pick"
+    if db.consent_version(client) < db.CONSENT_VERSION:
+        # Agreed to an older version of what we keep: ask again first.
+        ss.page = "consent"
+        return
+    _route_after_login()
+
+
+def agree_to_current_consent() -> None:
+    from datetime import datetime, timezone
+
+    from scripts.llm import db
+    db.record_consent(ss.db_client, datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    _route_after_login()
+
+
+def _route_after_login() -> None:
+    from scripts.llm import db
     # No children yet: the name page asks for the first (see create_child).
+    ss.page = "pick" if db.list_children(ss.db_client) else "name"
 
 
 def register(email: str, password: str, redirect_to: str | None, consent_at: str) -> bool:
@@ -71,10 +87,12 @@ def children() -> list[dict]:
 
 
 def choose_child(child: dict) -> None:
+    from frontend import history
     from scripts.llm import db
     ss.student_id = child["id"]
     db.attach(child["id"], ss.db_client)
     ss.name = child["display_name"]
+    history.load_for_child()
     change_grade(child["grade"])
     ss.page = "main"
 
@@ -128,8 +146,8 @@ def _drop_child_session() -> None:
 
 
 def switch_child() -> None:
-    """Back to the picker. The current child's progress is already saved;
-    their open chat window is not kept (chat history is not stored yet)."""
+    """Back to the picker. The current child's progress and chats are
+    already saved (each turn is saved as it finishes)."""
     _drop_child_session()
     ss.page = "pick"
 

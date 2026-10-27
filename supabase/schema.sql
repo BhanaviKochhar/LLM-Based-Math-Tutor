@@ -84,3 +84,56 @@ $$;
 
 revoke execute on function public.student_summary(uuid, int) from public, anon;
 grant execute on function public.student_summary(uuid, int) to authenticated;
+
+-- Saved chat history. One row per chat (a child's conversation thread) and
+-- one per message, in order. thread_notes are the tutor's short notes on
+-- earlier problems in the chat (scripts/llm/memory.py), kept so a reopened
+-- chat continues with the same context. Deleting a chat removes its
+-- messages; deleting a child removes its chats.
+
+create table if not exists public.chats (
+    id            uuid primary key default gen_random_uuid(),
+    student_id    uuid not null references public.students (id) on delete cascade,
+    title         text not null default '' check (char_length(title) <= 200),
+    thread_notes  jsonb not null default '[]'::jsonb,
+    created_at    timestamptz not null default now(),
+    updated_at    timestamptz not null default now()
+);
+
+create table if not exists public.messages (
+    id          bigint generated always as identity primary key,
+    chat_id     uuid not null references public.chats (id) on delete cascade,
+    position    int not null,
+    role        text not null check (role in ('user', 'assistant')),
+    content     text not null default '',
+    metadata    jsonb not null default '{}'::jsonb,
+    created_at  timestamptz not null default now(),
+    unique (chat_id, position)
+);
+
+create index if not exists chats_student_idx on public.chats (student_id, updated_at desc);
+
+revoke all on public.chats, public.messages from anon;
+grant select, insert, update, delete on public.chats to authenticated;
+grant select, insert, delete on public.messages to authenticated;
+
+alter table public.chats enable row level security;
+alter table public.messages enable row level security;
+
+drop policy if exists "own chats" on public.chats;
+create policy "own chats" on public.chats
+    for all to authenticated
+    using (exists (select 1 from public.students s
+                   where s.id = student_id and s.parent_account_id = (select auth.uid())))
+    with check (exists (select 1 from public.students s
+                        where s.id = student_id and s.parent_account_id = (select auth.uid())));
+
+drop policy if exists "own messages" on public.messages;
+create policy "own messages" on public.messages
+    for all to authenticated
+    using (exists (select 1 from public.chats c
+                   join public.students s on s.id = c.student_id
+                   where c.id = chat_id and s.parent_account_id = (select auth.uid())))
+    with check (exists (select 1 from public.chats c
+                        join public.students s on s.id = c.student_id
+                        where c.id = chat_id and s.parent_account_id = (select auth.uid())));

@@ -266,6 +266,86 @@ def test_auth_errors_become_parent_friendly() -> None:
           message("some_new_code") == "Something went wrong. Please try again.")
 
 
+# Message shapes the app stores (frontend/episode.py): a child's message, a
+# tutor turn, a small-talk reply (text under "reply"), a blocked input.
+_MESSAGES = [
+    {"role": "user", "text": "What is 25 + 17?"},
+    {"role": "assistant", "kind": "turn", "mode": "teach_invite", "text": "Let's add!",
+     "buttons": ["Give me a hint"], "terminal": False, "outcome": None, "hint_number": None,
+     "source": "", "verify": {"ok": True}, "self_check_issues": [], "continues_episode": False,
+     "safety": {"output_checked": True, "output_blocked": False}},
+    {"role": "user", "text": "hi"},
+    {"role": "assistant", "kind": "chat", "question": "hi", "reply": "Hello! Ready for maths?"},
+    {"role": "user", "text": "[hidden for privacy]"},
+]
+
+
+def test_messages_survive_a_round_trip() -> None:
+    print("every stored message shape comes back exactly as it went in")
+    for i, m in enumerate(_MESSAGES):
+        back = db.row_to_message(db.message_to_row("c", i, m))
+        check(f"{m['role']} / {m.get('kind', '-')}: identical after save and load", back == m)
+    row = db.message_to_row("c", 3, _MESSAGES[3])
+    check("a small-talk reply's text is stored as the row's content",
+          row["content"] == "Hello! Ready for maths?" and "reply" not in row["metadata"])
+
+
+class _ChatTable:
+    def __init__(self, store, name):
+        self.store, self.name, self.op, self.payload = store, name, None, None
+
+    def insert(self, payload):
+        self.op, self.payload = "insert", payload
+        return self
+
+    def update(self, payload):
+        self.op, self.payload = "update", payload
+        return self
+
+    def eq(self, column, value):
+        return self
+
+    def execute(self):
+        self.store["calls"].append((self.name, self.op))
+        if self.name == "chats" and self.op == "insert":
+            row = dict(self.payload, id="chat-uuid")
+            self.store["chats"].append(row)
+            return _Result([row])
+        if self.name == "messages":
+            self.store["messages"].extend(self.payload)
+        return _Result([])
+
+
+class _ChatClient:
+    def __init__(self):
+        self.store = {"chats": [], "messages": [], "calls": []}
+
+    def table(self, name):
+        return _ChatTable(self.store, name)
+
+
+def test_save_chat_inserts_only_new_messages() -> None:
+    print("save_chat creates the chat once, then adds only the messages not saved yet")
+    client = _ChatClient()
+    chat = {"messages": list(_MESSAGES[:2]), "thread_notes": ["note"]}
+    db.save_chat(client, "kid", chat, "What is 25 + 17?")
+    check("first save creates one chat row for the child",
+          len(client.store["chats"]) == 1 and client.store["chats"][0]["student_id"] == "kid")
+    check("and inserts both messages at positions 0 and 1",
+          [r["position"] for r in client.store["messages"]] == [0, 1])
+    chat["messages"] += _MESSAGES[2:4]
+    db.save_chat(client, "kid", chat, "What is 25 + 17?")
+    check("second save updates the chat row instead of creating another",
+          len(client.store["chats"]) == 1 and ("chats", "update") in client.store["calls"])
+    check("and inserts only the two new messages, at positions 2 and 3",
+          [r["position"] for r in client.store["messages"]] == [0, 1, 2, 3])
+    db.save_chat(client, "kid", chat, "What is 25 + 17?")
+    check("a save with nothing new inserts no messages",
+          [r["position"] for r in client.store["messages"]] == [0, 1, 2, 3])
+    check("thread notes are saved with the chat",
+          client.store["chats"][0]["thread_notes"] == ["note"])
+
+
 def main() -> None:
     test_attached_child_matches_json_store()
     test_attached_child_never_touches_json_file()
@@ -274,6 +354,8 @@ def main() -> None:
     test_detach_falls_back_to_json()
     test_configured_needs_both_settings()
     test_auth_errors_become_parent_friendly()
+    test_messages_survive_a_round_trip()
+    test_save_chat_inserts_only_new_messages()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

@@ -7,7 +7,7 @@ import time
 import streamlit as st
 import streamlit.components.v1 as components
 
-from frontend import account
+from frontend import account, history
 from frontend.assets.onboarding_scene import _build_footer_scene, _build_header_scene
 from frontend.episode import (
     _ACTIONABLE_LABELS,
@@ -175,6 +175,7 @@ def render_main_page():
     st.markdown(MAIN_CSS, unsafe_allow_html=True)
 
     chat = active_chat()
+    history.ensure_loaded(chat)
     msgs = chat["messages"]
 
     solved = sum(1 for m in msgs if m.get("role") == "assistant" and m.get("outcome") == "solved")
@@ -261,6 +262,34 @@ def render_main_page():
                                          type=("primary" if c["id"] == ss.active else "secondary"),
                                          use_container_width=True):
                                 ss.active = c["id"]
+                                ss.pop("_confirm_delete_chat", None)
+                                st.rerun()
+
+                        # Delete the open chat (and its saved copy, if any).
+                        current = active_chat()
+                        if current["messages"] or current.get("db_id"):
+                            if ss.get("_confirm_delete_chat") == current["id"]:
+                                st.markdown('<div class="tt-hist-empty">Delete this chat? '
+                                            "This can't be undone.</div>",
+                                            unsafe_allow_html=True)
+                                dy, dn = st.columns(2)
+                                with dy:
+                                    if st.button("Delete", key="delchat_yes",
+                                                 use_container_width=True):
+                                        try:
+                                            history.delete(current)
+                                        except Exception:
+                                            pass
+                                        ss.pop("_confirm_delete_chat", None)
+                                        st.rerun()
+                                with dn:
+                                    if st.button("Cancel", key="delchat_no",
+                                                 use_container_width=True):
+                                        ss.pop("_confirm_delete_chat", None)
+                                        st.rerun()
+                            elif st.button("🗑 Delete this chat", key="delchat_btn",
+                                           use_container_width=True):
+                                ss["_confirm_delete_chat"] = current["id"]
                                 st.rerun()
 
     # ---------- RIGHT: Progress + Badges ----------
@@ -455,6 +484,7 @@ def render_main_page():
                 # also just reads better regardless -- a "typing…" indicator
                 # belongs inside the conversation, not floating below it.
                 if process_pending_turn(chat, ss.grade, ss.level):
+                    history.save(chat)
                     st.rerun()
 
             components.html(

@@ -79,6 +79,7 @@ from frontend.episode import (
 from frontend.account import accounts_enabled
 from frontend.styles.global_css import inject_global_css
 from frontend.views.auth_page import render_auth_page
+from frontend.views.consent_page import render_consent_page
 from frontend.views.picker_page import render_picker_page
 from frontend.views.name_page import _name_page_submit, render_name_page
 from frontend.views.main_page import render_chat_reply, render_main_page, render_turn
@@ -113,6 +114,8 @@ if not MOCK_MODE and st.runtime.exists():
 # ===========================================================================
 if ss.page == "name" and ss.get("account") is None and accounts_enabled():
     render_auth_page()
+elif ss.page == "consent":
+    render_consent_page()
 elif ss.page == "pick":
     render_picker_page()
 elif ss.page == "name":

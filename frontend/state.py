@@ -177,7 +177,9 @@ def chat_title(chat) -> str:
     for m in chat["messages"]:
         if m["role"] == "user":
             return m["text"]
-    return "New chat"
+    # A saved chat not opened yet (frontend/history.py) has no messages
+    # loaded, only its stored title.
+    return chat.get("title") or "New chat"
 
 
 def start_new_chat():

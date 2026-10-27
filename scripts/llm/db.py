@@ -133,9 +133,10 @@ def _auth_error(exc: Exception) -> AccountError:
 def sign_up(client, email: str, password: str, redirect_to: str | None, consent_at: str) -> bool:
     """Register a parent or teacher account. Returns True when they are
     logged in straight away, False when they must confirm their email
-    first. consent_at (ISO time the consent box was ticked) is kept in the
-    account's own metadata as the record of that consent."""
-    options = {"data": {"consent_at": consent_at}}
+    first. consent_at (ISO time the consent box was ticked) and the consent
+    version are kept in the account's own metadata as the record of that
+    consent."""
+    options = {"data": {"consent_at": consent_at, "consent_version": CONSENT_VERSION}}
     if redirect_to:
         options["email_redirect_to"] = redirect_to
     try:
@@ -153,8 +154,10 @@ def sign_in(client, email: str, password: str) -> None:
 
 
 def sign_out(client) -> None:
+    """Ends this browser's session only; the default ("global") would also
+    log the parent out on every other device."""
     try:
-        client.auth.sign_out()
+        client.auth.sign_out({"scope": "local"})
     except Exception:
         pass
 
@@ -182,3 +185,91 @@ def rename_child(client, student_id: str, display_name: str) -> None:
 def delete_child(client, student_id: str) -> None:
     """Removes the profile; its attempts go with it (on delete cascade)."""
     client.table("students").delete().eq("id", student_id).execute()
+
+
+# ---------------------------------------------------------------------------
+# Consent
+# ---------------------------------------------------------------------------
+# Bumped when what we keep changes; a parent who agreed to an older version
+# is asked again at login. 1: name, class, practice results. 2: also chats.
+CONSENT_VERSION = 2
+
+
+def consent_version(client) -> int:
+    """The consent version the logged-in account last agreed to (accounts
+    from before versioning count as 1)."""
+    user = client.auth.get_user().user
+    return int((user.user_metadata or {}).get("consent_version", 1))
+
+
+def record_consent(client, consent_at: str) -> None:
+    client.auth.update_user({"data": {"consent_version": CONSENT_VERSION,
+                                      f"consent_v{CONSENT_VERSION}_at": consent_at}})
+    # update_user() leaves the client's table requests carrying the anon key
+    # instead of the parent's login (supabase-py resets the Authorization
+    # header on any auth event other than sign-in, refresh or sign-out), so
+    # the next query was refused by Row Level Security. A token refresh puts
+    # the login back.
+    client.auth.refresh_session()
+
+
+# ---------------------------------------------------------------------------
+# Saved chats (the History sidebar)
+# ---------------------------------------------------------------------------
+def _text_key(message: dict) -> str:
+    """Where a message keeps its visible text: a small-talk reply (kind
+    "chat") under "reply", everything else under "text"."""
+    return "reply" if message.get("role") == "assistant" and message.get("kind") == "chat" else "text"
+
+
+def message_to_row(chat_id: str, position: int, message: dict) -> dict:
+    key = _text_key(message)
+    metadata = {k: v for k, v in message.items() if k not in ("role", key)}
+    return {"chat_id": chat_id, "position": position, "role": message["role"],
+            "content": message.get(key) or "", "metadata": metadata}
+
+
+def row_to_message(row: dict) -> dict:
+    message = dict(row["metadata"] or {}, role=row["role"])
+    message[_text_key(message)] = row["content"]
+    return message
+
+
+def list_chats(client, student_id: str) -> list[dict]:
+    """The child's saved chats, most recently used first."""
+    return (client.table("chats").select("id, title, thread_notes")
+            .eq("student_id", student_id).order("updated_at", desc=True)
+            .execute().data)
+
+
+def load_messages(client, chat_id: str) -> list[dict]:
+    rows = (client.table("messages").select("position, role, content, metadata")
+            .eq("chat_id", chat_id).order("position").execute().data)
+    return [row_to_message(r) for r in rows]
+
+
+def save_chat(client, student_id: str, chat: dict, title: str) -> None:
+    """Bring the saved copy of a session chat up to date: create the chat row
+    on first save, then insert only the messages not saved yet.
+    chat["db_id"] and chat["saved_count"] record what is already stored."""
+    from datetime import datetime, timezone
+
+    fields = {"title": title[:200], "thread_notes": list(chat.get("thread_notes") or []),
+              "updated_at": datetime.now(timezone.utc).isoformat()}
+    if not chat.get("db_id"):
+        row = (client.table("chats").insert(dict(fields, student_id=student_id))
+               .execute().data[0])
+        chat["db_id"], chat["saved_count"] = row["id"], 0
+    else:
+        client.table("chats").update(fields).eq("id", chat["db_id"]).execute()
+    start = chat.get("saved_count") or 0
+    new = [message_to_row(chat["db_id"], pos, m)
+           for pos, m in enumerate(chat["messages"]) if pos >= start]
+    if new:
+        client.table("messages").insert(new).execute()
+    chat["saved_count"] = len(chat["messages"])
+
+
+def delete_chat(client, chat_id: str) -> None:
+    """Removes the chat; its messages go with it (on delete cascade)."""
+    client.table("chats").delete().eq("id", chat_id).execute()

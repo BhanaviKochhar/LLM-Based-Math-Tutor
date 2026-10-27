@@ -89,10 +89,43 @@ def main() -> None:
         check("list_children() includes the child", sid in listed)
         check("rename saved", listed.get(sid, {}).get("display_name") == "Live Test Renamed")
 
+        print("saved chats")
+        chat = {"messages": [{"role": "user", "text": "What is 2 + 2?"},
+                             {"role": "assistant", "kind": "turn", "text": "Let's count!",
+                              "buttons": ["Give me a hint"], "verify": {"ok": True}}],
+                "thread_notes": ["solved 3 + 3"]}
+        db.save_chat(parent, sid, chat, "What is 2 + 2?")
+        chat["messages"] += [{"role": "user", "text": "4"},
+                             {"role": "assistant", "kind": "chat", "question": "4", "reply": "Yes!"}]
+        db.save_chat(parent, sid, chat, "What is 2 + 2?")
+        listed_chats = db.list_chats(parent, sid)
+        check("list_chats() returns the chat with its title and notes",
+              [(c["id"], c["title"], c["thread_notes"]) for c in listed_chats]
+              == [(chat["db_id"], "What is 2 + 2?", ["solved 3 + 3"])])
+        check("load_messages() gives back all four messages, unchanged and in order",
+              db.load_messages(parent, chat["db_id"]) == chat["messages"])
+        spare = {"messages": [{"role": "user", "text": "spare"}], "thread_notes": []}
+        db.save_chat(parent, sid, spare, "spare")
+        db.delete_chat(parent, spare["db_id"])
+        check("delete_chat() removes the chat and its messages",
+              db.list_chats(parent, sid) == listed_chats
+              and parent.table("messages").select("id").eq("chat_id", spare["db_id"]).execute().data == [])
+
+        print("consent")
+        fresh = _signed_in("TEST_PARENT_EMAIL", "TEST_PARENT_PASSWORD")
+        db.record_consent(fresh, "2026-01-01T00:00:00+00:00")
+        check("consent is recorded at the current version",
+              db.consent_version(fresh) == db.CONSENT_VERSION)
+        check("and the account's queries still carry its login afterwards",
+              sid in {c["id"] for c in db.list_children(fresh)})
+        db.sign_out(fresh)
+
         print("Row Level Security")
         anon = db.new_client()
         check("a logged-out client sees no children", _rows_or_denied(anon, "students") == [])
         check("a logged-out client sees no attempts", _rows_or_denied(anon, "attempts") == [])
+        check("a logged-out client sees no chats", _rows_or_denied(anon, "chats") == [])
+        check("a logged-out client sees no messages", _rows_or_denied(anon, "messages") == [])
         try:
             anon.table("attempts").insert({"student_id": sid, "topic": "x", "correct": True}).execute()
             check("a logged-out client cannot add attempts", False)
@@ -111,6 +144,15 @@ def main() -> None:
                 check("another account cannot add attempts to this child", False)
             except Exception:
                 check("another account cannot add attempts to this child", True)
+            check("another account cannot see this child's chats",
+                  other.table("chats").select("id").eq("student_id", sid).execute().data == [])
+            check("or their messages",
+                  other.table("messages").select("id").eq("chat_id", chat["db_id"]).execute().data == [])
+            try:
+                other.table("messages").insert(db.message_to_row(chat["db_id"], 99, {"role": "user", "text": "x"})).execute()
+                check("another account cannot add messages to this child's chat", False)
+            except Exception:
+                check("another account cannot add messages to this child's chat", True)
             db.rename_child(other, sid, "Hijacked")
             db.delete_child(other, sid)
             still = parent.table("students").select("display_name").eq("id", sid).execute().data
@@ -131,6 +173,9 @@ def main() -> None:
               parent.table("students").select("id").eq("id", sid).execute().data == [])
         check("and its attempts with it",
               parent.table("attempts").select("id").eq("student_id", sid).execute().data == [])
+        check("and its chats and messages",
+              parent.table("chats").select("id").eq("student_id", sid).execute().data == []
+              and parent.table("messages").select("id").eq("chat_id", chat["db_id"]).execute().data == [])
     finally:
         db.detach(sid)
         parent.table("students").delete().eq("id", sid).execute()

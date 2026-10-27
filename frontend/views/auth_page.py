@@ -17,8 +17,12 @@ from frontend.views.name_page import render_onboarding_world
 
 _MIN_PASSWORD = 8
 
+# What a parent agrees to; db.CONSENT_VERSION counts changes to it, and a
+# parent who agreed to an older version is asked again at login
+# (views/consent_page.py).
 CONSENT_LABEL = ("I'm this child's parent, guardian or teacher, and I agree to "
-                 "TinyThinker keeping my child's first name, class and practice results.")
+                 "TinyThinker keeping my child's first name, class, practice results "
+                 "and chats with the tutor.")
 
 PRIVACY_NOTE = """
 **What TinyThinker keeps**
@@ -27,12 +31,16 @@ PRIVACY_NOTE = """
 - Your child's first name and class.
 - Which practice questions your child got right or wrong, so the tutor can
   pick up at the right level next time.
+- Your child's chats with the tutor (their questions and its replies), so
+  they can be reopened later from History.
 
 We don't ask for surnames, photos, age or school. The questions your child
-types are sent to an AI service to write the tutor's replies.
+types are sent to an AI service to write the tutor's replies. Anything that
+looks like a phone number, address or email is hidden before it is kept.
 
-You can reset your child's progress at any time. To delete the account and
-everything in it, contact the TinyThinker team.
+You can delete a chat, or a child's whole profile (with all its progress and
+chats), from the app at any time. To delete the account itself, contact the
+TinyThinker team.
 """
 
 
