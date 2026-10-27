@@ -159,11 +159,10 @@ def sign_out(client) -> None:
         pass
 
 
-def first_child(client) -> dict | None:
-    """The account's child profile (one per account for now), or None."""
-    rows = (client.table("students").select("id, display_name, grade")
-            .order("created_at").limit(1).execute().data)
-    return rows[0] if rows else None
+def list_children(client) -> list[dict]:
+    """The account's child profiles, oldest first."""
+    return (client.table("students").select("id, display_name, grade")
+            .order("created_at").execute().data)
 
 
 def add_child(client, display_name: str, grade: int) -> dict:
@@ -174,3 +173,12 @@ def add_child(client, display_name: str, grade: int) -> dict:
 
 def update_grade(client, student_id: str, grade: int) -> None:
     client.table("students").update({"grade": grade}).eq("id", student_id).execute()
+
+
+def rename_child(client, student_id: str, display_name: str) -> None:
+    client.table("students").update({"display_name": display_name}).eq("id", student_id).execute()
+
+
+def delete_child(client, student_id: str) -> None:
+    """Removes the profile; its attempts go with it (on delete cascade)."""
+    client.table("students").delete().eq("id", student_id).execute()

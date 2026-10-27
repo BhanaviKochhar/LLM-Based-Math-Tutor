@@ -380,6 +380,18 @@ def render_name_page():
         "Let's go →" if can_proceed else "Let's go",
         key="go_btn", use_container_width=True, disabled=not can_proceed,
     )
+    # Adding another child from the picker: offer the way back to it.
+    if account.signed_in() and ss.get("_add_child_back"):
+        st.markdown(
+            '<style>[class*="st-key-back_btn"] button { background: transparent !important;'
+            ' border: none !important; box-shadow: none !important; }'
+            '[class*="st-key-back_btn"] button p { color: #2f6bea !important;'
+            ' font-weight: 700 !important; text-decoration: underline; }</style>',
+            unsafe_allow_html=True,
+        )
+        if st.button("← Back to profiles", key="back_btn"):
+            account.back_to_picker()
+            st.rerun()
 
     # Pressing Enter in the name field reruns the script (committing the
     # text) but, with a bare st.button (not st.form_submit_button), does

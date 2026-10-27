@@ -79,6 +79,7 @@ from frontend.episode import (
 from frontend.account import accounts_enabled
 from frontend.styles.global_css import inject_global_css
 from frontend.views.auth_page import render_auth_page
+from frontend.views.picker_page import render_picker_page
 from frontend.views.name_page import _name_page_submit, render_name_page
 from frontend.views.main_page import render_chat_reply, render_main_page, render_turn
 
@@ -102,8 +103,8 @@ if not MOCK_MODE and st.runtime.exists():
 # Router
 #
 # When accounts are on (a Supabase project is configured, frontend/account.py),
-# the login page comes first; a logged-in parent with a child profile goes
-# straight to the chat, one without goes to the name page to create it.
+# the login page comes first; a logged-in parent with child profiles picks
+# one on the picker page, one without goes to the name page to create it.
 #
 # Onboarding is now a single screen: "Let's go" on the name page takes the
 # child straight to the chat (ss.page = "main") and queues a brief welcome
@@ -112,6 +113,8 @@ if not MOCK_MODE and st.runtime.exists():
 # ===========================================================================
 if ss.page == "name" and ss.get("account") is None and accounts_enabled():
     render_auth_page()
+elif ss.page == "pick":
+    render_picker_page()
 elif ss.page == "name":
     render_name_page()
 else:

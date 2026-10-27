@@ -84,6 +84,10 @@ def main() -> None:
         db.update_grade(parent, sid, 4)
         mine = parent.table("students").select("id, grade").eq("id", sid).execute().data
         check("grade saved", mine == [{"id": sid, "grade": 4}])
+        db.rename_child(parent, sid, "Live Test Renamed")
+        listed = {c["id"]: c for c in db.list_children(parent)}
+        check("list_children() includes the child", sid in listed)
+        check("rename saved", listed.get(sid, {}).get("display_name") == "Live Test Renamed")
 
         print("Row Level Security")
         anon = db.new_client()
@@ -107,6 +111,11 @@ def main() -> None:
                 check("another account cannot add attempts to this child", False)
             except Exception:
                 check("another account cannot add attempts to this child", True)
+            db.rename_child(other, sid, "Hijacked")
+            db.delete_child(other, sid)
+            still = parent.table("students").select("display_name").eq("id", sid).execute().data
+            check("another account cannot rename or delete this child",
+                  still == [{"display_name": "Live Test Renamed"}])
             db.sign_out(other)
         else:
             print("  skip cross-account checks (TEST_OTHER_EMAIL not set)")
@@ -114,11 +123,19 @@ def main() -> None:
         print("reset")
         student_tracker.reset(sid)
         check("reset() leaves no attempts", student_tracker.stats(sid)["attempts"] == 0)
+
+        print("delete")
+        student_tracker.record(sid, "Addition", True)
+        db.delete_child(parent, sid)
+        check("delete_child() removes the profile",
+              parent.table("students").select("id").eq("id", sid).execute().data == [])
+        check("and its attempts with it",
+              parent.table("attempts").select("id").eq("student_id", sid).execute().data == [])
     finally:
         db.detach(sid)
         parent.table("students").delete().eq("id", sid).execute()
         db.sign_out(parent)
-        print("deleted throwaway child profile")
+        print("throwaway child profile removed")
 
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:

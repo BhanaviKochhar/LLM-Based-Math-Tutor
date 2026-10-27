@@ -36,30 +36,33 @@ everything in it, contact the TinyThinker team.
 """
 
 
+# Shared by the account screens (this page and views/picker_page.py): the
+# outlined secondary button (any key starting "outline_") and the readable
+# message boxes written by notice().
+ACCOUNT_CSS = """
+<style>
+    [class*="st-key-outline_"] button {
+        font-family: 'Baloo 2', sans-serif !important; font-weight: 700 !important;
+        width: 100% !important; border-radius: 14px !important; padding: 10px !important;
+        background: #ffffff !important; color: #2f4d80 !important;
+        border: 2px solid #f5b301 !important;
+    }
+    [class*="st-key-outline_"] button p { color: #2f4d80 !important; font-weight: 700 !important; }
+    .tt-or { text-align: center; color: #7a6a52; font-weight: 700; margin: 10px 0 6px; }
+    .tt-notice {
+        font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px;
+        line-height: 1.45; border-radius: 12px; padding: 12px 16px; margin: 10px 0 4px;
+        border: 2px solid; background: #ffffff;
+    }
+    .tt-notice.ok { color: #1d5a32; border-color: #3a9d5d; background: #eef8f1; }
+    .tt-notice.err { color: #8a1c1c; border-color: #d64545; background: #fdf0f0; }
+</style>
+"""
+
+
 def render_auth_page():
     render_onboarding_world()
-    st.markdown(
-        """
-        <style>
-        [class*="st-key-guest_btn"] button {
-            font-family: 'Baloo 2', sans-serif !important; font-weight: 700 !important;
-            width: 100% !important; border-radius: 14px !important; padding: 10px !important;
-            background: #ffffff !important; color: #2f4d80 !important;
-            border: 2px solid #f5b301 !important;
-        }
-        [class*="st-key-guest_btn"] button p { color: #2f4d80 !important; font-weight: 700 !important; }
-        .tt-or { text-align: center; color: #7a6a52; font-weight: 700; margin: 10px 0 6px; }
-        .tt-notice {
-            font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px;
-            line-height: 1.45; border-radius: 12px; padding: 12px 16px; margin: 10px 0 4px;
-            border: 2px solid; background: #ffffff;
-        }
-        .tt-notice.ok { color: #1d5a32; border-color: #3a9d5d; background: #eef8f1; }
-        .tt-notice.err { color: #8a1c1c; border-color: #d64545; background: #fdf0f0; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown(ACCOUNT_CSS, unsafe_allow_html=True)
     st.markdown('<p class="tt-title">Welcome, <span class="accent">Tiny&nbsp;Thinker!</span></p>',
                 unsafe_allow_html=True)
     st.markdown('<p class="tt-sub">Grown-ups: log in to save your child\'s progress ✨</p>',
@@ -77,12 +80,12 @@ def render_auth_page():
                                               use_container_width=True)
         if submitted:
             if not email.strip() or not password:
-                _notice("err", "Please enter your email and password.")
+                notice("err", "Please enter your email and password.")
             else:
                 try:
                     account.log_in(email, password)
                 except Exception as exc:
-                    _notice("err", _message(exc))
+                    notice("err", _message(exc))
                 else:
                     st.rerun()
 
@@ -103,7 +106,7 @@ def render_auth_page():
         if created:
             problem = _registration_problem(new_email, new_password, repeat, consent)
             if problem:
-                _notice("err", problem)
+                notice("err", problem)
             else:
                 try:
                     logged_in = account.register(
@@ -111,21 +114,21 @@ def render_auth_page():
                         consent_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
                     )
                 except Exception as exc:
-                    _notice("err", _message(exc))
+                    notice("err", _message(exc))
                 else:
                     if logged_in:
                         st.rerun()
-                    _notice("ok", "Almost done! We've sent you an email. Open the link in it to "
+                    notice("ok", "Almost done! We've sent you an email. Open the link in it to "
                                "confirm your address, then come back here and log in.")
 
     st.markdown('<div class="tt-or">or</div>', unsafe_allow_html=True)
-    if st.button("Try without an account", key="guest_btn", use_container_width=True):
+    if st.button("Try without an account", key="outline_guest", use_container_width=True):
         account.continue_as_guest()
         st.rerun()
     st.stop()
 
 
-def _notice(kind: str, text: str) -> None:
+def notice(kind: str, text: str) -> None:
     """A readable message box: dark text on a pale tint with a strong border
     (Streamlit's own success/error boxes are pale-on-pale on this card)."""
     st.markdown(f'<div class="tt-notice {kind}">{html.escape(text)}</div>', unsafe_allow_html=True)

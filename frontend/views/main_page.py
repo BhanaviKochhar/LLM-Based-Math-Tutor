@@ -183,7 +183,7 @@ def render_main_page():
 
     initial = display_name()[0].upper() if display_name() != "friend" else "🙂"
     st.markdown(
-        f'<div class="tt-appbar">{_build_header_scene()}'
+        f'<div class="tt-appbar{" signed-in" if account.signed_in() else ""}">{_build_header_scene()}'
         f'<div class="tt-brand">Tiny<span class="y">Thinker</span></div>'
         f'<div class="tt-bar-right{" with-logout" if account.signed_in() else ""}">'
         f'<span class="tt-user"><span class="av">{initial}</span>'
@@ -191,6 +191,9 @@ def render_main_page():
         unsafe_allow_html=True,
     )
     if account.signed_in():
+        if st.button("Switch", key="switch_btn"):
+            account.switch_child()
+            st.rerun()
         if st.button("Log out", key="logout_btn"):
             account.log_out()
             st.rerun()
