@@ -1,0 +1,6 @@
+# Every page is designed on light backgrounds (cream card, sky scene), so the
+# app always uses Streamlit's light theme. Following a dark system setting
+# turned Streamlit's own text light-on-cream: tab labels, checkbox labels and
+# expander headers became unreadable.
+[theme]
+base = "light"

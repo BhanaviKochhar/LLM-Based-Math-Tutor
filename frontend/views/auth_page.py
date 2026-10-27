@@ -7,6 +7,7 @@ as before.
 """
 from __future__ import annotations
 
+import html
 from datetime import datetime, timezone
 
 import streamlit as st
@@ -48,6 +49,13 @@ def render_auth_page():
         }
         [class*="st-key-guest_btn"] button p { color: #2f4d80 !important; font-weight: 700 !important; }
         .tt-or { text-align: center; color: #7a6a52; font-weight: 700; margin: 10px 0 6px; }
+        .tt-notice {
+            font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px;
+            line-height: 1.45; border-radius: 12px; padding: 12px 16px; margin: 10px 0 4px;
+            border: 2px solid; background: #ffffff;
+        }
+        .tt-notice.ok { color: #1d5a32; border-color: #3a9d5d; background: #eef8f1; }
+        .tt-notice.err { color: #8a1c1c; border-color: #d64545; background: #fdf0f0; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -69,12 +77,12 @@ def render_auth_page():
                                               use_container_width=True)
         if submitted:
             if not email.strip() or not password:
-                st.error("Please enter your email and password.")
+                _notice("err", "Please enter your email and password.")
             else:
                 try:
                     account.log_in(email, password)
                 except Exception as exc:
-                    st.error(_message(exc))
+                    _notice("err", _message(exc))
                 else:
                     st.rerun()
 
@@ -95,7 +103,7 @@ def render_auth_page():
         if created:
             problem = _registration_problem(new_email, new_password, repeat, consent)
             if problem:
-                st.error(problem)
+                _notice("err", problem)
             else:
                 try:
                     logged_in = account.register(
@@ -103,11 +111,11 @@ def render_auth_page():
                         consent_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
                     )
                 except Exception as exc:
-                    st.error(_message(exc))
+                    _notice("err", _message(exc))
                 else:
                     if logged_in:
                         st.rerun()
-                    st.success("Almost done! We've sent you an email. Open the link in it to "
+                    _notice("ok", "Almost done! We've sent you an email. Open the link in it to "
                                "confirm your address, then come back here and log in.")
 
     st.markdown('<div class="tt-or">or</div>', unsafe_allow_html=True)
@@ -115,6 +123,12 @@ def render_auth_page():
         account.continue_as_guest()
         st.rerun()
     st.stop()
+
+
+def _notice(kind: str, text: str) -> None:
+    """A readable message box: dark text on a pale tint with a strong border
+    (Streamlit's own success/error boxes are pale-on-pale on this card)."""
+    st.markdown(f'<div class="tt-notice {kind}">{html.escape(text)}</div>', unsafe_allow_html=True)
 
 
 def _registration_problem(email: str, password: str, repeat: str, consent: bool) -> str | None:
