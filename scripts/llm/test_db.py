@@ -360,6 +360,30 @@ def test_save_chat_inserts_only_new_messages() -> None:
           [r["position"] for r in client.store["messages"]] == [0, 1, 2, 3])
     check("thread notes are saved with the chat",
           client.store["chats"][0]["thread_notes"] == ["note"])
+    db.save_chat(client, "kid2", {"messages": list(_MESSAGES[:1])}, "t", episode={"x": 1})
+    check("an unfinished problem is saved with the chat",
+          client.store["chats"][-1]["episode"] == {"x": 1})
+
+
+def test_open_problem_survives_save_and_reopen() -> None:
+    print("an unfinished problem comes back identical after a save and reopen")
+    import json
+
+    from frontend import history
+    from scripts.llm import controller as C
+    state, _ = C.start("What is 7 times 8?", 3, "intermediate", computed_answer="56", is_math=True)
+    state, _ = C.step(state, "ATTEMPT", "54")
+    state, _ = C.step(state, "HINT")
+    episode = {"state": state, "source": "NCERT Class 3, p. 42",
+               "chunks": [{"text": "7 x 8 = 56", "grade": 3, "page": 42, "topic": "Multiplication"}],
+               "hints_shown": ["Count in sevens"], "msg_start": 4, "verify": {"ok": True}}
+    stored = json.loads(json.dumps(history.episode_to_json(episode)))
+    back = history.episode_from_json(stored)
+    check("tutor state (attempts, hints, phase, answer) identical", back["state"] == state)
+    check("chunks, hints shown, source and position identical",
+          {k: back[k] for k in episode if k != "state"} == {k: episode[k] for k in episode if k != "state"})
+    check("no open problem stays no open problem",
+          history.episode_to_json(None) is None and history.episode_from_json(None) is None)
 
 
 def main() -> None:
@@ -372,6 +396,7 @@ def main() -> None:
     test_auth_errors_become_parent_friendly()
     test_messages_survive_a_round_trip()
     test_save_chat_inserts_only_new_messages()
+    test_open_problem_survives_save_and_reopen()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

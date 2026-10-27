@@ -76,6 +76,11 @@ def render_picker_page():
             account.start_adding_child(can_go_back=bool(kids))
             st.rerun()
 
+    if not managing and account.is_admin():
+        if st.button("Admin dashboard", key="link_admin"):
+            account.open_admin()
+            st.rerun()
+
     left, right = st.columns(2)
     with left:
         if kids and st.button("Done" if managing else "Manage profiles", key="link_manage"):

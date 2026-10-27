@@ -264,6 +264,26 @@ def start_adding_child(can_go_back: bool) -> None:
     ss.page = "name"
 
 
+def is_admin() -> bool:
+    """Whether this account may open the admin dashboard (checked once per
+    login; the dashboard's own database call checks again every time)."""
+    if not signed_in():
+        return False
+    if "_is_admin" not in ss:
+        from scripts.llm import db
+        ss["_is_admin"] = db.is_admin(ss.db_client)
+    return ss["_is_admin"]
+
+
+def open_admin() -> None:
+    ss.page = "admin"
+
+
+def admin_dashboard() -> dict:
+    from scripts.llm import db
+    return db.admin_dashboard(ss.db_client)
+
+
 def back_to_picker() -> None:
     ss.pop("_add_child_back", None)
     ss.page = "pick"

@@ -66,15 +66,21 @@ python -u scripts/retrieval.py
 ### Run the test suites
 
 ```bash
-python -m frontend.test_app           # 169 tests — UI/state logic
-python -m scripts.llm.test_pipeline   # 210 tests — verifier/pipeline/prompt logic
-python -m eval.controller_walk        # 117 checks — controller state-machine scenarios
-python -m eval.validate_datasets      # 74 checks — eval dataset schema/integrity
-python -m scripts.test_retrieval      # 16 checks — retrieval behavior
-python -m scripts.llm.test_scope      # 63 checks — the syllabus scope gate
+python -m frontend.test_app                          # 176 tests — UI/state logic
+python -m scripts.llm.test_pipeline                  # 266 tests — verifier/pipeline/prompt logic
+python -m eval.controller_walk                       # 127 checks — controller state-machine scenarios
+python -m eval.validate_datasets                     # 57 checks — eval dataset schema/integrity
+python -m scripts.test_retrieval                     # 27 checks — retrieval behavior and search path
+python -m scripts.llm.test_scope                     # 95 checks — the syllabus scope gate
+python -m scripts.llm.test_db                        # 35 checks — accounts, saved progress and chats
+python -m eval.test_answer_extraction                # 39 checks — answer extraction
+python -m eval.component_eval.test_component_eval    # 28 checks — eval harness plumbing
 ```
 
-All six are offline (no network, no API keys) and deterministic.
+All nine are offline (no network, no API keys) and deterministic, and run in
+CI on every push to `deploy` (`.github/workflows/tests.yml`).
+`python -m scripts.llm.test_db_live` checks the real Supabase database and is
+run by hand (it needs the Supabase settings and test accounts in `.env`).
 
 ---
 
@@ -128,7 +134,7 @@ end-to-end through them in order.
 | `views/main_page.py` | Screen 2: the actual chat — history/progress side panels, the ask-bar form, badge/progress computation, and `render_turn()`/`render_chat_reply()` which decide what a given stored message renders as (a graded turn with a verify-tag, or a plain conceptual chat reply). |
 | `assets/onboarding_scene.py` | Hand-authored inline SVGs for the onboarding page's illustrated world (sun, clouds, hills, forest critters) — built from one shared "critter" template so the whole cast reads as one coherent design. |
 | `assets/pandi.webm` | The current onboarding mascot animation. |
-| `test_app.py` | 169 tests covering UI/state logic (safety redaction, button gating, progress math, episode lifecycle) with the backend mocked — no network. |
+| `test_app.py` | 176 tests covering UI/state logic (safety redaction, button gating, progress math, episode lifecycle) with the backend mocked — no network. |
 
 ---
 

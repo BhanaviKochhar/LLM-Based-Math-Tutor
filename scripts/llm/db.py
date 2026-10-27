@@ -285,7 +285,7 @@ def row_to_message(row: dict) -> dict:
 
 def list_chats(client, student_id: str) -> list[dict]:
     """The child's saved chats, most recently used first."""
-    return (client.table("chats").select("id, title, thread_notes")
+    return (client.table("chats").select("id, title, thread_notes, episode")
             .eq("student_id", student_id).order("updated_at", desc=True)
             .execute().data)
 
@@ -296,14 +296,16 @@ def load_messages(client, chat_id: str) -> list[dict]:
     return [row_to_message(r) for r in rows]
 
 
-def save_chat(client, student_id: str, chat: dict, title: str) -> None:
+def save_chat(client, student_id: str, chat: dict, title: str,
+              episode: dict | None = None) -> None:
     """Bring the saved copy of a session chat up to date: create the chat row
     on first save, then insert only the messages not saved yet.
-    chat["db_id"] and chat["saved_count"] record what is already stored."""
+    chat["db_id"] and chat["saved_count"] record what is already stored.
+    `episode` is the chat's unfinished problem as plain JSON, or None."""
     from datetime import datetime, timezone
 
     fields = {"title": title[:200], "thread_notes": list(chat.get("thread_notes") or []),
-              "updated_at": datetime.now(timezone.utc).isoformat()}
+              "episode": episode, "updated_at": datetime.now(timezone.utc).isoformat()}
     if not chat.get("db_id"):
         row = (client.table("chats").insert(dict(fields, student_id=student_id))
                .execute().data[0])
@@ -353,3 +355,19 @@ def match_chunks(query_embedding: list[float], grades: tuple[int, ...],
         "min_page": min_page, "match_count": match_count,
     }).execute().data
     return [r["id"] for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# Admin dashboard (supabase/schema.sql admins, is_admin, admin_dashboard)
+# ---------------------------------------------------------------------------
+def is_admin(client) -> bool:
+    """Whether the logged-in account's email is on the admins list."""
+    try:
+        return bool(client.rpc("is_admin").execute().data)
+    except Exception:
+        return False
+
+
+def admin_dashboard(client) -> dict:
+    """Every dashboard number in one bundle; the database refuses non-admins."""
+    return client.rpc("admin_dashboard").execute().data

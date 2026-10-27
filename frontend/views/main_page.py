@@ -5,9 +5,8 @@ import html
 import time
 
 import streamlit as st
-import streamlit.components.v1 as components
 
-from frontend import account, history
+from frontend import account, history, page_script
 from frontend.assets.onboarding_scene import _build_footer_scene, _build_header_scene
 from frontend.episode import (
     _ACTIONABLE_LABELS,
@@ -487,69 +486,52 @@ def render_main_page():
                     history.save(chat)
                     st.rerun()
 
-            components.html(
-                f"""
-                <!-- cache-buster: {len(msgs)} {time.time()} -->
-                <script>
-                (function () {{
-                    // This component has no visible content (height=0) and
-                    // nothing inside it a user could ever interact with --
-                    // but the iframe Streamlit wraps it in is focusable by
-                    // default, like any iframe. That meant a keyboard user
-                    // tabbing through the page hit an invisible, silent tab
-                    // stop with no visible focus indicator between the
-                    // shortcut buttons and the ask box (U-14). Pulling it
-                    // out of tab order is standard practice for a purely
-                    // functional/invisible iframe like this one.
-                    if (window.frameElement) {{ window.frameElement.tabIndex = -1; }}
-                    function isScrollable(el) {{
-                        if (!el || el.scrollHeight <= el.clientHeight) return false;
-                        const style = window.getComputedStyle(el);
-                        return style.overflowY === 'auto' || style.overflowY === 'scroll';
-                    }}
-                    function findScrollable(root) {{
-                        if (isScrollable(root)) return root;
-                        let best = null, bestOverhang = 0;
-                        const all = root.querySelectorAll('*');
-                        for (const el of all) {{
-                            if (isScrollable(el)) {{
-                                const overhang = el.scrollHeight - el.clientHeight;
-                                if (overhang > bestOverhang) {{
-                                    best = el;
-                                    bestOverhang = overhang;
-                                }}
-                            }}
-                        }}
-                        return best;
-                    }}
-                    function scrollToLatestQuestion(tries) {{
-                        const doc = window.parent.document;
-                        const root = doc.querySelector('[class*="st-key-chat_scroll"]');
-                        if (!root) {{
-                            if (tries > 0) setTimeout(function () {{ scrollToLatestQuestion(tries - 1); }}, 100);
-                            return;
-                        }}
-                        const scrollable = findScrollable(root);
-                        if (!scrollable) {{
-                            if (tries > 0) setTimeout(function () {{ scrollToLatestQuestion(tries - 1); }}, 100);
-                            return;
-                        }}
-                        const blocks = scrollable.querySelectorAll('[data-testid="stVerticalBlockBorderWrapper"]');
-                        if (blocks.length > 0) {{
-                            const last = blocks[blocks.length - 1];
-                            const scrollableTop = scrollable.getBoundingClientRect().top;
-                            const lastTop = last.getBoundingClientRect().top;
-                            scrollable.scrollTop += (lastTop - scrollableTop) - 8;
-                        }} else {{
-                            scrollable.scrollTop = scrollable.scrollHeight;
-                        }}
-                    }}
-                    scrollToLatestQuestion(20);
-                }})();
-                </script>
-                """,
-                height=0,
-            )
+            # Scroll the conversation to the newest question. Runs on every
+            # render (the time in `data` changes each run).
+            page_script.run("tt_scroll_latest", """
+                function isScrollable(el) {
+                    if (!el || el.scrollHeight <= el.clientHeight) return false;
+                    const style = window.getComputedStyle(el);
+                    return style.overflowY === 'auto' || style.overflowY === 'scroll';
+                }
+                function findScrollable(root) {
+                    if (isScrollable(root)) return root;
+                    let best = null, bestOverhang = 0;
+                    const all = root.querySelectorAll('*');
+                    for (const el of all) {
+                        if (isScrollable(el)) {
+                            const overhang = el.scrollHeight - el.clientHeight;
+                            if (overhang > bestOverhang) {
+                                best = el;
+                                bestOverhang = overhang;
+                            }
+                        }
+                    }
+                    return best;
+                }
+                function scrollToLatestQuestion(tries) {
+                    const root = document.querySelector('[class*="st-key-chat_scroll"]');
+                    if (!root) {
+                        if (tries > 0) setTimeout(function () { scrollToLatestQuestion(tries - 1); }, 100);
+                        return;
+                    }
+                    const scrollable = findScrollable(root);
+                    if (!scrollable) {
+                        if (tries > 0) setTimeout(function () { scrollToLatestQuestion(tries - 1); }, 100);
+                        return;
+                    }
+                    const blocks = scrollable.querySelectorAll('[data-testid="stVerticalBlockBorderWrapper"]');
+                    if (blocks.length > 0) {
+                        const last = blocks[blocks.length - 1];
+                        const scrollableTop = scrollable.getBoundingClientRect().top;
+                        const lastTop = last.getBoundingClientRect().top;
+                        scrollable.scrollTop += (lastTop - scrollableTop) - 8;
+                    } else {
+                        scrollable.scrollTop = scrollable.scrollHeight;
+                    }
+                }
+                scrollToLatestQuestion(20);
+            """, data={"messages": len(msgs), "at": time.time()})
 
         # ---- ask bar: fixed at the bottom of the screen, above the footer ----
         # A bare st.text_input + a separate st.button does NOT submit on

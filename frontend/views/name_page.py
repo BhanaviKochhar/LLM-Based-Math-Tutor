@@ -5,7 +5,6 @@ import base64
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from frontend.assets.onboarding_scene import (
     _ICON_CAP_SVG,
@@ -13,7 +12,7 @@ from frontend.assets.onboarding_scene import (
     _MASCOT_SVG,
     _build_onboarding_scene,
 )
-from frontend import account
+from frontend import account, page_script
 from frontend.state import change_grade, ss
 from frontend.styles.scene_css import SCENE_CSS
 
@@ -401,34 +400,33 @@ def render_name_page():
     # find the name input, forward Enter to a synthetic click on the real
     # button element (a no-op while it's disabled, same as actually
     # clicking it would be).
-    components.html(
-        """
-        <script>
-        (function () {
-            function wire(tries) {
-                const doc = window.parent.document;
-                const input = doc.querySelector('div[data-testid="stTextInput"] input');
-                const btn = doc.querySelector('[class*="st-key-go_btn"] button');
-                if (!input || !btn) {
-                    if (tries > 0) setTimeout(function () { wire(tries - 1); }, 150);
-                    return;
-                }
-                if (window.frameElement) { window.frameElement.tabIndex = -1; }
-                if (input.dataset.ttEnterWired) return;
-                input.dataset.ttEnterWired = "1";
-                input.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (!btn.disabled) { btn.click(); }
-                    }
-                });
+    page_script.run("tt_name_enter", """
+        function wire(tries) {
+            const input = document.querySelector('div[data-testid="stTextInput"] input');
+            if (!input || !document.querySelector('[class*="st-key-go_btn"] button')) {
+                if (tries > 0) setTimeout(function () { wire(tries - 1); }, 150);
+                return;
             }
-            wire(20);
-        })();
-        </script>
-        """,
-        height=0,
-    )
+            if (input.dataset.ttEnterWired) return;
+            input.dataset.ttEnterWired = "1";
+            input.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+                // The typed name only reaches Python once the field is left
+                // (blur); until then "Let's go" is still disabled, so a click
+                // right away did nothing. Commit first, then click as soon as
+                // the button turns on (it stays off if no class is chosen).
+                input.blur();
+                let tries = 20;
+                (function clickWhenReady() {
+                    const btn = document.querySelector('[class*="st-key-go_btn"] button');
+                    if (btn && !btn.disabled) { btn.click(); return; }
+                    if (tries-- > 0) setTimeout(clickWhenReady, 100);
+                })();
+            });
+        }
+        wire(20);
+    """)
 
     if go_clicked and can_proceed:
         if account.signed_in():

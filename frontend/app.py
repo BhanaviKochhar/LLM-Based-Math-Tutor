@@ -79,6 +79,7 @@ from frontend.episode import (
 from frontend import account
 from frontend.account import accounts_enabled
 from frontend.styles.global_css import inject_global_css
+from frontend.views.admin_page import render_admin_page
 from frontend.views.auth_page import render_auth_page
 from frontend.views.consent_page import render_consent_page
 from frontend.views.picker_page import render_picker_page
@@ -126,6 +127,11 @@ elif ss.page == "consent":
     render_consent_page()
 elif ss.page == "pick":
     render_picker_page()
+elif ss.page == "admin":
+    if account.is_admin():
+        render_admin_page()
+    account.back_to_picker()
+    st.rerun()
 elif ss.page == "name":
     render_name_page()
 else:

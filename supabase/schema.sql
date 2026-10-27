@@ -188,3 +188,146 @@ $$;
 
 revoke execute on function public.match_chunks(extensions.vector, int[], int, int) from public;
 grant execute on function public.match_chunks(extensions.vector, int[], int, int) to anon, authenticated;
+
+-- Admin dashboard (frontend/views/admin_page.py). Admins are listed here by
+-- email; add yourself in the SQL editor:
+--     insert into public.admins (email) values ('you@example.com');
+-- Nothing in the app can read or change this table. admin_dashboard()
+-- returns the numbers of supabase/admin_queries.sql in one bundle, totals
+-- only, and refuses anyone whose login email isn't listed. Accounts flagged
+-- test_account are left out, as in admin_queries.sql.
+
+create table if not exists public.admins (email text primary key);
+alter table public.admins enable row level security;
+revoke all on public.admins from anon, authenticated;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select exists (select 1 from public.admins a
+                   where lower(a.email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+$$;
+
+revoke execute on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+
+create or replace function public.admin_dashboard()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'not an admin' using errcode = '42501';
+    end if;
+    return (
+        with real_accounts as (
+            select id, created_at from auth.users
+            where coalesce((raw_user_meta_data ->> 'test_account')::boolean, false) = false
+        ), real_students as (
+            select s.id, s.grade from public.students s
+            join real_accounts a on a.id = s.parent_account_id
+        ), msgs as (
+            select m.id, m.chat_id, m.role, m.metadata, m.created_at, c.student_id
+            from public.messages m
+            join public.chats c on c.id = m.chat_id
+            join real_students s on s.id = c.student_id
+        ), answers as (
+            select a.* from public.attempts a join real_students s on s.id = a.student_id
+        ), recent as (
+            select student_id, correct,
+                   row_number() over (partition by student_id order by id desc) as n
+            from answers
+        ), per_child as (
+            select s.id, count(r.correct) as answers,
+                   avg(case when r.correct then 1.0 else 0.0 end) as accuracy
+            from real_students s left join recent r on r.student_id = s.id and r.n <= 5
+            group by s.id
+        ), per_chat as (
+            select c.id, count(m.id) filter (where m.role = 'user') as typed
+            from public.chats c
+            join real_students s on s.id = c.student_id
+            left join public.messages m on m.chat_id = c.id
+            group by c.id
+        )
+        select jsonb_build_object(
+            'totals', jsonb_build_object(
+                'accounts', (select count(*) from real_accounts),
+                'children', (select count(*) from real_students),
+                'active_7_days', (select count(distinct student_id) from msgs
+                                  where role = 'user' and created_at > now() - interval '7 days'),
+                'active_30_days', (select count(distinct student_id) from msgs
+                                   where role = 'user' and created_at > now() - interval '30 days')),
+            'new_accounts_per_week', coalesce((
+                select jsonb_agg(jsonb_build_object('week', w, 'accounts', n) order by w)
+                from (select date_trunc('week', created_at)::date as w, count(*) as n
+                      from real_accounts group by 1) t), '[]'::jsonb),
+            'active_children_per_day', coalesce((
+                select jsonb_agg(jsonb_build_object('day', d, 'children', n) order by d)
+                from (select created_at::date as d, count(distinct student_id) as n from msgs
+                      where role = 'user' and created_at > now() - interval '30 days'
+                      group by 1) t), '[]'::jsonb),
+            'accuracy_per_class', coalesce((
+                select jsonb_agg(jsonb_build_object('class', g, 'children', c, 'answers', n,
+                                                    'percent_correct', p) order by g)
+                from (select s.grade as g, count(distinct s.id) as c, count(*) as n,
+                             round(100.0 * avg(case when a.correct then 1 else 0 end), 1) as p
+                      from answers a join real_students s on s.id = a.student_id
+                      group by 1) t), '[]'::jsonb),
+            'most_missed_topics', coalesce((
+                select jsonb_agg(jsonb_build_object('topic', topic, 'answers', n, 'wrong', w,
+                                                    'percent_wrong', p, 'children', c)
+                                 order by w desc, p desc)
+                from (select topic, count(*) as n, count(*) filter (where not correct) as w,
+                             round(100.0 * count(*) filter (where not correct) / count(*), 1) as p,
+                             count(distinct student_id) as c
+                      from answers group by 1
+                      order by 3 desc, 4 desc limit 15) t), '[]'::jsonb),
+            'tutor_levels', coalesce((
+                select jsonb_agg(jsonb_build_object('level', l, 'children', n) order by l)
+                from (select case when answers < 3 then 'not enough answers yet'
+                                  when accuracy < 0.4 then 'beginner'
+                                  when accuracy < 0.75 then 'intermediate'
+                                  else 'advanced' end as l, count(*) as n
+                      from per_child group by 1) t), '[]'::jsonb),
+            'chats_per_day', coalesce((
+                select jsonb_agg(jsonb_build_object('day', d, 'chats', c, 'typed', n) order by d)
+                from (select created_at::date as d, count(distinct chat_id) as c, count(*) as n
+                      from msgs where role = 'user' and created_at > now() - interval '30 days'
+                      group by 1) t), '[]'::jsonb),
+            'typed_per_chat', (
+                select jsonb_build_object('chats', count(*), 'average', round(avg(typed), 1),
+                                          'median', percentile_cont(0.5) within group (order by typed),
+                                          'most', max(typed))
+                from per_chat),
+            'problem_outcomes', coalesce((
+                select jsonb_agg(jsonb_build_object('ended', o, 'problems', n) order by n desc)
+                from (select metadata ->> 'outcome' as o, count(*) as n from msgs
+                      where role = 'assistant' and metadata ->> 'outcome' is not null
+                      group by 1) t), '[]'::jsonb),
+            'safety_and_scope_per_day', coalesce((
+                select jsonb_agg(jsonb_build_object('day', d, 'safety_blocked', b,
+                                                    'scope_declined', s, 'replies', n) order by d)
+                from (select created_at::date as d,
+                             count(*) filter (where metadata ->> 'mode' = 'safety_blocked') as b,
+                             count(*) filter (where metadata ->> 'mode' = 'scope_refused') as s,
+                             count(*) as n
+                      from msgs where role = 'assistant' and created_at > now() - interval '30 days'
+                      group by 1) t), '[]'::jsonb)
+        )
+    );
+end;
+$$;
+
+revoke execute on function public.admin_dashboard() from public, anon;
+grant execute on function public.admin_dashboard() to authenticated;
+
+-- An unfinished problem in a saved chat (the tutor's state, retrieved
+-- chunks, hints shown), so a reopened chat carries on where it stopped.
+alter table public.chats add column if not exists episode jsonb;

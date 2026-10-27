@@ -104,6 +104,9 @@ def main() -> None:
               == [(chat["db_id"], "What is 2 + 2?", ["solved 3 + 3"])])
         check("load_messages() gives back all four messages, unchanged and in order",
               db.load_messages(parent, chat["db_id"]) == chat["messages"])
+        db.save_chat(parent, sid, chat, "What is 2 + 2?", episode={"msg_start": 2, "hints_shown": ["count"]})
+        check("an unfinished problem is saved and listed with its chat",
+              [c["episode"] for c in db.list_chats(parent, sid)] == [{"msg_start": 2, "hints_shown": ["count"]}])
         spare = {"messages": [{"role": "user", "text": "spare"}], "thread_notes": []}
         db.save_chat(parent, sid, spare, "spare")
         db.delete_chat(parent, spare["db_id"])
@@ -129,6 +132,19 @@ def main() -> None:
         check("and its queries carry the login",
               sid in {c["id"] for c in db.list_children(restored)})
         db.sign_out(restored)
+
+        print("admin dashboard")
+        check("a test account isn't an admin", db.is_admin(parent) is False)
+        try:
+            db.admin_dashboard(parent)
+            check("and the dashboard refuses it", False)
+        except Exception:
+            check("and the dashboard refuses it", True)
+        try:
+            db.admin_dashboard(db.new_client())
+            check("a logged-out visitor is refused the dashboard", False)
+        except Exception:
+            check("a logged-out visitor is refused the dashboard", True)
 
         print("Row Level Security")
         anon = db.new_client()
