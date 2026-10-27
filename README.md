@@ -32,11 +32,15 @@ pip install -r requirements.txt
 Create `.env` in the project root:
 
 ```env
-GROQ_API_KEY=your_groq_key_here
-HF_TOKEN=hf_your_token_here
+GROQ_API_KEY=your_groq_key_here          # or GROQ_API_KEYS=key1,key2 to rotate several
+HF_TOKEN=hf_your_token_here              # optional: fallback providers if Groq fails
+SUPABASE_URL=https://<project>.supabase.co   # optional: accounts, saved progress and chats
+SUPABASE_ANON_KEY=sb_publishable_...         # optional: the project's publishable (anon) key
 ```
 
-Never commit `.env`.
+Never commit `.env`. Without the two Supabase lines the app runs in guest-only
+mode: no login, progress kept per visit, textbook search on a local Chroma index.
+See section 11 for the deployed setup.
 
 ### Build the local knowledge base (one-time, or whenever the PDFs/chunking change)
 
@@ -45,11 +49,15 @@ Download the PDFs from the link above and place them at `data/raw_pdfs/class1.pd
 
 ```bash
 python scripts/parse_ncert.py     # PDFs -> data/extracted_json/ncert_chunks.json
-python scripts/load_chromadb.py   # chunks -> embeddings -> data/chromadb/
+python scripts/load_chromadb.py   # chunks -> embeddings -> data/chromadb/  (optional, see below)
 ```
 
 Both `data/raw_pdfs/` and `data/chromadb/` are gitignored — they're either user-supplied source
-material or fully regenerable from `ncert_chunks.json` (which *is* committed).
+material or fully regenerable from `ncert_chunks.json` (which *is* committed). The app builds
+`data/chromadb/` by itself if it's missing (`scripts/retrieval.py` `build_index()`, about 1–2
+minutes), so `load_chromadb.py` is only needed to rebuild with sentence-transformers. When
+Supabase is configured, the meaning-based search uses the textbook vectors stored there
+instead (uploaded with `scripts/upload_chunks.py`; see section 11).
 
 ### Run it
 
@@ -466,10 +474,10 @@ previously asking "What is 12 times 3?":
 | `extracted_json/ncert_chunks.json` | **Yes** | The full corpus — 2,329 chunks, `{text, grade, page, source}`. Everything retrieval runs against. Rebuild with `parse_ncert.py` if the source PDFs change. |
 | `eval_baseline_vs_system.json` | **Yes** | A 36-item baseline-vs-system comparison from an earlier evaluation pass — real evidence, kept for traceability even though a larger replacement is in progress (see `eval/`). |
 | `raw_pdfs/` | No (gitignored) | The five source PDFs — not unique to any machine, download from [NCERT Classes 1-5](https://drive.google.com/drive/folders/1DBPLkxJh6Y6-zJNLeopLxnYEaSN2AV_T?usp=sharing). |
-| `chromadb/` | No (gitignored) | The persistent vector index — fully regenerable from `ncert_chunks.json` via `load_chromadb.py`. |
+| `chromadb/` | No (gitignored) | The local vector index — built automatically from `ncert_chunks.json` when missing. Used when Supabase isn't configured (local runs, CI); the deployed app searches the copy in Supabase. |
 | `llm_runs.jsonl` | No (gitignored) | Every generation call ever made locally, growing continuously. The paper's quantitative evidence is a *frozen snapshot* of a specific date window from this file, not the live file itself. |
 | `interaction_events.jsonl` | No (gitignored) | Per-turn structured telemetry — useful as live ground truth when debugging (distinguishes "the app did X" from "the test harness thinks it did X"), not meant to be shared via git. |
-| `students.json` | No (gitignored) | Per-student personalization state (`student_tracker`'s store) — real runtime data, not source material; was tracked early on but untracked once established it was perpetually-dirty local state, not a feature artifact. |
+| `students.json` | No (gitignored) | Per-student personalization state (`student_tracker`'s store) for guests and for runs without Supabase — real runtime data, not source material. Logged-in children's progress lives in Supabase instead. |
 
 ---
 
@@ -502,16 +510,62 @@ in-scope probes that must be answered, not refused. They were relabelled after t
 
 ```
 PyMuPDF            PDF text extraction (parse_ncert.py)
-chromadb           persistent vector store
-sentence-transformers   all-MiniLM-L6-v2 embeddings
+chromadb           local vector store, and its built-in ONNX all-MiniLM-L6-v2 embedder
+sentence-transformers   all-MiniLM-L6-v2 embeddings for load_chromadb.py (local only)
 rank-bm25          lexical retrieval
 openai             OpenAI-compatible client, used for both Groq and the HF router
-python-dotenv      loads GROQ_API_KEY / HF_TOKEN from .env
+python-dotenv      loads the keys in .env
 sympy              exact-rational arithmetic verification
 streamlit          the student-facing app
-pandas             analysis/eval tooling
+supabase           accounts, saved progress and chats, textbook vectors (scripts/llm/db.py)
+pandas             analysis/eval tooling, admin dashboard tables
 ```
 
 ```bash
 pip install -r requirements.txt
 ```
+
+There are two requirement files: the root `requirements.txt` (everything, minimum versions,
+for local work, evaluation and CI) and `frontend/requirements.txt` (only what the deployed app
+needs, pinned to exact versions, no torch). Streamlit Community Cloud installs the second one.
+
+---
+
+## 11. Deployment
+
+The app is live at **https://tinythinker.streamlit.app**, deployed from the `deploy` branch.
+
+| Piece | Service | Notes |
+|---|---|---|
+| Hosting | Streamlit Community Cloud (free) | Runs `frontend/app.py` on Python 3.13 with `frontend/requirements.txt`; follows `deploy` |
+| Tutor replies | Groq (`openai/gpt-oss-120b`; scope check `openai/gpt-oss-20b`) | Several keys can rotate (`GROQ_API_KEYS`); Hugging Face router as fallback (`HF_TOKEN`) |
+| Accounts, progress, chats, textbook vectors | Supabase (free, Mumbai) | Postgres with Row Level Security, Supabase Auth, pgvector |
+| Email (confirmation, password-reset code) | Supabase Auth via Gmail SMTP | Templates in Supabase → Authentication → Emails |
+| Tests | GitHub Actions (`.github/workflows/tests.yml`) | All offline suites plus a check of the deploy package set, on every push to `deploy`; no secrets |
+
+**What users get.** A parent or teacher registers (with a consent step), confirms their email,
+and adds one or more children; each child's level, weak topics and chats are saved and come
+back on any device. "Keep me logged in" lasts 30 days on a device; "Forgot password?" emails a
+6-digit code. Anyone can also "Try without an account" (nothing is kept after the visit).
+Admins (listed in the database's `admins` table) get an Admin dashboard with usage, learning,
+conversation and safety numbers — totals only.
+
+**Secrets** live in `.env` locally and in the app's Streamlit Secrets
+(`GROQ_API_KEYS`, `HF_TOKEN`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`). The Supabase secret key is
+used only briefly, locally, to upload textbook vectors, and never deployed.
+
+**Database.** Everything is in `supabase/schema.sql`, which is safe to re-run in the Supabase
+SQL editor; run it before pushing code that needs a schema change. Read-only admin queries are
+in `supabase/admin_queries.sql`.
+
+**Updating the live app.** Push to `deploy`; Streamlit Cloud picks it up. Streamlit Cloud only
+reloads modules under `frontend/` in place, so **after any push that changes `scripts/`
+(or the requirements or `.streamlit/config.toml`), reboot the app** (Manage app → ⋮ →
+Reboot app). Adding textbook PDFs means re-running `parse_ncert.py`, re-uploading the vectors
+with `scripts/upload_chunks.py`, then pushing and rebooting.
+
+**Free-tier notes.** Supabase pauses a free project after 7 days without activity (restore it
+from the dashboard) and has no automatic backups; Streamlit Cloud apps sleep when unused.
+
+The full owner's guide — every key and where it lives, step-by-step changes, troubleshooting
+and checklists — is `docs/DEPLOYMENT.md`, kept locally and gitignored.

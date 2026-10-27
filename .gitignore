@@ -8,3 +8,5 @@ eval/results/system_runs/interaction_events_scratch.jsonl
 __pycache__/
 *.pyc
 .env
+# Local deployment and operations guide (kept off git; see README section 11)
+docs/DEPLOYMENT.md
