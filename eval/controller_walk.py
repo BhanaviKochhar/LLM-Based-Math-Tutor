@@ -9,6 +9,30 @@ agreed rules say should happen. Run:
 from __future__ import annotations
 
 from scripts.llm import controller as C
+from scripts.llm import verifier
+
+# Graduation (scenarios 12-14e) goes through verifier.solve_with_type, whose
+# extractors are LLM calls. Stand in for them with the expression the
+# arithmetic extractor's prompt asks for on each posed exercise, and NONE for
+# everything else, so the walk stays offline and needs no API key.
+_EXERCISE_EXPRESSIONS = {
+    "1/3 of 9": "(1/3) * 9",
+    "multiply both parts by 3": "(2 * 3) / (3 * 3)",
+    "multiplying the top and bottom by 3": "(2 * 3) / (3 * 3)",
+    "colour 4 of them": "4/10",
+}
+
+
+def _offline_extractor(question, retries=1):
+    for phrase, expression in _EXERCISE_EXPRESSIONS.items():
+        if phrase in question:
+            return expression
+    return "NONE"
+
+
+verifier._default_extractor = _offline_extractor
+verifier._default_categorical_extractor = lambda question, retries=1: "NONE"
+verifier._default_function_extractor = lambda question, retries=1: "NONE"
 
 _passed = 0
 _failed = 0
