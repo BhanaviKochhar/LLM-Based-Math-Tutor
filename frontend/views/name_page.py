@@ -35,7 +35,7 @@ _PANDI_WEBM = Path(__file__).resolve().parents[1] / "assets" / "pandi.webm"
 def _pandi_video(width_px: int = 160) -> str:
     b64 = base64.b64encode(_PANDI_WEBM.read_bytes()).decode("ascii")
     return (f'<video autoplay loop muted playsinline '
-           f'style="width:{width_px}px;max-width:none;height:auto;'
+           f'style="width:100%;max-width:{width_px}px;height:auto;'
            f'display:block;margin:0 auto;">'
            f'<source src="data:video/webm;base64,{b64}" type="video/webm"></video>')
 
@@ -86,7 +86,7 @@ def render_name_page():
         /* ===== THE HERO: Math Buddy, welcoming the child into the world ===== */
         .tt-mascot-wrap {
             position: fixed; left: calc(50% - 350px); top: 32vh;
-            width: 150px; pointer-events: none; text-align: center;
+            width: 160px; pointer-events: none; text-align: center;
         }
         .tt-speech {
             display: inline-block; background: #ffffff; color: #3b2a2a;
@@ -165,7 +165,7 @@ def render_name_page():
            ABOVE the card instead of floating beside it. */
         @media (max-width: 700px) {
             .tt-mascot-wrap {
-                position: static !important; width: 92px; margin: 0 auto 6px; top:auto; left:auto;
+                position: static !important; width: 160px; margin: 0 auto 6px; top:auto; left:auto;
             }
             .block-container { padding: 16px 20px 24px !important; max-width: 94vw !important; }
             .tt-title { font-size: 28px !important; }
@@ -184,7 +184,7 @@ def render_name_page():
            Shrinks the mascot and every vertical gap specifically when
            height is tight, independent of width. */
         @media (max-height: 700px) {
-            .tt-mascot-wrap { width: 64px; margin-bottom: 2px; }
+            .tt-mascot-wrap { width: 96px; margin-bottom: 2px; }
             .tt-speech { font-size: 13px; padding: 6px 11px; }
             .block-container { padding-top: 12px !important; padding-bottom: 14px !important; }
             .tt-title { font-size: 22px !important; margin-bottom: 2px !important; }
@@ -194,19 +194,19 @@ def render_name_page():
         /* A restored (not maximized) browser window keeps its full desktop
            WIDTH but often loses enough HEIGHT to chrome/taskbar to trip the
            max-height:700px shrink above -- confirmed live: that rule
-           shrinks the mascot from 150px to 64px wide without moving its
-           `left` anchor, which was tuned assuming the 150px width, so the
+           shrinks the mascot from 160px to 96px wide without moving its
+           `left` anchor, which was tuned assuming the 160px width, so the
            mascot's right edge (meant to tuck slightly UNDER the card's left
-           edge) pulls back 86px and opens a visible gap instead -- reading
+           edge) pulls back 64px and opens a visible gap instead -- reading
            as the mascot having drifted away from the card, not just gotten
            smaller. Re-anchored here to the SAME right edge as the normal
-           150px-wide/left:calc(50% - 350px) desktop position, but only
+           160px-wide/left:calc(50% - 350px) desktop position, but only
            above the 1100px width breakpoint -- below it the mascot is
            already in its own left-edge-of-viewport layout (left: 4%, not
            card-relative), where this gap can't occur and re-anchoring would
            be wrong. */
         @media (min-width: 1101px) and (max-height: 700px) {
-            .tt-mascot-wrap { left: calc(50% - 264px); }
+            .tt-mascot-wrap { left: calc(50% - 286px); }
         }
         /* A genuinely tiny/old phone in portrait (≤600px tall) -- drop the
            mascot from the flow entirely rather than squeeze it further;
