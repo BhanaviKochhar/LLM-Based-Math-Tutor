@@ -102,11 +102,11 @@ def _warm_retrieval_index():
 
 if not MOCK_MODE and st.runtime.exists():
     _warm_retrieval_index()
-    # A remembered device logs back in before any page is drawn; then the
-    # login is kept fresh and any cookie change written (frontend/account.py).
-    account.restore_from_cookie()
+    # Keep the login fresh, then write any cookie change and, on a fresh visit,
+    # log a remembered device back in -- all before any page is drawn
+    # (frontend/account.py).
     account.keep_fresh()
-    account.render_cookie_writer()
+    account.sync_cookie()
 
 # ===========================================================================
 # Router

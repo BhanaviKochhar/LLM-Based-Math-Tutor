@@ -76,13 +76,13 @@ def _start_parent_session(client, remember: bool) -> None:
 # "Keep me logged in on this device"
 #
 # The parent's refresh token is kept in a browser cookie for 30 days. On a
-# new visit restore_from_cookie() logs back in with it. Supabase issues a new
+# new visit sync_cookie() logs back in with it. Supabase issues a new
 # refresh token whenever the session is refreshed and the old one stops
 # working, so every new token is written back to the cookie; keep_fresh()
 # does that refresh once per page interaction (the client's own background
-# refresh is off, see db.new_client). A cookie can only be written by the
-# page, so a change is queued in session state and written by
-# render_cookie_writer() on the next render.
+# refresh is off, see db.new_client). A cookie can only be read and written
+# by the page, so a change is queued in session state and delivered by the
+# cookie component (_cookie_bridge) on the next run.
 # ---------------------------------------------------------------------------
 COOKIE_NAME = "tt_session"
 COOKIE_DAYS = 30
@@ -99,15 +99,21 @@ def _forget_device() -> None:
     ss["_cookie_write"] = ""
 
 
-def restore_from_cookie() -> None:
-    """Once per browser session, before any page renders: log back in from
-    a remembered device, if there is one."""
-    if ss.get("_restore_tried") or ss.get("account") is not None or not accounts_enabled():
+def sync_cookie() -> None:
+    """Every run, before any page renders: deliver a queued cookie change,
+    learn the cookie's current value, and on a fresh visit log back in from
+    it."""
+    if not accounts_enabled():
+        return
+    _restore_from(_cookie_bridge())
+
+
+def _restore_from(token: str | None) -> None:
+    # None: the page hasn't reported the cookie yet (it does right after the
+    # first render, which reruns the script); try again then.
+    if token is None or ss.get("_restore_tried") or ss.get("account") is not None:
         return
     ss["_restore_tried"] = True
-    import streamlit as st
-
-    token = st.context.cookies.get(COOKIE_NAME)
     if not token:
         return
     from scripts.llm import db
@@ -124,8 +130,13 @@ def restore_from_cookie() -> None:
     ss["_remember"] = True
     if db.consent_version(client) < db.CONSENT_VERSION:
         ss.page = "consent"
-        return
-    _route_after_login()
+    else:
+        _route_after_login()
+    # The old token stopped working the moment this one was issued: run once
+    # more straight away so the cookie gets the new one even if the parent
+    # leaves without clicking anything.
+    import streamlit as st
+    st.rerun()
 
 
 def keep_fresh() -> None:
@@ -142,27 +153,50 @@ def keep_fresh() -> None:
         _remember_device(token)
 
 
-def render_cookie_writer() -> None:
-    """Write (or clear) the remembered-device cookie if a change is queued."""
-    value = ss.get("_cookie_write")
-    if value is None:
-        return
-    ss["_cookie_write"] = None
-    import json
+# The page's own cookie is read and written by a small two-way component
+# whose JavaScript runs in the app page. st.context.cookies can't be used for
+# this: on Streamlit Community Cloud the app sits behind Cloud's proxy and
+# this cookie never reaches Python that way (confirmed live).
+_COOKIE_JS = """
+export default function(component) {
+    const { data, setStateValue } = component;
+    const name = "%(name)s";
+    if (data && typeof data.write === "string") {
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = name + "=" + encodeURIComponent(data.write)
+            + "; Max-Age=" + (data.write ? %(max_age)d : 0) + "; Path=/; SameSite=Lax" + secure;
+    }
+    // Reported once per visit only: a reported value starts a new run, and a
+    // run started while a click's run is in flight drops that click.
+    if (data && data.report) {
+        const found = document.cookie.split("; ").find(c => c.startsWith(name + "="));
+        setStateValue("token", found ? decodeURIComponent(found.slice(name.length + 1)) : "");
+    }
+}
+""" % {"name": COOKIE_NAME, "max_age": COOKIE_DAYS * 24 * 3600}
 
-    import streamlit.components.v1 as components
-    max_age = COOKIE_DAYS * 24 * 3600 if value else 0
-    components.html(
-        f"""<script>
-        (function () {{
-            const doc = window.parent.document;
-            const secure = window.parent.location.protocol === "https:" ? "; Secure" : "";
-            doc.cookie = "{COOKIE_NAME}=" + encodeURIComponent({json.dumps(value)})
-                + "; Max-Age={max_age}; Path=/; SameSite=Lax" + secure;
-        }})();
-        </script>""",
-        height=0,
+_cookie_component = None
+
+
+def _cookie_bridge() -> str | None:
+    """Mount the cookie component: it writes a queued change, then reports
+    the cookie (None until the page has reported it once)."""
+    global _cookie_component
+    import streamlit as st
+
+    if _cookie_component is None:
+        _cookie_component = st.components.v2.component("tt_session_cookie", js=_COOKIE_JS)
+    write = ss.get("_cookie_write")
+    ss["_cookie_write"] = None
+    ss["_cookie_seq"] = ss.get("_cookie_seq", 0) + (write is not None)
+    result = _cookie_component(
+        key="tt_cookie",
+        data={"write": write, "seq": ss["_cookie_seq"], "report": not ss.get("_cookie_reported")},
+        on_token_change=lambda: None,
     )
+    if result.token is not None:
+        ss["_cookie_reported"] = True
+    return result.token
 
 
 def agree_to_current_consent() -> None:
