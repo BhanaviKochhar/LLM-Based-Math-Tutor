@@ -264,6 +264,22 @@ def test_auth_errors_become_parent_friendly() -> None:
     check("unconfirmed email", "confirm your email" in (message("email_not_confirmed") or ""))
     check("unknown code -> generic message, not raw API text",
           message("some_new_code") == "Something went wrong. Please try again.")
+    check("wrong or expired reset code", "wrong or has expired" in (message("otp_expired") or ""))
+
+    class _RefreshFails:
+        def refresh_session(self, token):
+            raise _AuthFail("refresh_token_already_used")
+
+    class _ClientR:
+        auth = _RefreshFails()
+
+    try:
+        db.restore_session(_ClientR(), "old-token")
+        restored = "no error"
+    except db.AccountError as exc:
+        restored = str(exc)
+    check("a remembered login that no longer works asks the parent to log in again",
+          restored == "Please log in again.")
 
 
 # Message shapes the app stores (frontend/episode.py): a child's message, a

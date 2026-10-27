@@ -41,18 +41,128 @@ def continue_as_guest() -> None:
     ss.account = "guest"
 
 
-def log_in(email: str, password: str) -> None:
+def log_in(email: str, password: str, remember: bool) -> None:
     """Raises db.AccountError with a parent-facing message on failure."""
     from scripts.llm import db
     client = db.new_client()
     db.sign_in(client, email.strip(), password)
+    _start_parent_session(client, remember)
+
+
+def reset_password(email: str, code: str, new_password: str) -> None:
+    """Finish a forgotten-password reset; the parent is then logged in (and
+    remembered on this device, the login form's default)."""
+    from scripts.llm import db
+    client = db.new_client()
+    db.reset_password(client, email.strip(), code.strip(), new_password)
+    _start_parent_session(client, remember=True)
+
+
+def _start_parent_session(client, remember: bool) -> None:
+    from scripts.llm import db
     ss.db_client = client
     ss.account = "parent"
+    ss["_remember"] = remember
+    if remember:
+        _remember_device(db.current_refresh_token(client))
     if db.consent_version(client) < db.CONSENT_VERSION:
         # Agreed to an older version of what we keep: ask again first.
         ss.page = "consent"
         return
     _route_after_login()
+
+
+# ---------------------------------------------------------------------------
+# "Keep me logged in on this device"
+#
+# The parent's refresh token is kept in a browser cookie for 30 days. On a
+# new visit restore_from_cookie() logs back in with it. Supabase issues a new
+# refresh token whenever the session is refreshed and the old one stops
+# working, so every new token is written back to the cookie; keep_fresh()
+# does that refresh once per page interaction (the client's own background
+# refresh is off, see db.new_client). A cookie can only be written by the
+# page, so a change is queued in session state and written by
+# render_cookie_writer() on the next render.
+# ---------------------------------------------------------------------------
+COOKIE_NAME = "tt_session"
+COOKIE_DAYS = 30
+
+
+def _remember_device(refresh_token: str | None) -> None:
+    if refresh_token and refresh_token != ss.get("_cookie_token"):
+        ss["_cookie_token"] = refresh_token
+        ss["_cookie_write"] = refresh_token
+
+
+def _forget_device() -> None:
+    ss["_cookie_token"] = None
+    ss["_cookie_write"] = ""
+
+
+def restore_from_cookie() -> None:
+    """Once per browser session, before any page renders: log back in from
+    a remembered device, if there is one."""
+    if ss.get("_restore_tried") or ss.get("account") is not None or not accounts_enabled():
+        return
+    ss["_restore_tried"] = True
+    import streamlit as st
+
+    token = st.context.cookies.get(COOKIE_NAME)
+    if not token:
+        return
+    from scripts.llm import db
+    client = db.new_client()
+    try:
+        new_token = db.restore_session(client, token)
+    except Exception:
+        _forget_device()  # expired or revoked: back to the login page
+        return
+    ss["_cookie_token"] = None  # force the new token into the cookie
+    _remember_device(new_token)
+    ss.db_client = client
+    ss.account = "parent"
+    ss["_remember"] = True
+    if db.consent_version(client) < db.CONSENT_VERSION:
+        ss.page = "consent"
+        return
+    _route_after_login()
+
+
+def keep_fresh() -> None:
+    """Once per page interaction: refresh the login if its access token has
+    expired, and keep a remembered device's cookie on the newest token."""
+    if not signed_in():
+        return
+    from scripts.llm import db
+    try:
+        token = db.current_refresh_token(ss.db_client)
+    except Exception:
+        return  # a network blip: the next interaction tries again
+    if token and ss.get("_remember"):
+        _remember_device(token)
+
+
+def render_cookie_writer() -> None:
+    """Write (or clear) the remembered-device cookie if a change is queued."""
+    value = ss.get("_cookie_write")
+    if value is None:
+        return
+    ss["_cookie_write"] = None
+    import json
+
+    import streamlit.components.v1 as components
+    max_age = COOKIE_DAYS * 24 * 3600 if value else 0
+    components.html(
+        f"""<script>
+        (function () {{
+            const doc = window.parent.document;
+            const secure = window.parent.location.protocol === "https:" ? "; Secure" : "";
+            doc.cookie = "{COOKIE_NAME}=" + encodeURIComponent({json.dumps(value)})
+                + "; Max-Age={max_age}; Path=/; SameSite=Lax" + secure;
+        }})();
+        </script>""",
+        height=0,
+    )
 
 
 def agree_to_current_consent() -> None:
@@ -158,6 +268,9 @@ def log_out() -> None:
     if ss.get("db_client") is not None:
         db.sign_out(ss.db_client)
     # A clean slate: the next person at this browser starts at the login page
-    # with none of this account's state left behind.
+    # with none of this account's state left behind, and this device is no
+    # longer remembered.
     for key in list(ss.keys()):
         del ss[key]
+    _forget_device()
+    ss["_restore_tried"] = True

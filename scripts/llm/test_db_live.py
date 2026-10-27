@@ -120,6 +120,16 @@ def main() -> None:
               sid in {c["id"] for c in db.list_children(fresh)})
         db.sign_out(fresh)
 
+        print("remembered login")
+        token = db.current_refresh_token(parent)
+        restored = db.new_client()
+        new_token = db.restore_session(restored, token)
+        check("a fresh client logs back in from a refresh token and gets a new one",
+              bool(new_token) and new_token != token)
+        check("and its queries carry the login",
+              sid in {c["id"] for c in db.list_children(restored)})
+        db.sign_out(restored)
+
         print("Row Level Security")
         anon = db.new_client()
         check("a logged-out client sees no children", _rows_or_denied(anon, "students") == [])

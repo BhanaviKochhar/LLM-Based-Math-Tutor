@@ -45,10 +45,13 @@ def new_client():
     sessions: it holds that parent's login."""
     from supabase import ClientOptions, create_client
 
+    # No background token refresh: the app refreshes once per page
+    # interaction instead (frontend/account.py keep_fresh), so a new token
+    # can be written to the "keep me logged in" cookie in the same step.
     return create_client(
         os.environ["SUPABASE_URL"],
         os.environ["SUPABASE_ANON_KEY"],
-        options=ClientOptions(postgrest_client_timeout=_DB_TIMEOUT_S),
+        options=ClientOptions(postgrest_client_timeout=_DB_TIMEOUT_S, auto_refresh_token=False),
     )
 
 
@@ -118,6 +121,11 @@ _AUTH_MESSAGES = {
     "over_email_send_rate_limit": "We've sent too many emails in the last hour. Please try again a bit later.",
     "over_request_rate_limit": "Too many attempts. Please wait a minute and try again.",
     "email_address_invalid": "That doesn't look like a valid email address.",
+    "otp_expired": "That code is wrong or has expired. Please ask for a new one.",
+    "same_password": "Please choose a password different from your old one.",
+    "refresh_token_not_found": "Please log in again.",
+    "refresh_token_already_used": "Please log in again.",
+    "session_expired": "Please log in again.",
 }
 
 
@@ -149,6 +157,46 @@ def sign_up(client, email: str, password: str, redirect_to: str | None, consent_
 def sign_in(client, email: str, password: str) -> None:
     try:
         client.auth.sign_in_with_password({"email": email, "password": password})
+    except Exception as exc:
+        raise _auth_error(exc) from exc
+
+
+def restore_session(client, refresh_token: str) -> str:
+    """Log a fresh client back in from a remembered refresh token. Returns
+    the NEW refresh token (Supabase issues a new one each time; the old one
+    stops working)."""
+    try:
+        return client.auth.refresh_session(refresh_token).session.refresh_token
+    except Exception as exc:
+        raise _auth_error(exc) from exc
+
+
+def current_refresh_token(client) -> str | None:
+    """The session's refresh token, refreshing the session first if its
+    access token has expired (so the client's requests keep working)."""
+    session = client.auth.get_session()
+    return session.refresh_token if session else None
+
+
+def send_reset_code(client, email: str) -> None:
+    """Email a 6-digit password-reset code (the Reset Password email
+    template must show {{ .Token }}). Supabase answers the same whether or
+    not the account exists."""
+    try:
+        client.auth.reset_password_for_email(email)
+    except Exception as exc:
+        raise _auth_error(exc) from exc
+
+
+def reset_password(client, email: str, code: str, new_password: str) -> None:
+    """Check the emailed code, set the new password, and leave the client
+    logged in."""
+    try:
+        client.auth.verify_otp({"email": email, "token": code, "type": "recovery"})
+        client.auth.update_user({"password": new_password})
+        # Same supabase-py quirk as record_consent: update_user() drops the
+        # login from table requests until the session is refreshed.
+        client.auth.refresh_session()
     except Exception as exc:
         raise _auth_error(exc) from exc
 

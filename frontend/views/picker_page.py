@@ -33,14 +33,6 @@ _PICKER_CSS = """
     transform: translateY(-1px); box-shadow: 0 8px 18px rgba(224,138,30,0.30) !important;
     background: #fff8e6 !important;
 }
-[class*="st-key-link_"] button {
-    background: transparent !important; border: none !important; box-shadow: none !important;
-    min-height: 0 !important; padding: 2px 6px !important;
-}
-[class*="st-key-link_"] button p {
-    color: #2f6bea !important; font-weight: 700 !important; font-size: 14px !important;
-    text-decoration: underline;
-}
 </style>
 """
 

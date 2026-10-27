@@ -76,6 +76,7 @@ from frontend.episode import (
     start_episode,
     submit_turn,
 )
+from frontend import account
 from frontend.account import accounts_enabled
 from frontend.styles.global_css import inject_global_css
 from frontend.views.auth_page import render_auth_page
@@ -101,6 +102,11 @@ def _warm_retrieval_index():
 
 if not MOCK_MODE and st.runtime.exists():
     _warm_retrieval_index()
+    # A remembered device logs back in before any page is drawn; then the
+    # login is kept fresh and any cookie change written (frontend/account.py).
+    account.restore_from_cookie()
+    account.keep_fresh()
+    account.render_cookie_writer()
 
 # ===========================================================================
 # Router
