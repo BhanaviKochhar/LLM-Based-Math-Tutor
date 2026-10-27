@@ -84,6 +84,10 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: python -m scripts.llm.test_scope
 
+      - name: scripts.llm.test_db
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: python -m scripts.llm.test_db
+
       - name: eval.test_answer_extraction
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: python -m eval.test_answer_extraction
@@ -132,3 +136,7 @@ jobs:
       - name: scripts.test_retrieval
         if: ${{ !cancelled() }}
         run: python -m scripts.test_retrieval
+
+      - name: scripts.llm.test_db
+        if: ${{ !cancelled() }}
+        run: python -m scripts.llm.test_db

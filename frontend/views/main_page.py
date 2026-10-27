@@ -7,6 +7,7 @@ import time
 import streamlit as st
 import streamlit.components.v1 as components
 
+from frontend import account
 from frontend.assets.onboarding_scene import _build_footer_scene, _build_header_scene
 from frontend.episode import (
     _ACTIONABLE_LABELS,
@@ -354,6 +355,7 @@ def render_main_page():
                                 if st.button("✅ Yes, change", key="grade_confirm_yes",
                                             use_container_width=True):
                                     change_grade(new_grade)
+                                    account.save_grade(new_grade)
                                     ss["_show_grade_picker"] = False
                                     st.rerun()
                             with gn:
@@ -375,6 +377,11 @@ def render_main_page():
                             bg = f'style="background:{c}"' if ok else ""
                             cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
                         st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
+
+                    if account.signed_in():
+                        if st.button("Log out", key="logout_btn", use_container_width=True):
+                            account.log_out()
+                            st.rerun()
 
     # ---------- CENTER: greeting + conversation + ask bar ----------
     with center:

@@ -15,6 +15,7 @@ sympy>=1.12            # evaluates the extracted arithmetic expression
 
 # --- Frontend ---
 streamlit>=1.36        # the student-facing web app (frontend/app.py)
+supabase>=2.33         # accounts and saved progress (scripts/llm/db.py)
 
 # --- Analysis ---
 pandas>=2.0

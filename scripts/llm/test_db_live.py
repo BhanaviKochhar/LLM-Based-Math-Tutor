@@ -1,0 +1,129 @@
+"""Live checks against the real Supabase project. NOT part of CI or the
+offline suites: it signs in, writes and deletes rows. Run by hand after
+supabase/schema.sql has been applied.
+
+Needs, in .env or the environment:
+    SUPABASE_URL, SUPABASE_ANON_KEY
+    TEST_PARENT_EMAIL, TEST_PARENT_PASSWORD   a confirmed test account
+    TEST_OTHER_EMAIL, TEST_OTHER_PASSWORD     optional second account, for
+                                              the cross-account check
+
+It creates its own throwaway child profile and deletes it at the end.
+
+Run:  python -m scripts.llm.test_db_live
+"""
+from __future__ import annotations
+
+import os
+import tempfile
+
+from scripts.llm import db, student_tracker
+
+_passed = 0
+_failed = 0
+
+
+def check(name: str, cond: bool) -> None:
+    global _passed, _failed
+    if cond:
+        _passed += 1
+        print(f"  ok   {name}")
+    else:
+        _failed += 1
+        print(f"  FAIL {name}")
+
+
+_SEQUENCE = [
+    ("Addition", True), ("Fractions", False), ("Time", False), ("Fractions", False),
+    ("Time", False), ("Addition", True), ("Money", False), ("Fractions", True),
+]
+
+
+def _rows_or_denied(client, table: str) -> list:
+    """Rows a client can read; [] when it has no access to the table at all
+    (logged-out visitors get no grant, so they are refused outright)."""
+    try:
+        return client.table(table).select("id").execute().data
+    except Exception:
+        return []
+
+
+def _signed_in(email_var: str, password_var: str):
+    client = db.new_client()
+    db.sign_in(client, os.environ[email_var], os.environ[password_var])
+    return client
+
+
+def main() -> None:
+    if not db.configured() or not os.environ.get("TEST_PARENT_EMAIL"):
+        raise SystemExit("Set SUPABASE_URL, SUPABASE_ANON_KEY, TEST_PARENT_EMAIL and "
+                         "TEST_PARENT_PASSWORD first.")
+
+    parent = _signed_in("TEST_PARENT_EMAIL", "TEST_PARENT_PASSWORD")
+    child = db.add_child(parent, "Live Test", 3)
+    sid = child["id"]
+    print("created throwaway child profile")
+    try:
+        print("progress round trip matches the JSON store")
+        db.attach(sid, parent)
+        old_store = student_tracker.STORE
+        with tempfile.TemporaryDirectory() as tmp:
+            student_tracker.STORE = os.path.join(tmp, "students.json")
+            try:
+                for topic, correct in _SEQUENCE:
+                    student_tracker.record(sid, topic, correct)
+                    student_tracker.record("file-twin", topic, correct)
+                check("stats() identical to the JSON store",
+                      student_tracker.stats(sid) == student_tracker.stats("file-twin"))
+                check("classify() identical to the JSON store",
+                      student_tracker.classify(sid) == student_tracker.classify("file-twin"))
+            finally:
+                student_tracker.STORE = old_store
+
+        print("grade update and profile lookup")
+        db.update_grade(parent, sid, 4)
+        mine = parent.table("students").select("id, grade").eq("id", sid).execute().data
+        check("grade saved", mine == [{"id": sid, "grade": 4}])
+
+        print("Row Level Security")
+        anon = db.new_client()
+        check("a logged-out client sees no children", _rows_or_denied(anon, "students") == [])
+        check("a logged-out client sees no attempts", _rows_or_denied(anon, "attempts") == [])
+        try:
+            anon.table("attempts").insert({"student_id": sid, "topic": "x", "correct": True}).execute()
+            check("a logged-out client cannot add attempts", False)
+        except Exception:
+            check("a logged-out client cannot add attempts", True)
+
+        if os.environ.get("TEST_OTHER_EMAIL"):
+            other = _signed_in("TEST_OTHER_EMAIL", "TEST_OTHER_PASSWORD")
+            check("another account cannot see this child",
+                  other.table("students").select("id").eq("id", sid).execute().data == [])
+            summary = other.rpc("student_summary", {"p_student_id": sid, "p_window": 5}).execute().data
+            check("another account's summary of this child is empty",
+                  summary["attempts"] == 0 and summary["recent"] == [])
+            try:
+                other.table("attempts").insert({"student_id": sid, "topic": "x", "correct": True}).execute()
+                check("another account cannot add attempts to this child", False)
+            except Exception:
+                check("another account cannot add attempts to this child", True)
+            db.sign_out(other)
+        else:
+            print("  skip cross-account checks (TEST_OTHER_EMAIL not set)")
+
+        print("reset")
+        student_tracker.reset(sid)
+        check("reset() leaves no attempts", student_tracker.stats(sid)["attempts"] == 0)
+    finally:
+        db.detach(sid)
+        parent.table("students").delete().eq("id", sid).execute()
+        db.sign_out(parent)
+        print("deleted throwaway child profile")
+
+    print(f"\n{_passed} passed, {_failed} failed")
+    if _failed:
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

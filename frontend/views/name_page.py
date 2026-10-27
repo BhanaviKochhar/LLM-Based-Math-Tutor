@@ -13,6 +13,7 @@ from frontend.assets.onboarding_scene import (
     _MASCOT_SVG,
     _build_onboarding_scene,
 )
+from frontend import account
 from frontend.state import change_grade, ss
 from frontend.styles.scene_css import SCENE_CSS
 
@@ -53,7 +54,9 @@ def _name_page_submit(name_field_value: str, grade_value: int | None) -> bool:
     return bool(name_field_value.strip()) and grade_value is not None
 
 
-def render_name_page():
+def render_onboarding_world():
+    """The illustrated scene, the mascot and the card styling shared by
+    every onboarding screen (this page and views/auth_page.py)."""
     st.markdown(SCENE_CSS, unsafe_allow_html=True)
     st.markdown(
         """
@@ -107,7 +110,7 @@ def render_name_page():
            (e.g. a very short window), so this never traps anything. */
         [data-testid="stMain"] {
             display: flex !important; flex-direction: column !important;
-            justify-content: center !important; min-height: 100vh !important;
+            justify-content: safe center !important; min-height: 100vh !important;
         }
         /* ===== THE CARD: one object IN the world, not a form floating in
            empty space -- warm cream instead of a dark translucent panel,
@@ -128,7 +131,23 @@ def render_name_page():
            belongs to this world too, even on the "UI" object (rule 8). */
         .block-container::before {
             content: "✦"; position: absolute; top: 14px; right: 20px;
-            font-size: 20px; color: #f5b301; opacity: 0.8;
+            font-size: 20px; color: #f5b301; opacity: 0.8; z-index: 3;
+        }
+        /* Layering. The scene pieces are position:fixed with no z-index,
+           and positioned boxes paint above a box's ordinary content -- so
+           wherever the card reached down into the hills (any phone, and the
+           taller login form even on desktop) the grass was drawn OVER the
+           card's text and fields. Three layers instead: the scene, then a
+           copy of the card's cream panel (so scenery still passes BEHIND
+           the card), then the card's own content. "safe center" above keeps
+           a card taller than the window starting at its top instead of
+           being pushed off-screen. */
+        .block-container::after {
+            content: ""; position: absolute; inset: 0; z-index: 1;
+            background: #fffaf0; border-radius: 28px; pointer-events: none;
+        }
+        .block-container > [data-testid="stVerticalBlock"] > *:not(:has(.tt-deco)) {
+            position: relative; z-index: 2;
         }
         .tt-title {
             font-family: 'Baloo 2', sans-serif !important; font-weight: 800 !important;
@@ -325,6 +344,9 @@ def render_name_page():
         unsafe_allow_html=True,
     )
 
+
+def render_name_page():
+    render_onboarding_world()
     st.markdown('<p class="tt-title">Welcome, <span class="accent">Tiny&nbsp;Thinker!</span></p>', unsafe_allow_html=True)
     st.markdown('<p class="tt-sub">Let\'s get ready for your math adventure! ✨</p>', unsafe_allow_html=True)
 
@@ -397,6 +419,14 @@ def render_name_page():
     )
 
     if go_clicked and can_proceed:
+        if account.signed_in():
+            # A parent's first visit: this form creates the child profile.
+            try:
+                account.create_child(ss.name_field.strip(), grade_choice)
+            except Exception:
+                st.error("We couldn't save the profile just now. Please try again.")
+                st.stop()
+            st.rerun()
         ss.name = ss.name_field.strip()
         change_grade(grade_choice)
         ss.page = "main"

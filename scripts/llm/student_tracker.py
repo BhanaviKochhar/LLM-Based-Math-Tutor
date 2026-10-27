@@ -10,9 +10,15 @@ Two changes from the first MVP cut:
 
 The store still keeps a cumulative record per student for analytics; only the
 *classification window* is recent. Level names stay beginner/intermediate/advanced.
+
+A logged-in child's progress lives in Supabase instead (see db.py): record,
+stats and reset hand off to that child's attached store, and everyone else
+uses the JSON file below. classify() is the same rules either way.
 """
 import json
 import os
+
+from . import db
 
 STORE = "data/students.json"
 
@@ -54,6 +60,10 @@ def _blank() -> dict:
 
 def record(student_id: str, topic: str, correct: bool) -> None:
     """Log one attempt for a student (cumulative totals + a recent window)."""
+    remote = db.store_for(student_id)
+    if remote:
+        remote.record(topic, correct)
+        return
     data = _load()
     s = data.setdefault(student_id, _blank())
     # Older records may predate the "recent" field; heal them on write.
@@ -72,6 +82,10 @@ def record(student_id: str, topic: str, correct: bool) -> None:
 def reset(student_id: str) -> None:
     """Forget everything for one student. Called by the UI's Clear chat so the
     level and history don't leak across sessions."""
+    remote = db.store_for(student_id)
+    if remote:
+        remote.reset()
+        return
     data = _load()
     if student_id in data:
         del data[student_id]
@@ -80,8 +94,8 @@ def reset(student_id: str) -> None:
 
 def stats(student_id: str) -> dict:
     """All-time totals plus the recent-window accuracy used for classification."""
-    data = _load()
-    s = data.get(student_id, _blank())
+    remote = db.store_for(student_id)
+    s = remote.summary(WINDOW) if remote else _load().get(student_id, _blank())
     recent = s.get("recent", [])
     lifetime_acc = s["correct"] / s["attempts"] if s["attempts"] else 0.0
     recent_acc = sum(recent) / len(recent) if recent else 0.0
