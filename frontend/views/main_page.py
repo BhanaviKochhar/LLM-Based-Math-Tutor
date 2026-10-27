@@ -185,11 +185,15 @@ def render_main_page():
     st.markdown(
         f'<div class="tt-appbar">{_build_header_scene()}'
         f'<div class="tt-brand">Tiny<span class="y">Thinker</span></div>'
-        f'<div class="tt-bar-right">'
+        f'<div class="tt-bar-right{" with-logout" if account.signed_in() else ""}">'
         f'<span class="tt-user"><span class="av">{initial}</span>'
         f'<span class="name">{display_name()}</span></span></div></div>',
         unsafe_allow_html=True,
     )
+    if account.signed_in():
+        if st.button("Log out", key="logout_btn"):
+            account.log_out()
+            st.rerun()
 
     ss.setdefault("history_collapsed", False)
     ss.setdefault("progress_collapsed", False)
@@ -377,11 +381,6 @@ def render_main_page():
                             bg = f'style="background:{c}"' if ok else ""
                             cells += f'<div class="tt-badge {cls}"><div class="hex" {bg}>{ico if ok else "🔒"}</div><div class="lbl">{name}</div></div>'
                         st.markdown(f'<div class="tt-badges">{cells}</div>', unsafe_allow_html=True)
-
-                    if account.signed_in():
-                        if st.button("Log out", key="logout_btn", use_container_width=True):
-                            account.log_out()
-                            st.rerun()
 
     # ---------- CENTER: greeting + conversation + ask bar ----------
     with center:

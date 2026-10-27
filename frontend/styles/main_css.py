@@ -460,6 +460,19 @@ div[data-testid="stTextInput"] > div:focus-within {
    long student names"). */
 .tt-user .name { max-width: 150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tt-user .av { width:24px;height:24px;border-radius:50%;background:#ffd23f;color:#2f4d80;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-family:'Baloo 2',sans-serif;font-size:12px;flex-shrink:0; }
+/* Log out (logged-in parents only). The bar is plain HTML, so the real
+   Streamlit button is pinned into its right end from outside, and the name
+   chip moves left to make room for it. */
+.tt-bar-right.with-logout { padding-right: 84px; }
+[class*="st-key-logout_btn"] {
+    position: fixed !important; top: 15px; right: 20px; z-index: 1001; width: auto !important;
+}
+[class*="st-key-logout_btn"] button {
+    min-height: 0 !important; height: 30px; padding: 0 12px !important; border-radius: 999px !important;
+    background: rgba(255,255,255,0.16) !important; border: 1.5px solid rgba(255,255,255,0.8) !important;
+}
+[class*="st-key-logout_btn"] button p { color:#fff !important; font-weight:800 !important; font-size:12px !important; }
+[class*="st-key-logout_btn"] button:hover { background: rgba(255,255,255,0.3) !important; }
 @media (max-width: 480px) {
     /* Not a horizontal squeeze of the same elements -- the name's
        max-width shrinks too so the bar stays a compact, single-row strip
@@ -469,6 +482,10 @@ div[data-testid="stTextInput"] > div:focus-within {
     .tt-brand { font-size: 15px; }
     .tt-user { font-size: 12px; }
     .tt-user .name { max-width: 72px; }
+    .tt-bar-right.with-logout { padding-right: 66px; }
+    [class*="st-key-logout_btn"] { top: 6px; right: 10px; }
+    [class*="st-key-logout_btn"] button { height: 26px; padding: 0 9px !important; }
+    [class*="st-key-logout_btn"] button p { font-size: 11px !important; }
 }
 
 /* Cards -- one shared padding/radius token so every bordered surface in the
