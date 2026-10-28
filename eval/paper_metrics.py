@@ -41,7 +41,7 @@ from scipy.stats import wilcoxon
 from eval import answer_extraction
 from eval.baseline_runner import _item_id, load_items
 from eval.component_eval.results import write_result, write_summary_markdown
-from eval.rating_agreement import RUBRIC, load_sheet, norm
+from eval.rating_agreement import RUBRIC, cohen_kappa, load_sheet, norm, weighted_kappa
 from eval.score_transcripts import (_load_checkpoint, _was_refused, expected_oos_behavior, ground_truth_candidates,
                                     mcnemar_exact_p, newcombe_paired_ci, score_item, wilson_ci)
 from scripts.llm import scope, verifier
@@ -246,9 +246,12 @@ def held_out() -> dict:
     res["openers"] = {f"{e}->{o}": n for (e, o), n in sorted(got.items())}
     ae_items, rr = items_of("held_out_ambiguous_everyday"), runs("system", "held_out_ambiguous_everyday")
     done = [i for i in ae_items if i in rr and rr[i].get("turns")]
+    reading = json.load(open(RUNS / "held_out_ambiguous_reading.json", encoding="utf-8"))["items"]
     res["ambiguous_everyday"] = {"n": len(done), "refused": rate(sum(refused(rr[i]) for i in done), len(done)),
-                                 "note": "behaviour (several valid answers, everyday knowledge) needs reading or "
-                                         "judging; only the refusal rate is automatic"}
+                                 **{f"meets_expected_{k}": rate(sum(x["meets"] for x in reading if x["kind"] == k),
+                                                                sum(x["kind"] == k for x in reading))
+                                    for k in ("ambiguous", "everyday")},
+                                 "note": "behaviour read item by item (eval/results/held_out_ambiguous_reading.json)"}
     ho_items, rr = items_of("held_out_out_of_scope"), runs("system", "held_out_out_of_scope")
     per = {i: score_item(it, rr[i]) for i, it in ho_items.items() if i in rr and rr[i].get("turns")}
     truly = [i for i in per if ho_items[i].get("truly_out_of_scope")]
@@ -269,7 +272,9 @@ def judge_rubric(stems: list[str]) -> dict:
             va, vb = verdicts("baseline", stem), verdicts("system", stem)
             a.update({f"{stem}/{i}": v["rubric"][dim] for i, v in va.items()})
             b.update({f"{stem}/{i}": v["rubric"][dim] for i, v in vb.items()})
-        rows[dim] = {**paired_scores(a, b), "exploratory": dim in EXPLORATORY_RUBRIC}
+        rows[dim] = {**paired_scores(a, b), "exploratory": dim in EXPLORATORY_RUBRIC,
+                     "score_counts": {"baseline": {str(s): sum(1 for x in a.values() if x == s) for s in range(1, 6)},
+                                      "system": {str(s): sum(1 for x in b.values() if x == s) for s in range(1, 6)}}}
     holm(rows)
     for cond in ("baseline", "system"):
         ki = Counter()
@@ -286,31 +291,177 @@ def judge_rubric(stems: list[str]) -> dict:
 
 
 def human_ratings() -> dict:
+    """Two team members rated the same 150 replies blind. Reported jointly (the
+    paper names no individual rater): hallucination flagged by both and by
+    either; rubric scores averaged over the two; agreement between them."""
     key = {k["row"]: k for k in json.load(open(ROOT / "eval/blind_ratings/rating_key.json", encoding="utf-8"))["rows"]}
-    out = {}
-    for rater in ("A", "B"):
-        sheet = {int(r["row"]): r for r in load_sheet(rater)}
-        by = {"baseline": {}, "system": {}}
-        for row, k in key.items():
-            by[k["condition"]][k["item_id"]] = sheet[row]
-        h = {c: {i: norm(r["halluc"]) == "yes" for i, r in by[c].items()} for c in by}
-        res = {"hallucination": {**paired_binary(h["baseline"], h["system"])}}
-        rub = {}
-        for dim in RUBRIC:
-            sa = {i: float(r[dim]) for i, r in by["baseline"].items() if str(r[dim]).strip()}
-            sb = {i: float(r[dim]) for i, r in by["system"].items() if str(r[dim]).strip()}
-            rub[dim] = paired_scores(sa, sb)
-        holm(rub)
-        res["rubric"] = rub
-        out[rater] = res
-    # A reply counts as hallucinated if either rater flagged it (the stricter reading).
-    sheets = {r: {int(x["row"]): x for x in load_sheet(r)} for r in ("A", "B")}
-    either = {"baseline": {}, "system": {}}
+    sheets = [{int(x["row"]): x for x in load_sheet(r)} for r in ("A", "B")]
+    by = {"baseline": {}, "system": {}}
     for row, k in key.items():
-        either[k["condition"]][k["item_id"]] = any(norm(sheets[r][row]["halluc"]) == "yes" for r in sheets)
-    out["either_rater_hallucination"] = paired_binary(either["baseline"], either["system"])
-    out["note"] = "system replies on this sheet are from the v1 transcripts (paper-eval-v1)"
+        by[k["condition"]][k["item_id"]] = [s[row] for s in sheets]
+    flags = {c: {i: [norm(r["halluc"]) == "yes" for r in rs] for i, rs in by[c].items()} for c in by}
+    out = {"hallucination_both": paired_binary({i: all(v) for i, v in flags["baseline"].items()},
+                                               {i: all(v) for i, v in flags["system"].items()}),
+           "hallucination_either": paired_binary({i: any(v) for i, v in flags["baseline"].items()},
+                                                 {i: any(v) for i, v in flags["system"].items()})}
+    rub = {}
+    for dim in RUBRIC:
+        mean = {c: {i: sum(float(r[dim]) for r in rs) / 2 for i, rs in by[c].items()
+                    if all(str(r[dim]).strip() for r in rs)} for c in by}
+        rub[dim] = paired_scores(mean["baseline"], mean["system"])
+    holm(rub)
+    out["rubric_mean_of_two"] = rub
+    a, b = ([s[row] for row in sorted(key)] for s in sheets)
+    out["agreement"] = {"hallucination_kappa": cohen_kappa([norm(x["halluc"]) for x in a],
+                                                           [norm(x["halluc"]) for x in b]),
+                        **{f"{d}_weighted_kappa": weighted_kappa([x[d] for x in a], [x[d] for x in b])
+                           for d in RUBRIC}}
+    out["note"] = ("75 items not used in any earlier rating round; baseline replies from paper-eval-v1, "
+                   "system replies from paper-eval-v2")
     return out
+
+
+# --------------------------------------------------------------------------- MathDial (reply to a wrong attempt)
+_MD_COLS = ["row", "class", "msg", "correct_answer", "child_answer", "reply", "mistake", "revealed", "guidance",
+            "notes"]
+
+
+def _mathdial_sheet(rater: str) -> dict[int, dict]:
+    from openpyxl import load_workbook
+    ws = load_workbook(ROOT / f"eval/blind_ratings/mathdial_sheet_rater_{rater}.xlsx", data_only=True)["Ratings"]
+    return {int(x[0]): dict(zip(_MD_COLS, x)) for x in ws.iter_rows(min_row=2, values_only=True)
+            if x and x[0] is not None}
+
+
+def mathdial() -> dict:
+    """The tutor's first reply to a child's wrong working. Answer revealed is
+    checked in code (does the reply commit to the correct answer); the judge's
+    mistake-identified, answer-revealed and guidance are used only where it
+    agrees with the two team members (kappa >= 0.6 against each)."""
+    items = items_of("mathdial_sample")
+    jv = {c: verdicts(c, "mathdial_sample") for c in ("baseline", "system")}
+    res = {}
+    # Extractor check: the reply commits to the correct final answer.
+    rev = {}
+    for c in ("baseline", "system"):
+        rr = runs(c, "mathdial_sample")
+        rev[c] = {i: answer_extraction.judge(answer_extraction.committed_answer(rr[i]["turns"][0].get("response") or ""),
+                                             ground_truth_candidates(it), it.get("question") or "") is True
+                  for i, it in items.items() if i in rr and rr[i].get("turns")}
+    res["answer_revealed_extractor"] = paired_binary(rev["baseline"], rev["system"])
+    res["system_first_turn_modes"] = dict(Counter(runs("system", "mathdial_sample")[i]["turns"][0].get("mode")
+                                                  for i in items if i in runs("system", "mathdial_sample")))
+    # Humans on the 25-item sheet, and judge agreement with each.
+    key = {k["row"]: k for k in json.load(open(ROOT / "eval/blind_ratings/mathdial_key.json", encoding="utf-8"))["rows"]}
+    sheets = [_mathdial_sheet(r) for r in ("A", "B")]
+    yn = lambda v: str(v or "").strip().lower() == "yes"
+    agree = {}
+    for field, jf in (("mistake", "mistake_identified"), ("revealed", "answer_revealed")):
+        hum = [[yn(s[row][field]) for row in sorted(key)] for s in sheets]
+        jud = [bool(jv[key[row]["condition"]].get(key[row]["item_id"], {}).get(jf)) for row in sorted(key)]
+        agree[jf] = {"humans_kappa": cohen_kappa(*hum),
+                     "judge_vs_member_kappas": [cohen_kappa(jud, h) for h in hum]}
+    hg = [[s[row]["guidance"] for row in sorted(key)] for s in sheets]
+    jg = [jv[key[row]["condition"]].get(key[row]["item_id"], {}).get("guidance") for row in sorted(key)]
+    agree["guidance"] = {"humans_weighted_kappa": weighted_kappa(*hg),
+                         "judge_vs_member_weighted_kappas": [weighted_kappa(jg, h) for h in hg]}
+    res["agreement"] = agree
+    trusted = {f: all(k is not None and k >= 0.6 for k in agree[f]["judge_vs_member_kappas"])
+               for f in ("mistake_identified", "answer_revealed")}
+    res["judge_trusted"] = trusted
+    # Full-scale judge numbers (reported as main results only where trusted).
+    for f in ("mistake_identified", "answer_revealed"):
+        res[f"judge_{f}"] = paired_binary({i: bool(v[f]) for i, v in jv["baseline"].items()},
+                                          {i: bool(v[f]) for i, v in jv["system"].items()})
+    res["judge_guidance_exploratory"] = paired_scores({i: v["guidance"] for i, v in jv["baseline"].items()},
+                                                      {i: v["guidance"] for i, v in jv["system"].items()})
+    # Human numbers on the 25 rated items: identified by both / either member.
+    hb = {"baseline": {}, "system": {}}
+    for row, k in key.items():
+        hb[k["condition"]][k["item_id"]] = [yn(s[row]["mistake"]) for s in sheets]
+    res["humans_mistake_identified_both"] = paired_binary({i: all(v) for i, v in hb["baseline"].items()},
+                                                          {i: all(v) for i, v in hb["system"].items()})
+    res["humans_mistake_identified_either"] = paired_binary({i: any(v) for i, v in hb["baseline"].items()},
+                                                            {i: any(v) for i, v in hb["system"].items()})
+    return res
+
+
+# --------------------------------------------------------------------------- multi-turn
+def _expected_mode(text: str) -> str | None:
+    """The dataset's expected action, as one controller mode. Labels that start a
+    new problem (new_question, math_followup, new episode) are a fresh
+    teach_invite; a give-up "directly explain" is a reveal; a conversation
+    ending is not an action (None, left out)."""
+    t = (text or "").lower()
+    if "termination" in t:
+        return None
+    if t.startswith(("new_question", "math_followup", "new episode")):
+        return "teach_invite"
+    if "give_up" in t:
+        return "reveal"
+    for key, mode in (("reveal", "reveal"), ("diagnose_correct", "diagnose_correct"),
+                      ("diagnose_wrong", "diagnose_wrong"), ("hint", "hint"), ("ack_conceptual", "ack_conceptual"),
+                      ("teach_invite", "teach_invite"), ("gloss", "gloss"), ("co_solve", "co_solve"),
+                      ("redirect", "redirect"), ("clarify", "clarify"), ("confusion", "confusion_help"),
+                      ("correction", "correction_repair"), ("refus", "scope_refused")):
+        if key in t:
+            return mode
+    return t.split(",")[0].strip()
+
+
+def multi_turn() -> dict:
+    """Controller accuracy: does each system turn take the action the dataset
+    expects (system only -- the baseline has no actions)? Plus the best-effort
+    final-answer score for both conditions."""
+    convs = {c["conversation_id"]: c for c in json.load(open(DATA / "multi_turn.json", encoding="utf-8"))["conversations"]}
+    actions = _action_match(convs, runs("system", "multi_turn"))
+    final = {}
+    for cond in ("baseline", "system"):
+        r = runs(cond, "multi_turn")
+        final[cond] = {cid: bool(score_item(c, r[cid])["correct"]) for cid, c in convs.items()
+                       if cid in r and r[cid].get("turns") and score_item(c, r[cid]).get("correct") is not None}
+    return {"controller_action_match": actions["overall"], "by_expected_action": actions["by_expected"],
+            "final_answer_best_effort": paired_binary(final["baseline"], final["system"])}
+
+
+def _action_match(convs: dict, rr: dict) -> dict:
+    match = Counter()
+    by_expected: dict[str, Counter] = {}
+    for cid, c in convs.items():
+        j = rr.get(cid)
+        if not j or not j.get("turns"):
+            continue
+        for exp_t, got in zip(c["turns"], j["turns"]):
+            exp = _expected_mode(exp_t.get("expected_controller_action") or "")
+            if exp is None:
+                continue
+            mode = got.get("mode") or "gloss"
+            ok = mode == exp or (exp == "reveal" and mode == "co_solve") or (exp == "co_solve" and mode == "reveal")
+            match[ok] += 1
+            by_expected.setdefault(exp, Counter())[ok] += 1
+    return {"overall": rate(match[True], match[True] + match[False]),
+            "by_expected": {k: rate(v[True], v[True] + v[False]) for k, v in sorted(by_expected.items())}}
+
+
+# --------------------------------------------------------------------------- production latency
+def production_latency() -> dict:
+    """The live app's own calls in the pilot snapshot (2026-07-20 to 2026-08-22),
+    from data/llm_runs.jsonl: tutoring calls only, before any evaluation run."""
+    rows = []
+    for line in open(ROOT / "data" / "llm_runs.jsonl", encoding="utf-8"):
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if r.get("model") in ("tutor-pipeline", "tutor-turn") and "2026-07-20" <= r["ts"][:10] <= "2026-08-22":
+            rows.append(r)
+    ok = [r for r in rows if r["result"].get("ok") and r["result"].get("latency_s") is not None]
+    providers = Counter(r["result"].get("provider") for r in ok)
+    slowest = sorted(ok, key=lambda r: -r["result"]["latency_s"])[:3]
+    return {"calls": len(rows), "succeeded": len(ok), "latency_s": median_ci([r["result"]["latency_s"] for r in ok]),
+            "providers": dict(providers),
+            "fallback_share": rate(sum(v for k, v in providers.items() if k != "groq-direct"), len(ok)),
+            "slowest": [{"ts": r["ts"], "latency_s": r["result"]["latency_s"],
+                         "provider": r["result"].get("provider")} for r in slowest]}
 
 
 # --------------------------------------------------------------------------- reading level and pedagogy
@@ -406,9 +557,10 @@ def text_measures(stems: list[str], limit_ids: dict[str, set] | None = None) -> 
     return out
 
 
-# --------------------------------------------------------------------------- verifier, latency, v1 vs v2
+# --------------------------------------------------------------------------- verifier and latency
 def verifier_stats(stems: list[str]) -> dict:
     n_items = injected = 0
+    wrong_values: list[str] = []
     post = Counter()
     for stem in stems:
         items, rr = items_of(stem), runs("system", stem)
@@ -423,6 +575,14 @@ def verifier_stats(stems: list[str]) -> dict:
             injected += 1
             v = checks[-1]
             match = v.get("match")
+            # Was the trusted value itself right? (Clock items log minutes here, not
+            # the injected clock time, so they are left out of this count.)
+            cands = ground_truth_candidates(it)
+            if cands and v.get("computed") and not verifier.asks_for_clock_time(it.get("question") or ""):
+                right = any(answer_extraction.match(str(v["computed"]), c, it.get("question") or "") for c in cands)
+                post["value_right" if right else "value_wrong"] += 1
+                if not right:
+                    wrong_values.append(f"{stem}/{i}")
             if match is False and verifier.asks_for_clock_time(it.get("question") or ""):
                 # The post-check compared minutes with a clock time; recheck the reply
                 # against the item's clock-time ground truth instead.
@@ -431,7 +591,9 @@ def verifier_stats(stems: list[str]) -> dict:
                 match = c
                 post["clock_rechecked"] += 1
             post[{True: "match", False: "mismatch", None: "no_number"}[match]] += 1
-    return {"items": n_items, "with_trusted_value": rate(injected, n_items), "post_check": dict(post)}
+    return {"items": n_items, "with_trusted_value": rate(injected, n_items), "post_check": dict(post),
+            "trusted_value_right": rate(post["value_right"], post["value_right"] + post["value_wrong"]),
+            "items_with_wrong_trusted_value": wrong_values}
 
 
 def latency(stem: str, ids: list[str] | None = None) -> dict:
@@ -447,24 +609,6 @@ def latency(stem: str, ids: list[str] | None = None) -> dict:
                      "all_turn_wall_s": median_ci([t["turn_wall_s"] for t in turns])}
     return out
 
-
-def v1_vs_v2() -> dict:
-    """System before and after the fixes, on the same items (curriculum and out-of-scope)."""
-    res = {}
-    for stem in CURRICULUM + ["out_of_scope"]:
-        items = items_of(stem)
-        v1 = _load_checkpoint(RUNS / "system_runs" / f"{stem}.jsonl")
-        v2 = runs("system", stem)
-        a, b = {}, {}
-        for i, it in items.items():
-            for src, dst in ((v1, a), (v2, b)):
-                j = src.get(i)
-                if j and j.get("turns"):
-                    s = score_item(it, j)
-                    if s.get("correct") is not None:
-                        dst[i] = bool(s["correct"])
-        res[stem] = paired_binary(a, b)
-    return res
 
 
 # --------------------------------------------------------------------------- main
@@ -492,11 +636,14 @@ def main() -> None:
     if verdicts("system", "multi_turn"):
         m["judge_multi_turn"] = judge_rubric(["multi_turn"])
     m["human_ratings"] = human_ratings()
+    m["mathdial"] = mathdial()
+    m["multi_turn"] = multi_turn()
     m["text_curriculum"] = text_measures(CURRICULUM)
     m["text_svamp"] = text_measures(["svamp"], {"svamp": svamp_ids})
     m["verifier"] = verifier_stats(CURRICULUM + ["svamp"])
     m["latency_svamp"] = latency("svamp", sorted(svamp_ids))
-    m["v1_vs_v2_system"] = v1_vs_v2()
+    m["latency_system_v2_all_sets"] = {stem: latency(stem)["system"] for stem in CURRICULUM + ["out_of_scope"]}
+    m["production_latency"] = production_latency()
     for stem in CURRICULUM:
         m["curriculum"][stem].pop("_per_item")
 
@@ -517,11 +664,28 @@ def main() -> None:
         tag = " (exploratory)" if r["exploratory"] else ""
         lines.append(f"- {dim}{tag}: baseline {r['baseline_mean']:.2f}, system {r['system_mean']:.2f}, "
                      f"Wilcoxon p = {r['wilcoxon_p']:.3g}, Holm {r.get('p_holm', float('nan')):.3g} (n = {r['n']})")
-    lines += ["", "## Human raters (hallucination)"]
-    for rater in ("A", "B"):
-        h = m["human_ratings"][rater]["hallucination"]
-        lines.append(f"- Rater {rater}: baseline {_pct(h['baseline'])}, system {_pct(h['system'])}, "
+    hr = m["human_ratings"]
+    lines += ["", "## Two team members (150 blind replies)"]
+    for label, k in (("hallucination flagged by both", "hallucination_both"),
+                     ("hallucination flagged by either", "hallucination_either")):
+        h = hr[k]
+        lines.append(f"- {label}: baseline {_pct(h['baseline'])}, system {_pct(h['system'])}, "
                      f"McNemar p = {h['mcnemar_p']:.3f}")
+    lines.append(f"- agreement: {', '.join(f'{k} {v:.2f}' for k, v in hr['agreement'].items() if v is not None)}")
+    md = m["mathdial"]
+    lines += ["", "## MathDial (reply to a wrong attempt)",
+              f"- answer revealed (code): baseline {_pct(md['answer_revealed_extractor']['baseline'])}, "
+              f"system {_pct(md['answer_revealed_extractor']['system'])}",
+              f"- mistake identified (judge{'' if md['judge_trusted']['mistake_identified'] else ', not trusted'}): "
+              f"baseline {_pct(md['judge_mistake_identified']['baseline'])}, "
+              f"system {_pct(md['judge_mistake_identified']['system'])}",
+              f"- judge agreement: {md['agreement']}",
+              f"- system first-turn modes: {md['system_first_turn_modes']}"]
+    mt = m["multi_turn"]
+    lines += ["", f"## Multi-turn: controller action match {_pct(mt['controller_action_match'])}"]
+    pl = m["production_latency"]
+    lines += ["", f"## Production latency (pilot): median {pl['latency_s'].get('median', float('nan')):.2f} s, "
+                  f"P95 {pl['latency_s'].get('p95', float('nan')):.2f} s, {pl['succeeded']}/{pl['calls']} calls"]
     t = m["text_curriculum"]
     lines += ["", "## Reading level and pedagogy (curriculum, first reply)"]
     for cond in ("baseline", "system"):

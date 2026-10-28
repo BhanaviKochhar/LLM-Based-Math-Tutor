@@ -18,3 +18,4 @@ streamlit>=1.36        # the student-facing web app (frontend/app.py)
 
 # --- Analysis ---
 pandas>=2.0
+matplotlib>=3.8      # paper figures (eval/make_paper_figures.py)
