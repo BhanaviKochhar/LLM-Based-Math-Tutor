@@ -1,0 +1,52 @@
+=== 17:12:55 system curriculum_benchmark_class1 (first pass) ===
+=== 17:13:17 system curriculum_benchmark_class2 (first pass) ===
+=== 17:13:24 system judge stopped by user; resumes after the baseline judge ===
+judged 160/160 -> eval\results\judge_runs\system_curriculum_benchmark_class2.jsonl
+=== 17:25:44 system curriculum_benchmark_class3 (first pass) ===
+=== 17:26:31 system curriculum_benchmark_class4 (first pass) ===
+=== 17:27:17 system judge loop fully stopped (it had continued to classes 2-4); partial verdicts kept ===
+=== 07:30:33 system curriculum_benchmark_class1 (first pass) ===
+judged 217/217 -> eval\results\judge_runs\system_curriculum_benchmark_class1.jsonl
+=== 07:38:50 system curriculum_benchmark_class3 (first pass) ===
+judged 187/187 -> eval\results\judge_runs\system_curriculum_benchmark_class3.jsonl
+=== 07:48:21 system curriculum_benchmark_class4 (first pass) ===
+judged 177/177 -> eval\results\judge_runs\system_curriculum_benchmark_class4.jsonl
+=== 07:58:41 system curriculum_benchmark_class5 (first pass) ===
+judged 194/194 -> eval\results\judge_runs\system_curriculum_benchmark_class5.jsonl
+=== 08:15:17 system out_of_scope (first pass) ===
+judged 277/277 -> eval\results\judge_runs\system_out_of_scope.jsonl
+eval/results/judge_runs/system_curriculum_benchmark_class1.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs/system_curriculum_benchmark_class3.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs/system_curriculum_benchmark_class4.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs/system_curriculum_benchmark_class5.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs/system_out_of_scope.jsonl: removed 0 failed verdicts for retry
+=== 09:03:06 system curriculum_benchmark_class1 (retry pass) ===
+judged 217/217 -> eval\results\judge_runs\system_curriculum_benchmark_class1.jsonl
+=== 09:03:08 system curriculum_benchmark_class3 (retry pass) ===
+judged 187/187 -> eval\results\judge_runs\system_curriculum_benchmark_class3.jsonl
+=== 09:03:11 system curriculum_benchmark_class4 (retry pass) ===
+judged 177/177 -> eval\results\judge_runs\system_curriculum_benchmark_class4.jsonl
+=== 09:03:13 system curriculum_benchmark_class5 (retry pass) ===
+judged 194/194 -> eval\results\judge_runs\system_curriculum_benchmark_class5.jsonl
+=== 09:03:16 system out_of_scope (retry pass) ===
+judged 277/277 -> eval\results\judge_runs\system_out_of_scope.jsonl
+=== 09:03:18 system judge finished for: curriculum_benchmark_class1.jsonl curriculum_benchmark_class3.jsonl curriculum_benchmark_class4.jsonl curriculum_benchmark_class5.jsonl out_of_scope.jsonl ===
+=== 08:27:48 system multi_turn (first pass) ===
+judged 206/206 -> eval\results\judge_runs\system_multi_turn.jsonl
+eval/results/judge_runs/system_multi_turn.jsonl: removed 0 failed verdicts for retry
+=== 08:35:23 system multi_turn (retry pass) ===
+judged 206/206 -> eval\results\judge_runs\system_multi_turn.jsonl
+=== 08:35:26 system judge finished for: multi_turn.json ===
+=== 2026-10-28 08:54:26 mathdial judge baseline (first pass) ===
+judged 100/100 -> eval\results\judge_runs\baseline_mathdial_sample.jsonl
+mathdial judge: removed 0 failed verdicts for retry: []
+=== 2026-10-28 08:57:29 mathdial judge baseline (retry pass) ===
+judged 100/100 -> eval\results\judge_runs\baseline_mathdial_sample.jsonl
+mathdial judge: removed 0 failed verdicts for retry: []
+=== 2026-10-28 08:57:32 mathdial judge system (first pass) ===
+judged 100/100 -> eval\results\judge_runs\system_mathdial_sample.jsonl
+mathdial judge: removed 0 failed verdicts for retry: []
+=== 2026-10-28 09:00:27 mathdial judge system (retry pass) ===
+judged 100/100 -> eval\results\judge_runs\system_mathdial_sample.jsonl
+mathdial judge: removed 0 failed verdicts for retry: []
+=== 2026-10-28 09:00:29 mathdial judge finished ===

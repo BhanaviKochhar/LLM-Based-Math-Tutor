@@ -1,6 +1,8 @@
 """eval/make_rating_sheet.py -- build the blind human rating sheet that
-calibrates the LLM judge (eval/judge.py) and audits the answer extractor
-(eval/answer_extraction.py), decided 2026-10-23 as ONE merged sheet.
+rates baseline (paper-eval-v1) against system (paper-eval-v2) replies and
+audits the answer extractor (eval/answer_extraction.py). The items are drawn
+fresh (SEED below), leaving out every item of the earlier round, whose key is
+read from eval/blind_ratings/rating_key.json before it is replaced.
 
 75 items, each answered by both conditions = 150 replies, shuffled, with
 no condition shown:
@@ -38,7 +40,24 @@ ROOT = Path(__file__).resolve().parent.parent
 DATASETS = ROOT / "eval" / "datasets"
 RUNS = ROOT / "eval" / "results"
 OUT = ROOT / "eval" / "blind_ratings"
-SEED = 20261023
+# The rated round (decided 2026-10-27): baseline paper-eval-v1 against system
+# paper-eval-v2, on 75 items the earlier round (seed 20261023, pre-fix system
+# replies) did not use, so raters see nothing they have rated before.
+SEED = 20261027
+SYSTEM_RUNS = RUNS / "system_runs_v2"
+EARLIER_ROUND_KEY = OUT / "rating_key.json"
+
+
+def _earlier_items() -> set[str]:
+    if not EARLIER_ROUND_KEY.exists():
+        return set()
+    key = json.load(open(EARLIER_ROUND_KEY, encoding="utf-8"))
+    if key.get("seed") == SEED:   # already this round's key: nothing to exclude beyond what it records
+        return set(key.get("excluded_earlier_items") or [])
+    return {r["item_id"] for r in key["rows"]}
+
+
+EXCLUDE = _earlier_items()
 
 
 def _pairs(dataset: str) -> list[tuple[dict, dict, dict]]:
@@ -46,9 +65,9 @@ def _pairs(dataset: str) -> list[tuple[dict, dict, dict]]:
     items = load_items(path)
     stem = path.stem
     b = _load_checkpoint(RUNS / "baseline_runs" / f"{stem}.jsonl")
-    s = _load_checkpoint(RUNS / "system_runs" / f"{stem}.jsonl")
-    return [(it, b[_item_id(it)], s[_item_id(it)]) for it in items
-            if b.get(_item_id(it), {}).get("turns") and s.get(_item_id(it), {}).get("turns")]
+    s = _load_checkpoint(SYSTEM_RUNS / f"{stem}.jsonl")
+    return [(it, b[_item_id(it)], s[_item_id(it)]) for it in items if _item_id(it) not in EXCLUDE
+            and b.get(_item_id(it), {}).get("turns") and s.get(_item_id(it), {}).get("turns")]
 
 
 def _old_substring_correct(item: dict, journey: dict) -> bool:
@@ -81,9 +100,10 @@ def select(rng: random.Random) -> list[tuple[str, dict, dict, dict]]:
 
     data = json.load(open(DATASETS / "multi_turn.json", encoding="utf-8"))
     b = _load_checkpoint(RUNS / "baseline_runs" / "multi_turn.jsonl")
-    s = _load_checkpoint(RUNS / "system_runs" / "multi_turn.jsonl")
+    s = _load_checkpoint(SYSTEM_RUNS / "multi_turn.jsonl")
     mt = [(c, b[c["conversation_id"]], s[c["conversation_id"]]) for c in data["conversations"]
-          if b.get(c["conversation_id"], {}).get("turns") and s.get(c["conversation_id"], {}).get("turns")]
+          if c["conversation_id"] not in EXCLUDE
+          and b.get(c["conversation_id"], {}).get("turns") and s.get(c["conversation_id"], {}).get("turns")]
     picked_mt = rng.sample(mt, 10)
 
     return ([("numeric", *p) for p in picked_numeric] + [("conceptual", *p) for p in rng.sample(conceptual, 20)]
@@ -212,7 +232,8 @@ def main() -> None:
     for rater in ("A", "B"):
         write_workbook(OUT / f"rating_sheet_rater_{rater}.xlsx", rows)
     with open(OUT / "rating_key.json", "w", encoding="utf-8") as f:
-        json.dump({"seed": SEED, "rows": key}, f, indent=1, ensure_ascii=False)
+        json.dump({"seed": SEED, "system_runs": SYSTEM_RUNS.name, "excluded_earlier_items": sorted(EXCLUDE),
+                   "rows": key}, f, indent=1, ensure_ascii=False)
     counts = {}
     for k in key:
         counts[k["stratum"]] = counts.get(k["stratum"], 0) + 1

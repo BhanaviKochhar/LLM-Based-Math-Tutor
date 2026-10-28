@@ -1,1205 +1,1283 @@
 {
- "seed": 20261023,
+ "seed": 20261027,
+ "system_runs": "system_runs_v2",
+ "excluded_earlier_items": [
+  "cb-105",
+  "cb-113",
+  "cb-153",
+  "cb-154",
+  "cb-166",
+  "cb-181",
+  "cb-182",
+  "cb-183",
+  "cb-196",
+  "cb-266",
+  "cb-282",
+  "cb-297",
+  "cb-371",
+  "cb-409",
+  "cb-425",
+  "cb-426",
+  "cb-440",
+  "cb-444",
+  "cb-445",
+  "cb-476",
+  "cb-480",
+  "cb-507",
+  "cb-529",
+  "cb-589",
+  "cb-595",
+  "cb-607",
+  "cb-617",
+  "cb-634",
+  "cb-636",
+  "cb-665",
+  "cb-680",
+  "cb-700",
+  "cb-705",
+  "cb-736",
+  "cb-754",
+  "cb-774",
+  "cb-785",
+  "cb-786",
+  "cb-796",
+  "cb-824",
+  "cb-843",
+  "cb-847",
+  "cb-860",
+  "cb-862",
+  "cb-869",
+  "cb-874",
+  "cb-881",
+  "cb-887",
+  "cb-905",
+  "cb-930",
+  "mt-020",
+  "mt-042",
+  "mt-057",
+  "mt-091",
+  "mt-094",
+  "mt-095",
+  "mt-115",
+  "mt-119",
+  "mt-142",
+  "mt-162",
+  "oos-005",
+  "oos-028",
+  "oos-043",
+  "oos-052",
+  "oos-055",
+  "oos-076",
+  "oos-078",
+  "oos-095",
+  "oos-108",
+  "oos-139",
+  "oos-152",
+  "oos-156",
+  "oos-200",
+  "oos-273",
+  "oos-277"
+ ],
  "rows": [
   {
    "row": 1,
-   "item_id": "cb-154",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "No, 1 is **not** a prime number.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 2,
-   "item_id": "cb-905",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "**Therefore, 37 is a prime number**. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 3,
-   "item_id": "cb-105",
+   "item_id": "mt-109",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "**Everyday picture:** Imagine you have 68452 mangoes in a big basket and you take out 12",
+   "stratum": "multi_turn",
+   "extractor_segment": "12 × 8 is indeed **96**. 🎉",
    "extractor_source": "last_bold"
   },
   {
-   "row": 4,
-   "item_id": "cb-887",
+   "row": 2,
+   "item_id": "cb-420",
    "condition": "baseline",
    "stratum": "conceptual",
-   "extractor_segment": "**So the exact number could be any 6-digit number between 4,50,000 and 5,49,999 inclusive**.",
-   "extractor_source": "conclusion"
+   "extractor_segment": "**We would weigh an apple in grams**.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 3,
+   "item_id": "oos-123",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 4,
+   "item_id": "oos-049",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 5,
-   "item_id": "cb-181",
+   "item_id": "cb-651",
    "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "plate**",
+   "stratum": "numeric",
+   "extractor_segment": "14550**",
    "extractor_source": "answer_line"
   },
   {
    "row": 6,
-   "item_id": "cb-930",
-   "condition": "system",
+   "item_id": "cb-733",
+   "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "21",
+   "extractor_segment": "99999 + 1 = 100000, and it is a **six-digit** number, not a five-digit one. Keep practicing place-value addition and you’ll see this pattern many times! If you have any more questions, just ask. 😊",
    "extractor_source": "answer_line"
   },
   {
    "row": 7,
-   "item_id": "cb-607",
+   "item_id": "cb-356",
    "condition": "system",
    "stratum": "numeric",
-   "extractor_segment": "1137",
+   "extractor_segment": "no**",
    "extractor_source": "answer_line"
   },
   {
    "row": 8,
-   "item_id": "cb-476",
+   "item_id": "mt-109",
    "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "**So, a tiny perfume bottle is measured in millilitres because the amount of liquid is much smaller than a litre.",
-   "extractor_source": "conclusion"
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 9,
-   "item_id": "mt-119",
-   "condition": "system",
-   "stratum": "multi_turn",
+   "item_id": "cb-351",
+   "condition": "baseline",
+   "stratum": "conceptual",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
    "row": 10,
-   "item_id": "cb-705",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "The farmer needs to know the **perimeter**, not the area. 🌾🪢",
+   "item_id": "cb-926",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "3**",
    "extractor_source": "answer_line"
   },
   {
    "row": 11,
-   "item_id": "oos-095",
+   "item_id": "oos-084",
    "condition": "baseline",
    "stratum": "out_of_scope",
-   "extractor_segment": "So, **100 sweets are red**.",
+   "extractor_segment": "Now ask yourself: *“What number multiplied by itself gives 16?”* The answer is **4** - that’s the square root of 16.",
    "extractor_source": "conclusion"
   },
   {
    "row": 12,
-   "item_id": "cb-266",
+   "item_id": "mt-110",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "14",
-   "extractor_source": "answer_line"
+   "stratum": "multi_turn",
+   "extractor_segment": "The LCM of 9 and 12 is **36**.",
+   "extractor_source": "last_bold"
   },
   {
    "row": 13,
-   "item_id": "cb-774",
+   "item_id": "cb-208",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The train arrives at **12 : 15**. 🚂🕒",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 14,
-   "item_id": "cb-881",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "**Therefore, 8,45,920 (845920) is greater than 8,45,290 (845290)**.",
+   "stratum": "conceptual",
+   "extractor_segment": "So, **5 and 5 are the same number**; neither of them is bigger.",
    "extractor_source": "conclusion"
   },
   {
+   "row": 14,
+   "item_id": "cb-005",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "The shape is a **square**. 🎉",
+   "extractor_source": "answer_line"
+  },
+  {
    "row": 15,
-   "item_id": "cb-440",
+   "item_id": "cb-711",
    "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "In 50 minutes it will be **9 : 10**.",
+   "extractor_segment": "The train reaches its destination at **9 : 10 am**. 🚂🕙",
    "extractor_source": "answer_line"
   },
   {
    "row": 16,
-   "item_id": "cb-700",
+   "item_id": "oos-123",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The area of the field is **300 square metres (300 m²)**.",
-   "extractor_source": "answer_line"
+   "stratum": "out_of_scope",
+   "extractor_segment": "So **5 threes** were multiplied together to give 243.",
+   "extractor_source": "conclusion"
   },
   {
    "row": 17,
-   "item_id": "cb-507",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "434",
-   "extractor_source": "answer_line"
+   "item_id": "oos-140",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So, a polynomial is just a sum of terms like 2x^3, -5x, or 7 where the exponents are whole numbers.",
+   "extractor_source": "conclusion"
   },
   {
    "row": 18,
-   "item_id": "oos-028",
+   "item_id": "cb-733",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "100000**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 19,
+   "item_id": "cb-726",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "### So, the key point",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 20,
+   "item_id": "oos-172",
    "condition": "system",
    "stratum": "out_of_scope",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 19,
-   "item_id": "oos-043",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "Each bag contains **5 marbles**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 20,
-   "item_id": "cb-634",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "In 20 minutes the clock will show **12 : 10**.",
-   "extractor_source": "answer_line"
-  },
-  {
    "row": 21,
-   "item_id": "cb-182",
-   "condition": "baseline",
+   "item_id": "cb-208",
+   "condition": "system",
    "stratum": "conceptual",
-   "extractor_segment": "If you look around, you might also notice other triangular things, like a **triangular road sign** on the wall or a **triangular piece of a chocolate bar**.",
-   "extractor_source": "last_bold"
+   "extractor_segment": "same",
+   "extractor_source": "answer_line"
   },
   {
    "row": 22,
-   "item_id": "cb-607",
+   "item_id": "oos-049",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The charity run raised **Rs 1,137** on day 2.",
-   "extractor_source": "answer_line"
+   "stratum": "out_of_scope",
+   "extractor_segment": "The speed-time graph is a straight line, so the area under it is a **trapezium**.",
+   "extractor_source": "last_bold"
   },
   {
    "row": 23,
-   "item_id": "cb-785",
-   "condition": "system",
+   "item_id": "cb-116",
+   "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "488129**",
-   "extractor_source": "answer_line"
+   "extractor_segment": "**So, the diameter of the circle is 14 cm**. 🎉",
+   "extractor_source": "conclusion"
   },
   {
    "row": 24,
-   "item_id": "oos-273",
+   "item_id": "cb-456",
    "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": "4",
+   "stratum": "numeric",
+   "extractor_segment": "30**",
    "extractor_source": "answer_line"
   },
   {
    "row": 25,
-   "item_id": "cb-785",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "4,88,000",
-   "extractor_source": "answer_line"
+   "item_id": "oos-084",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 26,
-   "item_id": "cb-796",
+   "item_id": "cb-776",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "1033332**",
+   "stratum": "conceptual",
+   "extractor_segment": "2400 metres",
    "extractor_source": "answer_line"
   },
   {
    "row": 27,
-   "item_id": "cb-905",
-   "condition": "system",
+   "item_id": "cb-241",
+   "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "yes**",
-   "extractor_source": "answer_line"
+   "extractor_segment": "So, after giving away 1 balloon, **Neha has 5 balloons left**.",
+   "extractor_source": "conclusion"
   },
   {
    "row": 28,
-   "item_id": "mt-020",
+   "item_id": "cb-456",
    "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "- **Quotient with remainder:** 4 remainder 2",
-   "extractor_source": "answer_line"
+   "stratum": "numeric",
+   "extractor_segment": "**Therefore, the next number in the pattern is 30**. 🎉",
+   "extractor_source": "conclusion"
   },
   {
    "row": 29,
-   "item_id": "mt-115",
+   "item_id": "cb-148",
    "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
+   "stratum": "conceptual",
+   "extractor_segment": "+",
+   "extractor_source": "answer_line"
   },
   {
    "row": 30,
-   "item_id": "cb-166",
+   "item_id": "cb-821",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The volume of the box is **60 cm³**. (That means the box could hold 60 cubic centimetres of material.)",
+   "stratum": "conceptual",
+   "extractor_segment": "Yes**!",
    "extractor_source": "answer_line"
   },
   {
    "row": 31,
-   "item_id": "cb-754",
+   "item_id": "cb-692",
    "condition": "system",
    "stratum": "numeric",
-   "extractor_segment": "12",
+   "extractor_segment": "18",
    "extractor_source": "answer_line"
   },
   {
    "row": 32,
-   "item_id": "oos-139",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "sqrt(-9)=3i",
+   "item_id": "cb-005",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "a square**",
    "extractor_source": "answer_line"
   },
   {
    "row": 33,
-   "item_id": "oos-139",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
+   "item_id": "cb-305",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "A **teacup** holds less water than a bathtub.",
+   "extractor_source": "answer_line"
   },
   {
    "row": 34,
-   "item_id": "mt-162",
-   "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": "A triangle has **3** sides. 🎉",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 35,
-   "item_id": "oos-152",
+   "item_id": "oos-183",
    "condition": "system",
    "stratum": "out_of_scope",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 36,
-   "item_id": "cb-425",
+   "row": 35,
+   "item_id": "cb-566",
    "condition": "system",
    "stratum": "conceptual",
-   "extractor_segment": "kilometres",
+   "extractor_segment": "a cube",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 36,
+   "item_id": "cb-821",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "yes",
    "extractor_source": "answer_line"
   },
   {
    "row": 37,
-   "item_id": "cb-847",
+   "item_id": "mt-192",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The combined length of the two ribbons is **7.25 metres**.",
-   "extractor_source": "answer_line"
+   "stratum": "multi_turn",
+   "extractor_segment": "#### Bottom line A logarithm tells you **the exponent** (the “how many times”) you need to use a given base to reach a certain number.",
+   "extractor_source": "conclusion"
   },
   {
    "row": 38,
-   "item_id": "cb-636",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "### ✅ Bottom line Knowing **both** the hour-hand position **and** the minute-hand position lets us tell the **exact** time - the hour *and* the minutes.",
-   "extractor_source": "conclusion"
+   "item_id": "mt-031",
+   "condition": "system",
+   "stratum": "multi_turn",
+   "extractor_segment": "**Everyday example:** Imagine a chocolate bar that is cut into four equal small squares.",
+   "extractor_source": "last_bold"
   },
   {
    "row": 39,
-   "item_id": "cb-371",
+   "item_id": "mt-187",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "11",
-   "extractor_source": "answer_line"
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 40,
-   "item_id": "mt-142",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
+   "item_id": "cb-056",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "7**",
+   "extractor_source": "answer_line"
   },
   {
    "row": 41,
-   "item_id": "cb-874",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "X × 500 metres",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 42,
-   "item_id": "oos-043",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": "5",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 43,
-   "item_id": "cb-700",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "300",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 44,
-   "item_id": "cb-796",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The park had **10,33,332 visitors** in the second year.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 45,
-   "item_id": "oos-273",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "So a square has **4 corners** (or 4 vertices). 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 46,
-   "item_id": "cb-297",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "So the answer is: **The school bus is longer than the pencil**. 🚍✏️",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 47,
-   "item_id": "cb-862",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The area of the swimming pool is **250 square metres (250 m²)**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 48,
-   "item_id": "mt-042",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "Great! 🎉 You’ve got it right—there are **20 pens left**.",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 49,
-   "item_id": "cb-444",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "**So, your birthday has not happened this year**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 50,
-   "item_id": "cb-196",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "- So the cone can stand upright even though it has a pointy top!",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 51,
-   "item_id": "oos-277",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "So the pattern is: add 5000 each step.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 52,
-   "item_id": "mt-162",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "That’s right—​a triangle has **3 sides**! 🎉",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 53,
-   "item_id": "oos-156",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 54,
-   "item_id": "cb-444",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "no**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 55,
-   "item_id": "mt-091",
-   "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 56,
-   "item_id": "oos-078",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "* If it’s **negative**, the square-root is of a negative number, so the solutions are **not real** (they’re called complex numbers).",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 57,
-   "item_id": "cb-680",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The answer is ** 3/5**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 58,
-   "item_id": "cb-595",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "**Therefore, the actual movie begins at 6 : 27 pm**. 🎬",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 59,
-   "item_id": "oos-055",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "So the instantaneous speed",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 60,
-   "item_id": "cb-445",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "9:10**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 61,
-   "item_id": "oos-156",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "- Important operations: **union (∪)**, **intersection (∩)**, and **complement**.",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 62,
-   "item_id": "cb-183",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "a rectangle",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 63,
-   "item_id": "cb-705",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "perimeter**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 64,
-   "item_id": "mt-094",
-   "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 65,
-   "item_id": "oos-277",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": "20000",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 66,
-   "item_id": "cb-774",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "735**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 67,
-   "item_id": "oos-108",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 68,
-   "item_id": "mt-091",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "- **Draw an equilateral triangle**.",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 69,
-   "item_id": "oos-200",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 70,
-   "item_id": "mt-057",
-   "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 71,
-   "item_id": "cb-786",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The warehouse now has **3,24,023 items** in total. 🎉",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 72,
-   "item_id": "cb-409",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "35",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 73,
-   "item_id": "cb-874",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "## Bottom line With the information “somewhere near” on the map, we **cannot determine the exact distance**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 74,
-   "item_id": "oos-055",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": "4 m/s",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 75,
-   "item_id": "oos-005",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 76,
-   "item_id": "cb-426",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "23",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 77,
-   "item_id": "cb-589",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "So, 35 minutes after 7 : 40 will be **8 : 15**. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 78,
-   "item_id": "cb-440",
+   "item_id": "cb-711",
    "condition": "system",
    "stratum": "numeric",
    "extractor_segment": "9:10",
    "extractor_source": "answer_line"
   },
   {
-   "row": 79,
-   "item_id": "cb-297",
+   "row": 42,
+   "item_id": "cb-653",
    "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "a school bus",
+   "stratum": "numeric",
+   "extractor_segment": "67433**",
    "extractor_source": "answer_line"
   },
   {
-   "row": 80,
-   "item_id": "cb-595",
+   "row": 43,
+   "item_id": "cb-918",
    "condition": "system",
    "stratum": "numeric",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 81,
-   "item_id": "cb-166",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "60",
+   "extractor_segment": "3/4",
    "extractor_source": "answer_line"
   },
   {
-   "row": 82,
-   "item_id": "cb-183",
+   "row": 44,
+   "item_id": "cb-056",
    "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "So the shape the student is describing is a **rectangle**.",
+   "stratum": "numeric",
+   "extractor_segment": "So, **one week = 7 days**.",
    "extractor_source": "conclusion"
   },
   {
-   "row": 83,
-   "item_id": "cb-507",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "Vikram now has **434 books**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 84,
-   "item_id": "mt-142",
-   "condition": "system",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 85,
-   "item_id": "cb-105",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The stadium has **55555 seats filled**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 86,
-   "item_id": "oos-076",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 87,
-   "item_id": "cb-754",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The diameter of the circle is **12 cm**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 88,
-   "item_id": "cb-665",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "50**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 89,
-   "item_id": "oos-108",
+   "row": 45,
+   "item_id": "oos-157",
    "condition": "baseline",
    "stratum": "out_of_scope",
-   "extractor_segment": "So, the median = **8**.",
-   "extractor_source": "conclusion"
+   "extractor_segment": "The union is ** 1, 2, 3, 4, 5 **.",
+   "extractor_source": "answer_line"
   },
   {
-   "row": 90,
-   "item_id": "cb-196",
+   "row": 46,
+   "item_id": "cb-142",
    "condition": "system",
    "stratum": "conceptual",
-   "extractor_segment": "Because its flat round base provides a stable surface that rests on the ground, allowing the cone to stand upright.",
+   "extractor_segment": "The corner of a book.",
    "extractor_source": "answer_line"
   },
   {
-   "row": 91,
-   "item_id": "oos-200",
+   "row": 47,
+   "item_id": "cb-215",
    "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "So, friction is simply the **force that tries to stop (or slow) motion when two surfaces rub together**.",
-   "extractor_source": "conclusion"
+   "stratum": "numeric",
+   "extractor_segment": "8 is greater than 5. 🎉",
+   "extractor_source": "answer_line"
   },
   {
-   "row": 92,
-   "item_id": "mt-094",
+   "row": 48,
+   "item_id": "cb-918",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "The tailor has **0.75 metres** of cloth left.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 49,
+   "item_id": "mt-096",
    "condition": "baseline",
    "stratum": "multi_turn",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 93,
-   "item_id": "cb-529",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "**So, 4 × 3 is the same as 3 × 4 because multiplication does not depend on the order of the numbers; it always gives the same total**. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 94,
-   "item_id": "cb-665",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "So, at that speed the printer would need **about 50 minutes** to print 900 pages.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 95,
-   "item_id": "mt-095",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "So 29 ÷ 3 = 9 with a remainder of 2 (or 29 = 3 x 9 + 2).",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 96,
-   "item_id": "cb-113",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "So, **18 is NOT bigger than 14; it is smaller**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 97,
-   "item_id": "cb-266",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "So, the number that comes just before 15 is **14**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 98,
-   "item_id": "cb-153",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "**So, in simple words:** A prime number is a whole number greater than 1 that can be divided exactly only by 1 and by itself, and by no other whole numbers. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 99,
-   "item_id": "cb-860",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "### Bottom line - **Area** = *how big the surface is* (2-D, measured in square units).",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 100,
-   "item_id": "cb-869",
+   "row": 50,
+   "item_id": "cb-305",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "20**",
+   "stratum": "conceptual",
+   "extractor_segment": "a teacup**",
    "extractor_source": "answer_line"
   },
   {
-   "row": 101,
-   "item_id": "cb-153",
-   "condition": "system",
+   "row": 51,
+   "item_id": "cb-782",
+   "condition": "baseline",
    "stratum": "conceptual",
-   "extractor_segment": "7 is a prime number.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 102,
-   "item_id": "cb-862",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "250",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 103,
-   "item_id": "cb-617",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "You’ll find the answer is 1 each time!",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 104,
-   "item_id": "cb-480",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "425",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 105,
-   "item_id": "cb-182",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "slice of pizza**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 106,
-   "item_id": "cb-371",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "So, when you put the sides of the hexagon and the pentagon together, they have **11 sides in total**. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 107,
-   "item_id": "cb-843",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "121/20**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 108,
-   "item_id": "oos-052",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 109,
-   "item_id": "oos-076",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "**In short:** A quadratic equation is an equation that contains the square of the unknown (like x^2).",
+   "extractor_segment": "**Tip:** If the shop owner wants to keep this good trend, they can look at what helped the sales rise (maybe a new product, a promotion, or good weather) and try to continue those positive actions.",
    "extractor_source": "last_bold"
   },
   {
-   "row": 110,
-   "item_id": "cb-824",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "So the fan has **rotational symmetry of order 3** (or “120° rotational symmetry”).",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 111,
-   "item_id": "mt-115",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "6 + 5 = 11",
+   "row": 52,
+   "item_id": "oos-171",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": "first² + first × second + second × first + second²",
    "extractor_source": "answer_line"
   },
   {
-   "row": 112,
-   "item_id": "mt-095",
+   "row": 53,
+   "item_id": "mt-076",
    "condition": "system",
    "stratum": "multi_turn",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 113,
-   "item_id": "cb-636",
+   "row": 54,
+   "item_id": "cb-420",
    "condition": "system",
    "stratum": "conceptual",
-   "extractor_segment": "Knowing both hands lets us read the precise hour **and** the exact minutes, so we can tell the exact time.",
+   "extractor_segment": "grams",
    "extractor_source": "answer_line"
   },
   {
-   "row": 114,
-   "item_id": "cb-425",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "We would measure the distance between two cities in kilometres. 🚗💨",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 115,
-   "item_id": "cb-154",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "No, 1 is not a prime number.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 116,
-   "item_id": "cb-589",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "8:15**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 117,
-   "item_id": "oos-078",
+   "row": 55,
+   "item_id": "oos-224",
    "condition": "system",
    "stratum": "out_of_scope",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 118,
-   "item_id": "mt-119",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": "So: **3 + 6 = 9**",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 119,
-   "item_id": "oos-095",
-   "condition": "system",
-   "stratum": "out_of_scope",
-   "extractor_segment": "100**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 120,
-   "item_id": "cb-736",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "58732**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 121,
-   "item_id": "cb-181",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "A common round object you’ll often see in the kitchen is a **plate**. 🍽️ It’s circular and used for serving food.",
-   "extractor_source": "last_bold"
-  },
-  {
-   "row": 122,
-   "item_id": "oos-152",
-   "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "The midpoint of (1,1) and (5,5) is (3,3).",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 123,
-   "item_id": "cb-843",
+   "row": 56,
+   "item_id": "cb-497",
    "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "So, the sum of **3.45 and 2.6 is 6.05**.",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 124,
-   "item_id": "cb-282",
-   "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "**So the next colour is red**. 🎨",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 125,
-   "item_id": "cb-617",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "yes**",
+   "extractor_segment": "**850 is bigger than 500**.",
    "extractor_source": "answer_line"
   },
   {
-   "row": 126,
-   "item_id": "oos-028",
+   "row": 57,
+   "item_id": "cb-252",
    "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "**In short:** A matrix is a rectangular arrangement of numbers in rows and columns, written inside brackets.",
-   "extractor_source": "last_bold"
+   "stratum": "conceptual",
+   "extractor_segment": "So the two numbers could be any of the following pairs: **(0 and 8), (1 and 7), (2 and 6), (3 and 5), (4 and 4), (5 and 3), (6 and 2), (7 and 1), or (8 and 0)**.",
+   "extractor_source": "conclusion"
   },
   {
-   "row": 127,
-   "item_id": "oos-052",
-   "condition": "baseline",
+   "row": 58,
+   "item_id": "oos-157",
+   "condition": "system",
    "stratum": "out_of_scope",
-   "extractor_segment": "### TL;DR (the short answer) **Differentiation** is a way of finding out **how fast something is changing at a particular instant**.",
-   "extractor_source": "last_bold"
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
-   "row": 128,
-   "item_id": "mt-042",
+   "row": 59,
+   "item_id": "cb-185",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "0",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 60,
+   "item_id": "oos-253",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "**So, you have a total of Rs 40**. 🎉",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 61,
+   "item_id": "oos-047",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "Mathematicians find the total area of a shape by **adding up lots and lots of very tiny pieces**—just like you would fill a picture with a huge number of tiny stickers or puzzle pieces.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 62,
+   "item_id": "cb-730",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "**Therefore, 72,154 is greater than 72,145**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 63,
+   "item_id": "mt-105",
    "condition": "system",
    "stratum": "multi_turn",
    "extractor_segment": null,
    "extractor_source": "none"
   },
   {
-   "row": 129,
-   "item_id": "cb-282",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "red",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 130,
-   "item_id": "cb-786",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "324023",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 131,
-   "item_id": "mt-020",
+   "row": 64,
+   "item_id": "mt-178",
    "condition": "system",
    "stratum": "multi_turn",
-   "extractor_segment": "So we write it as: 12 ÷ 3 = 4",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 132,
-   "item_id": "cb-480",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The train arrives at **7 : 05**.",
+   "extractor_segment": "5**",
    "extractor_source": "answer_line"
   },
   {
-   "row": 133,
-   "item_id": "cb-860",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "Area measures flat space (square units); volume measures space inside a solid (cubic units).",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 134,
-   "item_id": "cb-869",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "4 cm on the map represents **20 kilometres**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 135,
-   "item_id": "cb-680",
-   "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "yes**",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 136,
-   "item_id": "mt-057",
-   "condition": "baseline",
-   "stratum": "multi_turn",
-   "extractor_segment": null,
-   "extractor_source": "none"
-  },
-  {
-   "row": 137,
-   "item_id": "cb-445",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "**So the first class ends at 9 : 10 am**. 🎉",
-   "extractor_source": "conclusion"
-  },
-  {
-   "row": 138,
-   "item_id": "cb-930",
-   "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "The actual length of the trail is **21 kilometres**.",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 139,
-   "item_id": "cb-529",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "12",
-   "extractor_source": "answer_line"
-  },
-  {
-   "row": 140,
-   "item_id": "cb-113",
+   "row": 65,
+   "item_id": "cb-324",
    "condition": "system",
    "stratum": "conceptual",
    "extractor_segment": "no**",
    "extractor_source": "answer_line"
   },
   {
-   "row": 141,
-   "item_id": "cb-426",
+   "row": 66,
+   "item_id": "oos-068",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So the wall is 5 m tall.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 67,
+   "item_id": "cb-734",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "**48200 is closer to 50000 than 53900**.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 68,
+   "item_id": "cb-582",
    "condition": "baseline",
    "stratum": "numeric",
-   "extractor_segment": "So, **23 kg of potatoes remain**. (The two goats don’t affect the potato count.)",
+   "extractor_segment": "The baby’s weight is **3500 grams**.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 69,
+   "item_id": "cb-829",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "yes**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 70,
+   "item_id": "oos-253",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": "40**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 71,
+   "item_id": "cb-648",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "The warehouse still has **44,339 boxes** left. 🎉",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 72,
+   "item_id": "cb-116",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "14",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 73,
+   "item_id": "cb-050",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "25",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 74,
+   "item_id": "cb-077",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "54",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 75,
+   "item_id": "cb-830",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "no",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 76,
+   "item_id": "mt-092",
+   "condition": "system",
+   "stratum": "multi_turn",
+   "extractor_segment": "You’re right - the factory makes **35,750** toys in 143 days. 🎉",
+   "extractor_source": "last_bold"
+  },
+  {
+   "row": 77,
+   "item_id": "cb-093",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "both are equal**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 78,
+   "item_id": "oos-272",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": "6",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 79,
+   "item_id": "mt-076",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": "So the box’s geometric volume is **4 cm³**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 80,
+   "item_id": "cb-842",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "25100",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 81,
+   "item_id": "cb-737",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "After adding the new books, the library now has **83,230 books**. 🎉",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 82,
+   "item_id": "oos-183",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So there are **24 different ways** to arrange the 4 coloured beads in a row.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 83,
+   "item_id": "mt-187",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": "Calculus is a part of mathematics that helps us study how things change at each instant (differential calculus) and how to add up lots of tiny pieces to find totals like area or distance (integral calculus). It’s like having a magnifying glass to see tiny changes and a super-fine ruler to add up many tiny parts.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 84,
+   "item_id": "oos-047",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 85,
+   "item_id": "cb-186",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "Yes** - two triangles can be different sizes and still both be called triangles.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 86,
+   "item_id": "cb-776",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "2,400 metres** is the longer distance (it is 100 metres longer than 2.3 kilometres).",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 87,
+   "item_id": "oos-224",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 88,
+   "item_id": "oos-172",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So, whenever you hear “vector,” just picture an arrow that shows both **how far** and **where**!",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 89,
+   "item_id": "cb-252",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "0 and 8, 1 and 7, 2 and 6, 3 and 5, 4 and 4, 5 and 3, 6 and 2, 7 and 1, 8 and 0.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 90,
+   "item_id": "cb-926",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "- The tank can hold **3 cubic metres** of water.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 91,
+   "item_id": "mt-110",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": "Exactly right! 🎉 The least common multiple of 9 and 12 is **36**.",
+   "extractor_source": "last_bold"
+  },
+  {
+   "row": 92,
+   "item_id": "cb-730",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "72,154**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 93,
+   "item_id": "cb-244",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "**So, Sara has 3 stickers left**. 🎉",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 94,
+   "item_id": "cb-324",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "So, the answer is: **No, hearing a rattling sound does not tell you exactly how much money is inside**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 95,
+   "item_id": "oos-240",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So, the digit in the **lakhs place** is **1**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 96,
+   "item_id": "cb-599",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "1000**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 97,
+   "item_id": "cb-791",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "15669**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 98,
+   "item_id": "cb-215",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "8**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 99,
+   "item_id": "cb-842",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "1/4",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 100,
+   "item_id": "mt-178",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": "So, a pentagon has 5 corners simply because it has 5 sides, and each pair of sides creates one corner. 🌟",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 101,
+   "item_id": "mt-031",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": "**Measure each side** with a ruler.",
+   "extractor_source": "last_bold"
+  },
+  {
+   "row": 102,
+   "item_id": "cb-737",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "83230**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 103,
+   "item_id": "oos-272",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "Each friend will end up with **6 marbles**.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 104,
+   "item_id": "cb-531",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "no",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 105,
+   "item_id": "cb-648",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "44339",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 106,
+   "item_id": "cb-185",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "**Therefore a sphere has 0 flat round faces**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 107,
+   "item_id": "cb-241",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "5**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 108,
+   "item_id": "oos-180",
+   "condition": "baseline",
+   "stratum": "out_of_scope",
+   "extractor_segment": "So there are 24 different ways to arrange those 4 toys!",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 109,
+   "item_id": "cb-186",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "**So the answer is:** Two shapes can be different sizes, and as long as each one has three straight sides, they are both triangles. 🎉",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 110,
+   "item_id": "cb-599",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "1000 has more digits (four digits) while 999 has three digits.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 111,
+   "item_id": "cb-782",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "sales are increasing",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 112,
+   "item_id": "cb-829",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "✅ 29 is a prime number.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 113,
+   "item_id": "cb-726",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "A pictograph will underestimate the real quantity, showing a value ten times smaller than the actual amount.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 114,
+   "item_id": "cb-110",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "12**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 115,
+   "item_id": "cb-531",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "- Therefore, **the value does not change**; the product is exactly the same as the original number.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 116,
+   "item_id": "cb-147",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "same**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 117,
+   "item_id": "cb-142",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "So, the corner of a book shows a right angle in everyday life. 😊",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 118,
+   "item_id": "cb-753",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "**So, the fraction of the garden that has flowers is 3/5**. 🌸",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 119,
+   "item_id": "oos-140",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 120,
+   "item_id": "cb-844",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "7.8 - 3.25 = 4.55",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 121,
+   "item_id": "cb-791",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "So the answer is again **15669**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 122,
+   "item_id": "cb-830",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "### Conclusion **51 is a composite number** (its factors are 1, 3, 17, 51).",
+   "extractor_source": "last_bold"
+  },
+  {
+   "row": 123,
+   "item_id": "cb-244",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "3",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 124,
+   "item_id": "cb-093",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "Neither is heavier; both are 1 kilogram.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 125,
+   "item_id": "mt-096",
+   "condition": "system",
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 126,
+   "item_id": "oos-068",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 127,
+   "item_id": "cb-653",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "So, after one more person enters, the counter will show **67433**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 128,
+   "item_id": "cb-651",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "The cinema sold **14,550 tickets** in February.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 129,
+   "item_id": "cb-496",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "So, the school has **443 students** in total.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 130,
+   "item_id": "cb-582",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "3500",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 131,
+   "item_id": "oos-180",
+   "condition": "system",
+   "stratum": "out_of_scope",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 132,
+   "item_id": "cb-734",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "48,200",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 133,
+   "item_id": "cb-497",
+   "condition": "system",
+   "stratum": "numeric",
+   "extractor_segment": "850**",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 134,
+   "item_id": "cb-148",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "So, the number 8 is an object that looks unchanged after a half-turn. 🎉",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 135,
+   "item_id": "mt-105",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 136,
+   "item_id": "cb-356",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "No, two Rs 2 coins together make **Rs 4**, not Rs 22.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 137,
+   "item_id": "cb-077",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "**There are 54 chairs in total**.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 138,
+   "item_id": "cb-351",
+   "condition": "system",
+   "stratum": "conceptual",
+   "extractor_segment": "The rope whose end reaches farther (or has the larger measured length) is the longer rope.",
+   "extractor_source": "answer_line"
+  },
+  {
+   "row": 139,
+   "item_id": "cb-566",
+   "condition": "baseline",
+   "stratum": "conceptual",
+   "extractor_segment": "**So the net folds into a cube**.",
+   "extractor_source": "conclusion"
+  },
+  {
+   "row": 140,
+   "item_id": "mt-092",
+   "condition": "baseline",
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
+  },
+  {
+   "row": 141,
+   "item_id": "cb-692",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": "So, the circular plate’s diameter is **18 cm**.",
    "extractor_source": "conclusion"
   },
   {
    "row": 142,
-   "item_id": "cb-409",
+   "item_id": "cb-147",
    "condition": "baseline",
-   "stratum": "numeric",
-   "extractor_segment": "Amit has **35 stickers** left. 🎉",
+   "stratum": "conceptual",
+   "extractor_segment": "**After a half-turn (180°), a square looks exactly the same as before**. It has rotational symmetry, so the shape does not change.",
    "extractor_source": "answer_line"
   },
   {
    "row": 143,
-   "item_id": "cb-736",
+   "item_id": "oos-171",
    "condition": "baseline",
-   "stratum": "conceptual",
-   "extractor_segment": "Hence any 5-digit number in the interval",
-   "extractor_source": "conclusion"
+   "stratum": "out_of_scope",
+   "extractor_segment": "### Quick example Take **first** = 3 and **second** = 4.",
+   "extractor_source": "last_bold"
   },
   {
    "row": 144,
-   "item_id": "cb-881",
+   "item_id": "mt-192",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "8,45,920**",
-   "extractor_source": "answer_line"
+   "stratum": "multi_turn",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 145,
-   "item_id": "cb-847",
+   "item_id": "cb-844",
    "condition": "system",
    "stratum": "numeric",
-   "extractor_segment": "7.25 m (plus the length of the three pairs of scissors, if that is known).",
+   "extractor_segment": "91/20**",
    "extractor_source": "answer_line"
   },
   {
    "row": 146,
-   "item_id": "cb-476",
+   "item_id": "cb-496",
    "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "Because a tiny perfume bottle holds only a few hundred millilitres (e.g., 30 ml = 0.03 litre), using millilitres gives a simple, clear number instead of a tiny fraction of a litre.",
+   "stratum": "numeric",
+   "extractor_segment": "443",
    "extractor_source": "answer_line"
   },
   {
    "row": 147,
-   "item_id": "cb-887",
+   "item_id": "cb-753",
    "condition": "system",
    "stratum": "conceptual",
-   "extractor_segment": "4,50,000 - 5,49,999",
+   "extractor_segment": "3/5**",
    "extractor_source": "answer_line"
   },
   {
    "row": 148,
-   "item_id": "cb-634",
+   "item_id": "oos-240",
    "condition": "system",
-   "stratum": "numeric",
-   "extractor_segment": "12:10**",
+   "stratum": "out_of_scope",
+   "extractor_segment": "1**",
    "extractor_source": "answer_line"
   },
   {
    "row": 149,
-   "item_id": "cb-824",
-   "condition": "system",
-   "stratum": "conceptual",
-   "extractor_segment": "rotational symmetry",
-   "extractor_source": "answer_line"
+   "item_id": "cb-110",
+   "condition": "baseline",
+   "stratum": "numeric",
+   "extractor_segment": null,
+   "extractor_source": "none"
   },
   {
    "row": 150,
-   "item_id": "oos-005",
+   "item_id": "cb-050",
    "condition": "baseline",
-   "stratum": "out_of_scope",
-   "extractor_segment": "**So, 30^ = 1/2**.",
-   "extractor_source": "conclusion"
+   "stratum": "numeric",
+   "extractor_segment": "**After borrowing, subtract each column and write the result**.",
+   "extractor_source": "last_bold"
   }
  ]
 }

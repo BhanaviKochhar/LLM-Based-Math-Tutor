@@ -1,0 +1,353 @@
+=== 16:55:55 curriculum_benchmark_class1: system ===
+217 job(s) total, 0 already in checkpoint, 217 to run -> eval\results\system_runs_v2\curriculum_benchmark_class1.jsonl (max_workers=36)
+Done: 217/217 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class1.jsonl
+=== 17:13:29 curriculum_benchmark_class1 finished (217 records); paused before class2 ===
+=== 17:23:37 curriculum_benchmark_class2: system (18 workers) ===
+160 job(s) total, 0 already in checkpoint, 160 to run -> eval\results\system_runs_v2\curriculum_benchmark_class2.jsonl (max_workers=18)
+Done: 160/160 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class2.jsonl
+=== 17:45:58 paused before class3 ===
+=== 12:23:49 curriculum_benchmark_class2: cb-379 re-run on request ===
+160 job(s) total, 159 already in checkpoint, 1 to run -> eval\results\system_runs_v2\curriculum_benchmark_class2.jsonl (max_workers=1)
+Done: 160/160 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class2.jsonl
+=== 12:24:46 curriculum_benchmark_class3: system (18 workers) ===
+187 job(s) total, 0 already in checkpoint, 187 to run -> eval\results\system_runs_v2\curriculum_benchmark_class3.jsonl (max_workers=18)
+Done: 187/187 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class3.jsonl
+=== 12:38:05 paused before class4 ===
+=== 12:41:48 curriculum_benchmark_class4: system (18 workers) ===
+177 job(s) total, 0 already in checkpoint, 177 to run -> eval\results\system_runs_v2\curriculum_benchmark_class4.jsonl (max_workers=18)
+Done: 177/177 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class4.jsonl
+=== 12:59:42 paused before class5 ===
+=== 12:59:59 curriculum_benchmark_class4: cb-658 re-run on request ===
+177 job(s) total, 176 already in checkpoint, 1 to run -> eval\results\system_runs_v2\curriculum_benchmark_class4.jsonl (max_workers=1)
+Done: 177/177 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class4.jsonl
+=== 13:01:12 paused before class5 ===
+=== 13:02:14 curriculum_benchmark_class5: system (18 workers) ===
+194 job(s) total, 0 already in checkpoint, 194 to run -> eval\results\system_runs_v2\curriculum_benchmark_class5.jsonl (max_workers=18)
+Done: 194/194 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class5.jsonl
+=== 13:56:28 paused before out_of_scope ===
+=== 13:56:42 curriculum_benchmark_class5: cb-160 re-run on request ===
+194 job(s) total, 193 already in checkpoint, 1 to run -> eval\results\system_runs_v2\curriculum_benchmark_class5.jsonl (max_workers=1)
+Done: 194/194 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\curriculum_benchmark_class5.jsonl
+=== 14:00:22 paused before out_of_scope ===
+=== 14:02:59 out_of_scope: system (18 workers) ===
+=== 14:16:38 out_of_scope paused by user (checkpoint kept) ===
+=== 14:17:59 out_of_scope: 5 temporary API failures removed for retry ===
+=== 14:20:35 out_of_scope: resumed (18 workers) ===
+=== 14:27:10 out_of_scope paused (rate-limit exhaustion at 18 workers); failed records removed for retry ===
+=== 17:03:30 out_of_scope: resumed (6 workers) ===
+277 job(s) total, 227 already in checkpoint, 50 to run -> eval\results\system_runs_v2\out_of_scope.jsonl (max_workers=6)
+Done: 276/277 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\out_of_scope.jsonl
+=== 17:18:00 paused before multi_turn ===
+=== 17:18:12 out_of_scope: retrying failed journeys and re-running cut-off oos-243 ===
+277 job(s) total, 275 already in checkpoint, 2 to run -> eval\results\system_runs_v2\out_of_scope.jsonl (max_workers=2)
+Done: 277/277 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\out_of_scope.jsonl
+=== 17:19:53 out_of_scope complete (277/277); paused before multi_turn ===
+=== 17:42:26 svamp: system, items 1-250 (6 workers) ===
+=== 17:45:59 svamp system paused by user (checkpoint kept) ===
+=== 17:48:17 svamp: system resumed, items 1-250 (6 workers) ===
+=== 17:58:37 svamp system paused (rate-limit exhaustion at 6 workers) ===
+=== 18:15:45 svamp system: retrying svamp-0005, 0006, 0011 ===
+3 job(s) total, 0 already in checkpoint, 3 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=2)
+Done: 16/16 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+=== 18:18:23 svamp system: next 10 items (3 workers) ===
+10 job(s) total, 0 already in checkpoint, 10 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=3)
+Done: 22/26 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+=== 2026-10-26 07:29:06 svamp: system, items 1-250 (6 workers) ===
+=== 2026-10-26 07:51:45 svamp system stopped: full rerun planned after a scope change ===
+=== 2026-10-26 07:54:30 svamp system: items 1-250 (first pass, 6 workers) ===
+250 job(s) total, 216 already in checkpoint, 34 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 249/250 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 1 failed journeys for retry: ['svamp-0028']
+=== 2026-10-26 08:01:28 svamp system: items 1-250 (retry pass, 6 workers) ===
+250 job(s) total, 249 already in checkpoint, 1 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 250/250 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-26 08:02:26 svamp system batch 1-250 done ===
+=== 2026-10-26 08:02:26 svamp system: items 1-500 (first pass, 6 workers) ===
+=== 2026-10-26 08:32:33 svamp system paused by user (batch to 500 in progress; checkpoint kept) ===
+=== 2026-10-26 08:54:41 svamp system: items 1-250 (first pass, 6 workers) ===
+250 job(s) total, 250 already in checkpoint, 0 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 319/319 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-26 08:54:50 svamp system: items 1-250 (retry pass, 6 workers) ===
+250 job(s) total, 250 already in checkpoint, 0 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 319/319 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-26 08:54:57 svamp system batch 1-250 done ===
+=== 2026-10-26 08:54:57 svamp system: items 1-500 (first pass, 6 workers) ===
+=== 2026-10-26 09:16:06 svamp system: items 1-250 (first pass, 3 workers) ===
+250 job(s) total, 250 already in checkpoint, 0 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=3)
+Done: 350/350 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-26 09:16:13 svamp system: items 1-250 (retry pass, 3 workers) ===
+250 job(s) total, 250 already in checkpoint, 0 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=3)
+Done: 350/350 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-26 09:16:20 svamp system batch 1-250 done ===
+=== 2026-10-26 09:16:20 svamp system: items 1-500 (first pass, 3 workers) ===
+=== 2026-10-26 10:24:51 svamp system paused: Groq daily token cap (200k tokens/key/day on gpt-oss-120b) reached ===
+=== 2026-10-27 08:18:33 svamp system: items 1-500 (first pass, 6 workers) ===
+500 job(s) total, 383 already in checkpoint, 117 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 499/500 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 1 failed journeys for retry: ['svamp-0424']
+=== 2026-10-27 08:30:48 svamp system: items 1-500 (retry pass, 6 workers) ===
+500 job(s) total, 499 already in checkpoint, 1 to run -> eval\results\system_runs_v2\svamp.jsonl (max_workers=6)
+Done: 500/500 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\svamp.jsonl
+removed 0 failed journeys for retry: []
+=== 2026-10-27 08:31:14 svamp system batch 1-500 done ===
+=== 2026-10-27 08:31:14 svamp system stopped at 500 as planned ===
+=== 2026-10-27 08:43:41 svamp baseline: items 1-500 (first pass, 6 workers) ===
+500 job(s) total, 0 already in checkpoint, 500 to run -> eval\results\baseline_runs\svamp.jsonl (max_workers=6)
+Done: 500/500 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\svamp.jsonl
+baseline: removed 0 failed journeys for retry: []
+=== 2026-10-27 08:49:53 svamp baseline: items 1-500 (retry pass, 6 workers) ===
+500 job(s) total, 500 already in checkpoint, 0 to run -> eval\results\baseline_runs\svamp.jsonl (max_workers=6)
+Done: 500/500 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\svamp.jsonl
+baseline: removed 0 failed journeys for retry: []
+=== 2026-10-27 08:49:53 svamp baseline stopped at 500 as planned ===
+=== 2026-10-27 09:19:43 held_out_openers: system (first pass, 6 workers) ===
+30 job(s) total, 0 already in checkpoint, 30 to run -> eval\results\system_runs_v2\held_out_openers.jsonl (max_workers=6)
+Done: 29/30 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_openers.jsonl
+held-out: removed 1 failed journeys for retry: ['ho-op-15']
+=== 2026-10-27 09:22:26 held_out_openers: system (retry pass, 6 workers) ===
+30 job(s) total, 29 already in checkpoint, 1 to run -> eval\results\system_runs_v2\held_out_openers.jsonl (max_workers=6)
+Done: 30/30 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_openers.jsonl
+held-out: removed 0 failed journeys for retry: []
+=== 2026-10-27 09:22:48 held_out_openers done ===
+=== 2026-10-27 09:22:48 held_out_ambiguous_everyday: system (first pass, 6 workers) ===
+20 job(s) total, 0 already in checkpoint, 20 to run -> eval\results\system_runs_v2\held_out_ambiguous_everyday.jsonl (max_workers=6)
+Done: 20/20 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_ambiguous_everyday.jsonl
+held-out: removed 0 failed journeys for retry: []
+=== 2026-10-27 09:25:33 held_out_ambiguous_everyday: system (retry pass, 6 workers) ===
+20 job(s) total, 20 already in checkpoint, 0 to run -> eval\results\system_runs_v2\held_out_ambiguous_everyday.jsonl (max_workers=6)
+Done: 20/20 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_ambiguous_everyday.jsonl
+held-out: removed 0 failed journeys for retry: []
+=== 2026-10-27 09:25:44 held_out_ambiguous_everyday done ===
+=== 2026-10-27 09:25:44 held_out_out_of_scope: system (first pass, 6 workers) ===
+50 job(s) total, 0 already in checkpoint, 50 to run -> eval\results\system_runs_v2\held_out_out_of_scope.jsonl (max_workers=6)
+Done: 50/50 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_out_of_scope.jsonl
+held-out: removed 0 failed journeys for retry: []
+=== 2026-10-27 09:28:39 held_out_out_of_scope: system (retry pass, 6 workers) ===
+50 job(s) total, 50 already in checkpoint, 0 to run -> eval\results\system_runs_v2\held_out_out_of_scope.jsonl (max_workers=6)
+Done: 50/50 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\held_out_out_of_scope.jsonl
+held-out: removed 0 failed journeys for retry: []
+=== 2026-10-27 09:28:46 held_out_out_of_scope done ===
+=== 2026-10-27 09:28:46 v2 held-out sets finished ===
+=== 2026-10-27 09:37:12 multi_turn: system, conversations 1-10 (first pass, 3 workers) ===
+10 job(s) total, 0 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 10/10 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:43:17 multi_turn: system, conversations 1-10 (retry pass, 3 workers) ===
+10 job(s) total, 10 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 10/10 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:43:24 multi_turn batch 1-10 done ===
+=== 2026-10-27 09:43:24 multi_turn: system, conversations 1-20 (first pass, 3 workers) ===
+20 job(s) total, 10 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 20/20 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:48:22 multi_turn: system, conversations 1-20 (retry pass, 3 workers) ===
+20 job(s) total, 20 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 20/20 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:48:28 multi_turn batch 1-20 done ===
+=== 2026-10-27 09:48:28 multi_turn: system, conversations 1-30 (first pass, 3 workers) ===
+30 job(s) total, 20 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 30/30 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:52:03 multi_turn: system, conversations 1-30 (retry pass, 3 workers) ===
+30 job(s) total, 30 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 30/30 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:52:11 multi_turn batch 1-30 done ===
+=== 2026-10-27 09:52:11 multi_turn: system, conversations 1-40 (first pass, 3 workers) ===
+40 job(s) total, 30 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 40/40 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:58:43 multi_turn: system, conversations 1-40 (retry pass, 3 workers) ===
+40 job(s) total, 40 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 40/40 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 09:58:50 multi_turn batch 1-40 done ===
+=== 2026-10-27 09:58:50 multi_turn: system, conversations 1-50 (first pass, 3 workers) ===
+50 job(s) total, 40 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 50/50 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:03:38 multi_turn: system, conversations 1-50 (retry pass, 3 workers) ===
+50 job(s) total, 50 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 50/50 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:03:45 multi_turn batch 1-50 done ===
+=== 2026-10-27 10:03:45 multi_turn: system, conversations 1-60 (first pass, 3 workers) ===
+60 job(s) total, 50 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 60/60 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:11:15 multi_turn: system, conversations 1-60 (retry pass, 3 workers) ===
+60 job(s) total, 60 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 60/60 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:11:22 multi_turn batch 1-60 done ===
+=== 2026-10-27 10:11:22 multi_turn: system, conversations 1-70 (first pass, 3 workers) ===
+70 job(s) total, 60 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 70/70 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:19:19 multi_turn: system, conversations 1-70 (retry pass, 3 workers) ===
+70 job(s) total, 70 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 70/70 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:19:27 multi_turn batch 1-70 done ===
+=== 2026-10-27 10:19:27 multi_turn: system, conversations 1-80 (first pass, 3 workers) ===
+80 job(s) total, 70 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 80/80 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:26:14 multi_turn: system, conversations 1-80 (retry pass, 3 workers) ===
+80 job(s) total, 80 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 80/80 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:26:22 multi_turn batch 1-80 done ===
+=== 2026-10-27 10:26:22 multi_turn: system, conversations 1-90 (first pass, 3 workers) ===
+90 job(s) total, 80 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 90/90 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:41:29 multi_turn: system, conversations 1-90 (retry pass, 3 workers) ===
+90 job(s) total, 90 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 90/90 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 10:41:36 multi_turn batch 1-90 done ===
+=== 2026-10-27 10:41:36 multi_turn: system, conversations 1-100 (first pass, 3 workers) ===
+100 job(s) total, 90 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 100/100 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 11:06:06 multi_turn: system, conversations 1-100 (retry pass, 3 workers) ===
+100 job(s) total, 100 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 100/100 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 11:06:13 multi_turn batch 1-100 done ===
+=== 2026-10-27 11:06:13 multi_turn: system, conversations 1-110 (first pass, 3 workers) ===
+=== 2026-10-27 11:06:47 multi_turn paused by user after batch 1-100 (checkpoint kept) ===
+=== 2026-10-27 14:41:21 multi_turn resumed from conversation 101 (keys 18/18 healthy) ===
+=== 2026-10-27 14:41:22 multi_turn: system, conversations 1-110 (first pass, 3 workers) ===
+110 job(s) total, 100 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 110/110 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:43:19 multi_turn: system, conversations 1-110 (retry pass, 3 workers) ===
+110 job(s) total, 110 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 110/110 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:43:27 multi_turn batch 1-110 done ===
+=== 2026-10-27 14:43:27 multi_turn: system, conversations 1-120 (first pass, 3 workers) ===
+120 job(s) total, 110 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 120/120 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:46:22 multi_turn: system, conversations 1-120 (retry pass, 3 workers) ===
+120 job(s) total, 120 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 120/120 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:46:29 multi_turn batch 1-120 done ===
+=== 2026-10-27 14:46:29 multi_turn: system, conversations 1-130 (first pass, 3 workers) ===
+130 job(s) total, 120 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 130/130 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:55:38 multi_turn: system, conversations 1-130 (retry pass, 3 workers) ===
+130 job(s) total, 130 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 130/130 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 14:55:46 multi_turn batch 1-130 done ===
+=== 2026-10-27 14:55:46 multi_turn: system, conversations 1-140 (first pass, 3 workers) ===
+140 job(s) total, 130 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 140/140 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 15:24:54 multi_turn: system, conversations 1-140 (retry pass, 3 workers) ===
+140 job(s) total, 140 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 140/140 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 15:24:59 multi_turn batch 1-140 done ===
+=== 2026-10-27 15:24:59 multi_turn: system, conversations 1-150 (first pass, 3 workers) ===
+=== 2026-10-27 15:25:05 multi_turn paused by user after batch 1-140 (checkpoint kept) ===
+=== 2026-10-27 16:00:41 multi_turn resumed from conversation 141 (keys 18/18 healthy) ===
+=== 2026-10-27 16:00:42 multi_turn: system, conversations 1-150 (first pass, 3 workers) ===
+150 job(s) total, 140 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 150/150 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 16:24:56 multi_turn: system, conversations 1-150 (retry pass, 3 workers) ===
+150 job(s) total, 150 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 150/150 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-27 16:25:03 multi_turn batch 1-150 done ===
+=== 2026-10-27 16:25:03 multi_turn: system, conversations 1-160 (first pass, 3 workers) ===
+=== 2026-10-27 16:25:09 multi_turn paused by user after batch 1-150 (checkpoint kept) ===
+=== 2026-10-28 08:14:52 multi_turn resumed from conversation 151 ===
+=== 2026-10-28 08:14:52 multi_turn: system, conversations 1-160 (first pass, 3 workers) ===
+160 job(s) total, 150 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 160/160 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:17:15 multi_turn: system, conversations 1-160 (retry pass, 3 workers) ===
+160 job(s) total, 160 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 160/160 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:17:21 multi_turn batch 1-160 done ===
+=== 2026-10-28 08:17:22 multi_turn: system, conversations 1-170 (first pass, 3 workers) ===
+170 job(s) total, 160 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 170/170 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:19:21 multi_turn: system, conversations 1-170 (retry pass, 3 workers) ===
+170 job(s) total, 170 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 170/170 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:19:33 multi_turn batch 1-170 done ===
+=== 2026-10-28 08:19:33 multi_turn: system, conversations 1-180 (first pass, 3 workers) ===
+180 job(s) total, 170 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 180/180 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:21:15 multi_turn: system, conversations 1-180 (retry pass, 3 workers) ===
+180 job(s) total, 180 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 180/180 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:21:27 multi_turn batch 1-180 done ===
+=== 2026-10-28 08:21:27 multi_turn: system, conversations 1-190 (first pass, 3 workers) ===
+190 job(s) total, 180 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 190/190 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:23:02 multi_turn: system, conversations 1-190 (retry pass, 3 workers) ===
+190 job(s) total, 190 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 190/190 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:23:12 multi_turn batch 1-190 done ===
+=== 2026-10-28 08:23:12 multi_turn: system, conversations 1-200 (first pass, 3 workers) ===
+200 job(s) total, 190 already in checkpoint, 10 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 200/200 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:24:21 multi_turn: system, conversations 1-200 (retry pass, 3 workers) ===
+200 job(s) total, 200 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 200/200 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:24:27 multi_turn batch 1-200 done ===
+=== 2026-10-28 08:24:27 multi_turn: system, conversations 1-206 (first pass, 3 workers) ===
+206 job(s) total, 200 already in checkpoint, 6 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 206/206 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:24:57 multi_turn: system, conversations 1-206 (retry pass, 3 workers) ===
+206 job(s) total, 206 already in checkpoint, 0 to run -> eval\results\system_runs_v2\multi_turn.jsonl (max_workers=3)
+Done: 206/206 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\multi_turn.jsonl
+multi_turn: removed 0 failed conversations for retry
+=== 2026-10-28 08:25:03 multi_turn batch 1-206 done ===
+=== 2026-10-28 08:25:03 multi_turn finished (206 conversations) ===
+=== 2026-10-28 08:27:31 mathdial: baseline (first pass, 4 workers) ===
+100 job(s) total, 0 already in checkpoint, 100 to run -> eval\results\baseline_runs\mathdial_sample.jsonl (max_workers=4)
+Done: 100/100 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\mathdial_sample.jsonl
+mathdial baseline: removed 0 failed journeys for retry
+=== 2026-10-28 08:29:52 mathdial: baseline (retry pass, 4 workers) ===
+100 job(s) total, 100 already in checkpoint, 0 to run -> eval\results\baseline_runs\mathdial_sample.jsonl (max_workers=4)
+Done: 100/100 journeys completed every turn ok. Checkpoint: eval\results\baseline_runs\mathdial_sample.jsonl
+mathdial baseline: removed 0 failed journeys for retry
+=== 2026-10-28 08:29:52 mathdial baseline done ===
+=== 2026-10-28 08:29:53 mathdial: system (first pass, 4 workers) ===
+100 job(s) total, 0 already in checkpoint, 100 to run -> eval\results\system_runs_v2\mathdial_sample.jsonl (max_workers=4)
+Done: 99/100 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\mathdial_sample.jsonl
+mathdial system: removed 1 failed journeys for retry
+=== 2026-10-28 08:52:26 mathdial: system (retry pass, 4 workers) ===
+100 job(s) total, 99 already in checkpoint, 1 to run -> eval\results\system_runs_v2\mathdial_sample.jsonl (max_workers=4)
+Done: 100/100 journeys completed every turn ok. Checkpoint: eval\results\system_runs_v2\mathdial_sample.jsonl
+mathdial system: removed 0 failed journeys for retry
+=== 2026-10-28 08:53:18 mathdial system done ===
+=== 2026-10-28 08:53:18 mathdial finished ===

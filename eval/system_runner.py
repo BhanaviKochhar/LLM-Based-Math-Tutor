@@ -280,7 +280,7 @@ def _split_timing(turn_s: float, calls: list[dict]) -> dict:
 
 
 def run_journey(item_id: str, grade: int | None, ui_level: str | None,
-                student_turns: list[str]) -> dict:
+                student_turns: list[str], force_reveal: bool = True) -> dict:
     """Run every turn of one journey in order, system-only, in its own
     fresh chat + synthetic student identity (see module docstring). Stops
     early (and flags it) if a turn comes back not-ok, mirroring
@@ -313,7 +313,9 @@ def run_journey(item_id: str, grade: int | None, ui_level: str | None,
             all_ok = False
             break  # no point continuing a conversation whose last turn produced nothing
 
-    if (all_ok and len(student_turns) == 1 and turns_out
+    # An item that measures the reply to the child's own message (e.g. a
+    # wrong attempt to diagnose) sets no_forced_reveal: no give-up turn.
+    if (force_reveal and all_ok and len(student_turns) == 1 and turns_out
             and turns_out[-1].get("mode") is not None
             and turns_out[-1].get("mode") not in ANSWER_BEARING_MODES
             and turns_out[-1].get("mode") not in _REFUSAL_MODES):
@@ -361,7 +363,8 @@ def main() -> None:
 
     def call_fn(job: dict) -> dict:
         item = job["item"]
-        return run_journey(job["id"], _grade_of(item), _level_of(item), _student_turns(item))
+        return run_journey(job["id"], _grade_of(item), _level_of(item), _student_turns(item),
+                           force_reveal=not item.get("no_forced_reveal"))
 
     already_done = set()
     if checkpoint.exists():
