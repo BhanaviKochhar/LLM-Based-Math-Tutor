@@ -562,14 +562,20 @@ def verifier_stats(stems: list[str]) -> dict:
     n_items = injected = 0
     wrong_values: list[str] = []
     post = Counter()
+    # Coverage on items that have a checkable expression, per set, and how often the
+    # verifier engaged on items that have none (conceptual, comparison, ...).
+    coverage: dict[str, Counter] = {}
     for stem in stems:
         items, rr = items_of(stem), runs("system", stem)
+        cov = coverage.setdefault(stem.replace("curriculum_benchmark_", ""), Counter())
         for i, it in items.items():
             j = rr.get(i)
             if not j or not j.get("turns"):
                 continue
             n_items += 1
             checks = [t["verify"] for t in j["turns"] if t.get("verify") and t["verify"].get("verifiable")]
+            checkable = bool(it.get("trusted_expression")) and it.get("verifiable", True) is not False
+            cov[("checkable" if checkable else "not_checkable") + ("_engaged" if checks else "_missed")] += 1
             if not checks:
                 continue
             injected += 1
@@ -591,7 +597,15 @@ def verifier_stats(stems: list[str]) -> dict:
                 match = c
                 post["clock_rechecked"] += 1
             post[{True: "match", False: "mismatch", None: "no_number"}[match]] += 1
-    return {"items": n_items, "with_trusted_value": rate(injected, n_items), "post_check": dict(post),
+    def share(sets: list[str], kind: str) -> dict:
+        c = sum((coverage[s] for s in sets), Counter())
+        return rate(c[f"{kind}_engaged"], c[f"{kind}_engaged"] + c[f"{kind}_missed"])
+    curriculum_sets = [s for s in coverage if s != "svamp"]
+    return {"items": n_items, "with_trusted_value": rate(injected, n_items),
+            "coverage_checkable": {**{s: share([s], "checkable") for s in coverage},
+                                   "curriculum": share(curriculum_sets, "checkable")},
+            "engaged_not_checkable_curriculum": share(curriculum_sets, "not_checkable"),
+            "post_check": dict(post),
             "trusted_value_right": rate(post["value_right"], post["value_right"] + post["value_wrong"]),
             "items_with_wrong_trusted_value": wrong_values}
 
@@ -683,6 +697,11 @@ def main() -> None:
               f"- system first-turn modes: {md['system_first_turn_modes']}"]
     mt = m["multi_turn"]
     lines += ["", f"## Multi-turn: controller action match {_pct(mt['controller_action_match'])}"]
+    ver = m["verifier"]
+    lines += ["", "## Verifier (system)",
+              "- checkable items given a trusted value: " + ", ".join(f"{s} {_pct(r)}" for s, r in ver["coverage_checkable"].items()),
+              f"- engaged on curriculum items with no checkable answer: {_pct(ver['engaged_not_checkable_curriculum'])}",
+              f"- trusted value correct: {_pct(ver['trusted_value_right'])}; wrong on {', '.join(ver['items_with_wrong_trusted_value'])}"]
     pl = m["production_latency"]
     lines += ["", f"## Production latency (pilot): median {pl['latency_s'].get('median', float('nan')):.2f} s, "
                   f"P95 {pl['latency_s'].get('p95', float('nan')):.2f} s, {pl['succeeded']}/{pl['calls']} calls"]

@@ -1,0 +1,20 @@
+{
+ "description": "RQ3: when the system (paper-eval-v2) switched to solving together (co_solve) in the multi-turn set, from eval/results/system_runs_v2/multi_turn.jsonl. 21 of 206 conversations contain a co_solve turn. The trigger is taken from the controller's actions in every conversation; the six marked read_in_full were read turn by turn.",
+ "read_on": "2026-10-28",
+ "summary": {
+  "conversations_with_co_solve": 21,
+  "switched_on_explicit_give_up": 17,
+  "switched_after_repeated_wrong_attempts": 4,
+  "turns_after_co_solve": {"follow_up_handled": 2, "correct_confirmation_treated_as_new_question": 2, "later_give_up_re_explained": 2}
+ },
+ "items": [
+  {"id": "mt-005", "trigger": "give_up", "level": "beginner", "read_in_full": true, "note": "Child says 'i dont know' after the first teaching reply; the system solves 17 + 9 with the add-10-take-1 strategy. Right point."},
+  {"id": "mt-168", "trigger": "give_up", "level": "beginner", "read_in_full": true, "note": "Conceptual question (why 1 is not prime); child asks to be told; the system explains step by step. Right point, though the first reply had already explained most of it."},
+  {"id": "mt-170", "trigger": "give_up", "level": "intermediate", "read_in_full": true, "note": "One genuine wrong attempt (135000), a hint to split 330 into 300 + 30, then 'please just show me'; the system works the split. Right point."},
+  {"id": "mt-172", "trigger": "give_up", "level": "advanced", "read_in_full": true, "note": "Child refuses to guess; the system shows 9 x 6 as repeated addition, then handles the follow-up (9 x 7) and confirms 63. Right point, and the follow-up kept the same method."},
+  {"id": "mt-014", "trigger": "repeated_wrong", "level": "intermediate", "read_in_full": true, "note": "Answer 9 for 9 x 0, then the same idea restated; the system co-solves at the restatement, one turn before the script's second diagnosis. When the child then says 'so it's 0', the system re-teaches multiplication instead of confirming."},
+  {"id": "mt-045", "trigger": "repeated_wrong", "level": "beginner", "read_in_full": true, "note": "Two different wrong attempts (48, 36); the system co-solves 6 x 7 after the second, which suits a beginner. The child's correct '42' is then treated as a new question and answered with a place-value lesson."},
+  {"id": "mt-167", "trigger": "repeated_wrong", "level": "intermediate", "read_in_full": false, "note": "Co-solves after two wrong attempts; the child's later 'I give up' gets a fresh explanation of the same problem."},
+  {"id": "mt-177", "trigger": "repeated_wrong", "level": "intermediate", "read_in_full": false, "note": "Same pattern as mt-167, on 52 - 25."}
+ ]
+}
