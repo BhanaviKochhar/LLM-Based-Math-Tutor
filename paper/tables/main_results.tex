@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering
+\caption{Baseline Versus Tiny Thinker: Paired Results (\%)}
+\label{tab:main}
+\footnotesize
+\begin{tabular}{@{}L{4.4cm}rrcrr@{}}
+\toprule
+Measure & Base. & Sys. & Diff.\ [95\% CI] & $p$ & Sys.\ $k/n$ \\
+\midrule
+Curriculum final-answer accuracy & 96.5 & 97.6 & +1.0 [-0.2, +2.5] & 0.146 & 563/577 \\
+SVAMP accuracy (official labels) & 94.4 & 94.8 & +0.4 [-1.4, +2.3] & 0.815 & 474/500 \\
+SVAMP accuracy (debatable labels removed) & 97.5 & 98.1 & +0.6 [-1.2, +2.5] & 0.629 & 474/483 \\
+Out-of-scope: correct behaviour & 22.0 & 98.2 & +76.2 [+70.5, +80.7] & $<$0.001 & 272/277 \\
+\midrule
+First reply gives the answer away$^\downarrow$ & 95.3 & 4.0 & -- & -- & 23/576 \\
+First reply invites the child to try & 3.0 & 69.5 & -- & -- & 645/928 \\
+MathDial: names the mistake outright (judge)$^\ddagger$ & 90.0 & 14.0 & -76.0 [-83.3, -64.7] & $<$0.001 & 14/100 \\
+MathDial: answer handed over (code)$^\downarrow$ & 81.0 & 11.0 & -70.0 [-77.9, -58.6] & $<$0.001 & 11/100 \\
+\midrule
+Hallucination, flagged by both team members$^\downarrow$ & 2.7 & 4.0 & +1.3 [-5.8, +8.8] & 1.000 & 3/75 \\
+Hallucination, flagged by either team member$^\downarrow$ & 6.7 & 10.7 & +4.0 [-5.5, +13.8] & 0.549 & 8/75 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize Paired on the same items. Differences are system minus baseline in percentage points with Newcombe intervals; $p$ from the exact McNemar test. $\downarrow$: lower is better. The first-reply measures are not paired tests: the baseline answers at once, the system's first reply invites an attempt. Curriculum accuracy and giving the answer away cover the items with one checkable final answer; inviting a try covers every first reply. Sys.: Tiny Thinker. $^\ddagger$ Neither direction is better by itself: on 98 of 100 MathDial items the system re-teaches the step and asks the child to try again instead of naming the error, and the judge rated its guidance higher (Table~\ref{tab:rubric}).}
+\end{table*}

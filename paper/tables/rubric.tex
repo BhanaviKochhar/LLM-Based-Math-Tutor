@@ -1,0 +1,29 @@
+\begin{table}[t]
+\centering
+\caption{Response Quality, 1--5 Rubric}
+\label{tab:rubric}
+\footnotesize
+\begin{tabular}{@{}L{2.2cm}L{1.7cm}rrrr@{}}
+\toprule
+Rater & Dimension & Base. & Sys. & Diff. & $p_{\mathrm{Holm}}$ \\
+\midrule
+Judge, curriculum & correctness & 4.82 & 4.80 & -0.02 & 0.452 \\
+ & grade fit & 4.69 & 4.91 & +0.22 & $<$0.001 \\
+ & clarity$^\dagger$ & 4.81 & 4.92 & +0.10 & $<$0.001 \\
+ & restraint$^\dagger$ & 4.78 & 4.53 & -0.25 & $<$0.001 \\
+\midrule
+Judge, multi-turn & correctness & 4.75 & 4.71 & -0.03 & 0.498 \\
+ & grade fit & 4.41 & 4.84 & +0.43 & $<$0.001 \\
+ & clarity$^\dagger$ & 4.80 & 4.54 & -0.26 & 0.003 \\
+ & restraint$^\dagger$ & 4.52 & 4.15 & -0.37 & 0.012 \\
+\midrule
+Two team members (mean) & correctness & 4.85 & 4.82 & -0.03 & 0.675 \\
+ & grade fit & 3.99 & 4.77 & +0.79 & $<$0.001 \\
+ & clarity & 4.15 & 4.56 & +0.41 & 0.004 \\
+ & restraint & 3.68 & 4.23 & +0.55 & 0.267 \\
+\midrule
+Judge, MathDial & guidance$^\dagger$ & 1.74 & 2.33 & +0.59 & 0.001 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize Paired Wilcoxon signed-rank tests, Holm-corrected across the four dimensions (MathDial guidance: a single test). Judge: 935 curriculum replies, 206 conversations, 100 MathDial replies; team members: 75 paired replies. Restraint: no padding or needless detail. $^\dagger$ Exploratory: the judge's agreement with the team members on this dimension fell below the bar set in advance.}
+\end{table}
