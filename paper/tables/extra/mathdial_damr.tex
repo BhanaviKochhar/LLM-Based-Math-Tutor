@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\caption{MathDial on the MRBench Dimensions: Desired-Label Match Rate (\%)}
+\label{tab:mathdial-damr}
+\footnotesize
+\begin{tabular}{@{}L{3.2cm}L{2.6cm}rrcr@{}}
+\toprule
+Dimension & Desired & Base. & Sys. & Diff.\ [95\% CI] & $p$ \\
+\midrule
+Mistake identification & Yes & 90.0 & 14.0 & -76.0 [-83.3, -64.7] & $<$0.001 \\
+Mistake location$^\dagger$ & Yes & 83.0 & 10.0 & -73.0 [-80.2, -62.3] & $<$0.001 \\
+Answer withheld (code) & answer not stated (code) & 19.0 & 89.0 & +70.0 [+58.6, +77.9] & $<$0.001 \\
+Providing guidance$^\dagger$ & judge guidance 4-5 of 5 & 9.0 & 12.0 & +3.0 [-5.1, +11.3] & 0.607 \\
+Actionability$^\dagger$ & Yes & 56.0 & 23.0 & -33.0 [-44.6, -19.8] & $<$0.001 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize 100 MathDial items, paired, McNemar. Judge: qwen/qwen3.8-27b, blind to condition. $^\dagger$ Exploratory: location and actionability have no human check, and guidance agreement with the team members was low. Scaffolding replies are known to score lower on identification and location.}
+\end{table*}
