@@ -78,8 +78,28 @@ class Commit:
         return self.segments[0] if self.segments else None
 
 
+def reply_text(turn: dict) -> str:
+    """The text to read a turn's answer from: the model's own output where the
+    runner kept it (baseline turns store it as raw_response), else the stored
+    response. The stored baseline response went through the app's LaTeX
+    clean-up, which flattens \\dfrac{25}{100} to "25100"."""
+    return (turn or {}).get("raw_response") or (turn or {}).get("response") or ""
+
+
+_FRAC_VARIANT_RE = re.compile(r"\\[dt]frac\b")
+_FRAC_DIGITS_RE = re.compile(r"\\frac\s*(\d)\s*(\d)")          # \frac13 -> \frac{1}{3}
+_WRAPPER_RE = re.compile(r"\\(?:boxed|text|textbf|mathrm|mathbf|operatorname)\s*\{([^{}]*)\}")
+
+
 def _normalize(text: str) -> str:
-    t = response_parser.strip_latex(text or "")
+    t = text or ""
+    t = _FRAC_VARIANT_RE.sub(r"\\frac", t)
+    t = _FRAC_DIGITS_RE.sub(r"\\frac{\1}{\2}", t)
+    for _ in range(3):                                   # \boxed{\frac{2}{3}\text{ cup}}
+        t = _WRAPPER_RE.sub(r"\1", t)
+    t = re.sub(r"(?<=\d)\\[,;: ](?=\d)", "", t)          # 72\,000 -> 72000
+    t = t.replace("\\ ", " ")
+    t = response_parser.strip_latex(t)
     t = re.sub(r"\\[()\[\]]", " ", t)                   # \( \) \[ \] delimiters
     t = re.sub(r"\\[,;:!]", "", t)                      # LaTeX spacing commands
     # A thin/no-break space between digit groups is a thousands separator
@@ -222,6 +242,8 @@ def _result_number(segment: str, question: str) -> str | None:
     # would make a conversion question's answer look like one of its inputs.
     q_plain = _TIME_RE.sub(" ", _strip_marks(_normalize(question or "")))
     q_vals = {str(_num_value(n)) for n in _NUM_RE.findall(q_plain)}
+    # "Use 20 / 4 = 5": a division written with spaces is two inputs, not the fraction 20/4.
+    q_vals |= {str(_num_value(n)) for pair in re.findall(r"(\d+)\s+/\s+(\d+)", q_plain) for n in pair}
     # A parenthetical is an aside ("4/5 metre (which is 80 cm)"), not the result.
     segment = re.sub(r"\([^()]*\)", " ", segment)
     ordered: list[str] = []
@@ -291,8 +313,9 @@ def _has_value(segment: str, kind: str) -> bool:
         if re.search(r"\b(?:answer|it)\s+is\s+(?:yes|no)\b", _strip_marks(segment), re.IGNORECASE):
             return False   # "the answer is no" -- a yes/no commitment, not a value
         return bool(_NUM_RE.search(_plain_numeric(segment)))
-    if kind == "yes_no":
-        return bool(_YES_NO_WORD_RE.search(_strip_marks(segment)))
+    if kind == "yes_no":   # "composite" / "is prime" answer a yes/no prime question (see match)
+        return bool(_YES_NO_WORD_RE.search(_strip_marks(segment))
+                    or re.search(r"\b(?:composite|prime)\b", segment, re.IGNORECASE))
     return True
 
 
@@ -321,7 +344,14 @@ def match(segment: str, candidate: str, question: str = "") -> bool:
         q, r = (_num_value(n) for n in _NUM_RE.findall(cand)[:2])
         return bool(_LEFTOVER_RE.search(plain)) and q in seg_vals and r in seg_vals
     if kind == "yes_no":
-        said = {w.lower() for w in _YES_NO_WORD_RE.findall(_strip_marks(segment))}
+        plain = _strip_marks(segment)
+        said = {w.lower() for w in _YES_NO_WORD_RE.findall(plain)}
+        if not said and re.search(r"\bprime\b", question, re.IGNORECASE):
+            # "Is 51 a prime number?" answered "51 is a composite number".
+            if re.search(r"\b(?:composite|not\s+(?:a\s+)?prime)\b", plain, re.IGNORECASE):
+                said = {"no"}
+            elif re.search(r"\bis\s+(?:a\s+)?prime\b", plain, re.IGNORECASE):
+                said = {"yes"}
         return said == {cand.lower().rstrip(".!")}
     # Categorical / worded answer: every part present as whole words.
     nseg = _norm_text(segment)

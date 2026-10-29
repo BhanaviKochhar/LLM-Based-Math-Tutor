@@ -105,6 +105,28 @@ def test_times_and_remainders() -> None:
                   "List the factors of 36.") is True)
 
 
+def test_latex_and_yes_no() -> None:
+    print("LaTeX answers and yes/no questions")
+    check("\\boxed{\\dfrac{25}{100}} is 25/100 (cb-842)",
+          verdict("### Final answer\n\\[\n\\boxed{\\dfrac{25}{100}}\n\\]", ["1/4"], "Write 1/4 with denominator 100.") is True)
+    check("shorthand \\dfrac13 + \\dfrac13 = \\dfrac{2}{3} (cb-920)",
+          verdict("**Result**: The double batch uses \\(\\boxed{\\dfrac{2}{3}\\text{ cup of oil}}\\).", ["2/3"],
+                  "1/3 cup plus 1/3 cup more?") is True)
+    check("72\\,000\\ cm^3 is 72000 (cb-866)",
+          verdict("**Answer:** Its volume is \\(72\\,000\\ \\text{cm}^3\\).", ["72000"], "60 cm by 30 cm by 40 cm?") is True)
+    check("'51 is a composite number' answers no to a prime question (cb-830)",
+          verdict("### Conclusion **51 is a composite number** (its factors are 1, 3, 17, 51).", ["no"],
+                  "Is 51 a prime number?") is True)
+    item = {"question": "Is it true that 9 minus 9 equals 9?", "expected_answer": "0", "expected_yes_no": "no",
+            "trusted_expression": "9-9"}
+    check("yes/no misconception item: 'Answer: no' is correct (cb-250)",
+          st.score_item(item, {"turns": [{"response": "9 - 9 is 0, not 9.\n\n**Answer: no**"}]})["correct"] is True)
+    check("yes/no misconception item: 'Answer: yes' is wrong",
+          st.score_item(item, {"turns": [{"response": "Yes, it is.\n\n**Answer: yes**"}]})["correct"] is False)
+    check("raw_response is read before the stored response",
+          ax.reply_text({"response": "25100", "raw_response": "\\dfrac{25}{100}"}) == "\\dfrac{25}{100}")
+
+
 def test_truncation() -> None:
     print("truncation")
     check("cut off mid-word", ax.is_truncated("A logarith"))
@@ -158,6 +180,7 @@ def main() -> None:
     test_answer_line()
     test_concluding_sentences()
     test_times_and_remainders()
+    test_latex_and_yes_no()
     test_truncation()
     test_out_of_scope_scheme()
     test_paired_stats()

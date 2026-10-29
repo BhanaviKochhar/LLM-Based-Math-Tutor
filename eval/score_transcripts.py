@@ -215,7 +215,7 @@ def _score_curriculum(item: dict, journey: dict | None) -> dict:
     last = _last_turn(journey)
     if last is None:
         return {"scorable": False, "correct": None, "note": "no transcript for this item/condition"}
-    text = last.get("response") or ""
+    text = answer_extraction.reply_text(last)
     mode = last.get("mode")
     if response_parser.is_refusal(text):
         return {"scorable": True, "correct": False, "path": "curriculum", "note": "model refused"}
@@ -244,6 +244,10 @@ def ground_truth_candidates(item: dict) -> list[str]:
     """Every accepted form of the item's answer, re-verified from its
     trusted_expression where it has one."""
     candidates: list[str] = []
+    # A yes/no misconception question ("Is 9 - 9 equal to 9?") is answered by
+    # its yes/no; its expected_answer is the value in the dataset's own example.
+    if item.get("expected_yes_no"):
+        candidates.append(str(item["expected_yes_no"]))
     trusted_expr = item.get("trusted_expression")
     if trusted_expr:
         truth = _truth_value(trusted_expr)

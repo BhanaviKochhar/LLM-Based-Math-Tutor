@@ -140,16 +140,27 @@ def median_ci(values: list[float], seed: int = 20261027, n_boot: int = 2000) -> 
 
 # --------------------------------------------------------------------------- correctness
 def final_correct(item: dict, journey: dict, verdict: dict | None) -> tuple[bool | None, str]:
-    """(correct, how): how is rules | judge | undecided | not_scorable."""
+    """(correct, how): how is rules | judge | judge_second_reading | undecided | not_scorable.
+
+    The rules read the reply's final statement; the judge separately names the
+    answer the reply commits to. A reply the rules score wrong counts as right
+    when the judge's reading of it matches the ground truth -- the rules miss
+    answers phrased outside their patterns ("No, 5 - 2 = 3 ..." above a bold
+    reminder). Applied to both conditions alike; correctness is still decided
+    by matching against ground truth in code."""
     s = score_item(item, journey)
+    committed = str((verdict or {}).get("committed_answer") or "").strip()
+    cands = ground_truth_candidates(item)
+    judge_says = (bool(committed) and committed.upper() != "NONE" and bool(cands)
+                  and any(answer_extraction.match(committed, c, item.get("question") or "") for c in cands))
     if s.get("correct") is not None:
+        if not s["correct"] and judge_says and s.get("note") != "model refused":
+            return True, "judge_second_reading"
         return bool(s["correct"]), "rules"
     if not s.get("needs_llm_extraction") and not (s.get("note") or "").startswith("system hasn't revealed"):
         return None, "not_scorable"
-    committed = str((verdict or {}).get("committed_answer") or "").strip()
-    cands = ground_truth_candidates(item)
     if committed and committed.upper() != "NONE" and cands:
-        return any(answer_extraction.match(committed, c, item.get("question") or "") for c in cands), "judge"
+        return judge_says, "judge"
     return False, "undecided"
 
 
@@ -345,7 +356,7 @@ def mathdial() -> dict:
     rev = {}
     for c in ("baseline", "system"):
         rr = runs(c, "mathdial_sample")
-        rev[c] = {i: answer_extraction.judge(answer_extraction.committed_answer(rr[i]["turns"][0].get("response") or ""),
+        rev[c] = {i: answer_extraction.judge(answer_extraction.committed_answer(answer_extraction.reply_text(rr[i]["turns"][0])),
                                              ground_truth_candidates(it), it.get("question") or "") is True
                   for i, it in items.items() if i in rr and rr[i].get("turns")}
     res["answer_revealed_extractor"] = paired_binary(rev["baseline"], rev["system"])
@@ -471,7 +482,9 @@ _SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+|\n+")
 _ENCOURAGE_RE = re.compile(r"\b(great job|well done|good job|nice work|you did it|awesome|excellent|"
                            r"keep it up|you can do it|great work|fantastic|brilliant)\b", re.IGNORECASE)
 _INVITE_RE = re.compile(r"\b(your turn|give it a (?:try|go)|try (?:it|this|again)|can you|what do you think|"
-                        r"have a go|now you try)\b", re.IGNORECASE)
+                        r"have a go|now you try|you (?:can|could) (?:now )?try|"
+                        r"try (?:adding|subtracting|multiplying|dividing|writing|counting|finding|solving)|"
+                        r"tell me (?:what|which|how|the|if)|what (?:do|did) you get)\b", re.IGNORECASE)
 _STEP_RE = re.compile(r"^\s*(?:\*\*)?(?:step\s*\d+|\d+[.)])", re.IGNORECASE | re.MULTILINE)
 _EXAMPLE_RE = re.compile(r"\b(for example|for instance|imagine|e\.g\.|everyday example|think of)\b", re.IGNORECASE)
 _PRACTICE_RE = re.compile(r"\b(practice|your turn|try this one)\b", re.IGNORECASE)
@@ -536,7 +549,8 @@ def text_measures(stems: list[str], limit_ids: dict[str, set] | None = None) -> 
                     ped[k].append(pedagogy(txt))
                 cands = ground_truth_candidates(it)
                 if cands:
-                    v = answer_extraction.judge(answer_extraction.committed_answer(first), cands, it.get("question") or "")
+                    v = answer_extraction.judge(answer_extraction.committed_answer(answer_extraction.reply_text(j["turns"][0])),
+                                                cands, it.get("question") or "")
                     reveal.append(v is True)
         res = {"early_reveal_in_first_reply": rate(sum(reveal), len(reveal))}
         for k in ("first", "final"):
@@ -592,7 +606,7 @@ def verifier_stats(stems: list[str]) -> dict:
             if match is False and verifier.asks_for_clock_time(it.get("question") or ""):
                 # The post-check compared minutes with a clock time; recheck the reply
                 # against the item's clock-time ground truth instead.
-                c = answer_extraction.judge(answer_extraction.committed_answer(j["turns"][-1].get("response") or ""),
+                c = answer_extraction.judge(answer_extraction.committed_answer(answer_extraction.reply_text(j["turns"][-1])),
                                             ground_truth_candidates(it), it.get("question") or "")
                 match = c
                 post["clock_rechecked"] += 1

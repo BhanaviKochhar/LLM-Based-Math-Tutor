@@ -66,15 +66,17 @@ python -u scripts/retrieval.py
 ### Run the test suites
 
 ```bash
-python -m frontend.test_app           # 169 tests — UI/state logic
-python -m scripts.llm.test_pipeline   # 210 tests — verifier/pipeline/prompt logic
-python -m eval.controller_walk        # 117 checks — controller state-machine scenarios
-python -m eval.validate_datasets      # 74 checks — eval dataset schema/integrity
-python -m scripts.test_retrieval      # 16 checks — retrieval behavior
-python -m scripts.llm.test_scope      # 63 checks — the syllabus scope gate
+python -m frontend.test_app            # 176 tests — UI/state logic
+python -m scripts.llm.test_pipeline    # 266 tests — verifier/pipeline/prompt logic
+python -m eval.controller_walk         # 127 checks — controller state-machine scenarios
+python -m eval.validate_datasets       # 57 checks — eval dataset schema/integrity
+python -m scripts.test_retrieval       # 16 checks — retrieval behavior
+python -m scripts.llm.test_scope       # 95 checks — the syllabus scope gate
+python -m eval.test_answer_extraction  # 46 checks — the evaluation's final-answer scorer
 ```
 
-All six are offline (no network, no API keys) and deterministic.
+All seven are offline (no network, no API keys). `eval.controller_walk` has a known 0–2 flaky
+failures from timing; rerun before treating a failure as real.
 
 ---
 
@@ -90,8 +92,12 @@ frontend/views/main_page.py  (ask-bar form)
 frontend/episode.py  process_pending_turn() -> submit_turn()
         │
         ├─ 1. safety.check_input()            deterministic, runs BEFORE any LLM call
-        ├─ 2. scope.check()                   deterministic syllabus-scope gate
+        ├─ 2. scope.check()                   deterministic syllabus-scope word rules
         ├─ 3. conversation_resolver.resolve_question()   NEW / FOLLOWUP / CONFUSION / ...
+        │     (a chat's first message: classify_opener() — NEW / CLARIFY / ADVANCED,
+        │      one small-model call, gpt-oss-20b)
+        ├─ 3b. scope.needs_beyond_primary()   small-model scope check (gpt-oss-20b), only
+        │                                      where a new problem starts
         ├─ 4. scripts.retrieval.retrieve_with_metadata() hybrid BM25 + ChromaDB, RRF, top 3
         ├─ 5. verifier.solve_with_type()       compute-first: numeric -> quotient/remainder
         │                                      -> named functions -> categorical
@@ -108,7 +114,7 @@ frontend/episode.py  process_pending_turn() -> submit_turn()
 frontend/views/main_page.py renders the reply, verify-tag, citation, badges/progress
 ```
 
-Every one of those 13 steps is a real, separately-testable module — not a single monolithic
+Every one of those steps is a real, separately-testable module — not a single monolithic
 prompt. The rest of this document walks through each one, then traces a complete turn
 end-to-end through them in order.
 
@@ -134,7 +140,7 @@ end-to-end through them in order.
 
 ## 4. The backend (`scripts/llm/`)
 
-### 4.1 `controller.py` — the tutoring state machine (778 lines)
+### 4.1 `controller.py` — the tutoring state machine (794 lines)
 
 The single most important file for *why this isn't just a chatbot*. A `TutorState` dataclass
 tracks one open problem: `question`, `grade`, `level`, `computed_answer`, `is_math`,
@@ -160,7 +166,7 @@ a best-effort pattern read of free text, not an unambiguous single-value compari
 hidden to hint toward, so those buttons used to appear even when meaningless; every call site
 that offers them now goes through this one gate.
 
-### 4.2 `verifier.py` — compute-first ground truth (712 lines)
+### 4.2 `verifier.py` — compute-first ground truth (785 lines)
 
 Never calls the model to check its own arithmetic. Given a question, an LLM-based extractor
 (few-shot, temperature 0) proposes a plain arithmetic expression from an allow-listed grammar
@@ -188,7 +194,7 @@ own stated final number against the trusted value (only for modes that actually 
 the latter is a bounded guardrail for every other mode — did the model's own worked example
 actually add up, independent of any trusted value.
 
-### 4.3 `scope.py` — the deterministic syllabus boundary (275 lines)
+### 4.3 `scope.py` — the syllabus boundary (430 lines)
 
 Before this module existed, "refuse topics beyond primary school" was pure prose inside the
 main tutoring prompt, with zero code-level backstop — confirmed live to fail (a request to
@@ -201,6 +207,14 @@ the big multi-instruction tutoring prompt, which was found not to reliably hold 
 worked example" when competing with everything else in that prompt), or a hard refuse with zero
 LLM call at all (`REFUSAL_TEXT = "Let's ask your teacher about this one!"`). Non-math subjects
 never get the gloss exception — a maths tutor shouldn't teach photosynthesis even briefly.
+
+Word rules only catch phrasings someone listed (on 40 fresh disguised questions they stopped 4),
+so `needs_beyond_primary()` adds a concept-level check by a small model (`gpt-oss-20b`,
+temperature 0, medium reasoning effort, its own rate-limit pool): does answering this properly
+need maths beyond Class 5, even when asked in plain words? It runs only where a new problem
+starts (an opener, a new question, a changed problem) — never on attempts, hints or give-ups —
+skips bare arithmetic, and any failure leaves the message in scope. Its prompt is written from
+the Class 1–5 topic list and the beyond-primary list, never from test questions.
 
 ### 4.4 `intent.py` + `conversation_resolver.py` — understanding the turn
 
@@ -220,8 +234,13 @@ Two different jobs, both cascade (cheap-first) classifiers:
   unambiguous "X instead of Y" grammar without an LLM call; a low-confidence LLM resolution
   (`confidence < 0.70`) is downgraded to `FRAGMENT` rather than trusted, since an unsafe rewrite
   is worse than asking the child to clarify.
+- **`classify_opener()`** handles a chat's *first* message. A message with a quantity in it is a
+  real problem (no call); anything else gets one small-model call (`gpt-oss-20b`) answering
+  `NEW` (start teaching), `CLARIFY` (too vague — "Which is the bigger one?" — so ask what the
+  child means and open no problem) or `ADVANCED` (needs maths beyond Class 5 — refuse). Any
+  failure means `NEW`.
 
-### 4.5 `prompt_registry.py` — final message assembly (301 lines)
+### 4.5 `prompt_registry.py` — final message assembly (311 lines)
 
 `build_messages()` is where everything upstream converges into the actual LLM call. The system
 prompt (`TUTOR_SYSTEM`, persona "Ganita Didi") carries the always-vs-refuse rule, the
@@ -265,7 +284,7 @@ A flat, 14-topic, grade-independent keyword classifier grounded in
 30-character-truncated strings) — never for scope gating, which is `scope.py`'s separate job on
 a separate axis.
 
-### 4.9 `llm_client.py` — the shared streaming client (191 lines)
+### 4.9 `llm_client.py` — the shared streaming client (461 lines)
 
 One `stream()` generator tried against an ordered list of `Target`s: `groq-direct` first, then
 the Hugging Face router through `nscale`, then through `deepinfra` — deliberately never routing
@@ -275,7 +294,7 @@ that target even if it later errors, so the UI never receives an answer spliced 
 providers. A missing API key silently disables its target rather than raising. `chat()` is the
 non-streaming convenience built on the same generator.
 
-### 4.10 `response_parser.py` — cleaning model text (251 lines)
+### 4.10 `response_parser.py` — cleaning model text (261 lines)
 
 `strip_latex()` deterministically rewrites stray `\frac{1}{4}` → `1/4`, `\sqrt{9}` → `sqrt(9)`,
 drops any other backslash command, and runs unconditionally on every turn (not a
@@ -321,8 +340,7 @@ backward compatibility with scripts that import it directly.
 
 Two deliberately separate logs. `common.log_run()` writes one record per actual *generation*
 call to `data/llm_runs.jsonl` — full prompt messages, raw params, raw provider result; this is
-the file the paper's quantitative claims (285 logged interactions, the three-model pilot) are
-derived from. `telemetry.log_interaction()` writes one compact, structured record per *student
+the source of the pilot interaction figures and the early three-model pilot. `telemetry.log_interaction()` writes one compact, structured record per *student
 turn* to `data/interaction_events.jsonl` — what was decided (mode, terminal, outcome), not the
 raw prompt — reconstructable turn-by-turn without wading through full message payloads. Neither
 can raise in a way that breaks a tutoring turn.
@@ -367,7 +385,7 @@ when the UI needs to show a citation).
 
 ---
 
-## 6. `frontend/episode.py` — tying it all together (751 lines)
+## 6. `frontend/episode.py` — tying it all together (808 lines)
 
 This is where every backend module above actually gets called, in order, for a real turn.
 
@@ -458,10 +476,10 @@ previously asking "What is 12 times 3?":
 | Path | Tracked? | Contents |
 |---|---|---|
 | `extracted_json/ncert_chunks.json` | **Yes** | The full corpus — 2,329 chunks, `{text, grade, page, source}`. Everything retrieval runs against. Rebuild with `parse_ncert.py` if the source PDFs change. |
-| `eval_baseline_vs_system.json` | **Yes** | A 36-item baseline-vs-system comparison from an earlier evaluation pass — real evidence, kept for traceability even though a larger replacement is in progress (see `eval/`). |
+| `eval_baseline_vs_system.json` | **Yes** | A 36-item baseline-vs-system comparison from an early evaluation pass, kept for traceability. Superseded by the full evaluation in §9. |
 | `raw_pdfs/` | No (gitignored) | The five source PDFs — not unique to any machine, download from [NCERT Classes 1-5](https://drive.google.com/drive/folders/1DBPLkxJh6Y6-zJNLeopLxnYEaSN2AV_T?usp=sharing). |
 | `chromadb/` | No (gitignored) | The persistent vector index — fully regenerable from `ncert_chunks.json` via `load_chromadb.py`. |
-| `llm_runs.jsonl` | No (gitignored) | Every generation call ever made locally, growing continuously. The paper's quantitative evidence is a *frozen snapshot* of a specific date window from this file, not the live file itself. |
+| `llm_runs.jsonl` | No (gitignored) | Every generation call ever made locally, growing continuously. The pilot latency figures (§9) come from a fixed date window of this file (20 July – 22 August 2026, 266 tutoring calls). |
 | `interaction_events.jsonl` | No (gitignored) | Per-turn structured telemetry — useful as live ground truth when debugging (distinguishes "the app did X" from "the test harness thinks it did X"), not meant to be shared via git. |
 | `students.json` | No (gitignored) | Per-student personalization state (`student_tracker`'s store) — real runtime data, not source material; was tracked early on but untracked once established it was perpetually-dirty local state, not a feature artifact. |
 
@@ -469,17 +487,100 @@ previously asking "What is 12 times 3?":
 
 ## 9. Evaluation (`eval/`)
 
-Two generations of evaluation code coexist. The **current, actively maintained** suites —
-`eval/controller_walk.py` and `eval/validate_datasets.py` — are part of the standard test run
-above and extended continuously as the system changes. An **earlier framework**
-(`eval/component_eval/*`, `eval/run_eval.py`, `eval/eval_set.py`) is real, carefully-written
-work, self-marked `LEGACY`/superseded in its own docstrings and commit history (`git log` —
-"Mark legacy baseline-vs-system eval harness as superseded") because it predates the
-controller-driven live generation path and several of `verifier.py`'s current answer types. It's
-kept for historical traceability, not run day-to-day. `eval/datasets/*` holds well-schemaed
-question sets (retrieval, extraction, curriculum benchmark, out-of-scope, multi-turn,
-personalization, conceptual) — several of these feed the next, larger evaluation pass directly
-rather than needing to be re-authored from scratch.
+### 9.1 Design
+
+The evaluation compares two tutors on the same items, paired item by item, with the **same
+model and sampling settings** (`openai/gpt-oss-120b` on Groq, temperature 0.3), so differences
+come from the architecture, not the model:
+
+- **Baseline** (`eval/baseline_runner.py`, tag `paper-eval-v1`): one plain tutor instruction plus
+  the conversation — no retrieval, verifier, controller or scope gate.
+- **TinyThinker** (`eval/system_runner.py`, tag `paper-eval-v2`): the app's own turn function,
+  `frontend.episode.submit_turn`, unchanged.
+
+On single-turn items TinyThinker's first reply teaches and invites an attempt, so the harness
+sends a fixed give-up message as a second turn and scores its final answer there; the baseline
+answers once. First-reply measures use each side's first reply.
+
+| Set (`eval/datasets/`) | Items | Tests |
+|---|---|---|
+| `curriculum_benchmark_class1..5` | 935 (577 with one checkable answer) | correctness and teaching across 9 question types |
+| `out_of_scope` | 277 | the Class 1–5 boundary in both directions |
+| `multi_turn` | 206 conversations, 666 scored turns | the controller over whole conversations |
+| `held_out_*` | 30 openers, 20 ambiguous/everyday, 50 out-of-scope | unseen phrasing, written after the system was frozen |
+| `svamp` | items 1–500 of 1,000 | external word problems |
+| `mathdial_sample` | 100 | the reply to a child's wrong working |
+| `retrieval` | 100 queries (88 with labelled pages) | retrieval quality |
+
+**Raters.** An LLM judge (`qwen/qwen3.8-27b`, a different model family, blind to condition) and
+two members of the team, who rated a 150-row blind sheet and a 50-row MathDial sheet. The judge
+is trusted only where it agreed with the team members (correctness, grade fit, MathDial mistake
+identification); its clarity, restraint and guidance scores are exploratory and its
+hallucination flags are not used.
+
+**Answer scoring** (`eval/answer_extraction.py`, `eval/score_transcripts.py`,
+`eval/paper_metrics.final_correct`). Correctness is decided in code against each item's
+re-verified ground truth, from the answer the reply commits to (an "Answer:" line, a concluding
+sentence, or the last bold phrase), reading the model's raw text with LaTeX converted. Where the
+rules find no answer or a wrong one, the judge's separate reading of the committed answer is also
+checked against the ground truth — for both conditions alike. Yes/no misconception questions
+carry an `expected_yes_no` label and are scored on it.
+
+**Statistics.** Wilson intervals; exact McNemar tests and Newcombe paired intervals; discordant
+odds ratios and Cohen's g; Wilcoxon signed-rank tests with Holm correction and rank-biserial
+effect sizes; Cohen's κ, Gwet's AC1 and Krippendorff's α for agreement.
+
+### 9.2 Results (baseline vs TinyThinker)
+
+| Measure | Baseline | TinyThinker | p |
+|---|---|---|---|
+| Curriculum final answers correct (577) | 99.0% | 99.5% | 0.375 |
+| SVAMP final answers correct (500) | 95.4% | 94.8% | 0.581 |
+| Out-of-scope questions handled correctly (277) | 22.0% | 98.2% | < 0.001 |
+| In-scope questions wrongly refused (1,495) | 0.0% | 0.9% | — |
+| First reply gives the answer away | 97.2% | 4.0% | — |
+| First reply invites the child to try | 6.2% | 85.2% | — |
+| MathDial: hands over the answer | 81% | 11% | < 0.001 |
+| MathDial: names the mistake outright | 90% | 14% | < 0.001 |
+| Grade fit, two team members (1–5) | 3.99 | 4.77 | < 0.001 |
+| Hallucination flagged by both team members | 2.7% | 4.0% | 1.000 |
+
+Correctness is the same in both conditions. What changes is the tutoring: TinyThinker keeps to
+the Class 1–5 syllabus, withholds the answer and invites the child to try, and its replies fit
+the child's class better. On a child's own wrong working the two show different styles — the
+baseline names the error but hands over the answer; TinyThinker re-teaches and withholds but
+rarely points at the slip. There is no measurable difference in hallucination.
+
+Components: retrieval Hit@3 0.92, nDCG@3 0.71, no cross-class leakage (without the class filter
+nDCG@3 falls to 0.48); the verifier gives a trusted value on 88.5% of checkable curriculum
+questions and is right 99.2% of the time; the controller takes the expected action on 84.2% of
+turns (macro-F1 0.73); median reply 2.3 s vs 1.0 s on SVAMP (1.28 s in the pilot interaction
+log). Main limitations: no learners took part, the human raters are the builders, one generator
+model, and in-house datasets.
+
+### 9.3 Reproducing the numbers
+
+```bash
+python -m eval.paper_metrics          # headline metrics -> eval/results/paper_metrics_*.json/.md
+python -m eval.extra_metrics          # standard extra measures -> eval/results/extra_metrics_*
+python -m eval.retrieval_ablation     # retrieval measures and variants (local only)
+python -m eval.make_paper_outputs     # paper/tables/*.tex, paper/figures/*
+python -m eval.make_extra_outputs     # paper/tables/extra/*, paper/figures/extra/*
+```
+
+None of these makes an API call; they read the saved transcripts (`eval/results/baseline_runs/`,
+`eval/results/system_runs_v2/`), judge verdicts (`eval/results/judge_runs/`) and ratings
+(`eval/blind_ratings/`). `paper/README.md` maps every table and figure to the file it reads;
+every result file name carries the commit it was built from.
+
+### 9.4 Other evaluation code
+
+`eval/controller_walk.py` and `eval/validate_datasets.py` are part of the standard test run above.
+An earlier framework (`eval/component_eval/*`, `eval/run_eval.py`, `eval/eval_set.py`) predates the
+controller-driven generation path; its retrieval, arithmetic, controller and personalization
+checks still feed the components table, and the rest is kept for traceability.
+`eval/reference_v1_vs_v2.py` compares the system's development run with the frozen system for the
+team's reference only; no paper table or figure uses it.
 
 The evaluation datasets were generated with AI assistance (Claude) and every item was reviewed
 by hand by the project team.

@@ -124,6 +124,9 @@ def tables(m: dict, comp: dict) -> None:
           notes="Paired on the same items. Differences are system minus baseline in percentage points with Newcombe "
                 "intervals; $p$ from the exact McNemar test. $\\downarrow$: lower is better. The first-reply measures "
                 "are not paired tests: the baseline answers at once, the system's first reply invites an attempt. "
+                "Final answers are read in code; where the code finds no answer or a wrong one, the judge's reading of "
+                "the committed answer is checked against the ground truth as well (both conditions alike). Yes/no "
+                "misconception questions are scored on their yes/no. "
                 "Curriculum accuracy and giving the answer away cover the items with one checkable final answer; "
                 "inviting a try covers every first reply. Sys.: Tiny Thinker. $^\\ddagger$ Neither "
                 "direction is better by itself: on 98 of 100 MathDial items the system re-teaches the step and asks the "
@@ -191,7 +194,7 @@ def tables(m: dict, comp: dict) -> None:
     cur, ari, ctl, per = comp["curriculum"], comp["arithmetic"], comp["controller"], comp["personalization"]
     table("components", "System Components", "tab:components", "L{4.8cm}r",
           ["Measure", "Value"],
-          [["Retrieval Recall@1 / @3 / @5", f"{ret['recall_at_1']:.2f} / {ret['recall_at_3']:.2f} / {ret['recall_at_5']:.2f}"],
+          [["Retrieval Hit@1 / @3 / @5", f"{ret['recall_at_1']:.2f} / {ret['recall_at_3']:.2f} / {ret['recall_at_5']:.2f}"],
            ["Retrieval MRR; cross-grade leakage", f"{ret['mrr']:.2f}; {ret['grade_scope_mismatch_cross_grade_leakage_count']}"],
            ["--midrule--"],
            ["Verifier: checkable items given a trusted value, curriculum / SVAMP",
