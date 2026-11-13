@@ -8,6 +8,18 @@ so the sanity checker can find the model's final value reliably. This module
 locates that value and extracts a clean numeric token (integer, decimal, or
 fraction) from free text. It does no maths — turning a token into a value and
 comparing lives in verifier.py.
+
+final_number_str()'s fallback (no "Answer:" line found) used to scan the
+WHOLE text and take the FIRST number -- which, in a multi-sentence
+explanation, is very often an early input number rather than the stated
+result (e.g. "We have 3 groups, and each group has 4 apples... = 12" used to
+return "3"). A naive "take the LAST number instead" fix is also wrong for
+this tutor specifically: several prompt directives (see
+scripts/llm/controller.py _d_diagnose_correct, _d_reveal) instruct the model
+to append a follow-up suggestion AFTER the answer ("Would you like to try
+8 x 7 next?"), so the last number in the text is often that suggestion, not
+the answer. final_number_str() now uses a confidence-tiered fallback instead
+of guessing between first/last -- see its docstring.
 """
 from __future__ import annotations
 
@@ -19,9 +31,139 @@ REFUSAL_MARKER = "ask your teacher"
 # "Answer:" possibly bold/starred, capturing the rest of that line.
 _ANSWER_RE = re.compile(r"(?im)^\s*\**\s*answer\s*\**\s*[:\-]\s*\**\s*(.+?)\s*$")
 
-# A number: optional sign, then a fraction a/b, or a decimal/integer.
+# A number: optional sign, then a mixed number (1 1/2), a comma-grouped
+# integer (1,234 / Indian 1,00,000), a fraction a/b, or a decimal/integer.
+# Order matters -- each more specific shape must be tried before a shape it
+# contains, or part of it is silently dropped: "1 1/2" read as just "1/2"
+# loses the whole part, and "1,234" read as just "1" loses everything after
+# the first comma. Both are realistic model outputs here (grade 4-5 fraction
+# results over 1, and grade 4-5 "numbers up to 100,000" content) and would
+# otherwise cause a correct stated answer to be verified against the wrong
+# value.
+_MIXED_NUMBER_RE = re.compile(r"[-+]?\d+\s+\d+\s*/\s*\d+")
+_COMMA_GROUPED_RE = re.compile(r"[-+]?\d{1,3}(?:,\d{2,3})+")
+_NUMBER_TOKEN = (
+    r"[-+]?\d+\s+\d+\s*/\s*\d+"
+    r"|[-+]?\d{1,3}(?:,\d{2,3})+"
+    r"|[-+]?\d+\s*/\s*\d+"
+    r"|[-+]?\d*\.\d+"
+    r"|[-+]?\d+"
+)
 _FRACTION_RE = re.compile(r"[-+]?\d+\s*/\s*\d+")
 _DECIMAL_RE = re.compile(r"[-+]?\d*\.\d+|[-+]?\d+")
+
+# A handful of children's-maths LaTeX constructs the system prompt already
+# forbids ("NEVER use LaTeX... like \times or \frac") but the model
+# occasionally slips into anyway -- live-reported in a long beginner-level
+# explanation ("(\frac{1}{4})" shown raw instead of "1/4"). The prompt
+# instruction alone doesn't hold 100% of the time, and re-prompting on
+# detection was deliberately ruled out (another LLM call per turn for
+# something a deterministic rewrite handles for free); strip_latex() below
+# runs unconditionally on every generated turn instead, so a leak can never
+# reach the child -- or this pipeline's OWN number parsing just above
+# (final_number_str/verifier can't read a value out of "\frac{1}{2}" either,
+# so an unstripped leak would have silently broken correctness-checking too,
+# not just readability).
+# \frac{a}{b} -> a/b. No nested braces inside each half (fine for this
+# app's own content -- a fraction's numerator/denominator is itself a plain
+# number or short expression, never another \frac); strip_latex() applies
+# this twice to resolve the rare one-level-nested case.
+_LATEX_FRAC_RE = re.compile(r"\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}")
+_LATEX_SQRT_RE = re.compile(r"\\sqrt\s*\{([^{}]*)\}")
+_LATEX_SIMPLE_REPLACEMENTS = (
+    (re.compile(r"\\times"), "x"),
+    (re.compile(r"\\cdot"), "x"),
+    (re.compile(r"\\div"), "\u00f7"),
+    (re.compile(r"\\left"), ""),
+    (re.compile(r"\\right"), ""),
+    (re.compile(r"\\leq?\b"), "<="),
+    (re.compile(r"\\geq?\b"), ">="),
+    (re.compile(r"\\neq"), "!="),
+)
+# Any OTHER backslash command not explicitly handled above -- dropped
+# rather than shown raw, so an unanticipated LaTeX construct degrades to a
+# missing word instead of a literal "\something" a child can't read.
+_LATEX_STRAY_COMMAND_RE = re.compile(r"\\[a-zA-Z]+")
+_LATEX_DELIMITER_RE = re.compile(r"\\[()\[\]]")
+_LATEX_SPACING_RE = re.compile(r"\\[,;:!]")
+_LATEX_DEGREE_RE = re.compile(r"\^\s*(?:\{\s*\\circ\s*\}|\\circ)")
+
+
+def strip_latex(text: str) -> str:
+    """Deterministically rewrite stray LaTeX into the plain text this app
+    actually displays and parses numbers from. See the block comment above
+    for why this exists instead of a regenerate-on-detection approach."""
+    if not text or ("\\" not in text and "$" not in text):
+        return text
+    t = text
+    for _ in range(2):  # resolve one level of \frac nesting
+        t = _LATEX_FRAC_RE.sub(
+            lambda m: f"{m.group(1).strip()}/{m.group(2).strip()}", t)
+    t = _LATEX_SQRT_RE.sub(r"sqrt(\1)", t)
+    # "60^\circ" -> "60°" (v1 showed a bare "60^" once \circ was dropped).
+    t = _LATEX_DEGREE_RE.sub("°", t)
+    for pattern, repl in _LATEX_SIMPLE_REPLACEMENTS:
+        t = pattern.sub(repl, t)
+    # Math delimiters \( \) \[ \] and spacing commands \, \; \: \! are not
+    # letter commands, so _LATEX_STRAY_COMMAND_RE never caught them: v1
+    # showed "\(2 ÷ 2 = 1\)" raw on 16 system turns in the paper-eval v1 run.
+    t = _LATEX_DELIMITER_RE.sub("", t)
+    t = _LATEX_SPACING_RE.sub("", t)
+    t = _LATEX_STRAY_COMMAND_RE.sub("", t)
+    t = t.replace("$", "")
+    # Leftover braces from a construct not explicitly handled above read as
+    # stray punctuation to a child -- drop them too.
+    t = t.replace("{", "").replace("}", "")
+    return re.sub(r"[ \t]{2,}", " ", t)
+
+
+# A step-by-step reply (co_solve/reveal in particular) is rendered with
+# `white-space: pre-wrap` (see frontend/styles/main_css.py .answer-block),
+# so every newline in the raw text is a literal line break -- the model
+# occasionally emits long RUNS of them between steps (live-reported: a
+# co-solve walkthrough for "6 times 7" had seven or eight blank lines
+# between each addition step), which renders as a wall of dead vertical
+# space a child has to scroll through. One blank line (two newlines) is a
+# normal paragraph break and is left alone; anything beyond that collapses
+# down to it.
+_EXCESS_BLANK_LINES_RE = re.compile(r"\n{3,}")
+
+
+def collapse_excess_blank_lines(text: str) -> str:
+    """Collapse 3+ consecutive newlines down to a single blank line (2)."""
+    if not text or "\n\n\n" not in text:
+        return text
+    return _EXCESS_BLANK_LINES_RE.sub("\n\n", text)
+
+
+_NUMBER_TOKEN_RE = re.compile(_NUMBER_TOKEN)
+_MIXED_NUMBER_PARTS_RE = re.compile(r"^([-+]?)(\d+)\s+(\d+)\s*/\s*(\d+)$")
+
+
+def _normalize_token(raw: str) -> str:
+    """Collapse one matched numeric token into a sympy-evaluable string.
+
+    A plain fraction/decimal/integer only needs internal whitespace removed
+    (e.g. "3 / 4" -> "3/4", the pre-existing behaviour). A MIXED NUMBER like
+    "1 1/2" needs its whole and fractional parts combined into one improper
+    fraction ("3/2") -- naively stripping whitespace would instead
+    concatenate the digits into "11/2", a different and wrong value. A
+    COMMA-GROUPED integer like "1,234" or the Indian "1,00,000" just needs
+    its commas removed.
+    """
+    s = re.sub(r"\s+", " ", raw.strip())
+    mixed = _MIXED_NUMBER_PARTS_RE.match(s)
+    if mixed:
+        sign, whole, num, den = mixed.groups()
+        improper = int(whole) * int(den) + int(num)
+        return f"{sign}{improper}/{den}"
+    return re.sub(r"\s+", "", s).replace(",", "")
+
+# A stated computed result: "<work> = <value>" or "<work> equals <value>".
+# Deliberately requires "=" / "equals" immediately before the number, so a
+# trailing suggestion like "like 8 x 7" (no "=") is never mistaken for one.
+_EQUATION_RESULT_RE = re.compile(r"(?:=|\bequals\b)\s*(" + _NUMBER_TOKEN + r")",
+                                 re.IGNORECASE)
 
 
 def is_refusal(text: str) -> bool:
@@ -45,27 +187,75 @@ def extract_answer(text: str) -> str | None:
 def extract_number_str(text: str) -> str | None:
     """Pull the first numeric token from `text` as a normalized string.
 
-    Prefers a fraction ("3/4") over a plain number so that "3/4 of the cake"
-    is read as the fraction, not the 3. Whitespace inside a fraction is
-    collapsed ("3 / 4" -> "3/4"). Returns None when there's no number.
+    Prefers a mixed number ("1 1/2" -> "3/2") or comma-grouped integer
+    ("1,234" -> "1234") over a bare fraction, and a bare fraction ("3/4")
+    over a plain number, so that "3/4 of the cake" is read as the fraction,
+    not the 3. Whitespace inside a fraction is collapsed ("3 / 4" -> "3/4").
+    Returns None when there's no number.
     """
     if not text:
         return None
+    m = _MIXED_NUMBER_RE.search(text)
+    if m:
+        return _normalize_token(m.group(0))
+    m = _COMMA_GROUPED_RE.search(text)
+    if m:
+        return _normalize_token(m.group(0))
     m = _FRACTION_RE.search(text)
     if m:
-        return re.sub(r"\s+", "", m.group(0))
+        return _normalize_token(m.group(0))
     m = _DECIMAL_RE.search(text)
     if m:
         return m.group(0)
     return None
 
 
+def _last_equation_result(text: str) -> str | None:
+    """The value from the LAST explicit '... = value' / '... equals value'
+    statement in the text, or None if there is no such statement. Taking the
+    last one (not the first) matters when a worked solution states several
+    intermediate equations before the final result."""
+    matches = list(_EQUATION_RESULT_RE.finditer(text or ""))
+    if not matches:
+        return None
+    return _normalize_token(matches[-1].group(1))
+
+
+def _all_number_tokens(text: str) -> list[str]:
+    """Every numeric token in `text`, left to right, fraction-prioritized at
+    each position (matches extract_number_str's own token definition)."""
+    return [_normalize_token(m.group(0)) for m in _NUMBER_TOKEN_RE.finditer(text or "")]
+
+
 def final_number_str(text: str) -> str | None:
-    """Best-effort model final value: try the 'Answer:' line first, then fall
-    back to scanning the whole reply."""
+    """Best-effort model final value, in decreasing order of confidence:
+
+    1. An explicit 'Answer:' line -- every tutor prompt version is instructed
+       to end with one, so this is the normal, reliable case.
+    2. The LAST explicit '... = value' / '... equals value' statement in the
+       text. Narrower than "the last number anywhere": several controller
+       directives instruct the model to append a follow-up suggestion AFTER
+       the answer (e.g. "Would you like to try 8 x 7 next?"), and that
+       trailing number must not be mistaken for the result.
+    3. The sole numeric token in the text, IF there is exactly one -- safe by
+       elimination (nothing else for it to be).
+
+    Anything else is ambiguous (e.g. several bare numbers with no structural
+    signal for which is the final answer) and returns None rather than
+    guessing -- callers (verifier.check) already treat None as "couldn't
+    read a number", not as "wrong"."""
+    text = text or ""
     line = extract_answer(text)
     if line:
         num = extract_number_str(line)
         if num is not None:
             return num
-    return extract_number_str(text or "")
+
+    eq = _last_equation_result(text)
+    if eq is not None:
+        return eq
+
+    tokens = _all_number_tokens(text)
+    if len(tokens) == 1:
+        return tokens[0]
+    return None

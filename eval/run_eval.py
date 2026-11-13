@@ -1,5 +1,15 @@
 """eval/run_eval.py — baseline vs system evaluation (Objective 3).
 
+LEGACY / HISTORICAL — the "system" condition below calls the old Tier A
+single-shot path (prompt_registry + verifier directly, no controller), not
+the controller-driven start_episode/advance_episode flow that
+frontend/app.py actually runs. A result from this script describes the
+pre-controller prompt+verifier pipeline in isolation, not the live
+student-facing tutor's end-to-end behaviour (disclosure pacing, hints,
+conversational routing, etc. are not exercised at all). See
+eval/eval_set.py's docstring for the matching dataset note. The authoritative
+current evaluation entry points are eval/component_eval/*.
+
 Two conditions on the SAME questions:
   baseline : one LLM call, no classification, no injected answer, no verify.
              (prompt = v4-graded-refusal, computed_answer=None)

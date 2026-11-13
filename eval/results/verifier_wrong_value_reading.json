@@ -1,0 +1,14 @@
+{
+ "description": "Item-by-item reading of the 8 SVAMP items (of 948 checked) where the system's (paper-eval-v2) trusted value disagreed with the gold answer, from eval/results/system_runs_v2/svamp.jsonl. Each item is classed as a verifier error or a benchmark-label issue, with the baseline's outcome on the same item.",
+ "read_on": "2026-10-28",
+ "items": [
+  {"id": "svamp-0015", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "6 birds, then 4 more birds and 8 storks; gold 10 counts only the birds, the verifier counts storks as birds (18). On the debatable-label list."},
+  {"id": "svamp-0035", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "Asks for the afternoon emails, which the question states (3); gold 1 is the evening count. On the debatable-label list."},
+  {"id": "svamp-0161", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "2 beads make 32 necklaces; the verifier computes 1/16 beads per necklace, gold 16. SVAMP's deliberately odd variant; post-check flagged the mismatch."},
+  {"id": "svamp-0229", "kind": "verifier_error", "baseline_correct": true, "system_correct": false, "note": "Cookies baked till last night: 31 yesterday + 419 the day before = 450. The verifier also adds the 270 baked this morning (720), and the reply follows it. The one item the verifier cost the system against the baseline."},
+  {"id": "svamp-0305", "kind": "verifier_error", "baseline_correct": false, "system_correct": false, "note": "Together now: Fred's new 9 + Jason's 5 = 14. The verifier also adds Fred's old 86 (100)."},
+  {"id": "svamp-0333", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "2 chapters read over 664 days; gold 332 'chapters per day' is the odd variant's inverted answer; the verifier computes 1/332. Post-check flagged the mismatch."},
+  {"id": "svamp-0456", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "Same birds-and-storks reading as svamp-0015 (56 vs gold 10). On the debatable-label list."},
+  {"id": "svamp-0498", "kind": "label", "baseline_correct": false, "system_correct": false, "note": "$4 and 99 bars at $3 each; gold 1 ignores the 99. The verifier computes -293 without flagging a negative amount of money."}
+ ]
+}

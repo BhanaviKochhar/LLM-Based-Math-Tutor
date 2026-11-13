@@ -1,0 +1,26 @@
+{
+ "description": "Item-by-item reading of the system (paper-eval-v2) replies to eval/datasets/held_out_ambiguous_everyday.jsonl against each item's expected_behavior and must_avoid, judged on the whole conversation (first reply and the forced give-up reply). The forced give-up turn asks for 'its answer', which pushes the last reply to a single 'Answer:' line; an item passes when the conversation shows the expected behaviour and no reply presents one answer as the only one possible.",
+ "read_on": "2026-10-28",
+ "items": [
+  {"id": "ho-ae-01", "kind": "ambiguous", "meets": true, "note": "First reply: 3 + 5, and says 2 + 6 and 4 + 4 also make 8."},
+  {"id": "ho-ae-02", "kind": "ambiguous", "meets": false, "note": "States the rule is add 2 and the next number is 6; never says the rule is not fixed by two numbers."},
+  {"id": "ho-ae-03", "kind": "ambiguous", "meets": true, "note": "Final reply lists every number of equal rows: 1, 2, 3, 4, 6, 12."},
+  {"id": "ho-ae-04", "kind": "ambiguous", "meets": true, "note": "Final reply lists all three note combinations."},
+  {"id": "ho-ae-05", "kind": "ambiguous", "meets": false, "note": "Gives only 5 + 2 as the way to make Rs 7."},
+  {"id": "ho-ae-06", "kind": "ambiguous", "meets": false, "note": "Answer: 6, with no statement that any multiple of 6 works."},
+  {"id": "ho-ae-07", "kind": "ambiguous", "meets": true, "note": "Final reply: any number from 35 to 44."},
+  {"id": "ho-ae-08", "kind": "ambiguous", "meets": true, "note": "Names both square and rectangle as 4-corner shapes, then picks square as one possibility."},
+  {"id": "ho-ae-09", "kind": "ambiguous", "meets": true, "note": "Gives 6/8 and the rule (multiply top and bottom by the same number), inviting the child to make more."},
+  {"id": "ho-ae-10", "kind": "ambiguous", "meets": true, "note": "Lists all four factor pairs of 24 before picking one as the answer line."},
+  {"id": "ho-ae-11", "kind": "everyday", "meets": true, "note": "Blackboard, plus notebook, door, picture frame."},
+  {"id": "ho-ae-12", "kind": "everyday", "meets": true, "note": "Money: a coin or a note."},
+  {"id": "ho-ae-13", "kind": "everyday", "meets": true, "note": "Apple (also orange, guava)."},
+  {"id": "ho-ae-14", "kind": "everyday", "meets": true, "note": "Hold them in each hand, or a homemade balance."},
+  {"id": "ho-ae-15", "kind": "everyday", "meets": true, "note": "Ruler or measuring tape."},
+  {"id": "ho-ae-16", "kind": "everyday", "meets": true, "note": "Eggs (says a dozen is 12); final reply says bananas."},
+  {"id": "ho-ae-17", "kind": "everyday", "meets": true, "note": "A 1-litre milk or water bottle."},
+  {"id": "ho-ae-18", "kind": "everyday", "meets": true, "note": "Distance to another city, with the reason."},
+  {"id": "ho-ae-19", "kind": "everyday", "meets": true, "note": "Corners of doors, windows, frames, tiles, books."},
+  {"id": "ho-ae-20", "kind": "everyday", "meets": true, "note": "Ceiling fan and table fan."}
+ ]
+}

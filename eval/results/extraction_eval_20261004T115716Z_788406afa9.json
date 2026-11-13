@@ -1,0 +1,329 @@
+{
+  "evaluator_name": "extraction_eval",
+  "run_timestamp_utc": "20261004T115716Z",
+  "git": {
+    "commit": "788406afa93d7233768a8a36aeafcba28692f32f",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\extraction\\v1_starter.jsonl",
+      "version": "v1_starter",
+      "item_count": 14
+    },
+    {
+      "path": "eval\\datasets\\extraction\\v2_extended.jsonl",
+      "version": "v2_extended",
+      "item_count": 15
+    }
+  ],
+  "config": {
+    "live_llm_used": true,
+    "question_to_expression_stage": "executed"
+  },
+  "aggregate_metrics": {
+    "response_to_answer": {
+      "stage": "response_to_answer",
+      "live_llm_used": false,
+      "total_items": 15,
+      "exact_match": {
+        "numerator": 15,
+        "denominator": 15,
+        "rate": 1.0
+      },
+      "errors": 0
+    },
+    "question_to_expression_plan": {
+      "stage": "question_to_expression",
+      "status": "PENDING_APPROVAL_NOT_RUN",
+      "n_items": 14,
+      "n_calls_required": 14,
+      "model": "openai/gpt-oss-120b",
+      "provider_order": [
+        "groq-direct",
+        "hf-nscale",
+        "hf-deepinfra"
+      ],
+      "estimated_cost": "Groq free tier / no per-token billing configured in this repo's .env; HF router fallback billing depends on the account's HF Inference Providers plan. No paid API key was confirmed in this pass -- verify before running.",
+      "estimated_runtime_seconds": "~14 calls * ~2-4s typical latency (see docs/latency_reliability_evaluation.md) = roughly 42s, plus any 429 retries",
+      "case_ids": [
+        "ex-001",
+        "ex-002",
+        "ex-003",
+        "ex-004",
+        "ex-005",
+        "ex-006",
+        "ex-007",
+        "ex-015",
+        "ex-016",
+        "ex-017",
+        "ex-018",
+        "ex-019",
+        "ex-020",
+        "ex-029"
+      ]
+    },
+    "question_to_expression_executed": {
+      "stage": "question_to_expression",
+      "live_llm_used": true,
+      "total_items": 14,
+      "exact_match": {
+        "numerator": 3,
+        "denominator": 14,
+        "rate": 0.2143
+      },
+      "normalized_match": {
+        "numerator": 13,
+        "denominator": 14,
+        "rate": 0.9286
+      },
+      "value_equivalent_match": {
+        "numerator": 13,
+        "denominator": 14,
+        "rate": 0.9286
+      },
+      "parse_success": {
+        "numerator": 13,
+        "denominator": 14,
+        "rate": 0.9286
+      },
+      "errors": 0
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "response_to_answer is scored deterministically every run. question_to_expression requires the live LLM extractor and was executed with explicit --live-confirm.",
+  "per_example_results": [
+    {
+      "stage": "response_to_answer",
+      "items": [
+        {
+          "case_id": "ex-008",
+          "outcome": "match",
+          "got": "12",
+          "expected": "12"
+        },
+        {
+          "case_id": "ex-009",
+          "outcome": "match",
+          "got": "12",
+          "expected": "12"
+        },
+        {
+          "case_id": "ex-010",
+          "outcome": "match",
+          "got": "42",
+          "expected": "42"
+        },
+        {
+          "case_id": "ex-011",
+          "outcome": "match",
+          "got": null,
+          "expected": null
+        },
+        {
+          "case_id": "ex-012",
+          "outcome": "match",
+          "got": "42",
+          "expected": "42"
+        },
+        {
+          "case_id": "ex-013",
+          "outcome": "match",
+          "got": null,
+          "expected": null
+        },
+        {
+          "case_id": "ex-014",
+          "outcome": "match",
+          "got": "3/4",
+          "expected": "3/4"
+        },
+        {
+          "case_id": "ex-021",
+          "outcome": "match",
+          "got": "3/2",
+          "expected": "3/2"
+        },
+        {
+          "case_id": "ex-022",
+          "outcome": "match",
+          "got": "1234",
+          "expected": "1234"
+        },
+        {
+          "case_id": "ex-023",
+          "outcome": "match",
+          "got": null,
+          "expected": null
+        },
+        {
+          "case_id": "ex-024",
+          "outcome": "match",
+          "got": null,
+          "expected": null
+        },
+        {
+          "case_id": "ex-025",
+          "outcome": "match",
+          "got": "7",
+          "expected": "7"
+        },
+        {
+          "case_id": "ex-026",
+          "outcome": "match",
+          "got": "56",
+          "expected": "56"
+        },
+        {
+          "case_id": "ex-027",
+          "outcome": "match",
+          "got": "3/4",
+          "expected": "3/4"
+        },
+        {
+          "case_id": "ex-028",
+          "outcome": "match",
+          "got": "2/4",
+          "expected": "2/4"
+        }
+      ]
+    },
+    {
+      "stage": "question_to_expression",
+      "items": [
+        {
+          "case_id": "ex-001",
+          "got_expression": "2 + 3",
+          "expected_expression": "2+3",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-002",
+          "got_expression": "8 - 3",
+          "expected_expression": "8-3",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-003",
+          "got_expression": "7 * 2",
+          "expected_expression": "7*2",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": true
+        },
+        {
+          "case_id": "ex-004",
+          "got_expression": "1/2 + 1/4",
+          "expected_expression": "1/2+1/4",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-005",
+          "got_expression": "NONE",
+          "expected_expression": null,
+          "exact_match": true,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-006",
+          "got_expression": "44 - 14",
+          "expected_expression": "44-14",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-007",
+          "got_expression": "(5/2) * 8",
+          "expected_expression": "3/7+5",
+          "exact_match": false,
+          "normalized_match": false,
+          "value_equivalent_match": false,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-015",
+          "got_expression": "12 + 8",
+          "expected_expression": "12+8",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": true
+        },
+        {
+          "case_id": "ex-016",
+          "got_expression": "NONE",
+          "expected_expression": null,
+          "exact_match": true,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-017",
+          "got_expression": "60 - 15 - 22",
+          "expected_expression": "60-15-22",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-018",
+          "got_expression": "3/2 + 9/4",
+          "expected_expression": "3/2+9/4",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-019",
+          "got_expression": "15 - 2",
+          "expected_expression": "15-2",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-020",
+          "got_expression": "2 * (12 + 7)",
+          "expected_expression": "2*(12+7)",
+          "exact_match": false,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        },
+        {
+          "case_id": "ex-029",
+          "got_expression": "NONE",
+          "expected_expression": "NONE",
+          "exact_match": true,
+          "normalized_match": true,
+          "value_equivalent_match": true,
+          "has_distractor_numbers": false
+        }
+      ]
+    }
+  ]
+}

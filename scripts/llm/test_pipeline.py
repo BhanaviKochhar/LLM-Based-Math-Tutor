@@ -8,7 +8,9 @@ client, hint prompt shaping, and the level mapping. The live round-trip
 """
 from __future__ import annotations
 
-from . import hints, llm_client, pipeline, response_parser, verifier
+from . import (controller, conversation_resolver, hints, intent, llm_client,
+              pipeline, prompt_registry, response_parser, safety,
+              scope, student_tracker, topics, verifier)
 
 _passed = 0
 _failed = 0
@@ -42,6 +44,172 @@ def test_response_parser() -> None:
     check("refusal detected", response_parser.is_refusal("Let's ask your teacher about this one!"))
 
 
+def test_strip_latex_converts_to_plain_text() -> None:
+    """Live-reported: a beginner-level explanation leaked raw LaTeX
+    ("(\\frac{1}{4})" shown as-is instead of "1/4") despite the system
+    prompt already forbidding it. strip_latex() is the deterministic
+    prevention layer -- applied unconditionally to every generated turn in
+    frontend/episode.py's _run_generation, not a detect-and-regenerate loop
+    (explicitly ruled out: no extra LLM call per turn for something a
+    regex rewrite handles for free)."""
+    print("response_parser — strip_latex prevents LaTeX from ever reaching the child")
+    sl = response_parser.strip_latex
+
+    check("plain text with no LaTeX passes through completely unchanged",
+         sl("1/4 + 1/2 = 3/4") == "1/4 + 1/2 = 3/4")
+    check(r"\frac{a}{b} becomes a/b",
+         sl(r"Add \frac{1}{4} and \frac{1}{2}") == "Add 1/4 and 1/2")
+    check(r"\frac with spacing inside the braces still resolves",
+         sl(r"\frac{ 1 }{ 2 }") == "1/2")
+    check(r"one level of nested \frac resolves too",
+         sl(r"\frac{\frac{1}{2}}{3}") == "1/2/3")
+    check(r"\times becomes the app's own plain-text 'x' convention",
+         sl(r"3 \times 4 = 12") == "3 x 4 = 12")
+    check(r"\cdot also becomes 'x'", sl(r"3 \cdot 4") == "3 x 4")
+    check(r"\div becomes the division sign", sl(r"8 \div 2") == "8 ÷ 2")
+    check(r"\left( / \right) collapse to plain parentheses",
+         sl(r"\left(1 + 2\right)") == "(1 + 2)")
+    check("inline $...$ math delimiters are dropped, content kept",
+         sl(r"the answer is $12$ toffees") == "the answer is 12 toffees")
+    check("an unanticipated backslash command is dropped rather than shown raw",
+         sl(r"\unexpectedcommand 5") == " 5")
+    check("real-world leak from the live report converts cleanly",
+         sl(r"(\frac{1}{4}) + (\frac{1}{2}) = (\frac{3}{4})")
+         == "(1/4) + (1/2) = (3/4)")
+    check("a None/empty input is returned as-is, not crashed on",
+         sl("") == "" and sl(None) is None)
+    check(r"\( \) and \[ \] delimiters are dropped (paper-eval v1: 16 system turns showed them raw)",
+         sl(r"So \(2 ÷ 2 = 1\) litre.") == "So 2 ÷ 2 = 1 litre." and "\\" not in sl("\\[\n6 x 6 = 36\n\\]"))
+    check(r"spacing commands \, \; \! are dropped, keeping digit groups together",
+         sl(r"100\,000 and 4,\;8\!8") == "100000 and 4,88")
+    check(r"^\circ becomes a degree sign", sl(r"180^\circ - 120^{\circ} = 60^\circ") == "180° - 120° = 60°")
+
+
+def test_collapse_excess_blank_lines() -> None:
+    """Live-reported: a co-solve walkthrough for "6 times 7" rendered with
+    seven or eight blank lines between each addition step -- a wall of dead
+    vertical space a child has to scroll through to reach the answer.
+    .answer-block renders with `white-space: pre-wrap` (frontend/styles/
+    main_css.py), so every newline the model emits is a literal line break;
+    collapse_excess_blank_lines() is the same kind of deterministic
+    prevention layer as strip_latex, applied right alongside it in
+    frontend/episode.py's _run_generation."""
+    print("response_parser — collapse_excess_blank_lines prevents walls of dead vertical space")
+    cb = response_parser.collapse_excess_blank_lines
+
+    check("text with no excess blank lines passes through unchanged",
+         cb("Step 1.\n\nStep 2.") == "Step 1.\n\nStep 2.")
+    check("exactly one blank line (a normal paragraph break) is left alone",
+         cb("a\n\nb") == "a\n\nb")
+    check("three newlines (two blank lines) collapse to one blank line",
+         cb("a\n\n\nb") == "a\n\nb")
+    check("a long run of newlines (the live-reported case) collapses the same way",
+         cb("a\n\n\n\n\n\n\n\nb") == "a\n\nb")
+    check("multiple separate excess runs in one reply are all collapsed",
+         cb("a\n\n\n\nb\n\n\n\n\nc") == "a\n\nb\n\nc")
+    check("a None/empty input is returned as-is, not crashed on",
+         cb("") == "" and cb(None) is None)
+
+
+# ------------------------------------------- response_parser.final_number_str tiers
+def test_final_number_str_fallback_tiers() -> None:
+    """Regression tests for the confidence-tiered fallback (see
+    response_parser.py's module docstring and final_number_str's docstring).
+    Added when the fallback was changed from 'first number in the whole
+    text' (wrong: grabs an early input number) to this tiered approach.
+    Cases ex-009/ex-010 motivated the fix but these tests exercise the
+    general design, not just those two literal strings."""
+    print("response_parser.final_number_str — confidence-tiered fallback")
+    fns = response_parser.final_number_str
+
+    # Tier 1: explicit "Answer:" line, including bold/star formatting.
+    check("explicit Answer: line",
+          fns("some steps\nAnswer: 42") == "42")
+    check("explicit **Answer:** line (bold)",
+          fns("some steps\n**Answer:** 42") == "42")
+    check("Answer: line wins even with other numbers earlier",
+          fns("We started with 3 groups of 4.\nAnswer: 12") == "12")
+
+    # Tier 2: last "= value" / "equals value" statement, final answer buried
+    # in prose with no Answer: line and multiple intermediate values.
+    check("final answer in prose via last equation (ex-009-style)",
+          fns("We have 3 groups, and each group has 4 apples. "
+             "4 + 4 = 8, then 8 + 4 = 12. So 3 times 4 is 12.") == "12")
+    check("final answer in prose, single equation (ex-010-style)",
+          fns("Let's add these two numbers. 27 + 15 = 42. "
+             "So the answer is 42 toffees.") == "42")
+    check("multiple intermediate equations -> LAST one wins",
+          fns("Add the ones: 7 + 5 = 12, write 2 carry 1. "
+             "Add the tens: 2 + 1 + 1 = 4.") == "4")
+    check("'equals' spelled out, not just '='",
+          fns("Nine times six equals 54.") == "54")
+    check("trailing follow-up suggestion AFTER the answer is not picked up",
+          fns("Well done! 9 times 6 equals 54. Would you like to try a "
+             "little tougher one, like 8 times 7, or would you prefer "
+             "to explore a new topic?") == "54")
+    check("fraction as an equation result",
+          fns("First we simplify 2/4 = 1/2. Then 1/2 + 1/4 = 3/4.") == "3/4")
+    check("negative equation result",
+          fns("5 minus 8 = -3.") == "-3")
+
+    # Tier 3: no Answer: line, no equation -- sole number by elimination.
+    check("single bare number, no structure -> accepted by elimination",
+          fns("I think it's 7.") == "7")
+    check("single bare fraction, no structure -> accepted by elimination",
+          fns("I think it's 3/4.") == "3/4")
+
+    # Ambiguous: multiple bare numbers, no Answer:/equation to disambiguate
+    # -> None (unverifiable), not a guess.
+    check("multiple bare numbers with no structure -> ambiguous, None",
+          fns("I have 3 apples and my friend has 4 apples.") is None)
+
+    # Missing / no number at all.
+    check("no number anywhere -> None",
+          fns("Let's think about this together.") is None)
+    check("empty string -> None", fns("") is None)
+    check("None input -> None", fns(None) is None)
+
+    # Contradictory: two different Answer: lines -> last one wins (existing
+    # extract_answer behaviour, re-asserted here through final_number_str).
+    check("contradictory Answer: lines -> last wins",
+          fns("First attempt.\nAnswer: 10\nActually let me redo that.\n"
+             "Answer: 12") == "12")
+
+    # Malformed: an "=" with no usable number after it must not crash or
+    # fabricate a value; should fall through to the next tier instead.
+    check("malformed equation (nothing numeric after '=') falls through safely",
+          fns("This equals something unclear, but 9 works.") == "9")
+
+    # Irrelevant numbers mixed with a clear equation result.
+    check("irrelevant numbers (dates/counts) do not override the equation result",
+          fns("On day 3 of 5, we calculated 6 + 6 = 12 toffees in total.") == "12")
+
+    # Mixed numbers: a bare fraction match alone would silently drop the
+    # whole-number part ("1 1/2" -> "1/2", losing a whole unit). Realistic
+    # whenever a grade 4-5 fraction result exceeds 1.
+    check("mixed number on an Answer: line -> combined into one improper fraction",
+          fns("Answer: 1 1/2") == "3/2")
+    check("negative mixed number",
+          fns("Answer: -1 1/2") == "-3/2")
+    check("mixed number via a trailing equation, no Answer: line",
+          fns("So the total is = 1 1/2 cakes.") == "3/2")
+
+    # Comma-grouped large integers (Western "1,234" or Indian "1,00,000"):
+    # the plain-integer token alone would stop at the first comma. Realistic
+    # for grade 4-5 "numbers up to 100,000" content.
+    check("comma-grouped integer on an Answer: line",
+          fns("Answer: 1,234") == "1234")
+    check("Indian comma grouping on an Answer: line",
+          fns("Answer: 1,00,000") == "100000")
+    check("comma-grouped integer via a trailing equation",
+          fns("So the total is = 1,234 pages.") == "1234")
+
+    # A natural-language list ("3, 4") must NOT be merged into one number --
+    # a real thousands separator never has a space after the comma.
+    check("comma-separated list is not mistaken for a grouped integer",
+          fns("Ravi has 3, 4 apples left over.") is None)
+
+
 # --------------------------------------------------------------- verifier maths
 def test_verifier_math() -> None:
     print("verifier — sympy eval + safety")
@@ -55,6 +223,327 @@ def test_verifier_math() -> None:
                                          verifier._safe_eval("0.75")))
     check("close reject", not verifier._close(verifier._safe_eval("5"),
                                               verifier._safe_eval("6")))
+
+    # Division by zero must never evaluate to a usable value (sympy would
+    # otherwise return zoo/nan, which `is_number` but is not a real result).
+    check("reject division by zero", verifier._safe_eval("5/0") is None)
+    check("reject division by zero, non-bare shape",
+          verifier._safe_eval("5/0+3") is None)
+    check("reject division by a zero-valued sub-expression",
+          verifier._safe_eval("8/(3-3)") is None)
+
+
+# --------------------------------------------- verifier grade-appropriate gate
+def test_verifier_injection_gate() -> None:
+    """solve()'s injection gate: integer results and non-integer fraction
+    arithmetic are injected; a bare non-exact int/int division is withheld
+    so the tutor teaches quotient+remainder instead of an improper fraction
+    (see verifier._grade_appropriate_answer). Previously untested by any
+    deterministic suite."""
+    print("verifier — grade-appropriate injection gate")
+
+    def solve(expr: str):
+        return verifier.solve(expr, extract_fn=lambda q: expr)
+
+    check("integer result -> injected",
+          solve("6*9-32") == ("22", True))
+    check("non-integer fraction arithmetic -> injected (the taught answer)",
+          solve("1/2 + 1/4") == ("3/4", True))
+    check("bare non-exact int/int division -> withheld (teach remainder)",
+          solve("20/3") == (None, True))
+    check("non-exact division WRAPPED in redundant parens -> still withheld",
+          solve("(20/3)") == (None, True))
+    check("non-exact division double-wrapped -> still withheld",
+          solve("((20/3))") == (None, True))
+    check("a division that ISN'T the whole expression is unaffected",
+          solve("(1/2)*8") == ("4", True))
+    check("exact division -> injected as an integer",
+          solve("36/4") == ("9", True))
+    check("division by zero -> not computable at all, never injected",
+          solve("5/0") == (None, False))
+    check("division by zero (non-bare shape) -> not computable, never injected",
+          solve("5/0+3") == (None, False))
+
+    # Fraction-vs-division disambiguation (see verifier._looks_like_fraction_
+    # conversion). A bare "int/int" expression is genuinely ambiguous on its
+    # own -- the question's own wording is what tells a division word
+    # problem apart from a fraction-value/conversion question. Found via
+    # component evaluation producing real mismatches on ar-020/cb-158
+    # (general phrasing patterns reproduced here, not those literal
+    # dataset rows).
+    def solve_q(question: str, expr: str):
+        return verifier.solve(question, extract_fn=lambda q: expr)
+
+    check("ordinary exact division word problem -> injected as before (unaffected by this fix)",
+          solve_q("Share 36 pencils among 4 students. How many each?", "36/4") == ("9", True))
+    check("ordinary non-exact division word problem -> still withheld (core remainder "
+         "behaviour must survive this fix)",
+          solve_q("Share 20 toffees equally among 3 children.", "20/3") == (None, True))
+    check("fraction-to-decimal conversion ('written as a decimal') -> now injected, "
+         "not withheld",
+          solve_q("What is 3/10 written as a decimal?", "3/10") == ("3/10", True))
+    check("fraction-to-decimal conversion ('convert ... to a decimal') -> now injected",
+          solve_q("Convert 7/20 to a decimal.", "7/20") == ("7/20", True))
+    check("plain fraction-simplification question -> now injected",
+          solve_q("Simplify the fraction 4/8.", "4/8") == ("1/2", True))
+    check("a bare fraction value with no division/decimal wording at all defaults "
+         "to the prior withholding behaviour (ambiguous in the student's favour: "
+         "conservative, not silently guessed)",
+          solve_q("What is 1/3 of 9?", "20/3")[0] is None)
+    check("'what fraction...?' phrasing (the standard NCERT part-of-a-whole "
+         "question shape) -> now injected, not withheld as a sharing/remainder "
+         "problem. Live bug: a tutor-posed 'colour 4 of 10 bottle caps, what "
+         "fraction did you colour?' exercise never graduated because this "
+         "phrasing wasn't recognised as fraction-conversion intent",
+          solve_q("What fraction of the bottle caps did you colour?", "4/10") == ("2/5", True))
+    check("'which fraction...?' phrasing -> also injected",
+          solve_q("Which fraction of the shapes is shaded?", "3/8") == ("3/8", True))
+
+    # KNOWN LIMITATION, documented rather than hidden: this is a wording
+    # heuristic, not a semantic one. A genuine division word problem that
+    # happens to mention "decimal" in an unrelated sense (e.g. rounding
+    # instructions) is misread as a conversion question and gets the
+    # fraction injected when it should still be withheld. Narrowing the
+    # regex further to exclude this one adversarial phrasing risks new
+    # false negatives elsewhere; not attempted here -- see
+    # docs/tutoring_fixes_and_limitations.md.
+    check("KNOWN LIMITATION: a division word problem that happens to mention "
+         "'decimal' in an unrelated sense (rounding instructions) is "
+         "incorrectly treated as a conversion question",
+          solve_q("Share 45 rupees among 8 people. Round to 2 decimal places if needed.",
+                  "45/8") == ("45/8", True))
+
+
+def test_verifier_categorical() -> None:
+    """Objective 2 gap, live-reported: a question with a single short,
+    non-numeric answer (day name, shape name, yes/no...) had no trusted
+    value to grade against at all, so a CORRECT answer never got confirmed
+    OR tracked by personalisation. compute_categorical/solve_with_type are
+    the second, non-numeric half of the compute-first verifier -- tried
+    only once the numeric extractor has already said NONE."""
+    print("verifier — compute_categorical / solve_with_type (injected extractor, no LLM)")
+
+    comp = verifier.compute_categorical(
+        "If today is Monday, what day will it be after 3 days?",
+        extract_fn=lambda q: "Thursday")
+    check("a categorical question extracts a verifiable, non-numeric Computation",
+         comp.verifiable and comp.value == "Thursday" and comp.answer_type == "categorical")
+
+    comp_none = verifier.compute_categorical("What is a fraction?", extract_fn=lambda q: "NONE")
+    check("a genuinely open-ended question still extracts nothing",
+         not comp_none.verifiable)
+
+    # solve_with_type: numeric path takes priority and is untouched.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 7 times 8?", extract_fn=lambda q: "7 * 8",
+        categorical_extract_fn=lambda q: "should never be called")
+    check("a genuinely numeric question stays on the numeric path "
+         "(categorical extractor never even consulted)",
+         (answer, is_math, kind) == ("56", True, "numeric"))
+
+    # solve_with_type: numeric says NONE -> categorical fallback kicks in.
+    answer, is_math, kind = verifier.solve_with_type(
+        "If today is Monday, what day will it be after 3 days?",
+        extract_fn=lambda q: "NONE", categorical_extract_fn=lambda q: "Thursday")
+    check("numeric NONE falls through to the categorical extractor",
+         (answer, is_math, kind) == ("Thursday", True, "categorical"))
+
+    # solve_with_type: both say NONE -> genuinely ungradable, as before.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is a fraction?", extract_fn=lambda q: "NONE",
+        categorical_extract_fn=lambda q: "NONE")
+    check("neither path finds anything -> (None, False), same as plain solve()",
+         (answer, is_math) == (None, False))
+
+
+def test_verifier_function_registry() -> None:
+    """Issue 3 gap, live-reported: "What is the LCM of 4 and 6?" and similar
+    questions (HCF, prime check, factors, angle type, clock-time-add) had NO
+    trusted value to grade against at all, since the plain-arithmetic
+    extractor's grammar has no function-call support. compute_function /
+    verifier._FUNCTION_REGISTRY are a third, narrowly-scoped extractor,
+    tried only once BOTH the numeric and the general categorical paths
+    would otherwise apply -- see solve_with_type's own docstring."""
+    print("verifier — compute_function (named-function registry, injected extractor, no LLM)")
+
+    comp = verifier.compute_function("What is the LCM of 4 and 6?",
+                                     extract_fn=lambda q: "lcm(4, 6)")
+    check("lcm(4, 6) -> 12, numeric",
+         comp.verifiable and comp.value == "12" and comp.answer_type == "numeric")
+
+    comp = verifier.compute_function("Find the HCF of 12 and 18.",
+                                     extract_fn=lambda q: "hcf(12, 18)")
+    check("hcf(12, 18) -> 6, numeric",
+         comp.verifiable and comp.value == "6" and comp.answer_type == "numeric")
+
+    comp = verifier.compute_function("Is 7 a prime number?",
+                                     extract_fn=lambda q: "is_prime(7)")
+    check("is_prime(7) -> yes, categorical",
+         comp.verifiable and comp.value == "yes" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function("Is 15 a prime number?",
+                                     extract_fn=lambda q: "is_prime(15)")
+    check("is_prime(15) -> no, categorical",
+         comp.verifiable and comp.value == "no" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function("What are the factors of 12?",
+                                     extract_fn=lambda q: "factors(12)")
+    check("factors(12) -> '1, 2, 3, 4, 6, 12', list",
+         comp.verifiable and comp.value == "1, 2, 3, 4, 6, 12" and comp.answer_type == "list")
+
+    comp = verifier.compute_function("What type of angle is 120 degrees?",
+                                     extract_fn=lambda q: "angle_type(120)")
+    check("angle_type(120) -> obtuse angle, categorical",
+         comp.verifiable and comp.value == "obtuse angle" and comp.answer_type == "categorical")
+
+    comp = verifier.compute_function(
+        "If it is 3:30 now, what time will it be in 45 minutes?",
+        extract_fn=lambda q: "time_add(3, 30, 45)")
+    check("time_add(3, 30, 45) -> 4:15, time",
+         comp.verifiable and comp.value == "4:15" and comp.answer_type == "time")
+
+    # In the paper-eval v1 run arithmetic was tried first, so a what-time
+    # question got a minutes-after-midnight answer injected ("Answer: 550").
+    minutes_math = lambda q: "8*60+20+50"
+    ans = verifier.solve_with_type("If it is 8:20 now, what time will it be in 50 minutes?",
+                                   extract_fn=minutes_math,
+                                   function_extract_fn=lambda q: "time_add(8, 20, 50)")
+    check("a what-time question uses time_add even when arithmetic could produce minutes",
+         ans == ("9:10", True, "time"))
+    ans = verifier.solve_with_type("If it is 8:20 now, what time will it be in 50 minutes?",
+                                   extract_fn=minutes_math, function_extract_fn=lambda q: "NONE")
+    check("if time_add can't express it, nothing is injected -- never 550 minutes",
+         ans == (None, True, "numeric"))
+    no_extract = lambda q: (_ for _ in ()).throw(AssertionError("extractor should not be called"))
+    check("'round N to the nearest thousand' is computed in code, half up (v1 injected 4,88,129)",
+         verifier.solve_with_type("Round 4,87,629 to the nearest thousand.", extract_fn=no_extract)
+         == ("488000", True, "numeric"))
+    check("a half rounds up (350 to the nearest hundred is 400)",
+         verifier.round_to_nearest("Round 350 to the nearest hundred.") == "400")
+    check("ten thousand and lakh places",
+         verifier.round_to_nearest("Round 9,99,500 to the nearest thousand") == "1000000"
+         and verifier.round_to_nearest("round 64,999 to the nearest ten thousand") == "60000"
+         and verifier.round_to_nearest("Round 3,49,999 to the nearest lakh") == "300000")
+    check("other rounding wordings are left to the existing path",
+         verifier.round_to_nearest("Estimate the sum of 2,870 and 4,150 by rounding each to the nearest hundred") is None)
+    check("'what could the number be' gets no single injected answer",
+         verifier.solve_with_type("A 5-digit number rounds to 60,000 when rounded to the nearest ten thousand. "
+                                  "What could the number be?", extract_fn=no_extract) == (None, True, "numeric"))
+    check("an ordinary question is not treated as open",
+         not verifier.asks_open_answer("What is 8 times 7?"))
+    check("a function call from the arithmetic extractor is not salvaged as a number",
+         not verifier.compute("What is the HCF of 30 and 45?", extract_fn=lambda q: "hcf(30, 45)").verifiable)
+    check("so solve_with_type answers it through the function registry",
+         verifier.solve_with_type("What is the HCF of 30 and 45?", extract_fn=lambda q: "hcf(30, 45)",
+                                  function_extract_fn=lambda q: "hcf(30, 45)")[0] == "15")
+    check("bracketed arithmetic is still arithmetic",
+         verifier.compute("2 times (8 plus 5)", extract_fn=lambda q: "2*(8+5)").value == 26)
+    ans = verifier.solve_with_type("A school assembly starts at 2:45 PM and ends at 4:30 PM. How long is it in minutes?",
+                                   extract_fn=lambda q: "(16*60+30)-(14*60+45)",
+                                   function_extract_fn=lambda q: "NONE")
+    check("a how-long question still uses arithmetic (a duration in minutes is the right answer)",
+         ans[0] == "105" and ans[2] == "numeric")
+
+    comp = verifier.compute_function("What is 2 + 3?", extract_fn=lambda q: "NONE")
+    check("ordinary arithmetic is correctly declined (handled by the numeric path instead)",
+         not comp.verifiable)
+
+    comp = verifier.compute_function("What is the LCM of 4 and 6?",
+                                     extract_fn=lambda q: "lcm(4)")
+    check("wrong arity for the matched function is rejected, not mis-evaluated",
+         not comp.verifiable)
+
+    comp = verifier.compute_function("hack", extract_fn=lambda q: "os_system(4, 6)")
+    check("a function name outside the fixed registry is rejected outright",
+         not comp.verifiable)
+
+    # solve_with_type: numeric path still takes priority, function registry
+    # never even consulted.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 7 times 8?", extract_fn=lambda q: "7 * 8",
+        function_extract_fn=lambda q: (_ for _ in ()).throw(AssertionError("should not be called")))
+    check("a genuinely numeric question stays on the numeric path "
+         "(function extractor never even consulted)",
+         (answer, is_math, kind) == ("56", True, "numeric"))
+
+    # solve_with_type: numeric says NONE -> function registry fallback kicks in.
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is the LCM of 4 and 6?", extract_fn=lambda q: "NONE",
+        function_extract_fn=lambda q: "lcm(4, 6)")
+    check("numeric NONE falls through to the function registry",
+         (answer, is_math, kind) == ("12", True, "numeric"))
+
+    answer, is_math, kind = verifier.solve_with_type(
+        "What are the factors of 12?", extract_fn=lambda q: "NONE",
+        function_extract_fn=lambda q: "factors(12)")
+    check("a list-shaped function result flows through solve_with_type intact",
+         (answer, is_math, kind) == ("1, 2, 3, 4, 6, 12", True, "list"))
+
+
+def test_verifier_quotient_remainder() -> None:
+    """Issue 3 gap, live-reported: a bare non-exact division ("Divide 20 by
+    3") was computable but deliberately withheld as an improper fraction/
+    decimal (see _grade_appropriate_answer) -- correctly so, since NCERT
+    teaches it as quotient+remainder, but the quotient+remainder pair is
+    ITSELF trivially computable and was left fully ungraded instead."""
+    print("verifier — _quotient_remainder / solve_with_type quotient_remainder branch (no LLM)")
+
+    check("20/3 -> (6, 2)", verifier._quotient_remainder("20/3") == (6, 2))
+    check("a redundantly-parenthesised bare division is recognised the same way",
+         verifier._quotient_remainder("(20/3)") == (6, 2))
+    check("division by zero is rejected, not raised",
+         verifier._quotient_remainder("5/0") is None)
+    check("a non-division expression returns None",
+         verifier._quotient_remainder("5 + 3") is None)
+    check("an exact division returns its (quotient, 0) pair too",
+         verifier._quotient_remainder("6/3") == (2, 0))
+
+    answer, is_math, kind = verifier.solve_with_type(
+        "Divide 20 sweets among 3 children. How many does each get?",
+        extract_fn=lambda q: "20/3")
+    check("a withheld non-exact division now grades as quotient_remainder "
+         "instead of being left fully ungraded",
+         (answer, is_math, kind) == ("6 remainder 2", True, "quotient_remainder"))
+
+    # An EXACT division still injects its clean integer value, unaffected.
+    answer, is_math, kind = verifier.solve_with_type(
+        "Divide 12 sweets among 3 children. How many does each get?",
+        extract_fn=lambda q: "12/3")
+    check("an exact division is unaffected -- still a plain numeric answer",
+         (answer, is_math, kind) == ("4", True, "numeric"))
+
+    # A fraction-conversion question still injects the fraction value itself,
+    # unaffected (pre-existing _looks_like_fraction_conversion carve-out).
+    answer, is_math, kind = verifier.solve_with_type(
+        "What is 20/3 written as a decimal?", extract_fn=lambda q: "20/3")
+    check("a fraction/decimal-conversion question still injects the exact "
+         "value instead of quotient_remainder (pre-existing carve-out, unaffected)",
+         is_math and kind == "numeric" and answer is not None)
+
+
+def test_controller_diagnose_new_answer_types() -> None:
+    """The controller-level grading half of the same three new answer
+    shapes: diagnose() must recognise 'time' / 'list' / 'quotient_remainder'
+    the same conservative way it already handles 'categorical' -- correct
+    or engaged, never wrong/unclear (see diagnose()'s own docstring)."""
+    print("controller.diagnose — time / list / quotient_remainder answer types (no LLM)")
+
+    check("a matching clock time -> correct",
+         controller.diagnose("I think it will be 4:15", "4:15", True, "time") == "correct")
+    check("a non-matching clock time -> engaged, never wrong",
+         controller.diagnose("I think it will be 5:00", "4:15", True, "time") == "engaged")
+    check("no time mentioned at all -> engaged, never unclear",
+         controller.diagnose("I'm not sure", "4:15", True, "time") == "engaged")
+
+    check("the full matching factor set, any order -> correct",
+         controller.diagnose("12, 6, 4, 3, 2, 1", "1, 2, 3, 4, 6, 12", True, "list") == "correct")
+    check("a partial factor set -> engaged, never wrong",
+         controller.diagnose("1, 2, 3", "1, 2, 3, 4, 6, 12", True, "list") == "engaged")
+
+    check("a matching quotient+remainder pair -> correct",
+         controller.diagnose("6 remainder 2", "6 remainder 2", True, "quotient_remainder") == "correct")
+    check("the quotient alone, wrong remainder -> engaged, never wrong",
+         controller.diagnose("6 remainder 1", "6 remainder 2", True, "quotient_remainder") == "engaged")
 
 
 # ------------------------------------------------------- verifier check (no LLM)
@@ -134,9 +623,9 @@ def test_client_fallback(monkeypatched=True) -> None:
             yield _FakeChunk("lo", finish="stop")
         return gen()
 
-    # Point every target at our fake client, regardless of missing keys.
+    # Point every target at one fake client (key "k1"), regardless of missing keys.
     orig = llm_client._client_for
-    llm_client._client_for = lambda target: _FakeClient(behaviour)
+    llm_client._client_for = lambda target: [("k1", _FakeClient(behaviour))]
     try:
         h = llm_client.StreamHandle()
         text = "".join(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
@@ -153,7 +642,7 @@ def test_client_fallback(monkeypatched=True) -> None:
 def test_client_skips_missing_keys() -> None:
     print("llm_client — missing keys skipped")
     orig = llm_client._client_for
-    llm_client._client_for = lambda target: None  # all keys "missing"
+    llm_client._client_for = lambda target: []  # all keys "missing"
     try:
         h = llm_client.StreamHandle()
         list(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
@@ -161,6 +650,65 @@ def test_client_skips_missing_keys() -> None:
         llm_client._client_for = orig
     check("no key -> not ok", not h.ok)
     check("attempts recorded", len(h.attempts) == 3 and all("skipped" in a for a in h.attempts))
+
+
+class _FakeRateLimitError(Exception):
+    status_code = 429
+
+
+def test_client_key_rotation_on_429() -> None:
+    print("llm_client — multi-key rotation: first key 429s, second key succeeds")
+
+    calls = []
+
+    def make_behaviour(key_id):
+        def behaviour(model):
+            calls.append(key_id)
+            if key_id == "k1":
+                raise _FakeRateLimitError("rate limited")
+            def gen():
+                yield _FakeChunk("Hi", finish="stop")
+            return gen()
+        return behaviour
+
+    fake_keys = [("k1", _FakeClient(make_behaviour("k1"))),
+                 ("k2", _FakeClient(make_behaviour("k2")))]
+
+    orig_client_for = llm_client._client_for
+    orig_retries = llm_client._MAX_RETRIES_PER_KEY
+    orig_rotation = dict(llm_client._rotation_counters)
+    orig_cooldown = dict(llm_client._key_cooldown_until)
+    llm_client._client_for = lambda target: fake_keys if target.name == "groq-direct" else []
+    llm_client._MAX_RETRIES_PER_KEY = 0  # no backoff sleep in a fast unit test
+    try:
+        llm_client.start_call_recording()
+        h = llm_client.StreamHandle()
+        text = "".join(llm_client.stream([{"role": "user", "content": "hi"}], handle=h))
+        aux = llm_client.chat([{"role": "user", "content": "hi"}])
+        recorded = llm_client.stop_call_recording()
+    finally:
+        llm_client._client_for = orig_client_for
+        llm_client._MAX_RETRIES_PER_KEY = orig_retries
+        llm_client._rotation_counters.clear()
+        llm_client._rotation_counters.update(orig_rotation)
+        llm_client._key_cooldown_until.clear()
+        llm_client._key_cooldown_until.update(orig_cooldown)
+
+    check("first key tried", "k1" in calls)
+    check("second key tried after first key's 429", "k2" in calls
+          and calls.index("k2") > calls.index("k1"))
+    check("second key's response streamed through", text == "Hi")
+    check("handle committed to groq-direct on the second key", h.ok and h.provider == "groq-direct")
+    # Timing across every attempt, not just the one that worked.
+    check("the rate-limited attempt is counted (a 'noisy' call)", h.rate_limited_attempts == 1)
+    check("time to first token and total wall time are recorded, TTFT <= wall",
+         h.ttft_s is not None and h.wall_s is not None and h.ttft_s <= h.wall_s)
+    check("chat() returns the same timing fields",
+         {"ttft_s", "wall_s", "rate_limited_attempts"} <= set(aux))
+    check("the per-thread recorder logs both calls, labelled generation vs aux",
+         [c["purpose"] for c in recorded] == ["generation", "aux"])
+    check("recording is off again after stop_call_recording()",
+         llm_client.stop_call_recording() == [])
 
 
 # --------------------------------------------------------------- hints + levels
@@ -181,7 +729,15 @@ def test_hints_and_levels() -> None:
     user_msg = captured["messages"][1]["content"]
     check("hint system has grade", "Class 3" in sys_msg)
     check("hint user has prior hints", "think groups" in user_msg)
-    check("hint level-2 guidance present", "first concrete step" in user_msg)
+    # This call is hint 2 of the default total_hints=3, i.e. a MIDDLE hint, not
+    # the LAST or SINGLE case — so it must use hints._GUIDANCE_MIDDLE's wording
+    # ("...one real step closer..."), not "first concrete step" (that phrase is
+    # unique to _GUIDANCE_SINGLE, for problems with only one hint total, and
+    # never appears when total_hints=3). The previous assertion checked for
+    # the wrong guidance tier's wording and would fail even though hints.py's
+    # step-scaled guidance (_guidance_for) is working correctly.
+    check("hint level-2 (of 3) uses middle-tier escalating guidance, not first/last/single wording",
+          "one real step closer" in user_msg)
 
     check("map needs_practice", pipeline._norm_level("needs_practice") == "beginner")
     check("map on_track", pipeline._norm_level("on_track") == "intermediate")
@@ -193,13 +749,447 @@ def test_hints_and_levels() -> None:
     check("source built", "NCERT Class 4" in src and "p.12" in src)
 
 
+def test_student_tracker_atomic_save() -> None:
+    """Regression test for the atomic-write fix in student_tracker._save():
+    uses a temp STORE path so the real data/students.json is never touched."""
+    print("student_tracker — atomic save")
+    import os
+    import tempfile
+
+    orig_store = student_tracker.STORE
+    tmpdir = tempfile.mkdtemp()
+    student_tracker.STORE = os.path.join(tmpdir, "students.json")
+    try:
+        student_tracker.record("test_student", topic="fractions", correct=True)
+        student_tracker.record("test_student", topic="fractions", correct=False)
+        stats = student_tracker.stats("test_student")
+        check("attempts recorded", stats["attempts"] == 2)
+        check("no leftover .tmp file after save",
+              not os.path.exists(student_tracker.STORE + ".tmp"))
+        import json
+        with open(student_tracker.STORE, encoding="utf-8") as f:
+            reloaded = json.load(f)
+        check("saved file is valid, re-loadable JSON",
+              reloaded["test_student"]["attempts"] == 2)
+    finally:
+        student_tracker.STORE = orig_store
+
+
+def test_topic_canonicalization() -> None:
+    """Track 16: weak_topics must aggregate under a small, fixed set of
+    canonical topic names instead of the raw (previously 30-char-truncated)
+    question text, which produced an unaggregatable key per differently-
+    worded question. Covers both the classifier itself and that
+    pipeline.record_feedback actually uses it end to end."""
+    print("topics — deterministic canonical classification")
+
+    cases = [
+        ("What is 7 times 8?", "Multiplication"),
+        ("56 + 27", "Addition & Subtraction"),
+        ("add 56 and 27", "Addition & Subtraction"),
+        ("What is one-third of 9?", "Fractions & Decimals"),
+        ("perimeter of a rectangle", "Perimeter, Area & Volume"),
+        ("what are the factors of 12", "Factors & Multiples"),
+        ("89/4 explain step by step. div", "Division"),
+        ("what time is it", "Time & Calendar"),
+        ("how many rupees do I have", "Money"),
+        ("6 x 2", "Multiplication"),
+    ]
+    for q, expected in cases:
+        check(f"canonicalize({q!r}) -> {expected!r}", topics.canonicalize(q) == expected)
+    check("an un-classifiable fragment returns None, not a guess",
+         topics.canonicalize("There are 26 ba") is None)
+
+    import os
+    import tempfile
+
+    orig_store = student_tracker.STORE
+    tmpdir = tempfile.mkdtemp()
+    student_tracker.STORE = os.path.join(tmpdir, "students.json")
+    try:
+        # Two differently-worded additions should aggregate under the SAME
+        # canonical key -- the exact aggregation failure being fixed.
+        pipeline.record_feedback("topic_test", "56 + 27", correct=False)
+        pipeline.record_feedback("topic_test", "what is 12 plus 9", correct=False)
+        stats = student_tracker.stats("topic_test")
+        check("both differently-worded wrong attempts aggregate under ONE "
+             "canonical topic key, not two separate raw-text keys",
+             stats["weak_topics"] == ["Addition & Subtraction"])
+
+        # A question the matcher can't place goes in the honest "Other"
+        # bucket, never a fabricated specific topic.
+        pipeline.record_feedback("topic_test", "There are 26 ba", correct=False)
+        stats2 = student_tracker.stats("topic_test")
+        check("an unclassifiable question is bucketed as 'Other', not guessed",
+             "Other" in stats2["weak_topics"])
+    finally:
+        student_tracker.STORE = orig_store
+
+
+# -------------------------------------------- intent keyword-fallback routing
+def test_intent_keyword_fallback() -> None:
+    """scripts/llm/intent.py's deterministic keyword fallback
+    (_keyword_guess) -- previously had zero test coverage anywhere in this
+    project. Regression-tests two generations of the same underlying issue:
+
+    1. (Original fix) "I don't understand" must not resolve to GIVE_UP: a
+       confused-but-still-engaged child is not quitting.
+    2. (This stabilization pass) Confusion about the tutor's last explanation
+       is now its OWN label, CONFUSION, distinct from HINT -- a child who
+       says "I don't understand" wants the SAME idea re-explained, not the
+       next rung of a hint ladder (see controller._d_confusion and
+       intent.py's module docstring). "I cant understand" (no apostrophe)
+       used to be a documented, accepted gap that fell through to GIVE_UP;
+       it is now folded into the same CONFUSION keyword list and no longer a
+       gap.
+    """
+    print("intent._keyword_guess -- confusion vs hint vs genuine give-up")
+
+    check("'I dont understand' -> CONFUSION, not GIVE_UP or HINT",
+         intent._keyword_guess("I dont understand") == "CONFUSION")
+    check("\"I don't understand\" (apostrophe) -> CONFUSION",
+         intent._keyword_guess("I don't understand this one") == "CONFUSION")
+    check("'I dont get it' -> CONFUSION",
+         intent._keyword_guess("I dont get it") == "CONFUSION")
+    check("'confused' alone -> CONFUSION",
+         intent._keyword_guess("wait, I'm confused") == "CONFUSION")
+    check("genuine give-up phrasing is still GIVE_UP, unaffected by this fix",
+         intent._keyword_guess("I dont know, this is too hard") == "GIVE_UP")
+    check("'I cant do it' is still GIVE_UP",
+         intent._keyword_guess("i cant do it") == "GIVE_UP")
+    check("'I cant understand' (without an apostrophe-don't) now resolves to "
+         "CONFUSION -- the previously-documented fallback gap is closed",
+         intent._keyword_guess("I cant understand this at all") == "CONFUSION")
+    check("an ordinary hint request is still HINT, not CONFUSION (unaffected)",
+         intent._keyword_guess("give me a hint please") == "HINT")
+    check("a plain SOLVE request is still SOLVE (unaffected)",
+         intent._keyword_guess("just show me how") == "SOLVE")
+    check("a bare attempt number still falls through to ATTEMPT",
+         intent._keyword_guess("42") == "ATTEMPT")
+    check("a bare rejection resolves to CORRECTION via the prefilter",
+         intent._prefilter("no") == "CORRECTION")
+    check("'that's wrong' resolves to CORRECTION via the prefilter",
+         intent._prefilter("that's wrong") == "CORRECTION")
+    check("CORRECTION is checked before CONFUSION/GIVE_UP in the keyword list",
+         intent._keyword_guess("thats wrong") == "CORRECTION")
+
+
+# ----------------------------------------------------- conversation_resolver
+def test_conversation_resolver_deterministic_paths() -> None:
+    """Pure, no-LLM-call paths of conversation_resolver.resolve_question:
+    the "X instead of Y" grammar rule, the bare-correction regex, the
+    no-previous-turn NEW default, and (this stabilization pass) that the
+    router's own system prompt is parameterized by the REAL grade instead of
+    a hardcoded "Class 3" -- found hardcoded during the architecture audit
+    (Problem 1: grade must propagate into conversational routing, not just
+    retrieval/verifier/prompt)."""
+    print("conversation_resolver — deterministic routing paths")
+
+    prior = [{"role": "user", "content": "What is 245 + 136?"},
+             {"role": "assistant", "content": "Let's work through it..."}]
+
+    r = conversation_resolver.resolve_question(
+        "what if it was plus 150 instead of 136?", prior)
+    check("'X instead of Y' resolves deterministically, no LLM call",
+         r.mode == "MATH_FOLLOWUP" and r.resolved_question == "245 + 150"
+         and r.confidence == 1.0)
+
+    r_no_prev = conversation_resolver.resolve_question("What is 5 + 5?", None)
+    check("no previous turn -> NEW by default, no LLM call",
+         r_no_prev.mode == "NEW" and r_no_prev.use_rag and r_no_prev.use_verifier)
+
+    r_correction = conversation_resolver.resolve_question("no", prior)
+    check("a bare rejection resolves to CORRECTION deterministically",
+         r_correction.mode == "CORRECTION" and not r_correction.use_rag
+         and not r_correction.use_verifier)
+
+    r_empty = conversation_resolver.resolve_question("", prior)
+    check("empty input -> FRAGMENT, not a crash", r_empty.mode == "FRAGMENT")
+
+    rendered = conversation_resolver._ROUTER_SYSTEM_TEMPLATE.replace("{grade}", "4")
+    check("the router's system prompt is parameterized by grade, not "
+         "hardcoded to Class 3",
+         "Class 4" in rendered and "Class 3" not in rendered)
+
+
+# ------------------------------------------------- verifier.check_self_consistency
+def test_verifier_self_consistency_guardrail() -> None:
+    """Bounded guardrail (Problem 10): checks arithmetic the MODEL invents on
+    its own (e.g. a worked example in a broad teach_invite/redirect reply),
+    independent of whichever mode produced it and independent of the
+    student's own trusted answer. Must be conservative -- skip, not flag,
+    anything it can't confidently parse."""
+    print("verifier — self-consistency guardrail for self-made examples")
+
+    check("a correct self-made equation -> no issues",
+         verifier.check_self_consistency("First 4 + 4 = 8, then 8 + 4 = 12.") == [])
+    check("no equation at all -> no issues",
+         verifier.check_self_consistency("Let's think about this together.") == [])
+
+    bad = verifier.check_self_consistency("So 7 + 5 = 13, write 3 carry 1.")
+    check("a wrong self-made equation is caught",
+         len(bad) == 1 and bad[0]["computed"] == "12" and bad[0]["stated"] == "13")
+
+    multi = verifier.check_self_consistency(
+        "9 - 3 = 6 is correct, but 2 * 2 = 5 is wrong.")
+    check("multiple equations are each checked independently",
+         len(multi) == 1 and multi[0]["statement"] == "2 * 2 = 5")
+
+    check("the trusted-answer 'Answer:' line format is not mistaken for a "
+         "self-made equation (no operator before '=')",
+         verifier.check_self_consistency("Answer: 42") == [])
+
+
+def test_self_consistency_fraction_parsing() -> None:
+    """Regression for the false fraction self-check warning: the RHS of an
+    equation was matched by an alternation that tried the bare-number form
+    BEFORE the fraction form, so "... = 2/4" only captured "2" and silently
+    dropped "/4" -- a correct "1/2 = 2/4" was reported as "1/2 = 2", a false
+    mismatch. The fix reorders the alternation (fraction tried first); this
+    locks that fix in and proves genuinely wrong fraction equations are
+    still caught, not silently waved through."""
+    print("verifier — self-consistency correctly parses fraction equations")
+
+    correct_fraction_equations = [
+        "1/2 = 2/4", "3/5 = 6/10", "2/3 = 6/9",
+        "1/4 + 1/4 = 1/2", "3/4 - 1/4 = 1/2",
+        "1 / 2 = 2 / 4", "3 / 5 = 6 / 10",
+    ]
+    for eq in correct_fraction_equations:
+        check(f"correct fraction equation {eq!r} produces no false warning",
+             verifier.check_self_consistency(eq) == [])
+
+    wrong_frac = verifier.check_self_consistency("1/2 = 2/5")
+    check("a genuinely WRONG fraction equation is still caught (not over-corrected)",
+         len(wrong_frac) == 1
+         and wrong_frac[0]["computed"] == "1/2" and wrong_frac[0]["stated"] == "2/5")
+
+    wrong_mixed = verifier.check_self_consistency("3/4 + 1/4 = 2")
+    check("a wrong fraction-sum-to-integer equation is still caught",
+         len(wrong_mixed) == 1 and wrong_mixed[0]["stated"] == "2")
+
+
+def test_safety_gate() -> None:
+    """Track 5 (safety boundary): a bounded, deterministic (no LLM call)
+    input/output safety gate. check_input must run before any LLM-based
+    routing ever sees the text; check_output is a defense-in-depth scan of
+    what the model itself produced."""
+    print("safety — deterministic input/output gate")
+
+    safe_inputs = ["What is 24 + 18?", "I don't understand", "give me a hint",
+                  "counting", "8 + 9 = 7", "can you explain fractions"]
+    for s in safe_inputs:
+        check(f"safe input not blocked: {s!r}", safety.check_input(s).blocked is False)
+
+    unsafe_cases = [
+        ("I want to kill myself", "self_harm"),
+        ("I'm going to kill you", "violence"),
+        ("you are a fucking idiot", "sexual_profanity"),
+        ("call me at 555-123-4567", "personal_info"),
+        ("my home address is 12 Oak Street", "personal_info"),
+    ]
+    for text, _ in unsafe_cases:
+        result = safety.check_input(text)
+        check(f"unsafe input blocked: {text!r}", result.blocked is True)
+        check(f"blocked input has a child-safe fallback (no category leaked): {text!r}",
+             bool(result.fallback_text) and result.category not in result.fallback_text)
+
+    check("safe generated text is not blocked",
+         safety.check_output("Let's add 3 and 2. 3 + 2 = 5. Answer: 5").blocked is False)
+    bad_output = safety.check_output("Just go kill yourself if you can't do this.")
+    check("unsafe generated text IS blocked", bad_output.blocked is True)
+    check("the output fallback is generic (not a copy of the unsafe text)",
+         bad_output.fallback_text and "kill" not in bad_output.fallback_text)
+
+
+def test_system_prompt_requires_self_contained_explanations() -> None:
+    """Retrieved NCERT chunks routinely reference pictures, textbook pages,
+    and physical classroom materials (matchsticks, bottle caps, dot grids)
+    the child cannot see through the chat. The system prompt must explicitly
+    forbid treating those as visible/available, rather than relying on the
+    model to infer it -- live testing found the tutor otherwise asserting
+    specific counts from an unseen 'picture' as fact."""
+    print("prompt_registry — system prompt requires self-contained explanations")
+
+    messages = prompt_registry.build_messages(
+        "what is data handling", 3, ["On the dot grid given below, draw..."],
+        version="v5-personalized", level="intermediate",
+    )
+    system = messages[0]["content"]
+    check("forbids referring to a picture/page the child can't see",
+         "look at the picture" in system.lower() or "cannot see any picture" in system.lower())
+    check("tells the model to transform physical-material references into "
+         "self-contained or explicitly imagined framing",
+         "imagine" in system.lower())
+
+
+def test_system_prompt_allows_simple_out_of_grade_explanations() -> None:
+    """Section 6: 'out-of-grade = immediate refusal' must not be the only
+    behavior. A simple 'what is X' about a topic beyond primary school
+    (integration, algebra...) should get one short, honest conceptual gloss;
+    only a request for the detailed procedure/formula should still defer.
+    Live testing confirmed the pre-fix prompt refused 'what is integration'
+    outright with no conceptual attempt at all."""
+    print("prompt_registry — simple out-of-grade concepts get a gloss, not a flat refusal")
+
+    messages = prompt_registry.build_messages(
+        "what is integration", 5, [], version="v5-personalized", level="intermediate",
+    )
+    system = messages[0]["content"]
+    check("allows a simple conceptual explanation of an advanced topic's name",
+         "simple" in system.lower() and "beyond primary school" in system.lower())
+    check("still reserves refusal for a DETAILED procedure/formula request, "
+         "not just an advanced-sounding topic name",
+         "detailed" in system.lower() and "procedure" in system.lower())
+
+
+def test_beginner_level_requires_showing_substep_method() -> None:
+    """Live-reported: a first-session (beginner-by-default) explanation of
+    adding fractions asserted "the smallest common denominator for 3 and 9
+    is 9" without ever showing HOW to find it -- correct final steps, but a
+    sub-procedure stated as a given fact instead of taught. The beginner
+    LEVEL_STYLE must explicitly forbid that: any sub-step that is itself a
+    small procedure (finding a common denominator, simplifying...) has to
+    show its method, not just its result. intermediate gets the same rule
+    in lighter form; advanced is intentionally allowed to skip obvious
+    steps, so it is NOT asserted here."""
+    print("prompt_registry — beginner level must show the method behind a sub-step, not just assert its result")
+
+    messages = prompt_registry.build_messages(
+        "explain fractions and how to add them", 3, [],
+        version="v5-personalized", level="beginner",
+    )
+    system = messages[0]["content"]
+    check("beginner style requires showing HOW to do a sub-procedure, not "
+         "just stating its result",
+         "show the method" in system.lower() or "must show how" in system.lower())
+    check("beginner style requires defining a term before using it",
+         "define it" in system.lower())
+
+    messages_int = prompt_registry.build_messages(
+        "explain fractions and how to add them", 3, [],
+        version="v5-personalized", level="intermediate",
+    )
+    system_int = messages_int[0]["content"]
+    check("intermediate style also asks for the method behind a sub-step "
+         "(lighter than beginner, but not silently asserting a result)",
+         "method that gets you there" in system_int.lower())
+
+
+def test_system_prompt_paper_eval_v2_fixes() -> None:
+    """Prompt changes after the paper-eval v1 run (off-topic context, several
+    valid answers, Answer line before practice; Class 5
+    percentages in scope), checked on the prompt actually sent."""
+    print("prompt_registry — context, multiple answers, Answer line, percentages")
+    messages = prompt_registry.build_messages(
+        "Name one round object you can find in your kitchen.", 1, [],
+        version="v5-personalized", level="intermediate", computed_answer="9:10",
+    )
+    system = messages[0]["content"].lower()
+    check("no longer tells the model to refuse when the context is off-topic (cb-181)",
+         "totally different (non-maths) topic" not in system)
+    check("answers an ordinary question from everyday knowledge when the context doesn't cover it",
+         "doesn't cover it" in system and "everyday knowledge" in system)
+    check("still forbids inventing a textbook definition or rule",
+         "never invent a textbook definition" in system)
+    check("asks for every valid answer when there is more than one (cb-290)",
+         "more than one correct answer" in system and "never present one" in system)
+    check("the Answer line comes before any practice question (cb-819)",
+         'put "answer: 9:10" on its own line right after the working' in system
+         and "never before it" in system and 'end with: "answer:' not in system)
+    check("simple Class 5 percentages are listed as allowed maths", "simple percentages in class 5" in system)
+
+
+def test_paper_eval_v2_controller_fixes() -> None:
+    """Reading a stated result after working; give-up requests; session openers."""
+    print("controller/intent/resolver — stated results, give-ups, openers")
+    sa = controller._student_answer
+    check("a result stated after working is read ('so 8 times 6 is 48')",
+         sa("Oh, area is length times width, so 8 times 6 is 48") == "48")
+    check("'so 26' after a bracketed expression is read",
+         sa("Oh right, perimeter is 2 times (8 plus 5), so 26") == "26")
+    check("'That's 7.' is read", sa("Oh ok, so it's just asking 56 divided by 8. That's 7.") == "7")
+    check("working with no stated result is still unclear (never mis-graded)", sa("I added 4 and 5") is None)
+    check("a 'how' question is still never an answer", sa("how is 26 the answer") is None)
+    check("diagnose grades the stated result as correct",
+         controller.diagnose("so 8 times 6 is 48", "48", True) == "correct")
+    no_llm = lambda t: (_ for _ in ()).throw(AssertionError("prefilter should decide this"))
+    for text in ["I don't know, just tell me.", "meh, this is boring, just give me the answer",
+                 "I give up, what's the answer?", "I have no idea, can you just explain it?"]:
+        check(f"{text!r} -> GIVE_UP without an LLM call",
+             intent.classify_intent(text, classify_fn=no_llm) == "GIVE_UP")
+    check("a hint request with 'I don't know' stays a hint, not a give-up",
+         intent._prefilter("I don't know where to start, give me a hint.") is None)
+    check("'just tell me' alone is not forced to GIVE_UP (still the classifier's call)",
+         intent._prefilter("just tell me") is None)
+
+    # The session-opener router (conversation_resolver.classify_opener).
+    co = conversation_resolver.classify_opener
+    boom = lambda msgs: (_ for _ in ()).throw(AssertionError("no model call expected"))
+    check("an opener with a quantity is NEW with no model call",
+         co("There are 15 pencils in a box and 4 more are added, how many now?", chat_fn=boom) == "NEW")
+    calls = []
+    co("what about the 2nd one", chat_fn=lambda m: calls.append(m) or {"text": "CLARIFY"})
+    check("an ordinal ('2nd') is not a quantity -- the model decides", len(calls) == 1)
+    check("the model's CLARIFY is returned", co("Which is the bigger one?", chat_fn=lambda m: {"text": "CLARIFY"}) == "CLARIFY")
+    check("the last label wins in a chatty reply",
+         co("circles?", chat_fn=lambda m: {"text": "Not CLARIFY -- a topic word, so NEW"}) == "NEW")
+    check("a failed call falls back to NEW (the v1 behaviour)",
+         co("Which is the bigger one?", chat_fn=lambda m: (_ for _ in ()).throw(RuntimeError("429"))) == "NEW")
+    check("spelling is called out as never making a message CLARIFY",
+         "never make a message CLARIFY" in conversation_resolver._opener_system(3))
+    r = conversation_resolver.resolve_question("Which is the bigger one?", None,
+                                               opener_fn=lambda m: {"text": "CLARIFY"})
+    check("resolve_question routes a vague opener to FRAGMENT, no RAG/verifier",
+         r.mode == "FRAGMENT" and not r.use_rag and not r.use_verifier)
+    r = conversation_resolver.resolve_question("how likely is it to pick a red sweet", None,
+                                               opener_fn=lambda m: {"text": "ADVANCED"})
+    check("the same opener call can mark a message beyond Class 5",
+         r.mode == "BEYOND_PRIMARY" and r.scope_checked)
+    r = conversation_resolver.resolve_question("15 pencils and 4 more, how many?", None, opener_fn=boom)
+    check("an opener with a quantity is NEW without a call, and still needs the scope check",
+         r.mode == "NEW" and not r.scope_checked)
+
+    # The small-model scope check (scope.needs_beyond_primary).
+    nb = scope.needs_beyond_primary
+    check("bare arithmetic skips the model", not nb("What is 23 + 45?", chat_fn=boom))
+    check("the model's ADVANCED is a refusal",
+         nb("In how many ways can 4 friends stand in a line?", chat_fn=lambda m: {"text": "ADVANCED"}))
+    check("the model's IN_SCOPE passes", not nb("Name a round fruit.", chat_fn=lambda m: {"text": "IN_SCOPE"}))
+    check("a failed call leaves the word rules' verdict (in scope)",
+         not nb("A tricky question", chat_fn=lambda m: (_ for _ in ()).throw(RuntimeError("429"))))
+    check("the scope prompt carries the Class 1-5 topic list, not test questions",
+         "missing-number boxes" in scope._BEYOND_SYSTEM and "percentages" in scope._BEYOND_SYSTEM)
+
+
 def main() -> None:
     test_response_parser()
+    test_strip_latex_converts_to_plain_text()
+    test_collapse_excess_blank_lines()
+    test_final_number_str_fallback_tiers()
+    test_student_tracker_atomic_save()
     test_verifier_math()
+    test_verifier_categorical()
+    test_verifier_function_registry()
+    test_verifier_quotient_remainder()
+    test_controller_diagnose_new_answer_types()
+    test_verifier_injection_gate()
     test_verifier_check()
     test_client_fallback()
     test_client_skips_missing_keys()
+    test_client_key_rotation_on_429()
     test_hints_and_levels()
+    test_intent_keyword_fallback()
+    test_conversation_resolver_deterministic_paths()
+    test_verifier_self_consistency_guardrail()
+    test_self_consistency_fraction_parsing()
+    test_safety_gate()
+    test_topic_canonicalization()
+    test_system_prompt_requires_self_contained_explanations()
+    test_system_prompt_allows_simple_out_of_grade_explanations()
+    test_beginner_level_requires_showing_substep_method()
+    test_system_prompt_paper_eval_v2_fixes()
+    test_paper_eval_v2_controller_fixes()
     print(f"\n{_passed} passed, {_failed} failed")
     if _failed:
         raise SystemExit(1)

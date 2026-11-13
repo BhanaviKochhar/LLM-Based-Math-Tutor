@@ -1,0 +1,15 @@
+{
+ "description": "Reading of the retrieval misses in eval/results/retrieval_eval_20261023T180901Z_eec1643166.json against the corpus (data/extracted_json/ncert_chunks.json): whether the corpus holds the content (retriever miss) or not (corpus gap), and the Class 2 pattern.",
+ "read_on": "2026-10-28",
+ "misses_outside_top_5": [
+  {"id": "rq-001", "query": "fractions", "grade": 4, "kind": "retriever_miss", "note": "Class 4 'Jugs and Mugs' pages 101-112 cover fractions; the bare one-word query returns Class 3 pages instead. The longer 'what is a fraction of a whole' (rq-003) ranks the right pages first."},
+  {"id": "rq-010", "query": "What is 1/2 + 1/4?", "grade": 4, "kind": "corpus_gap", "note": "The Class 4 chapter names and compares fractions but never adds unlike fractions; page 102 is only the nearest grounding."},
+  {"id": "rq-068", "query": "counting in tens", "grade": 2, "kind": "retriever_miss", "note": "Class 2 pages 33-37 are the 'Counting in Tens' chapter; the top results are Class 1 teacher's notes (pages 142 and 152)."}
+ ],
+ "class_2_pattern": {
+  "recall_at_1_by_grade": {"1": "13/19", "2": "7/14", "3": "15/20", "4": "11/17", "5": "14/18"},
+  "class_2_queries_with_a_class_1_top_result": "9/14",
+  "of_which_class_1_teacher_notes_pages_147_to_156": "8/9",
+  "note": "Class 2 searches also cover Class 1, and the Class 1 book ends with teacher-facing notes that use the same topic words as the chapters (subtraction, patterns, measurement), so they outrank the Class 2 pages."
+ }
+}

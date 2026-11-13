@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{Latency Detail (SVAMP, Clean Turns)}
+\label{tab:latency-detail}
+\footnotesize
+\begin{tabular}{@{}L{4.4cm}rr@{}}
+\toprule
+Measure & Base. & Sys. \\
+\midrule
+Full reply, P50 / P90 / P95 (s) & 0.98 / 2.51 / 6.04 & 2.28 / 12.40 / 20.16 \\
+First word, P50 / P90 / P95 (s) & 0.67 / 2.00 / 5.80 & 1.98 / 12.26 / 19.77 \\
+Model calls per turn (mean) & 1.00 & 2.03 \\
+New-problem turn: before generation, P50 (s) & -- & 1.88 \\
+New-problem turn: generation, P50 (s) & -- & 1.02 \\
+Clean turns & 438 & 659 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize Clean turns: no rate-limit retry. A new-problem turn makes the scope and verifier calls before generating (322 turns); the scripted give-up turn makes one call.}
+\end{table}

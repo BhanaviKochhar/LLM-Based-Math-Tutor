@@ -1,0 +1,318 @@
+{
+  "evaluator_name": "reference_v1_vs_v2",
+  "run_timestamp_utc": "20261029T040150Z",
+  "git": {
+    "commit": "811367b31f203023ef9dd12cab3f7cef9004604f",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "D:\\LLM-Based-Math-Tutor\\eval\\datasets"
+    }
+  ],
+  "config": {
+    "reference_only": true
+  },
+  "aggregate_metrics": {
+    "note": "baseline/system keys inside each paired row mean v1/v2 here",
+    "correctness": {
+      "curriculum_benchmark_class1": {
+        "n": 123,
+        "baseline": {
+          "k": 121,
+          "n": 123,
+          "rate": 0.983739837398374,
+          "ci95": [
+            0.9426484258328016,
+            0.9955295851667443
+          ]
+        },
+        "system": {
+          "k": 123,
+          "n": 123,
+          "rate": 1.0,
+          "ci95": [
+            0.9697134063272616,
+            0.9999999999999998
+          ]
+        },
+        "both": 121,
+        "only_baseline": 0,
+        "only_system": 2,
+        "neither": 0,
+        "diff_system_minus_baseline": 0.016260162601625994,
+        "diff_ci95": [
+          -0.016240235991919788,
+          0.05735157416719838
+        ],
+        "mcnemar_p": 0.5
+      },
+      "curriculum_benchmark_class2": {
+        "n": 101,
+        "baseline": {
+          "k": 100,
+          "n": 101,
+          "rate": 0.9900990099009901,
+          "ci95": [
+            0.9460315253904807,
+            0.998250133798238
+          ]
+        },
+        "system": {
+          "k": 101,
+          "n": 101,
+          "rate": 1.0,
+          "ci95": [
+            0.9633580563440465,
+            0.9999999999999998
+          ]
+        },
+        "both": 100,
+        "only_baseline": 0,
+        "only_system": 1,
+        "neither": 0,
+        "diff_system_minus_baseline": 0.00990099009900991,
+        "diff_ci95": [
+          -0.027636629107252474,
+          0.05396847460951926
+        ],
+        "mcnemar_p": 1.0
+      },
+      "curriculum_benchmark_class3": {
+        "n": 127,
+        "baseline": {
+          "k": 123,
+          "n": 127,
+          "rate": 0.968503937007874,
+          "ci95": [
+            0.9218114747018281,
+            0.9876851991389076
+          ]
+        },
+        "system": {
+          "k": 126,
+          "n": 127,
+          "rate": 0.9921259842519685,
+          "ci95": [
+            0.9567449252236082,
+            0.9986087237687615
+          ]
+        },
+        "both": 123,
+        "only_baseline": 0,
+        "only_system": 3,
+        "neither": 1,
+        "diff_system_minus_baseline": 0.023622047244094557,
+        "diff_ci95": [
+          -0.012369344278958111,
+          0.06920208616110049
+        ],
+        "mcnemar_p": 0.25
+      },
+      "curriculum_benchmark_class4": {
+        "n": 111,
+        "baseline": {
+          "k": 105,
+          "n": 111,
+          "rate": 0.9459459459459459,
+          "ci95": [
+            0.887062928365998,
+            0.9749940266050229
+          ]
+        },
+        "system": {
+          "k": 111,
+          "n": 111,
+          "rate": 1.0,
+          "ci95": [
+            0.9665487070887205,
+            1.0
+          ]
+        },
+        "both": 105,
+        "only_baseline": 0,
+        "only_system": 6,
+        "neither": 0,
+        "diff_system_minus_baseline": 0.05405405405405406,
+        "diff_ci95": [
+          0.009750781179327803,
+          0.11293707163400202
+        ],
+        "mcnemar_p": 0.03125
+      },
+      "curriculum_benchmark_class5": {
+        "n": 114,
+        "baseline": {
+          "k": 112,
+          "n": 114,
+          "rate": 0.9824561403508771,
+          "ci95": [
+            0.9382807541193635,
+            0.9951756823173447
+          ]
+        },
+        "system": {
+          "k": 113,
+          "n": 114,
+          "rate": 0.9912280701754386,
+          "ci95": [
+            0.9519784746833306,
+            0.9984498969613177
+          ]
+        },
+        "both": 111,
+        "only_baseline": 1,
+        "only_system": 2,
+        "neither": 0,
+        "diff_system_minus_baseline": 0.00877192982456143,
+        "diff_ci95": [
+          -0.032639049627839825,
+          0.05362324475294328
+        ],
+        "mcnemar_p": 1.0
+      },
+      "out_of_scope": {
+        "n": 277,
+        "baseline": {
+          "k": 231,
+          "n": 277,
+          "rate": 0.8339350180505415,
+          "ci95": [
+            0.785603948384305,
+            0.8731303701781872
+          ]
+        },
+        "system": {
+          "k": 272,
+          "n": 277,
+          "rate": 0.9819494584837545,
+          "ci95": [
+            0.9584478801497017,
+            0.9922659742080571
+          ]
+        },
+        "both": 231,
+        "only_baseline": 0,
+        "only_system": 41,
+        "neither": 5,
+        "diff_system_minus_baseline": 0.148014440433213,
+        "diff_ci95": [
+          0.10806476099646523,
+          0.194658542419679
+        ],
+        "mcnemar_p": 9.094947017729282e-13
+      }
+    },
+    "curriculum_all": {
+      "n": 576,
+      "baseline": {
+        "k": 561,
+        "n": 576,
+        "rate": 0.9739583333333334,
+        "ci95": [
+          0.9574803245846679,
+          0.9841561499283716
+        ]
+      },
+      "system": {
+        "k": 574,
+        "n": 576,
+        "rate": 0.9965277777777778,
+        "ci95": [
+          0.9874290122708577,
+          0.9990472943618504
+        ]
+      },
+      "both": 560,
+      "only_baseline": 1,
+      "only_system": 14,
+      "neither": 1,
+      "diff_system_minus_baseline": 0.02256944444444442,
+      "diff_ci95": [
+        0.009478274963810155,
+        0.03903092328943436
+      ],
+      "mcnemar_p": 0.0009765625
+    },
+    "out_of_scope_outcomes": {
+      "v1": {
+        "answer": {
+          "taught": 54,
+          "gloss": 1,
+          "refused": 5
+        },
+        "gloss": {
+          "gloss": 18,
+          "broken_gloss": 1
+        },
+        "decline": {
+          "refused": 156,
+          "gloss": 2,
+          "taught": 40
+        }
+      },
+      "v2": {
+        "answer": {
+          "taught": 60
+        },
+        "gloss": {
+          "gloss": 19
+        },
+        "decline": {
+          "refused": 188,
+          "gloss": 5,
+          "taught": 5
+        }
+      }
+    },
+    "false_refusal_curriculum": {
+      "v1": {
+        "k": 5,
+        "n": 935,
+        "rate": 0.0053475935828877,
+        "ci95": [
+          0.002286237196972506,
+          0.012457037919937523
+        ]
+      },
+      "v2": {
+        "k": 7,
+        "n": 935,
+        "rate": 0.0074866310160427805,
+        "ci95": [
+          0.0036311275734423067,
+          0.015372717164583787
+        ]
+      }
+    },
+    "controller_action_match": {
+      "v1": {
+        "k": 486,
+        "n": 666,
+        "rate": 0.7297297297297297,
+        "ci95": [
+          0.694754608141781,
+          0.7620698112433392
+        ]
+      },
+      "v2": {
+        "k": 561,
+        "n": 666,
+        "rate": 0.8423423423423423,
+        "ci95": [
+          0.8127115931881979,
+          0.8680463651111969
+        ]
+      }
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "REFERENCE ONLY: system v1 vs v2; not used in the paper.",
+  "per_example_results": []
+}

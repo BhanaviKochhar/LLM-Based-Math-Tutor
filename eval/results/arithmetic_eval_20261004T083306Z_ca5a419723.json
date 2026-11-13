@@ -1,0 +1,376 @@
+{
+  "evaluator_name": "arithmetic_eval",
+  "run_timestamp_utc": "20261004T083306Z",
+  "git": {
+    "commit": "ca5a419723c42ae0817f495a7a17188a2455bcc6",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\arithmetic\\v1_starter.jsonl",
+      "version": "v1_starter",
+      "item_count": 15
+    },
+    {
+      "path": "eval\\datasets\\arithmetic\\v2_phaseB_extension.jsonl",
+      "version": "v2_phaseB_extension",
+      "item_count": 6
+    }
+  ],
+  "config": {
+    "extract_fn": "known-good trusted_expression (bypasses the LLM extractor by design; see extraction_eval.py for that path)",
+    "live_llm_used": false
+  },
+  "aggregate_metrics": {
+    "total_items": 21,
+    "system_scorable": 16,
+    "verified_not_system_scorable": 2,
+    "requires_human_rubric_evaluation": 3,
+    "answer_accuracy": {
+      "numerator_match": 15,
+      "denominator_scorable": 16,
+      "rate": 0.9375
+    },
+    "parsing_success_rate": {
+      "numerator_parsed": 16,
+      "denominator_scorable": 16,
+      "rate": 1.0
+    },
+    "mismatches": 1,
+    "errors": 0,
+    "by_grade": {
+      "1": {
+        "n_scorable": 3,
+        "match": 3,
+        "excluded": 0
+      },
+      "2": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "3": {
+        "n_scorable": 4,
+        "match": 4,
+        "excluded": 1
+      },
+      "4": {
+        "n_scorable": 5,
+        "match": 5,
+        "excluded": 1
+      },
+      "5": {
+        "n_scorable": 3,
+        "match": 2,
+        "excluded": 3
+      }
+    },
+    "by_topic": {
+      "addition": {
+        "n_scorable": 2,
+        "match": 2,
+        "excluded": 0
+      },
+      "subtraction": {
+        "n_scorable": 2,
+        "match": 2,
+        "excluded": 0
+      },
+      "multiplication": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "division_exact": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "division_remainder": {
+        "n_scorable": 0,
+        "match": 0,
+        "excluded": 2
+      },
+      "fraction_addition": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "fraction_subtraction": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "fraction_of_quantity_equivalence": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "multi_step_word_problem": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "distractor_numbers": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "perimeter": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "comparison_not_single_value": {
+        "n_scorable": 0,
+        "match": 0,
+        "excluded": 1
+      },
+      "subtraction_borrowing": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "fraction_of_fraction": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      },
+      "hcf": {
+        "n_scorable": 0,
+        "match": 0,
+        "excluded": 1
+      },
+      "lcm": {
+        "n_scorable": 0,
+        "match": 0,
+        "excluded": 1
+      },
+      "fraction_to_decimal": {
+        "n_scorable": 1,
+        "match": 0,
+        "excluded": 0
+      },
+      "decimal_addition": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 0
+      }
+    }
+  },
+  "exclusions": [
+    {
+      "case_id": "ar-005",
+      "reason": "verifiable=false; not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-012",
+      "reason": "verifiable=false; not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-015",
+      "reason": "verifiable=false; not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-018",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM); ground truth was checked directly with sympy at authoring time, not via the live system"
+    },
+    {
+      "case_id": "ar-019",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM); ground truth was checked directly with sympy at authoring time, not via the live system"
+    }
+  ],
+  "execution_errors": [],
+  "notes": "This measures the verifier's COMPUTATION+GATING layer given a KNOWN-CORRECT expression, not end-to-end question-to-answer accuracy (which requires the LLM extractor -- see extraction_eval.py). A 'match' can legitimately mean both sides are None (a correctly withheld non-exact division).",
+  "per_example_results": [
+    {
+      "case_id": "ar-001",
+      "grade": 1,
+      "topic": "addition",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "13",
+      "detail": "computed=13 expected=13"
+    },
+    {
+      "case_id": "ar-002",
+      "grade": 2,
+      "topic": "subtraction",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "13",
+      "detail": "computed=13 expected=13"
+    },
+    {
+      "case_id": "ar-003",
+      "grade": 3,
+      "topic": "multiplication",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "54",
+      "detail": "computed=54 expected=54"
+    },
+    {
+      "case_id": "ar-004",
+      "grade": 3,
+      "topic": "division_exact",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "9",
+      "detail": "computed=9 expected=9"
+    },
+    {
+      "case_id": "ar-005",
+      "grade": 3,
+      "topic": "division_remainder",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-006",
+      "grade": 4,
+      "topic": "fraction_addition",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "1/2",
+      "detail": "computed=1/2 expected=1/2"
+    },
+    {
+      "case_id": "ar-007",
+      "grade": 4,
+      "topic": "fraction_subtraction",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "1/4",
+      "detail": "computed=1/4 expected=1/4"
+    },
+    {
+      "case_id": "ar-008",
+      "grade": 4,
+      "topic": "fraction_of_quantity_equivalence",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "3",
+      "detail": "computed=3 expected=3"
+    },
+    {
+      "case_id": "ar-009",
+      "grade": 4,
+      "topic": "multi_step_word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "33",
+      "detail": "computed=33 expected=33"
+    },
+    {
+      "case_id": "ar-010",
+      "grade": 3,
+      "topic": "distractor_numbers",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "14",
+      "detail": "computed=14 expected=14"
+    },
+    {
+      "case_id": "ar-011",
+      "grade": 4,
+      "topic": "perimeter",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "48",
+      "detail": "computed=48 expected=48"
+    },
+    {
+      "case_id": "ar-012",
+      "grade": 4,
+      "topic": "comparison_not_single_value",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-013",
+      "grade": 3,
+      "topic": "subtraction_borrowing",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "18",
+      "detail": "computed=18 expected=18"
+    },
+    {
+      "case_id": "ar-014",
+      "grade": 5,
+      "topic": "fraction_of_fraction",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "1/8",
+      "detail": "computed=1/8 expected=1/8"
+    },
+    {
+      "case_id": "ar-015",
+      "grade": 5,
+      "topic": "division_remainder",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "not a numeric-answer item"
+    },
+    {
+      "case_id": "ar-016",
+      "grade": 1,
+      "topic": "addition",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "ar-017",
+      "grade": 1,
+      "topic": "subtraction",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "3",
+      "detail": "computed=3 expected=3"
+    },
+    {
+      "case_id": "ar-018",
+      "grade": 5,
+      "topic": "hcf",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM); ground truth was checked directly with sympy at authoring time, not via the live system"
+    },
+    {
+      "case_id": "ar-019",
+      "grade": 5,
+      "topic": "lcm",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM); ground truth was checked directly with sympy at authoring time, not via the live system"
+    },
+    {
+      "case_id": "ar-020",
+      "grade": 5,
+      "topic": "fraction_to_decimal",
+      "classification": "system_scorable",
+      "outcome": "mismatch",
+      "computed": null,
+      "detail": "one side is None: computed=None expected='0.3'"
+    },
+    {
+      "case_id": "ar-021",
+      "grade": 5,
+      "topic": "decimal_addition",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "11/20",
+      "detail": "computed=11/20 expected=11/20"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\caption{Effect Sizes for Paired Yes/No Outcomes}
+\label{tab:effect-sizes}
+\footnotesize
+\begin{tabular}{@{}L{3.6cm}rrrcll@{}}
+\toprule
+Outcome & $n$ & $b$ & $c$ & OR $c/b$ [95\% CI] & Cohen's $g$ & $p$ \\
+\midrule
+Curriculum: correct & 577 & 1 & 4 & 4.00 [0.45, 35.79] & 0.30 (large) & 0.375 \\
+SVAMP: correct & 500 & 8 & 5 & 0.62 [0.20, 1.91] & 0.12 (small) & 0.581 \\
+SVAMP, debatable removed: correct & 483 & 7 & 5 & 0.71 [0.23, 2.25] & 0.08 (small) & 0.774 \\
+Out-of-scope: handled correctly & 277 & 0 & 211 & 423.00$^\ast$ [26.37, 6785.24] & 0.50 (large) & $<$0.001 \\
+MathDial: answer handed over$^\downarrow$ & 100 & 71 & 1 & 0.01 [0.00, 0.10] & 0.49 (large) & $<$0.001 \\
+MathDial: names the mistake & 100 & 78 & 2 & 0.03 [0.01, 0.10] & 0.47 (large) & $<$0.001 \\
+Hallucination, both members$^\downarrow$ & 75 & 2 & 3 & 1.50 [0.25, 8.98] & 0.10 (small) & 1.000 \\
+Hallucination, either member$^\downarrow$ & 75 & 4 & 7 & 1.75 [0.51, 5.98] & 0.14 (small) & 0.549 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize $b$: items yes for the baseline only; $c$: yes for Tiny Thinker only. OR: discordant odds ratio, log-normal interval; $^\ast$0.5 added to both cells because one is zero. Cohen's $g = |c/(b+c) - 0.5|$; bands $<$0.05 negligible, $<$0.15 small, $<$0.25 medium, otherwise large. With few discordant pairs (curriculum: 12) $g$ is unstable; read it with the interval. $\downarrow$: fewer is better.}
+\end{table*}

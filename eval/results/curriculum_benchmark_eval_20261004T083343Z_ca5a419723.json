@@ -1,0 +1,2206 @@
+{
+  "evaluator_name": "curriculum_benchmark_eval",
+  "run_timestamp_utc": "20261004T083343Z",
+  "git": {
+    "commit": "ca5a419723c42ae0817f495a7a17188a2455bcc6",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\curriculum_benchmark\\v1_class1.jsonl",
+      "version": "v1_class1",
+      "item_count": 35
+    },
+    {
+      "path": "eval\\datasets\\curriculum_benchmark\\v1_class2.jsonl",
+      "version": "v1_class2",
+      "item_count": 30
+    },
+    {
+      "path": "eval\\datasets\\curriculum_benchmark\\v1_class3.jsonl",
+      "version": "v1_class3",
+      "item_count": 35
+    },
+    {
+      "path": "eval\\datasets\\curriculum_benchmark\\v1_class4.jsonl",
+      "version": "v1_class4",
+      "item_count": 33
+    },
+    {
+      "path": "eval\\datasets\\curriculum_benchmark\\v1_class5.jsonl",
+      "version": "v1_class5",
+      "item_count": 42
+    }
+  ],
+  "config": {
+    "extract_fn": "known-good trusted_expression (bypasses the LLM extractor); see extraction_eval.py for the live-extraction path",
+    "live_llm_used": false
+  },
+  "aggregate_metrics": {
+    "total_items": 175,
+    "system_scorable": 69,
+    "verified_not_system_scorable": 36,
+    "requires_human_rubric_evaluation": 70,
+    "answer_accuracy": {
+      "numerator_match": 68,
+      "denominator_scorable": 69,
+      "rate": 0.9855
+    },
+    "mismatches": 1,
+    "errors": 0,
+    "by_grade": {
+      "1": {
+        "n_scorable": 14,
+        "match": 14,
+        "excluded": 21
+      },
+      "2": {
+        "n_scorable": 11,
+        "match": 11,
+        "excluded": 19
+      },
+      "3": {
+        "n_scorable": 17,
+        "match": 17,
+        "excluded": 18
+      },
+      "4": {
+        "n_scorable": 14,
+        "match": 14,
+        "excluded": 19
+      },
+      "5": {
+        "n_scorable": 13,
+        "match": 12,
+        "excluded": 29
+      }
+    },
+    "by_question_type": {
+      "direct_numerical": {
+        "n_scorable": 26,
+        "match": 25,
+        "excluded": 16
+      },
+      "conceptual": {
+        "n_scorable": 2,
+        "match": 2,
+        "excluded": 30
+      },
+      "comparison": {
+        "n_scorable": 1,
+        "match": 1,
+        "excluded": 19
+      },
+      "real_life": {
+        "n_scorable": 2,
+        "match": 2,
+        "excluded": 12
+      },
+      "ambiguous": {
+        "n_scorable": 0,
+        "match": 0,
+        "excluded": 1
+      },
+      "word_problem": {
+        "n_scorable": 25,
+        "match": 25,
+        "excluded": 12
+      },
+      "paraphrased": {
+        "n_scorable": 3,
+        "match": 3,
+        "excluded": 0
+      },
+      "misconception": {
+        "n_scorable": 5,
+        "match": 5,
+        "excluded": 15
+      },
+      "multi_step": {
+        "n_scorable": 5,
+        "match": 5,
+        "excluded": 1
+      }
+    },
+    "rubric_queue_size": 70
+  },
+  "exclusions": [
+    {
+      "case_id": "cb-001",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-002",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-003",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-004",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-005",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-007",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-008",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-009",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-010",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-018",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-019",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-022",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-023",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-025",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-026",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-027",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-028",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-029",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-030",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-033",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-034",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-036",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-037",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-038",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-039",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-040",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-043",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-044",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-051",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-052",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-053",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-055",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-056",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-057",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-058",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-059",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-060",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-063",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-064",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-065",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-067",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-068",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-069",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-084",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-085",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-086",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-087",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-088",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-089",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-090",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-091",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-093",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-094",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-095",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-096",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-097",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-098",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-100",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-102",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-103",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-104",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-109",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-112",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-113",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-114",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-115",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-117",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-118",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-121",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-122",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-123",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-126",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-127",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-128",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-129",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-131",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-133",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-134",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-136",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-138",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-140",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-141",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-142",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-144",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-145",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-147",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-148",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-149",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-150",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-151",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-152",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-153",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-154",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-155",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-156",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-157",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-159",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-162",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-165",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-166",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-167",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-168",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-170",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-172",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-174",
+      "reason": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-175",
+      "reason": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    }
+  ],
+  "execution_errors": [],
+  "notes": "70 rubric/conceptual items are preserved in a separate rubric_queue artifact (see rubric_queue_path below), not scored and not discarded, pending a future rubric/human-evaluation pass.",
+  "per_example_results": [
+    {
+      "case_id": "cb-001",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-002",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-003",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-004",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-005",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-006",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "8",
+      "detail": "computed=8 expected=8"
+    },
+    {
+      "case_id": "cb-007",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-008",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-009",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-010",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-011",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "cb-012",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "cb-013",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "paraphrased",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "cb-014",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "5",
+      "detail": "computed=5 expected=5"
+    },
+    {
+      "case_id": "cb-015",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "misconception",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "5",
+      "detail": "computed=5 expected=5"
+    },
+    {
+      "case_id": "cb-016",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "14",
+      "detail": "computed=14 expected=14"
+    },
+    {
+      "case_id": "cb-017",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "16",
+      "detail": "computed=16 expected=16"
+    },
+    {
+      "case_id": "cb-018",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-019",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-020",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "20",
+      "detail": "computed=20 expected=20"
+    },
+    {
+      "case_id": "cb-021",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "10",
+      "detail": "computed=10 expected=10"
+    },
+    {
+      "case_id": "cb-022",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-023",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-024",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "9",
+      "detail": "computed=9 expected=9"
+    },
+    {
+      "case_id": "cb-025",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-026",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-027",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-028",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-029",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-030",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-031",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "cb-032",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "6",
+      "detail": "computed=6 expected=6"
+    },
+    {
+      "case_id": "cb-033",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-034",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-035",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "6",
+      "detail": "computed=6 expected=6"
+    },
+    {
+      "case_id": "cb-036",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-037",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-038",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-039",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-040",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-041",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "73",
+      "detail": "computed=73 expected=73"
+    },
+    {
+      "case_id": "cb-042",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "25",
+      "detail": "computed=25 expected=25"
+    },
+    {
+      "case_id": "cb-043",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-044",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-045",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "57",
+      "detail": "computed=57 expected=57"
+    },
+    {
+      "case_id": "cb-046",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "35",
+      "detail": "computed=35 expected=35"
+    },
+    {
+      "case_id": "cb-047",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "27",
+      "detail": "computed=27 expected=27"
+    },
+    {
+      "case_id": "cb-048",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "paraphrased",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "83",
+      "detail": "computed=83 expected=83"
+    },
+    {
+      "case_id": "cb-049",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "multi_step",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "17",
+      "detail": "computed=17 expected=17"
+    },
+    {
+      "case_id": "cb-050",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "misconception",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "25",
+      "detail": "computed=25 expected=25"
+    },
+    {
+      "case_id": "cb-051",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-052",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "real_life",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-053",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-054",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "4",
+      "detail": "computed=4 expected=4"
+    },
+    {
+      "case_id": "cb-055",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-056",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-057",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-058",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-059",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-060",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-061",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "7",
+      "detail": "computed=7 expected=7"
+    },
+    {
+      "case_id": "cb-062",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "10",
+      "detail": "computed=10 expected=10"
+    },
+    {
+      "case_id": "cb-063",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-064",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-065",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-066",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "427",
+      "detail": "computed=427 expected=427"
+    },
+    {
+      "case_id": "cb-067",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-068",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-069",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-070",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "500",
+      "detail": "computed=500 expected=500"
+    },
+    {
+      "case_id": "cb-071",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "634",
+      "detail": "computed=634 expected=634"
+    },
+    {
+      "case_id": "cb-072",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "841",
+      "detail": "computed=841 expected=841"
+    },
+    {
+      "case_id": "cb-073",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "263",
+      "detail": "computed=263 expected=263"
+    },
+    {
+      "case_id": "cb-074",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "misconception",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "263",
+      "detail": "computed=263 expected=263"
+    },
+    {
+      "case_id": "cb-075",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "multi_step",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "341",
+      "detail": "computed=341 expected=341"
+    },
+    {
+      "case_id": "cb-076",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "56",
+      "detail": "computed=56 expected=56"
+    },
+    {
+      "case_id": "cb-077",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "54",
+      "detail": "computed=54 expected=54"
+    },
+    {
+      "case_id": "cb-078",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "conceptual",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "12",
+      "detail": "computed=12 expected=12"
+    },
+    {
+      "case_id": "cb-079",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "real_life",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "70",
+      "detail": "computed=70 expected=70"
+    },
+    {
+      "case_id": "cb-080",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "misconception",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "0",
+      "detail": "computed=0 expected=0"
+    },
+    {
+      "case_id": "cb-081",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "6",
+      "detail": "computed=6 expected=6"
+    },
+    {
+      "case_id": "cb-082",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "6",
+      "detail": "computed=6 expected=6"
+    },
+    {
+      "case_id": "cb-083",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "conceptual",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "5",
+      "detail": "computed=5 expected=5"
+    },
+    {
+      "case_id": "cb-084",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-085",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-086",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-087",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-088",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-089",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-090",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-091",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-092",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "200",
+      "detail": "computed=200 expected=200"
+    },
+    {
+      "case_id": "cb-093",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-094",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-095",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-096",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-097",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-098",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-099",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "23",
+      "detail": "computed=23 expected=23"
+    },
+    {
+      "case_id": "cb-100",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-101",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "43251",
+      "detail": "computed=43251 expected=43251"
+    },
+    {
+      "case_id": "cb-102",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-103",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-104",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-105",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "55555",
+      "detail": "computed=55555 expected=55555"
+    },
+    {
+      "case_id": "cb-106",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "884",
+      "detail": "computed=884 expected=884"
+    },
+    {
+      "case_id": "cb-107",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "25",
+      "detail": "computed=25 expected=25"
+    },
+    {
+      "case_id": "cb-108",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "multi_step",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "180",
+      "detail": "computed=180 expected=180"
+    },
+    {
+      "case_id": "cb-109",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-110",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "misconception",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "12",
+      "detail": "computed=12 expected=12"
+    },
+    {
+      "case_id": "cb-111",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "paraphrased",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "5/8",
+      "detail": "computed=5/8 expected=5/8"
+    },
+    {
+      "case_id": "cb-112",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-113",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-114",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "direct_numerical",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-115",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-116",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "14",
+      "detail": "computed=14 expected=14"
+    },
+    {
+      "case_id": "cb-117",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-118",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-119",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "36",
+      "detail": "computed=36 expected=36"
+    },
+    {
+      "case_id": "cb-120",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "38",
+      "detail": "computed=38 expected=38"
+    },
+    {
+      "case_id": "cb-121",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-122",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-123",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-124",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "3000",
+      "detail": "computed=3000 expected=3000"
+    },
+    {
+      "case_id": "cb-125",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "250",
+      "detail": "computed=250 expected=250"
+    },
+    {
+      "case_id": "cb-126",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-127",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-128",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-129",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-130",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "30",
+      "detail": "computed=30 expected=30"
+    },
+    {
+      "case_id": "cb-131",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-132",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "10",
+      "detail": "computed=10 expected=10"
+    },
+    {
+      "case_id": "cb-133",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-134",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "direct_numerical",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-135",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "375000",
+      "detail": "computed=375000 expected=375000"
+    },
+    {
+      "case_id": "cb-136",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-137",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "multi_step",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "135000",
+      "detail": "computed=135000 expected=135000"
+    },
+    {
+      "case_id": "cb-138",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-139",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "real_life",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "1500000",
+      "detail": "computed=1500000 expected=1500000"
+    },
+    {
+      "case_id": "cb-140",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "direct_numerical",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-141",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "comparison",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-142",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-143",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "55",
+      "detail": "computed=55 expected=55"
+    },
+    {
+      "case_id": "cb-144",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "direct_numerical",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-145",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-146",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "90",
+      "detail": "computed=90 expected=90"
+    },
+    {
+      "case_id": "cb-147",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-148",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-149",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-150",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-151",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "direct_numerical",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-152",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-153",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-154",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-155",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-156",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-157",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "comparison",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-158",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "mismatch",
+      "computed": null,
+      "detail": "one side is None: computed=None expected='0.35'"
+    },
+    {
+      "case_id": "cb-159",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-160",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "19/20",
+      "detail": "computed=19/20 expected=19/20"
+    },
+    {
+      "case_id": "cb-161",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "multi_step",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "17/10",
+      "detail": "computed=17/10 expected=17/10"
+    },
+    {
+      "case_id": "cb-162",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-163",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "direct_numerical",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "40",
+      "detail": "computed=40 expected=40"
+    },
+    {
+      "case_id": "cb-164",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "24",
+      "detail": "computed=24 expected=24"
+    },
+    {
+      "case_id": "cb-165",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-166",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "real_life",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-167",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "multi_step",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    },
+    {
+      "case_id": "cb-168",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-169",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "70",
+      "detail": "computed=70 expected=70"
+    },
+    {
+      "case_id": "cb-170",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-171",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "word_problem",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "25",
+      "detail": "computed=25 expected=25"
+    },
+    {
+      "case_id": "cb-172",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "real_life",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-173",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "comparison",
+      "classification": "system_scorable",
+      "outcome": "match",
+      "computed": "6",
+      "detail": "computed=6 expected=6"
+    },
+    {
+      "case_id": "cb-174",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "misconception",
+      "classification": "requires_human_rubric_evaluation",
+      "outcome": "excluded",
+      "detail": "verifiable=false; requires human/rubric evaluation, not discarded"
+    },
+    {
+      "case_id": "cb-175",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "word_problem",
+      "classification": "verified_not_system_scorable",
+      "outcome": "excluded",
+      "detail": "verifiable=true but trusted_expression is null -- outside the production verifier's current arithmetic grammar (e.g. HCF/LCM)"
+    }
+  ]
+}

@@ -1,0 +1,3168 @@
+{
+  "evaluator_name": "opener_eval",
+  "run_timestamp_utc": "20261023T180540Z",
+  "git": {
+    "commit": "eec1643166c7fd9dcd6a34498e494fd89abc4902",
+    "branch": "evaluation",
+    "dirty": false
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "D:\\LLM-Based-Math-Tutor\\eval\\datasets"
+    }
+  ],
+  "config": {
+    "model": "openai/gpt-oss-20b"
+  },
+  "aggregate_metrics": {
+    "curriculum": {
+      "clarify_caught": 0,
+      "clarify_n": 0,
+      "new_wrongly_clarified": 2,
+      "new_n": 225
+    },
+    "held-out ambiguous/everyday": {
+      "clarify_caught": 0,
+      "clarify_n": 0,
+      "new_wrongly_clarified": 0,
+      "new_n": 9
+    },
+    "held-out child-style openers": {
+      "clarify_caught": 15,
+      "clarify_n": 15,
+      "new_wrongly_clarified": 0,
+      "new_n": 15
+    },
+    "multi_turn openers": {
+      "clarify_caught": 23,
+      "clarify_n": 25,
+      "new_wrongly_clarified": 1,
+      "new_n": 16
+    },
+    "out_of_scope probes": {
+      "clarify_caught": 0,
+      "clarify_n": 0,
+      "new_wrongly_clarified": 0,
+      "new_n": 6
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Live validation of conversation_resolver.classify_opener.",
+  "per_example_results": [
+    {
+      "set": "curriculum",
+      "id": "cb-001",
+      "grade": 1,
+      "text": "How many corners (sides) does a triangle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-001",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-002",
+      "grade": 1,
+      "text": "Why does a ball roll easily in any direction?",
+      "expected": "NEW",
+      "job": "curriculum|cb-002",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-003",
+      "grade": 1,
+      "text": "Can two circles be different sizes but both still be circles? Explain.",
+      "expected": "NEW",
+      "job": "curriculum|cb-003",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-004",
+      "grade": 1,
+      "text": "Name one object at home shaped like a rectangle.",
+      "expected": "NEW",
+      "job": "curriculum|cb-004",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-005",
+      "grade": 1,
+      "text": "It looks kind of round but has four straight sides.\n\nWhat shape is the student describing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-005",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-009",
+      "grade": 1,
+      "text": "Why do we say there are 'zero' apples when a basket is empty, instead of saying there is no number at all?",
+      "expected": "NEW",
+      "job": "curriculum|cb-009",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-022",
+      "grade": 1,
+      "text": "What is the rule in this pattern: red, blue, red, blue, red, __?",
+      "expected": "NEW",
+      "job": "curriculum|cb-022",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-026",
+      "grade": 1,
+      "text": "Which is longer: your arm or your little finger?",
+      "expected": "NEW",
+      "job": "curriculum|cb-026",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-027",
+      "grade": 1,
+      "text": "Why might you and a friend measure the same table with handspans and get different numbers?",
+      "expected": "NEW",
+      "job": "curriculum|cb-027",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-028",
+      "grade": 1,
+      "text": "Name something you would describe as 'heavier' or 'lighter' rather than count with a number.",
+      "expected": "NEW",
+      "job": "curriculum|cb-028",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-034",
+      "grade": 1,
+      "text": "Why do we count carefully (e.g. one by one) before answering 'how many toys are there' in a picture?",
+      "expected": "NEW",
+      "job": "curriculum|cb-034",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-176",
+      "grade": 1,
+      "text": "How many corners does a triangle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-176",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-177",
+      "grade": 1,
+      "text": "How many straight sides does a square have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-177",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-178",
+      "grade": 1,
+      "text": "How many corners does a circle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-178",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-179",
+      "grade": 1,
+      "text": "Why can a ball roll but a box cannot roll?",
+      "expected": "NEW",
+      "job": "curriculum|cb-179",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-180",
+      "grade": 1,
+      "text": "Is a square also a kind of rectangle? Why or why not?",
+      "expected": "NEW",
+      "job": "curriculum|cb-180",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-181",
+      "grade": 1,
+      "text": "Name one round object you can find in your kitchen.",
+      "expected": "NEW",
+      "job": "curriculum|cb-181",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-182",
+      "grade": 1,
+      "text": "Name one object at home shaped like a triangle.",
+      "expected": "NEW",
+      "job": "curriculum|cb-182",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-184",
+      "grade": 1,
+      "text": "I think a bigger triangle has more corners than a smaller triangle.\n\nDoes a bigger triangle have more corners than a smaller one?",
+      "expected": "NEW",
+      "job": "curriculum|cb-184",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-185",
+      "grade": 1,
+      "text": "How many flat round faces does a ball (sphere) have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-185",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-186",
+      "grade": 1,
+      "text": "Can two triangles be different sizes but both still be called triangles? Explain.",
+      "expected": "NEW",
+      "job": "curriculum|cb-186",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-187",
+      "grade": 1,
+      "text": "How many corners does a rectangle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-187",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-188",
+      "grade": 1,
+      "text": "If you look at a clock face, what shape is its outer edge usually?",
+      "expected": "NEW",
+      "job": "curriculum|cb-188",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-189",
+      "grade": 1,
+      "text": "Why does a box stack neatly on top of another box, but a ball does not?",
+      "expected": "NEW",
+      "job": "curriculum|cb-189",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-191",
+      "grade": 1,
+      "text": "How many corners does a rectangle have, if you count each corner once?",
+      "expected": "NEW",
+      "job": "curriculum|cb-191",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-192",
+      "grade": 1,
+      "text": "Name one object at home shaped like a rectangle.",
+      "expected": "NEW",
+      "job": "curriculum|cb-192",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-193",
+      "grade": 1,
+      "text": "Is a circle the same shape as an oval? Why or why not?",
+      "expected": "NEW",
+      "job": "curriculum|cb-193",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-194",
+      "grade": 1,
+      "text": "It has no straight sides and no corners.\n\nWhat shape is the student describing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-194",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-196",
+      "grade": 1,
+      "text": "Why does a cone have one flat round face but still be able to stand upright?",
+      "expected": "NEW",
+      "job": "curriculum|cb-196",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-197",
+      "grade": 1,
+      "text": "Name one object at home shaped like a sphere.",
+      "expected": "NEW",
+      "job": "curriculum|cb-197",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-198",
+      "grade": 1,
+      "text": "Riya drew a shape with three straight lines meeting at three points. Without seeing the drawing, what shape did she most likely draw?",
+      "expected": "NEW",
+      "job": "curriculum|cb-198",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-200",
+      "grade": 1,
+      "text": "Look around the room you are in right now. Is there anything near you shaped like a circle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-200",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-201",
+      "grade": 1,
+      "text": "A square and a diamond (rotated square) -- do they have the same number of sides and corners?",
+      "expected": "NEW",
+      "job": "curriculum|cb-201",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-202",
+      "grade": 1,
+      "text": "I drew a triangle really big, so I think it must have more corners than my friend's tiny triangle.\n\nDoes drawing a triangle bigger give it more corners?",
+      "expected": "NEW",
+      "job": "curriculum|cb-202",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-204",
+      "grade": 1,
+      "text": "If you cut a square piece of paper exactly along one diagonal, what two shapes do you get?",
+      "expected": "NEW",
+      "job": "curriculum|cb-204",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-226",
+      "grade": 1,
+      "text": "Kabir is holding up some fingers on one hand -- all of them except his thumb. How many fingers is he holding up?",
+      "expected": "NEW",
+      "job": "curriculum|cb-226",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-279",
+      "grade": 1,
+      "text": "In the pattern circle, square, circle, square, circle, what shape comes next?",
+      "expected": "NEW",
+      "job": "curriculum|cb-279",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-282",
+      "grade": 1,
+      "text": "In the pattern red, blue, blue, red, blue, blue, what comes next?",
+      "expected": "NEW",
+      "job": "curriculum|cb-282",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-284",
+      "grade": 1,
+      "text": "I think a number pattern always has to go up, never down.\n\nCan a number pattern count down instead of up?",
+      "expected": "NEW",
+      "job": "curriculum|cb-284",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-287",
+      "grade": 1,
+      "text": "In the pattern star, star, moon, star, star, moon, what comes next?",
+      "expected": "NEW",
+      "job": "curriculum|cb-287",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-289",
+      "grade": 1,
+      "text": "Name one everyday pattern you can see on a piece of clothing, like stripes or dots.",
+      "expected": "NEW",
+      "job": "curriculum|cb-289",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-292",
+      "grade": 1,
+      "text": "Sara claps, stomps, claps, stomps, claps. If she keeps going the same way, what does she do next?",
+      "expected": "NEW",
+      "job": "curriculum|cb-292",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-294",
+      "grade": 1,
+      "text": "I think once a pattern starts going up, it can never switch to going down.\n\nCan a pattern go up for a while and then go down?",
+      "expected": "NEW",
+      "job": "curriculum|cb-294",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-295",
+      "grade": 1,
+      "text": "A row of streetlights goes on, off, on, off, on. If the pattern keeps going, is the next light on or off?",
+      "expected": "NEW",
+      "job": "curriculum|cb-295",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-297",
+      "grade": 1,
+      "text": "Which is longer: a pencil or a school bus?",
+      "expected": "NEW",
+      "job": "curriculum|cb-297",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-298",
+      "grade": 1,
+      "text": "Which is heavier: a feather or a stone?",
+      "expected": "NEW",
+      "job": "curriculum|cb-298",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-299",
+      "grade": 1,
+      "text": "Which holds more water: a small cup or a bucket?",
+      "expected": "NEW",
+      "job": "curriculum|cb-299",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-300",
+      "grade": 1,
+      "text": "If you measure a table's length using your hand-spans, why might you and your friend get different numbers of hand-spans for the same table?",
+      "expected": "NEW",
+      "job": "curriculum|cb-300",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-301",
+      "grade": 1,
+      "text": "Name something in your classroom that is shorter than your pencil.",
+      "expected": "NEW",
+      "job": "curriculum|cb-301",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-302",
+      "grade": 1,
+      "text": "Which is taller: a water bottle or a school building?",
+      "expected": "NEW",
+      "job": "curriculum|cb-302",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-303",
+      "grade": 1,
+      "text": "This box feels heavy.\n\nIs the box definitely heavier than a smaller box nearby?",
+      "expected": "NEW",
+      "job": "curriculum|cb-303",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-304",
+      "grade": 1,
+      "text": "Which is shorter: a crayon or a cricket bat?",
+      "expected": "NEW",
+      "job": "curriculum|cb-304",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-305",
+      "grade": 1,
+      "text": "Which holds less water: a bathtub or a teacup?",
+      "expected": "NEW",
+      "job": "curriculum|cb-305",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-306",
+      "grade": 1,
+      "text": "Name something at home that is heavier than a spoon.",
+      "expected": "NEW",
+      "job": "curriculum|cb-306",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-307",
+      "grade": 1,
+      "text": "Why can't you use a bucket of water to measure how long a table is?",
+      "expected": "NEW",
+      "job": "curriculum|cb-307",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-308",
+      "grade": 1,
+      "text": "Which is longer: your arm or your finger?",
+      "expected": "NEW",
+      "job": "curriculum|cb-308",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-309",
+      "grade": 1,
+      "text": "Someone says a rope is 'about as long as the room'. How long is the rope exactly?",
+      "expected": "NEW",
+      "job": "curriculum|cb-309",
+      "got": "CLARIFY",
+      "ok": false
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-310",
+      "grade": 1,
+      "text": "Between a school bag full of books and an empty school bag, which one would be harder to lift?",
+      "expected": "NEW",
+      "job": "curriculum|cb-310",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-311",
+      "grade": 1,
+      "text": "Two jugs look exactly the same size from the outside, but one is tall and thin while the other is short and wide. Could they still hold the same amount of water?",
+      "expected": "NEW",
+      "job": "curriculum|cb-311",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-324",
+      "grade": 1,
+      "text": "Your piggy bank rattles when you shake it. Does that tell you exactly how much money is inside?",
+      "expected": "NEW",
+      "job": "curriculum|cb-324",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-327",
+      "grade": 1,
+      "text": "If you trace around the bottom of a cylinder, like a tin can, onto paper, what shape do you get?",
+      "expected": "NEW",
+      "job": "curriculum|cb-327",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-329",
+      "grade": 1,
+      "text": "Between a cone and a cylinder, which one comes to a pointed tip?",
+      "expected": "NEW",
+      "job": "curriculum|cb-329",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-330",
+      "grade": 1,
+      "text": "I think a square has more corners than a rectangle because squares look neater.\n\nDoes a square have more corners than a rectangle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-330",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-331",
+      "grade": 1,
+      "text": "It has corners, but I didn't count how many.\n\nHow many sides might the shape the student is thinking of have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-331",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-346",
+      "grade": 1,
+      "text": "In the pattern leaf, flower, leaf, flower, leaf, what comes next?",
+      "expected": "NEW",
+      "job": "curriculum|cb-346",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-348",
+      "grade": 1,
+      "text": "I think a pattern must always use numbers, never shapes or colours.\n\nCan a pattern be made using shapes or colours instead of numbers?",
+      "expected": "NEW",
+      "job": "curriculum|cb-348",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-349",
+      "grade": 1,
+      "text": "Which is lighter: a single leaf or a brick?",
+      "expected": "NEW",
+      "job": "curriculum|cb-349",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-350",
+      "grade": 1,
+      "text": "On the kitchen counter there is a watermelon, a lemon, and a recipe book kept nearby for reference. Of the watermelon and the lemon, which would be heavier to lift?",
+      "expected": "NEW",
+      "job": "curriculum|cb-350",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-351",
+      "grade": 1,
+      "text": "Two ropes look about the same length when loosely coiled up on the floor. How could you be sure which one is actually longer?",
+      "expected": "NEW",
+      "job": "curriculum|cb-351",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-352",
+      "grade": 1,
+      "text": "This bag feels about the same as that one.\n\nAre the two bags definitely the same weight?",
+      "expected": "NEW",
+      "job": "curriculum|cb-352",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-036",
+      "grade": 2,
+      "text": "How many flat faces does a cube have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-036",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-037",
+      "grade": 2,
+      "text": "What is the difference between a straight line and a curved line? Give one example of each.",
+      "expected": "NEW",
+      "job": "curriculum|cb-037",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-038",
+      "grade": 2,
+      "text": "Name one object shaped like a cylinder.",
+      "expected": "NEW",
+      "job": "curriculum|cb-038",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-040",
+      "grade": 2,
+      "text": "I think a ball is a circle because it looks round from every side.\n\nIs the student's identification of a ball as a circle correct?",
+      "expected": "NEW",
+      "job": "curriculum|cb-040",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-051",
+      "grade": 2,
+      "text": "Which holds more water: a bucket or a cup?",
+      "expected": "NEW",
+      "job": "curriculum|cb-051",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-052",
+      "grade": 2,
+      "text": "Would you measure a bag of rice in litres or in kilograms?",
+      "expected": "NEW",
+      "job": "curriculum|cb-052",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-053",
+      "grade": 2,
+      "text": "Why might two people measuring the same wall with their own footsteps get different answers?",
+      "expected": "NEW",
+      "job": "curriculum|cb-053",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-055",
+      "grade": 2,
+      "text": "Is a heavier object always bigger in size than a lighter one? Give an example to support your answer.",
+      "expected": "NEW",
+      "job": "curriculum|cb-055",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-056",
+      "grade": 2,
+      "text": "How many days are there in one week?",
+      "expected": "NEW",
+      "job": "curriculum|cb-056",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-057",
+      "grade": 2,
+      "text": "What day comes right after Wednesday?",
+      "expected": "NEW",
+      "job": "curriculum|cb-057",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-058",
+      "grade": 2,
+      "text": "Name one season you would expect heavy rain in, in most of India.",
+      "expected": "NEW",
+      "job": "curriculum|cb-058",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-061",
+      "grade": 2,
+      "text": "A tally chart shows: apples |||| , bananas |||. How many apples and bananas are there in total?",
+      "expected": "NEW",
+      "job": "curriculum|cb-061",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-063",
+      "grade": 2,
+      "text": "Why do we use tally marks instead of writing the running number directly while counting a long list of items?",
+      "expected": "NEW",
+      "job": "curriculum|cb-063",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-064",
+      "grade": 2,
+      "text": "In a block diagram, if the bar for 'cats' is taller than the bar for 'dogs', what does that tell you?",
+      "expected": "NEW",
+      "job": "curriculum|cb-064",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-358",
+      "grade": 2,
+      "text": "How many faces does a cube have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-358",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-359",
+      "grade": 2,
+      "text": "How many corners does a cube have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-359",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-360",
+      "grade": 2,
+      "text": "How many sides does a pentagon have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-360",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-361",
+      "grade": 2,
+      "text": "How many sides does a hexagon have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-361",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-362",
+      "grade": 2,
+      "text": "What is one way a cube and a square are alike, and one way they are different?",
+      "expected": "NEW",
+      "job": "curriculum|cb-362",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-363",
+      "grade": 2,
+      "text": "Name one object at home shaped like a cube.",
+      "expected": "NEW",
+      "job": "curriculum|cb-363",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-364",
+      "grade": 2,
+      "text": "Name one object at home shaped like a cylinder.",
+      "expected": "NEW",
+      "job": "curriculum|cb-364",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-367",
+      "grade": 2,
+      "text": "How many edges does a cube have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-367",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-368",
+      "grade": 2,
+      "text": "Name one object at home shaped like a sphere.",
+      "expected": "NEW",
+      "job": "curriculum|cb-368",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-369",
+      "grade": 2,
+      "text": "How many sides does an octagon have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-369",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-370",
+      "grade": 2,
+      "text": "What is one way a cone and a cylinder are alike, and one way they are different?",
+      "expected": "NEW",
+      "job": "curriculum|cb-370",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-374",
+      "grade": 2,
+      "text": "Why does a soccer ball look like it's made of many flat patches, even though it's actually round overall?",
+      "expected": "NEW",
+      "job": "curriculum|cb-374",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-375",
+      "grade": 2,
+      "text": "A birthday party has cone-shaped hats and cylinder-shaped party horns. Which of these two shapes has exactly one flat face?",
+      "expected": "NEW",
+      "job": "curriculum|cb-375",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-376",
+      "grade": 2,
+      "text": "I think a pentagon and a hexagon are the same shape, just drawn differently.\n\nAre a pentagon and a hexagon the same shape?",
+      "expected": "NEW",
+      "job": "curriculum|cb-376",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-398",
+      "grade": 2,
+      "text": "I think if you add two odd numbers, the answer always stays odd.\n\nIs the sum of two odd numbers always odd?",
+      "expected": "NEW",
+      "job": "curriculum|cb-398",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-419",
+      "grade": 2,
+      "text": "Which unit would you use to measure the length of your classroom: centimetres or metres?",
+      "expected": "NEW",
+      "job": "curriculum|cb-419",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-420",
+      "grade": 2,
+      "text": "Which unit would you use to weigh an apple: grams or kilograms?",
+      "expected": "NEW",
+      "job": "curriculum|cb-420",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-425",
+      "grade": 2,
+      "text": "Which unit would you use to measure the distance between two cities: metres or kilometres?",
+      "expected": "NEW",
+      "job": "curriculum|cb-425",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-428",
+      "grade": 2,
+      "text": "If your school bag feels lighter today than yesterday, what's a sensible reason that might be true?",
+      "expected": "NEW",
+      "job": "curriculum|cb-428",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-431",
+      "grade": 2,
+      "text": "How many days are there in a week?",
+      "expected": "NEW",
+      "job": "curriculum|cb-431",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-432",
+      "grade": 2,
+      "text": "How many months are there in a year?",
+      "expected": "NEW",
+      "job": "curriculum|cb-432",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-433",
+      "grade": 2,
+      "text": "If today is Tuesday, what day will it be tomorrow?",
+      "expected": "NEW",
+      "job": "curriculum|cb-433",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-436",
+      "grade": 2,
+      "text": "If today is Friday, what day was it yesterday?",
+      "expected": "NEW",
+      "job": "curriculum|cb-436",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-442",
+      "grade": 2,
+      "text": "Which month comes right after June?",
+      "expected": "NEW",
+      "job": "curriculum|cb-442",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-444",
+      "grade": 2,
+      "text": "If your birthday is in December and today is in March, has your birthday already happened this year?",
+      "expected": "NEW",
+      "job": "curriculum|cb-444",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-450",
+      "grade": 2,
+      "text": "A bar graph shows that 'cricket' has the tallest bar among the sports children like. What does that tell you?",
+      "expected": "NEW",
+      "job": "curriculum|cb-450",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-452",
+      "grade": 2,
+      "text": "A tally chart shows some marks for 'dogs' and some for 'cats', and dogs has more marks. Which pet did more children choose?",
+      "expected": "NEW",
+      "job": "curriculum|cb-452",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-455",
+      "grade": 2,
+      "text": "Why is a bar graph often easier to read quickly than a long list of numbers?",
+      "expected": "NEW",
+      "job": "curriculum|cb-455",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-458",
+      "grade": 2,
+      "text": "I think the tallest bar in a bar graph always means that category has the biggest NUMBER written next to it, even if the bar itself looks shorter.\n\nIf one bar in a graph looks taller than another, does that always mean its value is bigger?",
+      "expected": "NEW",
+      "job": "curriculum|cb-458",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-459",
+      "grade": 2,
+      "text": "A tally chart at the school canteen shows which lunch was most popular today using little marks. Why would the canteen staff want to look at this chart?",
+      "expected": "NEW",
+      "job": "curriculum|cb-459",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-460",
+      "grade": 2,
+      "text": "How many faces does a cuboid have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-460",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-462",
+      "grade": 2,
+      "text": "What is one way a cylinder and a cone are different, in terms of their flat faces?",
+      "expected": "NEW",
+      "job": "curriculum|cb-462",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-463",
+      "grade": 2,
+      "text": "I think a cube and a cuboid are exactly the same shape, just with two different names.\n\nAre a cube and a cuboid always exactly the same shape?",
+      "expected": "NEW",
+      "job": "curriculum|cb-463",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-476",
+      "grade": 2,
+      "text": "Why does a tiny bottle of perfume usually get measured in millilitres rather than litres?",
+      "expected": "NEW",
+      "job": "curriculum|cb-476",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-482",
+      "grade": 2,
+      "text": "Someone says a meeting will happen 'sometime next week'. On exactly which day will it happen?",
+      "expected": "NEW",
+      "job": "curriculum|cb-482",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-485",
+      "grade": 2,
+      "text": "If a bar graph's tallest bar represents 'summer' as the class's favourite season, what does the SHORTEST bar tell you?",
+      "expected": "NEW",
+      "job": "curriculum|cb-485",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-487",
+      "grade": 2,
+      "text": "I think a pattern in a list of numbers can only ever go up, never repeat the same number twice in a row.\n\nCan a number pattern repeat the same number more than once in a row?",
+      "expected": "NEW",
+      "job": "curriculum|cb-487",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-086",
+      "grade": 3,
+      "text": "What does it mean for a shape to have a 'line of symmetry'?",
+      "expected": "NEW",
+      "job": "curriculum|cb-086",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-087",
+      "grade": 3,
+      "text": "Does a square have more lines of symmetry than a non-square rectangle? Explain.",
+      "expected": "NEW",
+      "job": "curriculum|cb-087",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-088",
+      "grade": 3,
+      "text": "Name one everyday object or letter of the alphabet that has a line of symmetry.",
+      "expected": "NEW",
+      "job": "curriculum|cb-088",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-090",
+      "grade": 3,
+      "text": "I think every shape has at least one line of symmetry.\n\nIs it true that every shape has at least one line of symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-090",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-094",
+      "grade": 3,
+      "text": "Why do we use standard units like centimetres and kilograms instead of handspans and footsteps as we get older?",
+      "expected": "NEW",
+      "job": "curriculum|cb-094",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-098",
+      "grade": 3,
+      "text": "How many paise make one rupee?",
+      "expected": "NEW",
+      "job": "curriculum|cb-098",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-545",
+      "grade": 3,
+      "text": "How is division related to repeated subtraction?",
+      "expected": "NEW",
+      "job": "curriculum|cb-545",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-555",
+      "grade": 3,
+      "text": "How many square faces does a cube's net unfold into?",
+      "expected": "NEW",
+      "job": "curriculum|cb-555",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-556",
+      "grade": 3,
+      "text": "Does the letter 'A' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-556",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-557",
+      "grade": 3,
+      "text": "Does the letter 'F' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-557",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-558",
+      "grade": 3,
+      "text": "How many lines of symmetry does a rectangle (that is not a square) have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-558",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-560",
+      "grade": 3,
+      "text": "Name one object at home shaped like a cone.",
+      "expected": "NEW",
+      "job": "curriculum|cb-560",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-561",
+      "grade": 3,
+      "text": "Does a circle have a line of symmetry? If so, how many?",
+      "expected": "NEW",
+      "job": "curriculum|cb-561",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-562",
+      "grade": 3,
+      "text": "Does the letter 'M' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-562",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-563",
+      "grade": 3,
+      "text": "How many lines of symmetry does an equilateral triangle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-563",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-564",
+      "grade": 3,
+      "text": "Name one object at home shaped like a cuboid.",
+      "expected": "NEW",
+      "job": "curriculum|cb-564",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-565",
+      "grade": 3,
+      "text": "How many rectangular faces does a cuboid's net unfold into?",
+      "expected": "NEW",
+      "job": "curriculum|cb-565",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-567",
+      "grade": 3,
+      "text": "A greeting card folds exactly in half and the two halves match perfectly. What property does the card's flat shape have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-567",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-569",
+      "grade": 3,
+      "text": "A butterfly's two wings look like mirror images of each other across its body. What property does the butterfly's shape have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-569",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-573",
+      "grade": 3,
+      "text": "Why would you measure the weight of an elephant in kilograms rather than grams?",
+      "expected": "NEW",
+      "job": "curriculum|cb-573",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-580",
+      "grade": 3,
+      "text": "A tailor measures cloth with a metre-stick, but a jeweller measures gold with a tiny balance using grams. Why don't they use the same tool?",
+      "expected": "NEW",
+      "job": "curriculum|cb-580",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-600",
+      "grade": 3,
+      "text": "I think a number with more digits always uses bigger individual digits than a number with fewer digits.\n\nDoes a number with more digits always use bigger individual digits than a number with fewer digits?",
+      "expected": "NEW",
+      "job": "curriculum|cb-600",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-620",
+      "grade": 3,
+      "text": "How many lines of symmetry does a square have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-620",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-621",
+      "grade": 3,
+      "text": "Does the letter 'T' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-621",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-622",
+      "grade": 3,
+      "text": "A kite-maker folds a kite's paper exactly in half so both sides match perfectly, and he also happens to be using blue thread for the tail today. What property does the folded paper shape have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-622",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-624",
+      "grade": 3,
+      "text": "Which has more lines of symmetry: a rectangle that is not a square, or an equilateral triangle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-624",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-625",
+      "grade": 3,
+      "text": "A paper snowflake is cut while the paper is folded into many layers, so the finished shape repeats evenly all the way around. What property does the snowflake likely have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-625",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-629",
+      "grade": 3,
+      "text": "Why might a scientist measuring a tiny insect's length use millimetres instead of centimetres?",
+      "expected": "NEW",
+      "job": "curriculum|cb-629",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-631",
+      "grade": 3,
+      "text": "I think a kilogram and a litre measure the same kind of thing, just under different names.\n\nDo a kilogram and a litre measure the same kind of thing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-631",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-636",
+      "grade": 3,
+      "text": "Why is it useful to know both the hour hand's and the minute hand's positions to tell time exactly?",
+      "expected": "NEW",
+      "job": "curriculum|cb-636",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-114",
+      "grade": 4,
+      "text": "What do we call the distance from the center of a circle to any point on its edge?",
+      "expected": "NEW",
+      "job": "curriculum|cb-114",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-115",
+      "grade": 4,
+      "text": "How is the diameter of a circle related to its radius?",
+      "expected": "NEW",
+      "job": "curriculum|cb-115",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-117",
+      "grade": 4,
+      "text": "Name one tool used to draw a circle accurately.",
+      "expected": "NEW",
+      "job": "curriculum|cb-117",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-118",
+      "grade": 4,
+      "text": "What is special about every point on the edge of a circle, with respect to the center?",
+      "expected": "NEW",
+      "job": "curriculum|cb-118",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-121",
+      "grade": 4,
+      "text": "What is the difference between perimeter and area, in your own words?",
+      "expected": "NEW",
+      "job": "curriculum|cb-121",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-660",
+      "grade": 4,
+      "text": "I think multiplying always makes a number bigger.\n\nDoes multiplying a number always make it bigger?",
+      "expected": "NEW",
+      "job": "curriculum|cb-660",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-673",
+      "grade": 4,
+      "text": "What does the bottom number (denominator) of a fraction tell you?",
+      "expected": "NEW",
+      "job": "curriculum|cb-673",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-682",
+      "grade": 4,
+      "text": "What is the centre of a circle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-682",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-683",
+      "grade": 4,
+      "text": "What is the radius of a circle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-683",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-685",
+      "grade": 4,
+      "text": "What is the difference between a radius and a diameter?",
+      "expected": "NEW",
+      "job": "curriculum|cb-685",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-686",
+      "grade": 4,
+      "text": "What do we call a straight line that touches a circle's edge at exactly one point?",
+      "expected": "NEW",
+      "job": "curriculum|cb-686",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-687",
+      "grade": 4,
+      "text": "Are two lines that never meet, no matter how far they are extended, called parallel or perpendicular?",
+      "expected": "NEW",
+      "job": "curriculum|cb-687",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-688",
+      "grade": 4,
+      "text": "Are two lines that cross each other to form a perfect right angle called parallel or perpendicular?",
+      "expected": "NEW",
+      "job": "curriculum|cb-688",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-690",
+      "grade": 4,
+      "text": "Name one everyday object that is circular in shape.",
+      "expected": "NEW",
+      "job": "curriculum|cb-690",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-691",
+      "grade": 4,
+      "text": "This line touches the circle but only at one spot.\n\nWhat is the name for the line the student is describing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-691",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-693",
+      "grade": 4,
+      "text": "Railway tracks run side by side and never meet, even far into the distance. What are these two lines called?",
+      "expected": "NEW",
+      "job": "curriculum|cb-693",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-694",
+      "grade": 4,
+      "text": "I think the diameter and the radius of a circle are the same thing, just two different names.\n\nAre the diameter and radius of a circle the same thing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-694",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-699",
+      "grade": 4,
+      "text": "What is the difference between perimeter and area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-699",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-701",
+      "grade": 4,
+      "text": "I think a bigger perimeter always means a bigger area.\n\nDoes a shape with a bigger perimeter always have a bigger area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-701",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-705",
+      "grade": 4,
+      "text": "A farmer wants to put a fence all the way around a rectangular field. Would the farmer need to know the field's perimeter or its area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-705",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-722",
+      "grade": 4,
+      "text": "What does the height of a bar in a bar graph represent?",
+      "expected": "NEW",
+      "job": "curriculum|cb-722",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-724",
+      "grade": 4,
+      "text": "A bar chart shows that 'blue' has a much taller bar than every other colour. What does that suggest?",
+      "expected": "NEW",
+      "job": "curriculum|cb-724",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-728",
+      "grade": 4,
+      "text": "If a weather chart shows rainfall bars that are all roughly the same height across a whole month, what does that suggest about the rain that month?",
+      "expected": "NEW",
+      "job": "curriculum|cb-728",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-741",
+      "grade": 4,
+      "text": "I think dividing a bigger number always takes more steps than dividing a smaller one, no matter what the actual numbers are.\n\nDoes dividing a bigger number always take more steps than dividing a smaller one?",
+      "expected": "NEW",
+      "job": "curriculum|cb-741",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-756",
+      "grade": 4,
+      "text": "Why do all the spokes of a bicycle wheel have the same length?",
+      "expected": "NEW",
+      "job": "curriculum|cb-756",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-757",
+      "grade": 4,
+      "text": "I think a tangent line crosses through the inside of a circle on its way past.\n\nDoes a tangent line cross through the inside of a circle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-757",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-758",
+      "grade": 4,
+      "text": "Are two lines that meet to form a perfect right angle called parallel or perpendicular?",
+      "expected": "NEW",
+      "job": "curriculum|cb-758",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-761",
+      "grade": 4,
+      "text": "It passes through the centre and touches the circle at two opposite points.\n\nWhat is the name for the line segment the student is describing?",
+      "expected": "NEW",
+      "job": "curriculum|cb-761",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-764",
+      "grade": 4,
+      "text": "If you double both the length and the width of a rectangle, what happens to its area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-764",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-765",
+      "grade": 4,
+      "text": "I think two rectangles with the same perimeter must also have the same area.\n\nMust two rectangles with the same perimeter always have the same area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-765",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-779",
+      "grade": 4,
+      "text": "Why might two different bar graphs of the exact same data look very different if they use different scales on the vertical axis?",
+      "expected": "NEW",
+      "job": "curriculum|cb-779",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-782",
+      "grade": 4,
+      "text": "A shop owner tracks daily sales on a line graph and notices the line has been climbing steadily for the past week. What does this trend suggest?",
+      "expected": "NEW",
+      "job": "curriculum|cb-782",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-138",
+      "grade": 5,
+      "text": "What is the difference between a 'lakh' and a 'crore' in the Indian numbering system?",
+      "expected": "NEW",
+      "job": "curriculum|cb-138",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-140",
+      "grade": 5,
+      "text": "How many degrees are there in a right angle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-140",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-142",
+      "grade": 5,
+      "text": "Name one everyday object that shows a right angle.",
+      "expected": "NEW",
+      "job": "curriculum|cb-142",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-144",
+      "grade": 5,
+      "text": "What tool is used to measure an angle accurately, and what unit does it use?",
+      "expected": "NEW",
+      "job": "curriculum|cb-144",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-145",
+      "grade": 5,
+      "text": "I think an angle drawn with longer lines always has a bigger degree measure than one drawn with shorter lines.\n\nDoes the length of the lines drawn for an angle affect its degree measure?",
+      "expected": "NEW",
+      "job": "curriculum|cb-145",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-146",
+      "grade": 5,
+      "text": "What does a 'quarter turn' mean, in degrees?",
+      "expected": "NEW",
+      "job": "curriculum|cb-146",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-150",
+      "grade": 5,
+      "text": "I think every shape that has a line of symmetry also has rotational symmetry.\n\nDoes having a line of symmetry guarantee a shape also has rotational symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-150",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-153",
+      "grade": 5,
+      "text": "What does it mean for a number to be 'prime'?",
+      "expected": "NEW",
+      "job": "curriculum|cb-153",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-156",
+      "grade": 5,
+      "text": "I think the factors of a number are always smaller than the multiples of that same number.\n\nIs it true that a number's factors are always smaller than its multiples?",
+      "expected": "NEW",
+      "job": "curriculum|cb-156",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-165",
+      "grade": 5,
+      "text": "What does 'volume' measure, and how is it different from 'area'?",
+      "expected": "NEW",
+      "job": "curriculum|cb-165",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-168",
+      "grade": 5,
+      "text": "I think doubling the side length of a square doubles its area too.\n\nDoes doubling a square's side length double its area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-168",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-170",
+      "grade": 5,
+      "text": "What does a 'scale' on a map tell us?",
+      "expected": "NEW",
+      "job": "curriculum|cb-170",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-172",
+      "grade": 5,
+      "text": "Why might a town planner use a scaled floor plan before building a house, instead of drawing it at full size?",
+      "expected": "NEW",
+      "job": "curriculum|cb-172",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-802",
+      "grade": 5,
+      "text": "A triangle's three angles add up to how many degrees?",
+      "expected": "NEW",
+      "job": "curriculum|cb-802",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-804",
+      "grade": 5,
+      "text": "Is a triangle with all three sides equal called equilateral, isosceles, or scalene?",
+      "expected": "NEW",
+      "job": "curriculum|cb-804",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-808",
+      "grade": 5,
+      "text": "Is a triangle with no two sides equal called equilateral, isosceles, or scalene?",
+      "expected": "NEW",
+      "job": "curriculum|cb-808",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-810",
+      "grade": 5,
+      "text": "When you open a book flat so the two pages lie completely level with each other, roughly what angle have the covers turned through?",
+      "expected": "NEW",
+      "job": "curriculum|cb-810",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-812",
+      "grade": 5,
+      "text": "A door is opened so that it stands exactly upright from the wall, forming a perfect L-shape with it. What type of angle does the door make with the wall?",
+      "expected": "NEW",
+      "job": "curriculum|cb-812",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-813",
+      "grade": 5,
+      "text": "How many lines of symmetry does a square have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-813",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-814",
+      "grade": 5,
+      "text": "How many lines of symmetry does an equilateral triangle have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-814",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-815",
+      "grade": 5,
+      "text": "Does the letter 'H' have a line of symmetry? If so, how many?",
+      "expected": "NEW",
+      "job": "curriculum|cb-815",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-816",
+      "grade": 5,
+      "text": "What does it mean for a shape to have 'rotational symmetry'?",
+      "expected": "NEW",
+      "job": "curriculum|cb-816",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-818",
+      "grade": 5,
+      "text": "Name one everyday object that looks the same after being rotated, like a pinwheel or fan blade pattern.",
+      "expected": "NEW",
+      "job": "curriculum|cb-818",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-819",
+      "grade": 5,
+      "text": "How many lines of symmetry does a regular hexagon have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-819",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-820",
+      "grade": 5,
+      "text": "Does the letter 'O' have rotational symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-820",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-823",
+      "grade": 5,
+      "text": "I think every shape with a line of symmetry must also have rotational symmetry.\n\nDoes every shape with a line of symmetry also have rotational symmetry?",
+      "expected": "NEW",
+      "job": "curriculum|cb-823",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-860",
+      "grade": 5,
+      "text": "What is the difference between area and volume?",
+      "expected": "NEW",
+      "job": "curriculum|cb-860",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-865",
+      "grade": 5,
+      "text": "I think volume and area are measured the same way, just with bigger numbers.\n\nIs volume just a bigger version of area?",
+      "expected": "NEW",
+      "job": "curriculum|cb-865",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-873",
+      "grade": 5,
+      "text": "Why is a compass direction like 'north-east' useful on a map?",
+      "expected": "NEW",
+      "job": "curriculum|cb-873",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-874",
+      "grade": 5,
+      "text": "On a map, a village is shown 'somewhere near' a river bend. How far is the village from the river, exactly?",
+      "expected": "NEW",
+      "job": "curriculum|cb-874",
+      "got": "CLARIFY",
+      "ok": false
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-877",
+      "grade": 5,
+      "text": "Why does a map need a 'key' or 'legend' explaining its symbols?",
+      "expected": "NEW",
+      "job": "curriculum|cb-877",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-880",
+      "grade": 5,
+      "text": "A treasure hunt clue says 'walk north-east from the big tree'. Why is 'north-east' a better clue than just saying 'that way'?",
+      "expected": "NEW",
+      "job": "curriculum|cb-880",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-892",
+      "grade": 5,
+      "text": "I think a reflex angle is just a bigger version of an obtuse angle.\n\nIs a reflex angle simply a bigger obtuse angle?",
+      "expected": "NEW",
+      "job": "curriculum|cb-892",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-893",
+      "grade": 5,
+      "text": "Is a triangle with exactly two equal sides called equilateral, isosceles, or scalene?",
+      "expected": "NEW",
+      "job": "curriculum|cb-893",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-897",
+      "grade": 5,
+      "text": "How many lines of symmetry does a regular pentagon have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-897",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-898",
+      "grade": 5,
+      "text": "A stained-glass window is shaped like a regular octagon, and the window is also framed in dark wood. How many lines of symmetry does the window have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-898",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-900",
+      "grade": 5,
+      "text": "I think a shape can only have rotational symmetry if it also has a line of symmetry.\n\nCan a shape have rotational symmetry without having any line of symmetry at all?",
+      "expected": "NEW",
+      "job": "curriculum|cb-900",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-901",
+      "grade": 5,
+      "text": "Which has more lines of symmetry: a regular hexagon, or a regular pentagon?",
+      "expected": "NEW",
+      "job": "curriculum|cb-901",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-902",
+      "grade": 5,
+      "text": "A traditional rangoli pattern looks exactly the same after being turned a sixth of a full circle. What property does this pattern have?",
+      "expected": "NEW",
+      "job": "curriculum|cb-902",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-908",
+      "grade": 5,
+      "text": "I think the LCM of two numbers must always be strictly bigger than their HCF.\n\nMust the LCM of two numbers always be strictly bigger than their HCF?",
+      "expected": "NEW",
+      "job": "curriculum|cb-908",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-923",
+      "grade": 5,
+      "text": "If you triple all three dimensions of a cuboid -- its length, width, and height -- what happens to its volume?",
+      "expected": "NEW",
+      "job": "curriculum|cb-923",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "curriculum",
+      "id": "cb-924",
+      "grade": 5,
+      "text": "I think a cube with double the edge length of a smaller cube has exactly double the volume.\n\nDoes doubling a cube's edge length exactly double its volume?",
+      "expected": "NEW",
+      "job": "curriculum|cb-924",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-092",
+      "grade": 5,
+      "text": "What is a percentage?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-092",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-257",
+      "grade": 5,
+      "text": "How many lines of symmetry does a square have?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-257",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-258",
+      "grade": 5,
+      "text": "Does the letter 'A' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-258",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-266",
+      "grade": 5,
+      "text": "How many faces does a cube's net fold into?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-266",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-273",
+      "grade": 5,
+      "text": "How many corners does a square have?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-273",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "out_of_scope probes",
+      "id": "oos-274",
+      "grade": 5,
+      "text": "How many days are there in the month of April?",
+      "expected": "NEW",
+      "job": "out_of_scope probes|oos-274",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-11",
+      "grade": 1,
+      "text": "Name something in your classroom that is shaped like a rectangle.",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-11",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-12",
+      "grade": 1,
+      "text": "What do we give the shopkeeper when we buy something?",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-12",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-13",
+      "grade": 2,
+      "text": "Name a fruit that is round.",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-13",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-14",
+      "grade": 2,
+      "text": "What could you use at home to find out which of two toys is heavier?",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-14",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-15",
+      "grade": 3,
+      "text": "What could you use to measure how long your pencil is?",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-15",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-16",
+      "grade": 3,
+      "text": "Name something at home that is usually bought by the dozen.",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-16",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-18",
+      "grade": 4,
+      "text": "Which would you measure in kilometres: the length of your room or the distance to another city?",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-18",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-19",
+      "grade": 5,
+      "text": "Where in your house might you find a right angle?",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-19",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out ambiguous/everyday",
+      "id": "ho-ae-20",
+      "grade": 5,
+      "text": "Name something in your home that turns in a full circle, like a wheel.",
+      "expected": "NEW",
+      "job": "held-out ambiguous/everyday|ho-ae-20",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-002",
+      "grade": 5,
+      "text": "q",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-002",
+      "got": "CLARIFY",
+      "ok": false
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-004",
+      "grade": 4,
+      "text": "fractions",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-004",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-011",
+      "grade": 5,
+      "text": "What is the difference between an acute angle and an obtuse angle?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-011",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-013",
+      "grade": 4,
+      "text": "What is a fraction?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-013",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-015",
+      "grade": 2,
+      "text": "How many faces does a cube have?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-015",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-017",
+      "grade": 2,
+      "text": "Which is the bigger one?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-017",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-018",
+      "grade": 4,
+      "text": "Can you simplify it for me?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-018",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-019",
+      "grade": 5,
+      "text": "How do you do that again?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-019",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-020",
+      "grade": 3,
+      "text": "What about the other way of doing it?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-020",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-021",
+      "grade": 1,
+      "text": "Is it bigger than the other one?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-021",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-022",
+      "grade": 3,
+      "text": "Can you check if this is right?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-022",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-023",
+      "grade": 5,
+      "text": "Is that always true?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-023",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-024",
+      "grade": 2,
+      "text": "What about mine?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-024",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-025",
+      "grade": 3,
+      "text": "What will it be after that?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-025",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-026",
+      "grade": 4,
+      "text": "Can you do the same as before, but with different numbers?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-026",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-027",
+      "grade": 3,
+      "text": "wait no that's not right",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-027",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-028",
+      "grade": 1,
+      "text": "circles?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-028",
+      "got": "NEW",
+      "ok": false
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-029",
+      "grade": 4,
+      "text": "I'm stuck.",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-029",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-030",
+      "grade": 5,
+      "text": "My teacher said 'practice your tables tonight'.",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-030",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-031",
+      "grade": 1,
+      "text": "I learned something so cool today!!",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-031",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-032",
+      "grade": 1,
+      "text": "How many are there?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-032",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-033",
+      "grade": 2,
+      "text": "Is mine heavier?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-033",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-034",
+      "grade": 3,
+      "text": "How many groups will there be?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-034",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-035",
+      "grade": 4,
+      "text": "Which one is more?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-035",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-036",
+      "grade": 5,
+      "text": "Is it a factor of that?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-036",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-037",
+      "grade": 2,
+      "text": "What day will it be?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-037",
+      "got": "NEW",
+      "ok": false
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-038",
+      "grade": 1,
+      "text": "How much change do I get?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-038",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-039",
+      "grade": 4,
+      "text": "How long will it take?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-039",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-040",
+      "grade": 5,
+      "text": "What kind is it?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-040",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-054",
+      "grade": 5,
+      "text": "How many lines of symmetry does a square have?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-054",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-063",
+      "grade": 5,
+      "text": "What is the order of rotational symmetry of a parallelogram (not a rectangle)?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-063",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-066",
+      "grade": 5,
+      "text": "Why does multiplying the top and bottom of a fraction by the same number keep it equal?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-066",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-071",
+      "grade": 5,
+      "text": "Why are all prime numbers odd?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-071",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-077",
+      "grade": 3,
+      "text": "Look at the shape below -- how many sides does it have?",
+      "expected": "CLARIFY",
+      "job": "multi_turn openers|mt-077",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-080",
+      "grade": 3,
+      "text": "Does the letter 'A' have a line of symmetry?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-080",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-082",
+      "grade": 4,
+      "text": "Why does a rectangle's area and perimeter give such different numbers even though they're about the same shape?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-082",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-101",
+      "grade": 3,
+      "text": "How many faces does a cube have, based on its net?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-101",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-107",
+      "grade": 5,
+      "text": "What is the order of rotational symmetry of a regular hexagon?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-107",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-156",
+      "grade": 5,
+      "text": "What makes a shape have rotational symmetry?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-156",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-197",
+      "grade": 2,
+      "text": "How many lines of symmetry does a square have?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-197",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "multi_turn openers",
+      "id": "mt-202",
+      "grade": 4,
+      "text": "How many straight sides does a circle have?",
+      "expected": "NEW",
+      "job": "multi_turn openers|mt-202",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-01",
+      "grade": 2,
+      "text": "how do u ad fracshuns",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-01",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-02",
+      "grade": 1,
+      "text": "wat is haf of ten",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-02",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-03",
+      "grade": 3,
+      "text": "multiplikashun tabel of seven pls",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-03",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-04",
+      "grade": 4,
+      "text": "perimetr of squar how",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-04",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-05",
+      "grade": 1,
+      "text": "teach me counting",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-05",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-06",
+      "grade": 5,
+      "text": "wat r factrs",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-06",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-07",
+      "grade": 2,
+      "text": "i want to lern subtracshun",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-07",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-08",
+      "grade": 3,
+      "text": "clock time kaise padhte hai",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-08",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-09",
+      "grade": 4,
+      "text": "what is a right angel",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-09",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-10",
+      "grade": 1,
+      "text": "shapes!!!",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-10",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-11",
+      "grade": 5,
+      "text": "decimal to fraction how u change",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-11",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-12",
+      "grade": 2,
+      "text": "whats bigger a liter or a mililiter",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-12",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-13",
+      "grade": 3,
+      "text": "devide by too means wat",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-13",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-14",
+      "grade": 4,
+      "text": "how many sides octagon have",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-14",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-15",
+      "grade": 5,
+      "text": "explane volume of cuboid",
+      "expected": "NEW",
+      "job": "held-out child-style openers|ho-op-15",
+      "got": "NEW",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-16",
+      "grade": 2,
+      "text": "the big one is it more",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-16",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-17",
+      "grade": 3,
+      "text": "do the thing",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-17",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-18",
+      "grade": 1,
+      "text": "is this rite",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-18",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-19",
+      "grade": 4,
+      "text": "what about the 2nd one",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-19",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-20",
+      "grade": 5,
+      "text": "my homework",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-20",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-21",
+      "grade": 2,
+      "text": "i dont get it",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-21",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-22",
+      "grade": 3,
+      "text": "same like yesterday",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-22",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-23",
+      "grade": 4,
+      "text": "how much is it",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-23",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-24",
+      "grade": 1,
+      "text": "hiii",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-24",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-25",
+      "grade": 5,
+      "text": "can u check mine",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-25",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-26",
+      "grade": 3,
+      "text": "which is more",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-26",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-27",
+      "grade": 2,
+      "text": "what is the answer",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-27",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-28",
+      "grade": 4,
+      "text": "ma'am gave sum in class",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-28",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-29",
+      "grade": 5,
+      "text": "is that the same as the other way",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-29",
+      "got": "CLARIFY",
+      "ok": true
+    },
+    {
+      "set": "held-out child-style openers",
+      "id": "ho-op-30",
+      "grade": 1,
+      "text": "how many",
+      "expected": "CLARIFY",
+      "job": "held-out child-style openers|ho-op-30",
+      "got": "CLARIFY",
+      "ok": true
+    }
+  ]
+}

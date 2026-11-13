@@ -1,0 +1,1382 @@
+"""frontend/test_app.py — offline tests for the controller-integration glue
+in frontend/app.py (start_episode / advance_episode / submit_turn / the
+per-turn helpers).
+
+These are deterministic unit tests: all LLM/generation calls are mocked, so
+nothing here calls Groq/HF or spends an API credit. They verify WIRING and
+STATE-MACHINE CORRECTNESS, not response quality. A few tests (marked below)
+exercise scripts.llm.controller directly against the REAL state machine
+(cheap, pure, no LLM) to pin down a behavioural root cause found during
+manual review — see test_conceptual_episode_never_advances.
+
+Response-quality questions (does a generated explanation actually recognise
+a child's reasoning, is a hint relevant, etc.) cannot be asserted
+deterministically and are NOT covered here; see the development checkpoint
+notes for the manual/evidence-based findings on that.
+
+Run:  python -m frontend.test_app
+"""
+from __future__ import annotations
+
+from scripts.llm import controller as C, hints, pipeline, safety, student_tracker, verifier
+from frontend import app, episode, state
+
+_passed = 0
+_failed = 0
+
+
+def check(name: str, cond: bool) -> None:
+    global _passed, _failed
+    if cond:
+        _passed += 1
+        print(f"  ok   {name}")
+    else:
+        _failed += 1
+        print(f"  FAIL {name}")
+
+
+# --------------------------------------------------------------------------- helpers
+class _FakeStream:
+    """Stand-in for pipeline.TurnStream: .stream() yields once, then .text
+    holds the full reply, matching what _run_generation expects."""
+
+    def __init__(self, text: str):
+        self.text = text
+
+    def stream(self):
+        yield self.text
+
+
+def _new_chat(episode=None) -> dict:
+    return {"messages": [], "episode": episode}
+
+
+def _math_episode(attempts: int = 0, computed_answer: str = "56") -> dict:
+    state = C.TutorState(
+        question="What is 7 times 8?", grade=3, level="intermediate",
+        computed_answer=computed_answer, is_math=True, attempts=attempts,
+    )
+    return {"state": state, "chunks": [], "source": "", "hints_shown": []}
+
+
+class _Patch:
+    """Minimal monkeypatch-and-restore context manager (no pytest in this repo)."""
+
+    def __init__(self, obj, name, value):
+        self.obj, self.name, self.value = obj, name, value
+
+    def __enter__(self):
+        self._orig = getattr(self.obj, self.name)
+        setattr(self.obj, self.name, self.value)
+        return self
+
+    def __exit__(self, *exc):
+        setattr(self.obj, self.name, self._orig)
+
+
+# --------------------------------------------------------- A: generation-failure rollback
+def test_generation_failure_rolls_back_state() -> None:
+    print("A. state consistency on generation failure")
+
+    chat = _new_chat(_math_episode(attempts=0))
+    pre_attempts = chat["episode"]["state"].attempts
+    pre_phase = chat["episode"]["state"].phase
+
+    def boom(*a, **kw):
+        raise RuntimeError("provider down")
+
+    # record_feedback is mocked throughout: this test exercises state/rollback
+    # wiring, not the tracker, and must not touch the real data/students.json.
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None):
+        with _Patch(pipeline, "generate_turn", boom):
+            reply = app.submit_turn(chat, "54", 3, "on_track", [])
+
+        check("failure returns a reply, not a crash", isinstance(reply, dict))
+        check("failure message is distinguishable from the ambiguous-input fallback",
+              reply.get("reply") != app._friendly_reply("54"))
+        check("controller attempts NOT incremented after a failed generation",
+              chat["episode"]["state"].attempts == pre_attempts)
+        check("controller phase unchanged after a failed generation",
+              chat["episode"]["state"].phase == pre_phase)
+
+        # Retry the SAME input once generation works — should advance exactly
+        # once, not be double-counted from the failed attempt above.
+        with _Patch(pipeline, "generate_turn",
+                   lambda *a, **kw: _FakeStream("Nice try! Add 7 eight times again.")):
+            reply2 = app.submit_turn(chat, "54", 3, "on_track", [])
+    check("retry after failure succeeds", reply2.get("mode") == "diagnose_wrong")
+    check("retry advances attempts exactly once (no duplication from the failure)",
+          chat["episode"]["state"].attempts == pre_attempts + 1)
+
+
+# -------------------------------------------- A4: hint lifecycle integration
+def test_hint_lifecycle_integration() -> None:
+    """Integration-level (through submit_turn/_apply_action), complementing
+    eval/controller_walk.py's pure-controller hint-lifecycle scenario. Covers
+    what the controller test can't: the actual generated/fixed TEXT reaching
+    the reply dict, hints_shown bookkeeping, and a hint-specific
+    generation-failure+retry (the existing test above only exercises an
+    ATTEMPT failure)."""
+    print("A4. hint lifecycle through submit_turn: numbering, exhaustion, failure+retry")
+
+    chat = _new_chat(_math_episode(attempts=0))
+
+    def _hint_fn(n):
+        # hints.generate_hint returns an already-generated plain STRING
+        # (pipeline.get_hint/generate_turn pass it straight through, no
+        # TurnStream wrapping) -- patch at THIS level, not pipeline.generate_turn
+        # itself, so the real MODE_HINT/MODE_HINT_EXHAUSTED dispatch logic in
+        # pipeline.generate_turn actually runs and is genuinely exercised,
+        # rather than being bypassed by the mock.
+        return lambda *a, **kw: f"hint text #{n}"
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None):
+        for n in (1, 2, 3):
+            with _Patch(hints, "generate_hint", _hint_fn(n)):
+                reply = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                        forced_intent="HINT")
+            check(f"hint {n}: mode=hint, hint_number={n} (state-driven)",
+                 reply.get("mode") == "hint" and reply.get("hint_number") == n)
+            check(f"hint {n}: text is the generated hint, not a placeholder",
+                 reply.get("text") == f"hint text #{n}")
+        check("3 real hints were generated and spent an LLM call each",
+             len(chat["episode"]["hints_shown"]) == 3)
+
+        # 4th request: the REAL pipeline.generate_turn/controller.step run
+        # unmocked; only hints.generate_hint is instrumented, so this
+        # genuinely proves the LLM-calling function is never reached once
+        # exhausted, rather than just proving a mock wasn't called.
+        called = {"n": 0}
+
+        def _should_not_be_called(*a, **kw):
+            called["n"] += 1
+            return "should never see this"
+
+        with _Patch(hints, "generate_hint", _should_not_be_called):
+            reply4 = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                     forced_intent="HINT")
+            check("4th hint request -> mode=hint_exhausted, not another generated hint",
+                 reply4.get("mode") == "hint_exhausted")
+            check("4th hint request's fixed message does not repeat an earlier hint string",
+                 reply4.get("text") not in {"hint text #1", "hint text #2", "hint text #3"})
+            check("the exhausted-hint message does NOT get appended to hints_shown "
+                 "(it isn't a real hint and must not pollute future hint context)",
+                 len(chat["episode"]["hints_shown"]) == 3)
+            check("'Another hint' is no longer offered once exhausted",
+                 "Another hint" not in reply4.get("buttons", []))
+            check("hints.generate_hint was never called for the exhausted request "
+                 "(no LLM call spent)", called["n"] == 0)
+
+            # Repeated click on the already-exhausted state: still
+            # idempotent, still zero LLM calls.
+            reply5 = app.submit_turn(chat, "Another hint", 3, "on_track", [],
+                                     forced_intent="HINT")
+        check("a second click after exhaustion is still hint_exhausted, "
+             "no further LLM call made (called['n'] stayed 0 across both attempts)",
+             reply5.get("mode") == "hint_exhausted" and called["n"] == 0)
+
+    # Hint-specific generation failure + retry (distinct from the ATTEMPT
+    # failure already covered above): a failed hint call must not consume a
+    # hint slot, and retrying must produce the SAME hint number, not skip one.
+    chat2 = _new_chat(_math_episode(attempts=0))
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None):
+        with _Patch(hints, "generate_hint",
+                   lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("provider down"))):
+            fail_reply = app.submit_turn(chat2, "Give me a hint", 3, "on_track", [],
+                                         forced_intent="HINT")
+        check("a failed hint generation returns a reply, not a crash",
+             isinstance(fail_reply, dict))
+        check("hints_given is NOT incremented after a failed hint generation",
+             chat2["episode"]["state"].hints_given == 0)
+
+        with _Patch(hints, "generate_hint", _hint_fn(1)):
+            retry_reply = app.submit_turn(chat2, "Give me a hint", 3, "on_track", [],
+                                          forced_intent="HINT")
+        check("retrying after a failed hint generation produces Hint 1 "
+             "(not Hint 2 -- no hint silently skipped by the failed attempt)",
+             retry_reply.get("hint_number") == 1
+             and chat2["episode"]["state"].hints_given == 1)
+
+
+def test_empty_generation_treated_as_failure() -> None:
+    print("A2. empty generation (no exception) also rolls back")
+
+    chat = _new_chat(_math_episode(attempts=0))
+    pre_attempts = chat["episode"]["state"].attempts
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None):
+        with _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("")):
+            reply = app.submit_turn(chat, "54", 3, "on_track", [])
+
+    check("empty text does not crash", isinstance(reply, dict))
+    check("empty text is not presented as a successful tutoring turn",
+          reply.get("mode") is None)
+    check("attempts not committed on empty generation",
+          chat["episode"]["state"].attempts == pre_attempts)
+
+
+def test_start_episode_does_not_commit_on_failure() -> None:
+    print("A3. a failed FIRST turn leaves no silently-started episode")
+
+    chat = _new_chat(episode=None)
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("down"))), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()):
+        # Avoid network for resolution/retrieval/solve too, since this test is
+        # about the commit-on-failure contract, not the resolver/retriever.
+        reply = app.submit_turn(chat, "What is 2 + 2?", 3, "on_track", [])
+    check("failure on the first turn still returns a reply", isinstance(reply, dict))
+    check("no episode is left behind after a failed first turn",
+          chat["episode"] is None)
+
+
+# --------------------------------------------------------------- B: practice-problem shortcut
+def test_practice_problem_shortcut_disabled() -> None:
+    print("B. practice-problem shortcut")
+    check("'Practice problem' is not rendered as an actionable button "
+         "(no generator exists to back it — documented known limitation)",
+          "Practice problem" not in app._ACTIONABLE_LABELS)
+    check("'New question' remains the actionable way to close a finished episode",
+          "New question" in app._CLOSE_EPISODE_LABELS)
+
+
+# ----------------------------------------------------------- C: feedback/tracking semantics
+def test_attempt_recording_semantics() -> None:
+    print("C. feedback recording distinguishes correct / wrong / give-up / reveal")
+
+    calls = []
+
+    def fake_record(question, correct):
+        calls.append((question, correct))
+
+    with _Patch(episode, "record_feedback", fake_record):
+        correct_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                     computed_answer="56", is_math=True)
+        app._record_outcome(correct_state, C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved"))
+        check("correct attempt recorded as True", calls[-1] == ("q", True))
+
+        wrong_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                   computed_answer="56", is_math=True, attempts=1)
+        app._record_outcome(wrong_state, C.Action(C.MODE_DIAGNOSE_WRONG, "", outcome=None))
+        check("non-terminal wrong attempt recorded as False", calls[-1] == ("q", False))
+
+        cosolve_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                     computed_answer="56", is_math=True, attempts=2)
+        app._record_outcome(cosolve_state, C.Action(C.MODE_CO_SOLVE, "", outcome="shown", terminal=True))
+        check("threshold-reached co_solve (a real final wrong attempt) recorded as False",
+              calls[-1] == ("q", False))
+
+        n_before = len(calls)
+        gaveup_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                    computed_answer="56", is_math=True, attempts=0)
+        app._record_outcome(gaveup_state, C.Action(C.MODE_CO_SOLVE, "", outcome="gave_up", terminal=True))
+        check("giving up is NOT recorded as a wrong attempt (no attempt was made)",
+              len(calls) == n_before)
+
+        n_before = len(calls)
+        cold_reveal_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                         computed_answer="56", is_math=True, attempts=0)
+        app._record_outcome(cold_reveal_state, C.Action(C.MODE_REVEAL, "", outcome="shown", terminal=True))
+        check("a cold reveal (asked to be shown, never attempted) is NOT recorded",
+              len(calls) == n_before)
+
+        warm_reveal_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                         computed_answer="56", is_math=True, attempts=1)
+        app._record_outcome(warm_reveal_state, C.Action(C.MODE_REVEAL, "", outcome="shown", terminal=True))
+        check("a reveal after at least one real attempt IS recorded as False",
+              calls[-1] == ("q", False))
+
+        n_before = len(calls)
+        app._record_outcome(correct_state, C.Action(C.MODE_HINT, "", outcome=None))
+        app._record_outcome(correct_state, C.Action(C.MODE_ACK_CONCEPTUAL, "", outcome=None))
+        check("hints and conceptual acknowledgements are not graded attempts",
+              len(calls) == n_before)
+
+
+# --------------------------------------------------------------- D: public verifier/pipeline API
+def test_public_api_wrappers() -> None:
+    print("D. frontend uses public wrappers, not private package internals")
+
+    check("verifier.parse_trusted_value matches the internal evaluator",
+          verifier.parse_trusted_value("3/4") == verifier._safe_eval("3/4"))
+
+    calls = []
+    with _Patch(pipeline, "_resolve_question",
+               lambda q, at, grade=3: calls.append(("resolve", q, at, grade)) or "R"):
+        result = pipeline.resolve_conversation("q", None)
+    check("resolve_conversation forwards to the resolver",
+         calls == [("resolve", "q", None, 3)] and result == "R")
+
+    calls.clear()
+    with _Patch(verifier, "solve_with_type",
+               lambda q, g: calls.append(("solve_with_type", q, g)) or ("5", True, "numeric")):
+        result = pipeline.compute_trusted_answer("q", 3)
+    check("compute_trusted_answer forwards to solve_with_type (the live "
+         "controller path -- also tries a categorical answer, unlike the "
+         "numeric-only _solve used by the legacy Tier A path)",
+          calls == [("solve_with_type", "q", 3)] and result == ("5", True, "numeric"))
+
+    calls.clear()
+    with _Patch(pipeline, "_make_source", lambda meta: calls.append(("source", meta)) or "SRC"):
+        result = pipeline.source_citation([{"grade": 4}])
+    check("source_citation forwards to the source builder",
+          calls == [("source", [{"grade": 4}])] and result == "SRC")
+
+    check("frontend/*.py no longer reaches into pipeline._* / verifier._* internals", True
+          if _no_private_calls_in_app() else False)
+
+
+def _frontend_source_files():
+    import pathlib
+    root = pathlib.Path(app.__file__).resolve().parent
+    return [p for p in root.rglob("*.py")
+           if p.name != "test_app.py" and "__pycache__" not in p.parts]
+
+
+def _no_private_calls_in_app() -> bool:
+    import re
+    for path in _frontend_source_files():
+        src = path.read_text(encoding="utf-8")
+        if re.search(r"pipeline\._|verifier\._", src):
+            return False
+    return True
+
+
+# ----------------------------------------------------------- E: verification success/failure
+def test_post_check_paths() -> None:
+    print("E. post-generation verification paths")
+
+    state = C.TutorState(question="q", grade=3, level="intermediate",
+                         computed_answer="56", is_math=True)
+    reveal = C.Action(C.MODE_REVEAL, "", outcome="shown", terminal=True)
+
+    v_match = app._post_check(state, reveal, "working...\nAnswer: 56")
+    check("matching stated answer -> verifiable + match True",
+          v_match is not None and v_match["verifiable"] and v_match["match"] is True)
+
+    v_mismatch = app._post_check(state, reveal, "working...\nAnswer: 50")
+    check("disagreeing stated answer -> verifiable + match False",
+          v_mismatch["verifiable"] and v_mismatch["match"] is False)
+
+    v_unreadable = app._post_check(state, reveal, "I think we're done here.")
+    check("no readable number -> verifiable but match None (unverifiable, not silently correct)",
+          v_unreadable["verifiable"] and v_unreadable["match"] is None)
+
+    hint_action = C.Action(C.MODE_HINT, "", outcome=None)
+    check("a mode with no injected answer (e.g. hint) is not checked at all",
+          app._post_check(state, hint_action, "a hint") is None)
+
+    no_truth_state = C.TutorState(question="q", grade=3, level="intermediate",
+                                  computed_answer=None, is_math=False)
+    check("reveal/co_solve with no computed answer is not checked",
+          app._post_check(no_truth_state, reveal, "some text") is None)
+
+    # diagnose_correct: the controller already graded the STUDENT's stated
+    # answer before this runs; this covers the separate case of the model's
+    # own celebratory restatement naming the wrong number (see
+    # docs/current_state_evaluation.md Section 2 — previously uncaught).
+    diagnose_correct = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved", terminal=True)
+
+    v_confirm_match = app._post_check(state, diagnose_correct, "Great job! The answer is 56.")
+    check("diagnose_correct: model's restatement matching the computed answer -> match True",
+          v_confirm_match is not None and v_confirm_match["verifiable"]
+          and v_confirm_match["match"] is True)
+
+    v_confirm_mismatch = app._post_check(state, diagnose_correct, "Great job! The answer is 50.")
+    check("diagnose_correct: model's restatement naming a DIFFERENT number -> match False",
+          v_confirm_mismatch["verifiable"] and v_confirm_mismatch["match"] is False)
+
+
+# ----------------------------------- root-cause diagnostic for the reviewed conversation
+def test_conceptual_episode_never_advances() -> None:
+    """Pins down the root cause behind the observed repetition / non-recognition
+    behaviour in the reviewed "fractions" conversation (see checkpoint notes,
+    Cases A & C): once an episode starts from a non-computable prompt
+    (is_math=False, computed_answer=None), controller.diagnose() can only ever
+    return "engaged" for ANY student reply, so every subsequent turn routes to
+    the same non-terminal MODE_ACK_CONCEPTUAL action regardless of what the
+    student actually wrote. This is a real controller/architecture property,
+    confirmed live against scripts.llm.controller (no mocking) — it is NOT a
+    frontend wiring bug. controller.step()/diagnose() still behave exactly
+    this way by design; this test exercises that directly and its assertions
+    remain correct. The episode is no longer stuck here forever, though:
+    controller.graduate_if_computable(), wired into frontend/app.py's
+    _apply_action, can lift it out of this exact loop once the model's own
+    MODE_ACK_CONCEPTUAL reply poses a computable follow-up question — a
+    mitigation this test deliberately does not exercise, since it calls
+    C.step() directly rather than going through _apply_action."""
+    print("Diagnostic: conceptual (ungradable) episodes never progress past teach_invite via controller.step() alone")
+
+    state, action = C.start("fractions", 4, "intermediate", computed_answer=None, is_math=False)
+    check("a non-computable topic starts with teach_invite, not terminal",
+          action.mode == C.MODE_TEACH_INVITE and not action.terminal)
+
+    for turn in ("3/9", "8/10 means i have 8 of the 10 total pieces.",
+                "I have one mango, cut in 2 pieces. I have both pieces."):
+        state, action = C.step(state, "ATTEMPT", turn)
+        check(f"ATTEMPT {turn[:30]!r}... -> ack_conceptual, non-terminal, no attempt counted",
+              action.mode == C.MODE_ACK_CONCEPTUAL and not action.terminal and state.attempts == 0)
+
+
+# ------------------------------------------------- F: active-episode routing fixes
+def test_math_followup_preserves_relationship() -> None:
+    """Stabilization-pass fix (Problem 2 / Step 10): a contextual follow-up
+    that changes a number in the CURRENT problem ("what if it was 150
+    instead of 136?") used to fall through to intent.py's ATTEMPT handling
+    (the only vocabulary an open episode's turns were routed through),
+    which — seeing two numbers and no single stated answer — asked "what
+    answer did you get?", silently losing the relationship to the previous
+    problem. advance_episode now recognises MATH_FOLLOWUP and routes it
+    through _advance_math_followup, which re-resolves the problem and opens
+    a connected follow-up episode via controller.start_followup."""
+    print("F1. MATH_FOLLOWUP during an open episode recomputes the problem")
+
+    class _Resolution:
+        mode = "MATH_FOLLOWUP"
+        resolved_question = "245 + 150"
+        retrieval_query = "245 + 150"
+        use_rag = False
+        use_verifier = True
+        changed = True
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="381"))
+    chat["episode"]["state"].question = "245 + 136"
+
+    # advance_episode's FIRST stop for an open episode is intent.classify_intent
+    # (a real LLM call unless forced); mocked here too, consistent with the
+    # module docstring's "no network calls" promise -- this test is about
+    # what happens once MATH_FOLLOWUP is identified, not about the
+    # classifier's own accuracy (that has its own dedicated coverage).
+    from scripts.llm import intent as intent_mod
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(intent_mod, "classify_intent", lambda *a, **kw: "MATH_FOLLOWUP"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("395", True, "numeric")), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("245 + 150 is like your last problem, "
+                                           "but with 150 instead of 136. Try it!")):
+        reply = app.submit_turn(chat, "what if it was 150 instead of 136?",
+                                3, "on_track", [])
+
+    state = chat["episode"]["state"]
+    check("the episode's question is updated to the NEW problem",
+         state.question == "245 + 150")
+    check("the trusted answer is RECOMPUTED for the new problem, not reused",
+         state.computed_answer == "395")
+    check("attempts/hints reset for the new sub-episode (a fresh problem, "
+         "not a continuation of the old attempt count)",
+         state.attempts == 0 and state.hints_given == 0)
+    check("the reply is a normal teaching turn, NOT 'what answer did you "
+         "get?' (the old misroute through ATTEMPT/diagnose())",
+         reply.get("mode") == "teach_invite")
+
+
+def test_math_followup_falls_back_safely_on_low_confidence() -> None:
+    """If a second, heavier look (conversation_resolver) disagrees with the
+    cheap classifier's MATH_FOLLOWUP guess, the turn must not be dropped or
+    guess a fabricated new problem -- it falls back to grading it as a plain
+    attempt against the CURRENT problem."""
+    print("F2. MATH_FOLLOWUP that resolver demotes falls back to ATTEMPT, not silently dropped")
+
+    class _FragmentResolution:
+        mode = "FRAGMENT"
+        resolved_question = "what about 5"
+        retrieval_query = ""
+        use_rag = False
+        use_verifier = False
+        changed = False
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _FragmentResolution()), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("Let's check your working.")):
+        reply = app.submit_turn(chat, "what about 5", 3, "on_track", [],
+                                forced_intent=None)
+    check("falls back to grading against the CURRENT (unchanged) problem",
+         chat["episode"]["state"].question == "What is 7 times 8?")
+    check("a reply is produced, not dropped", isinstance(reply, dict))
+
+
+def test_confusion_correction_clarify_do_not_mutate_state() -> None:
+    """Problem 3/4: CONFUSION/CORRECTION/CLARIFY are generation-only -- they
+    must not consume a hint, count an attempt, or end the episode, since
+    none of them are the child answering, asking for the next hint rung, or
+    giving up."""
+    print("F3. CONFUSION/CORRECTION/CLARIFY never mutate attempts/hints/phase")
+
+    for label, mode in (("CONFUSION", C.MODE_CONFUSION),
+                        ("CORRECTION", C.MODE_CORRECTION),
+                        ("CLARIFY", C.MODE_CLARIFY)):
+        chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+        pre = chat["episode"]["state"]
+        with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+             _Patch(pipeline, "generate_turn",
+                   lambda *a, **kw: _FakeStream("Let's look at that together.")):
+            reply = app.submit_turn(chat, "huh?", 3, "on_track", [],
+                                    forced_intent=label)
+        post = chat["episode"]["state"]
+        check(f"{label}: mode is {mode}", reply.get("mode") == mode)
+        check(f"{label}: hints_given unchanged", post.hints_given == pre.hints_given)
+        check(f"{label}: attempts unchanged", post.attempts == pre.attempts)
+        check(f"{label}: episode not terminal", not reply.get("terminal"))
+        check(f"{label}: not recorded as a graded attempt (record_feedback not "
+             "reached for this mode)", reply.get("outcome") is None)
+
+
+def test_confusion_correction_clarify_skip_retrieval() -> None:
+    """Problem 11: a conversational-repair turn on an open episode must not
+    trigger a fresh (and likely garbage) retrieval query -- it reuses the
+    episode's existing chunks, exactly like HINT/ATTEMPT turns already do."""
+    print("F4. CONFUSION/CORRECTION/CLARIFY never call retrieval")
+
+    calls = []
+
+    def _tracking_retrieve(*a, **kw):
+        calls.append((a, kw))
+        return []
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("Let's look at that together.")):
+        import scripts.retrieval as retrieval_mod
+        with _Patch(retrieval_mod, "retrieve_with_metadata", _tracking_retrieve):
+            app.submit_turn(chat, "I dont understand", 3, "on_track", [],
+                            forced_intent="CONFUSION")
+    check("no retrieval call was made for a CONFUSION turn", calls == [])
+
+
+# ------------------------------------------------------- G: clear chat vs reset
+def test_clear_chat_preserves_learner_profile() -> None:
+    """Problem 5: clearing a chat window must never erase the persistent
+    student_tracker profile -- only an explicit, separate reset action
+    (reset_learning_progress) may do that."""
+    print("G. clear_chat vs reset_learning_progress")
+
+    reset_calls = []
+    with _Patch(state, "reset_student", lambda: reset_calls.append(1)):
+        chat = _new_chat(_math_episode(attempts=1))
+        chat["messages"] = [{"role": "user", "text": "hi"}]
+        chat["thread_notes"] = ["asked \"hi\" · solved it"]
+        app.clear_chat(chat)
+        check("messages cleared", chat["messages"] == [])
+        check("episode cleared", chat["episode"] is None)
+        check("thread_notes cleared", chat["thread_notes"] == [])
+        check("clear_chat NEVER calls reset_student (the fixed bug)",
+             reset_calls == [])
+
+        app.reset_learning_progress()
+        check("reset_learning_progress DOES call reset_student "
+             "(the separate, explicit destructive action)",
+             reset_calls == [1])
+
+
+def test_current_learner_level_uses_real_backend_classification() -> None:
+    """Problem 6: the UI's honest 'Tutor Level' row must forward to the same
+    resolver the live pipeline itself uses (pipeline.resolve_level), not a
+    separate ad hoc computation, so it can never drift from the number that
+    actually shapes tutoring depth."""
+    print("H. _current_learner_level forwards to pipeline.resolve_level")
+
+    with _Patch(pipeline, "resolve_level", lambda sid, lvl: "advanced"):
+        check("forwards to pipeline.resolve_level",
+             app._current_learner_level() == "advanced")
+
+
+def test_top_weak_topic_surfaces_canonical_topics_only() -> None:
+    """Track 16 follow-through: the canonicalized weak_topics data (fixed in
+    scripts/llm/topics.py) must actually reach the UI, and the low-confidence
+    'Other' bucket must never be shown as if it were a specific, actionable
+    topic."""
+    print("Q2. _top_weak_topic surfaces a real canonical topic, never 'Other'")
+
+    with _Patch(student_tracker, "stats",
+               lambda sid: {"weak_topics": ["Other", "Fractions & Decimals"]}):
+        check("the honest 'Other' bucket is skipped in favour of a real topic",
+             app._top_weak_topic() == "Fractions & Decimals")
+
+    with _Patch(student_tracker, "stats", lambda sid: {"weak_topics": ["Other"]}):
+        check("ONLY 'Other' present -> no topic surfaced at all (not shown as if specific)",
+             app._top_weak_topic() is None)
+
+    with _Patch(student_tracker, "stats", lambda sid: {"weak_topics": []}):
+        check("no weak topics yet -> None, not an empty-string placeholder",
+             app._top_weak_topic() is None)
+
+
+# --------------------------------------------------------------- I: thread_notes memory
+def test_thread_notes_populated_on_terminal_action() -> None:
+    """Problem 8: a finished episode must leave a thread note behind so the
+    NEXT episode in the same chat has continuity -- previously thread_notes
+    was defined in scripts/llm/memory.py and consumed by prompt_registry, but
+    no live caller in frontend/app.py ever populated or passed it (confirmed
+    by a repo-wide grep before this fix), so it was dead in practice despite
+    being fully implemented."""
+    print("I. _apply_action populates chat['thread_notes'] on a terminal action")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    chat["thread_notes"] = []
+    correct_action = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved",
+                              terminal=True)
+    # Mocked like every other generation call in this file (see the module
+    # docstring: "nothing here calls Groq/HF or spends an API credit") --
+    # this call was previously left unmocked, a real network dependency
+    # hiding in a suite that promises it has none, found when a live quota
+    # exhaustion elsewhere in testing made this specific test fail.
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Great job!")):
+        reply = app._apply_action(chat, chat["episode"], correct_action, [])
+    check("a terminal action with real text adds exactly one thread note",
+         len(chat["thread_notes"]) == 1)
+    check("the note mentions the episode's question",
+         "7 times 8" in chat["thread_notes"][0])
+
+    captured = {}
+
+    def _capture_thread_notes(state, action, chunks=None, thread_notes=None,
+                              active_turns=None, previous_hints=None):
+        captured["thread_notes"] = thread_notes
+        return _FakeStream("Nice!")
+
+    chat2 = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    chat2["thread_notes"] = ["asked \"What is 3 x 3?\" · solved it"]
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn", _capture_thread_notes):
+        app._apply_action(chat2, chat2["episode"], correct_action, [])
+    check("an existing thread note is actually forwarded into generate_turn "
+         "(not just stored and never read)",
+         captured.get("thread_notes") == ["asked \"What is 3 x 3?\" · solved it"])
+
+
+# -------------------------------------------------- J: numeric self-consistency guardrail
+def test_self_consistency_guardrail_surfaces_but_does_not_block() -> None:
+    """Problem 10: modes that let the model invent its OWN illustrative
+    numbers (teach_invite, redirect, hints, ...) are not covered by the
+    trusted-answer check at all. check_self_consistency is a bounded,
+    non-blocking guardrail: it flags an internally-inconsistent equation the
+    model wrote itself, without gating or regenerating the reply."""
+    print("J. verifier.check_self_consistency + _apply_action wiring")
+
+    ok = verifier.check_self_consistency("First, 4 + 4 = 8, then 8 + 4 = 12.")
+    check("internally consistent equations -> no issues", ok == [])
+
+    bad = verifier.check_self_consistency("Well, 7 + 5 = 13, so write 3 carry 1.")
+    check("an inconsistent self-chosen equation is caught",
+         len(bad) == 1 and bad[0]["computed"] == "12" and bad[0]["stated"] == "13")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer=None))
+    chat["episode"]["state"].is_math = False
+    teach_action = C.Action(C.MODE_TEACH_INVITE, "", buttons=[])
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("For example, 6 + 6 = 13.")):
+        reply = app._apply_action(chat, chat["episode"], teach_action, [])
+    check("a bad self-made example on an UNVERIFIED mode (teach_invite) is "
+         "still caught by the bounded guardrail",
+         len(reply["self_check_issues"]) == 1)
+    check("the reply still goes through -- this is a warning, not a block",
+         reply["text"] == "For example, 6 + 6 = 13.")
+
+
+# ------------------------------------------------ K: legacy path isolation (Problem 12)
+def test_live_app_never_calls_legacy_tier_a_path() -> None:
+    """Problem 12: frontend/app.py (the live student-facing path) must never
+    call the superseded Tier A single-shot functions (TutorTurn/prepare/
+    resume/ask_tutor) -- those are retained only for
+    scripts/llm/smoke_live.py, marked LEGACY in pipeline.py's own
+    docstrings. A regression here would mean a future edit accidentally
+    reintroduced a call to dead code that bypasses the controller entirely."""
+    print("K. frontend/app.py never reaches the legacy Tier A entry points")
+
+    sources = {p: p.read_text(encoding="utf-8") for p in _frontend_source_files()}
+    for symbol in ("pipeline.prepare(", "pipeline.resume(",
+                  "pipeline.ask_tutor(", "pipeline.TutorTurn("):
+        check(f"no frontend module calls {symbol}",
+             not any(symbol in src for src in sources.values()))
+
+
+def test_episode_scoped_active_turns_excludes_prior_episode() -> None:
+    """Track 1 (stale-problem/stale-operand regression): a finished episode's
+    full transcript must never be replayed into a LATER episode's generation
+    context, even though both live in the same chat and the UI-level
+    active_turns (built from the whole chat, for conversation_resolver's
+    benefit) legitimately does include it. Reproduces the shape of the live
+    bug (an earlier problem's numbers surfacing in a later problem's
+    co-solve) generically, with two different arithmetic problems, not by
+    special-casing any one example."""
+    print("L. generation context is scoped to the CURRENT episode, not the whole chat")
+
+    chat = _new_chat(episode=None)
+    captured = []
+
+    def _capture_generate_turn(state, action, chunks=None, thread_notes=None,
+                               active_turns=None, previous_hints=None):
+        captured.append(list(active_turns or []))
+        return _FakeStream(f"reply about {state.question}")
+
+    def _resolution_for(q):
+        class _R:
+            resolved_question = q
+            retrieval_query = q
+            use_rag = False
+            use_verifier = False
+        return _R()
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "generate_turn", _capture_generate_turn):
+
+        # Episode 1: the first-ever turn in a brand new chat.
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("3 + 2")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "3 + 2"})
+            chat["messages"].append(app.submit_turn(chat, "3 + 2", 3, "on_track", active_turns))
+        check("episode 1's own first turn sees no prior turns", captured[-1] == [])
+
+        # Close episode 1 out (as a real terminal action would) so the next
+        # turn opens a fresh, unrelated episode in the SAME chat. `terminal`
+        # is a read-only property derived from `phase`, so drive it via phase.
+        chat["episode"]["state"].phase = C.SOLVED
+
+        # Episode 2: a different, unrelated problem, same chat/session.
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("8 + 9")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "8 + 9"})
+            chat["messages"].append(app.submit_turn(chat, "8 + 9", 3, "on_track", active_turns))
+        check("the UI-level active_turns passed in DOES span the whole chat "
+             "(unaffected -- conversation_resolver still sees full history)",
+             len(active_turns) == 2)
+        check("but episode 2's OWN first-turn generation context excludes "
+             "episode 1's transcript entirely",
+             captured[-1] == [])
+
+        # A follow-up turn within episode 2 (its second turn).
+        with _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _resolution_for("8 + 9")):
+            active_turns = app.build_active_turns(chat["messages"])
+            chat["messages"].append({"role": "user", "text": "8+9=7"})
+            chat["messages"].append(app.submit_turn(chat, "8+9=7", 3, "on_track", active_turns,
+                                                     forced_intent="ATTEMPT"))
+        check("a later turn in episode 2 sees episode 2's own prior turn only",
+             len(captured[-1]) == 2 and captured[-1][0]["content"] == "8 + 9")
+        check("episode 1's question never leaks into episode 2's generation context",
+             not any("3 + 2" in str(t.get("content", "")) for t in captured[-1]))
+
+
+def test_input_safety_runs_before_any_llm_routing() -> None:
+    """Track 5: an unsafe turn must never reach conversation_resolver or
+    intent.classify_intent -- both of those are themselves LLM calls, so
+    checking safety AFTER them would mean an unsafe message already went to
+    a model. Proven here by making both raise if called at all, not just by
+    checking the final reply shape."""
+    print("M. input safety gate runs before conversation_resolver/intent are ever touched")
+
+    from scripts.llm import intent as intent_mod
+
+    def _must_not_be_called(*a, **kw):
+        raise AssertionError("LLM-based routing was reached for an unsafe input")
+
+    chat = _new_chat(episode=None)
+    with _Patch(pipeline, "resolve_conversation", _must_not_be_called), \
+         _Patch(intent_mod, "classify_intent", _must_not_be_called):
+        reply = app.submit_turn(chat, "I want to kill myself", 3, "on_track", [])
+    check("unsafe input never reaches conversation_resolver/intent (no exception bubbled up)",
+         isinstance(reply, dict))
+    check("blocked reply is tagged safety_blocked, not a normal tutoring mode",
+         reply.get("mode") == "safety_blocked")
+    check("the episode is left completely untouched (no episode silently started)",
+         chat["episode"] is None)
+    check("the safety decision is recorded on the reply",
+         reply.get("safety") == {"input_checked": True, "input_blocked": True,
+                                 "input_category": "self_harm",
+                                 "output_checked": False, "output_blocked": False})
+
+    # Safe input is unaffected and still reaches the real routing/generation.
+    chat2 = _new_chat(episode=None)
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add 2 and 2!")):
+        safe_reply = app.submit_turn(chat2, "What is 2 + 2?", 3, "on_track", [])
+    check("safe input reaches real generation (not blocked)",
+         safe_reply.get("mode") != "safety_blocked" and chat2["episode"] is not None)
+    check("the safety block records input_checked/input_blocked=False and "
+         "output_checked=True for a normal turn",
+         safe_reply.get("safety", {}).get("input_checked") is True
+         and safe_reply.get("safety", {}).get("input_blocked") is False
+         and safe_reply.get("safety", {}).get("output_checked") is True)
+
+
+def test_unsafe_message_mid_episode_preserves_the_open_problem() -> None:
+    """Journey J (safety continuation): an unsafe message arriving while a
+    math problem is already open must not reset, advance, or otherwise touch
+    that episode -- the child should be able to answer the SAME problem
+    normally right afterward. submit_turn's input-safety branch returns
+    before advance_episode is ever reached, so chat["episode"] is never
+    touched either way; this proves that holds for an ALREADY-OPEN episode,
+    not just a fresh chat (which test M already covers)."""
+    print("M2. an unsafe message mid-episode leaves the open problem untouched")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    state_before = chat["episode"]["state"]
+
+    blocked_reply = app.submit_turn(chat, "I want to kill myself", 3, "on_track", [])
+    check("the unsafe message is blocked, not treated as an answer",
+         blocked_reply.get("mode") == "safety_blocked")
+    check("the SAME episode object survives completely untouched",
+         chat["episode"]["state"] is state_before
+         and state_before.question == "What is 7 times 8?"
+         and state_before.computed_answer == "56" and state_before.attempts == 0)
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Great job!")):
+        normal_reply = app.submit_turn(chat, "56", 3, "on_track", [])
+    check("tutoring resumes normally on the SAME problem right after the "
+         "safety interruption (not reset to a new/different episode)",
+         normal_reply.get("mode") == "diagnose_correct")
+
+
+def test_output_safety_blocks_unsafe_generated_text() -> None:
+    """Track 5: a bounded defense-in-depth scan of the model's OWN generated
+    text, independent of the input check above (the input here is ordinary
+    and safe; only the model's output is unsafe)."""
+    print("N. output safety gate blocks an unsafe generated reply before it is rendered")
+
+    chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+    teach_action = C.Action(C.MODE_DIAGNOSE_WRONG, "", buttons=[])
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "generate_turn",
+               lambda *a, **kw: _FakeStream("Just go kill yourself if you can't do this.")):
+        reply = app._apply_action(chat, chat["episode"], teach_action, [])
+    check("the unsafe generated text is never shown to the child",
+         "kill" not in reply["text"])
+    check("a safe, generic fallback is shown instead",
+         reply["text"] == safety.check_output(
+             "Just go kill yourself if you can't do this.").fallback_text)
+    check("the reply records that output safety blocked this turn",
+         reply.get("safety", {}).get("output_blocked") is True)
+
+
+def test_interaction_telemetry_reconstructs_the_turn() -> None:
+    """Track 6: one structured interaction_events record per student turn,
+    distinct from common.log_run's per-generation-call log, sufficient to
+    answer "what happened to this turn" (controller mode, safety decisions,
+    verify outcome) without duplicating the raw prompt transcript."""
+    print("O. structured interaction telemetry is actually written per turn")
+
+    from scripts.llm import telemetry
+
+    captured = []
+    with _Patch(telemetry, "log_interaction", lambda **kw: captured.append(kw)):
+        chat = _new_chat(_math_episode(attempts=0, computed_answer="56"))
+        correct_action = C.Action(C.MODE_DIAGNOSE_CORRECT, "", outcome="solved", terminal=True)
+        with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+             _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Nice!")):
+            app._apply_action(chat, chat["episode"], correct_action, [])
+        check("a normal turn logs exactly one interaction event", len(captured) == 1)
+        check("the event records the controller mode and outcome",
+             captured[0]["controller_mode"] == "diagnose_correct"
+             and captured[0]["outcome"] == "solved")
+        check("the event records that both safety checks ran and passed",
+             captured[0]["input_safety"] == {"checked": True, "blocked": False}
+             and captured[0]["output_safety"]["checked"] is True
+             and captured[0]["output_safety"]["blocked"] is False)
+
+        captured.clear()
+        chat2 = _new_chat(episode=None)
+        app.submit_turn(chat2, "I want to kill myself", 3, "on_track", [])
+        check("a safety-blocked turn ALSO logs exactly one interaction event",
+             len(captured) == 1)
+        check("the blocked event records the input-safety category, with no "
+             "controller mode (the controller was never reached)",
+             captured[0]["input_safety"]["blocked"] is True
+             and captured[0]["input_safety"]["category"] == "self_harm"
+             and captured[0]["controller_mode"] == "safety_blocked")
+
+
+def test_student_id_is_per_session_not_a_shared_constant() -> None:
+    """Track 7 (identity isolation): student_id must be a stable, opaque
+    per-BROWSER-SESSION id, not a single hardcoded constant shared by every
+    visitor (the previous STUDENT_ID = "session_user") and not the child's
+    display name (two children can share a name). Verified at the level
+    that actually matters here: different session_state backings produce
+    different, but each internally stable, ids."""
+    print("P. _student_id() is session-scoped, not a shared global constant")
+
+    import streamlit as st
+
+    class _FakeSessionState(dict):
+        def setdefault(self, key, default):
+            return dict.setdefault(self, key, default)
+
+    session_a = _FakeSessionState()
+    session_b = _FakeSessionState()
+
+    with _Patch(st, "session_state", session_a):
+        id_a1 = app._student_id()
+        id_a2 = app._student_id()
+    check("the same session gets the SAME id on repeated calls (stable)", id_a1 == id_a2)
+
+    with _Patch(st, "session_state", session_b):
+        id_b1 = app._student_id()
+    check("a DIFFERENT session gets a DIFFERENT id (isolation, not a shared constant)",
+         id_a1 != id_b1)
+    check("the id is not derived from the child's display name (it's an opaque token)",
+         id_a1 != "session_user" and len(id_a1) >= 16)
+
+
+def test_pending_turn_shows_question_before_generating_the_reply() -> None:
+    """Track 10 (chat lifecycle): queue_pending_turn must append the user's
+    message WITHOUT generating anything, so a caller can rerun/render once
+    with just the question visible before process_pending_turn (a separate
+    call, on the next pass in the real app) actually generates the reply.
+    Live-reproduced bug this fixes: previously both the question and the
+    reply appeared together only after the full generation finished."""
+    print("Q. queue_pending_turn / process_pending_turn: immediate question, deferred reply")
+
+    chat = _new_chat(episode=None)
+    app.queue_pending_turn(chat, "What is 2 + 2?")
+    check("the question is appended immediately", chat["messages"] == [
+        {"role": "user", "text": "What is 2 + 2?"}])
+    check("no reply has been generated yet", len(chat["messages"]) == 1)
+    check("the turn is recorded as pending", chat.get("pending_turn") == {
+        "text": "What is 2 + 2?", "forced_intent": None})
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add 2 and 2!")):
+        ran = app.process_pending_turn(chat, 3, "on_track")
+    check("process_pending_turn reports that it actually ran a turn", ran is True)
+    check("the reply is now appended after the question", len(chat["messages"]) == 2
+         and chat["messages"][1]["role"] == "assistant")
+    check("the pending marker is cleared once the reply lands", chat.get("pending_turn") is None)
+
+    check("calling process_pending_turn again with nothing queued is a safe no-op",
+         app.process_pending_turn(chat, 3, "on_track") is False)
+
+
+def test_progress_to_next_badge_has_a_defensible_meaning() -> None:
+    """The old `(solved % 3) / 3` formula cycled back to 0% every 3rd solve
+    -- including the instant after a correct answer -- and "3" had no
+    relationship to the actual badge thresholds (1, 3, 5, 8). This checks
+    the replacement: a monotonically non-decreasing bar WITHIN each badge
+    band, a threshold that always matches _BADGES, and 100% once every
+    badge is earned."""
+    print("R. _progress_to_next_badge ties the bar to the real badge thresholds")
+
+    check("0 solved -> 0% toward the first badge (threshold 1)",
+         app._progress_to_next_badge(0) == (0, 1, 0.0))
+    check("1 solved -> Quick Thinker just earned, fresh 0% toward Rising Star (3)",
+         app._progress_to_next_badge(1) == (1, 3, 0.0))
+    check("2 solved -> halfway to Rising Star",
+         app._progress_to_next_badge(2) == (2, 3, 0.5))
+    check("3 solved -> Rising Star just earned, fresh 0% toward Problem Solver (5)",
+         app._progress_to_next_badge(3) == (3, 5, 0.0))
+    check("8 solved -> every badge earned, 100% and no further threshold",
+         app._progress_to_next_badge(8) == (8, None, 1.0))
+    check("9 solved -> still capped at 100% with no threshold (never errors/overflows)",
+         app._progress_to_next_badge(9) == (9, None, 1.0))
+
+    # Within each band (between two badge unlocks), progress must never
+    # drop as solved increases -- the exact bug being fixed.
+    prev_pct = -1.0
+    prev_threshold = None
+    for solved in range(0, 9):
+        _, next_badge, pct = app._progress_to_next_badge(solved)
+        if next_badge == prev_threshold:
+            check(f"progress never drops within a band (solved={solved})", pct >= prev_pct)
+        prev_pct, prev_threshold = pct, next_badge
+
+    check("the progress-bar thresholds are exactly the Badges panel's own "
+         "thresholds (single source of truth, can't drift out of sync)",
+         [t for _, _, _, t in app._BADGES] == [1, 3, 5, 8])
+
+
+def test_init_session_state_defaults_to_the_weakest_level() -> None:
+    """Live-reported: a brand-new session's first-ever explanation (default
+    'on_track' -> 'intermediate' depth) asserted a sub-step's result ("the
+    common denominator is 9") without ever showing how to find it. Until
+    student_tracker has enough history to classify a child for real (see
+    pipeline.resolve_level), the UI-level default IS the tutor's working
+    assumption about a child it knows nothing about yet -- it should assume
+    weak/needs_practice, not the middle 'on_track', so a new child gets the
+    more thorough beginner-level explanation by default."""
+    print("T. init_session_state defaults the UI level to needs_practice, not on_track")
+
+    fake_ss = {}
+    with _Patch(state, "ss", fake_ss):
+        state.init_session_state()
+    check("defaults to needs_practice (-> beginner depth), not on_track",
+         fake_ss.get("level") == "needs_practice")
+
+
+def test_change_grade_invalidates_open_episodes_but_keeps_chat_history() -> None:
+    """Section 10 (ongoing grade change): changing grade mid-session must not
+    let an in-progress episode -- computed (trusted answer, retrieval,
+    prompt) for the OLD grade's taught form -- silently continue under the
+    new grade, but must never touch the chat's message history. Grade is a
+    single global (ss.grade), not per-chat, so EVERY chat's open episode is
+    invalidated, not just the active one."""
+    print("S. change_grade invalidates open episodes without touching messages")
+
+    class _FakeSS:
+        grade = 3
+        chats: list = []
+
+    fake_ss = _FakeSS()
+    chat_a = {"id": "a", "messages": [{"role": "user", "text": "hi"}],
+             "episode": {"state": "something"}, "thread_notes": []}
+    chat_b = {"id": "b", "messages": [{"role": "user", "text": "yo"}],
+             "episode": {"state": "something else"}, "thread_notes": []}
+    fake_ss.chats = [chat_a, chat_b]
+
+    with _Patch(state, "ss", fake_ss):
+        app.change_grade(5)
+        check("grade is updated", fake_ss.grade == 5)
+        check("chat A's open episode is invalidated", chat_a["episode"] is None)
+        check("chat B's open episode is ALSO invalidated (grade is global, not per-chat)",
+             chat_b["episode"] is None)
+        check("chat A's message history is untouched", len(chat_a["messages"]) == 1)
+        check("chat B's message history is untouched", len(chat_b["messages"]) == 1)
+
+        chat_a["episode"] = {"state": "fresh"}
+        app.change_grade(5)
+        check("calling with the SAME grade is a no-op (episode untouched)",
+             chat_a["episode"] == {"state": "fresh"})
+
+
+def test_wrong_answer_gets_a_distinct_visual_treatment() -> None:
+    """Live-reported bug: a wrong answer (mode == "diagnose_wrong") rendered
+    in the exact same neutral ".chat-reply" box as every other reply -- the
+    ".feedback-wrong" CSS class existed (styled red/pink, mirroring
+    ".feedback-correct") but was never referenced by render_turn, so a
+    skimming child had no visual signal they got it wrong. This can't be
+    asserted by calling render_turn() directly (it calls st.markdown, which
+    needs a real Streamlit script run), so it checks the actual source
+    text -- the same evidence a human reviewer would use -- for the
+    specific branch and class name, the way U-02 was originally found."""
+    print("T. render_turn gives a wrong answer its own feedback-wrong treatment")
+
+    import inspect
+
+    src = inspect.getsource(app.render_turn)
+    check('a diagnose_wrong branch exists in render_turn',
+         'mode == "diagnose_wrong"' in src)
+    check("that branch actually uses the (previously dead) feedback-wrong class",
+         '"diagnose_wrong"' in src and "feedback-wrong" in src)
+    # Sanity-check the branch is positioned so it actually fires instead of
+    # being shadowed by the generic `elif text:` fallback used by every
+    # other mode without its own branch.
+    wrong_idx = src.find('mode == "diagnose_wrong"')
+    fallback_idx = src.find("elif text:")
+    check("the diagnose_wrong branch comes before the generic text fallback "
+         "(so it isn't shadowed)",
+         wrong_idx != -1 and fallback_idx != -1 and wrong_idx < fallback_idx)
+
+
+def test_name_page_submit_requires_name_and_class() -> None:
+    """Live-reported feedback: "Let's go" used to proceed with a blank name
+    (silently falling back to "Hi friend!" with zero warning) AND the class
+    dropdown defaulted to a pre-selected class, so a child could submit
+    having never actually chosen one. Both are now hard requirements: the
+    button itself is disabled (see render_name_page) until a name is typed
+    AND a class is picked, computed by this same pure check on every rerun
+    -- not just re-evaluated after a bad submit, which is what the previous
+    (now superseded) warn-once-then-proceed-as-friend behavior did.
+    _name_page_submit is the extracted decision logic (render_name_page
+    itself needs a real Streamlit widget tree, so the pure decision is
+    tested in isolation)."""
+    print("U. _name_page_submit requires both a non-blank name and a chosen class")
+
+    check("name + class both present -> proceed",
+         app._name_page_submit("Aanya", 3) is True)
+    check("blank name, class chosen -> blocked",
+         app._name_page_submit("", 3) is False)
+    check("whitespace-only name is treated as blank",
+         app._name_page_submit("   ", 3) is False)
+    check("name present, no class chosen (None) -> blocked",
+         app._name_page_submit("Aanya", None) is False)
+    check("neither present -> blocked",
+         app._name_page_submit("", None) is False)
+
+
+def test_group_chat_history_collapses_follow_up_turns() -> None:
+    """Live-reported bug: History listed every turn (an answer attempt, a
+    hint tap, "I don't understand"...) as its own flat, indistinguishable
+    numbered row -- one problem with a wrong attempt, 3 hints, and a
+    correct answer produced 7 rows for what was really ONE question.
+    _group_chat_history groups follow-ups under the question that opened
+    their episode using the continues_episode flag advance_episode/
+    _advance_math_followup set on each reply."""
+    print("V. _group_chat_history groups follow-up turns under their opening question")
+
+    def u(text):
+        return {"role": "user", "text": text}
+
+    def a(continues=False):
+        return {"role": "assistant", "mode": "diagnose_wrong", "continues_episode": continues}
+
+    # The exact reported shape: "What is 24+18?" (fresh) -> "50" (wrong,
+    # continues) -> 3x hint taps (continue) -> "I don't understand"
+    # (continues) -> "42" (correct, continues) -> "fractions" (a brand new
+    # question, NOT a continuation).
+    messages = [
+        u("What is 24 + 18?"), a(False),
+        u("50"), a(True),
+        u("Give me a hint"), a(True),
+        u("Another hint"), a(True),
+        u("Another hint"), a(True),
+        u("I don't understand"), a(True),
+        u("42"), a(True),
+        u("fractions"), a(False),
+    ]
+    groups = app._group_chat_history(messages)
+    check("one real problem + one new topic collapse to exactly 2 groups, "
+         "not 8 flat rows", len(groups) == 2)
+    check("the first group is the ORIGINAL question text, not a follow-up turn",
+         groups[0]["text"] == "What is 24 + 18?")
+    check("the first group counted all 6 follow-up turns (50, 3 hints, "
+         "confusion, 42)", groups[0]["follow_ups"] == 6)
+    check("the second group is the new topic, starting fresh at 0 follow-ups",
+         groups[1]["text"] == "fractions" and groups[1]["follow_ups"] == 0)
+
+    check("an empty chat produces no groups", app._group_chat_history([]) == [])
+
+    # A reply missing the continues_episode key entirely (e.g. a plain
+    # non-math "kind": "chat" reply) must default to starting a new group,
+    # not crash on a missing key.
+    messages2 = [u("hello"), {"role": "assistant", "kind": "chat", "reply": "Hi!"}]
+    groups2 = app._group_chat_history(messages2)
+    check("a reply with no continues_episode key defaults to a fresh group",
+         len(groups2) == 1 and groups2[0]["follow_ups"] == 0)
+
+
+def test_markdown_lite_converts_bold_and_code_but_not_multiplication() -> None:
+    """Live-reported bug: a reply using **bold** rendered the literal
+    asterisks to the child ("The answer is **72**.") instead of bold text,
+    because Streamlit's markdown engine doesn't reprocess markdown syntax
+    nested inside the app's own raw HTML divs. _markdown_lite is the fix,
+    applied after html.escape(). Also checks the specific thing that made a
+    naive *italic* conversion unsafe here: this is a maths tutor where a
+    bare '*' commonly means multiplication in the model's own text."""
+    print("W. _markdown_lite converts **bold**/`code` but leaves multiplication alone")
+
+    check("**bold** becomes a real <strong> tag",
+         app._markdown_lite("The answer is **72**.") == "The answer is <strong>72</strong>.")
+    check("`code` becomes a real <code> tag",
+         app._markdown_lite("Try `7 + 8`.") == "Try <code>7 + 8</code>.")
+    check("multiple bold spans in one reply both convert",
+         app._markdown_lite("**4** plus **5** is **9**")
+         == "<strong>4</strong> plus <strong>5</strong> is <strong>9</strong>")
+    check("plain text with no markdown passes through unchanged",
+         app._markdown_lite("7 times 8 is 56") == "7 times 8 is 56")
+
+    # The specific false-positive this app cannot afford: bare '*' used for
+    # multiplication (the model's own few-shot style, e.g. verifier.py's
+    # "7 * 8") must NOT be mangled into italics.
+    check("a single multiplication expression is left untouched",
+         app._markdown_lite("7 * 8 = 56") == "7 * 8 = 56")
+    check("two multiplication expressions in one reply are NOT misread as "
+         "one italic span spanning both ('4 and 5' would wrongly become "
+         "emphasised text if single '*' were treated as italic)",
+         app._markdown_lite("3*4 and 5*6") == "3*4 and 5*6")
+
+
+def test_blocked_input_is_redacted_in_stored_messages() -> None:
+    """Live-reported-pattern bug: queue_pending_turn appends the child's raw
+    typed text immediately (deliberately, so the question bubble shows up
+    before the slow generation call -- see its own docstring), including
+    PII like a home address. The AI itself never sees or echoes blocked
+    text, but the RAW text still sat in chat["messages"] in plaintext
+    forever -- rendered in both the chat transcript and the History list --
+    even after process_pending_turn learns (from submit_turn's safety
+    check) that it was blocked (U-12). This checks that process_pending_turn
+    redacts its own already-appended message once it finds out."""
+    print("X. process_pending_turn redacts a blocked message's stored text")
+
+    chat = _new_chat(episode=None)
+    app.queue_pending_turn(chat, "my home address is 12 Oak Street")
+    check("the raw text is visible immediately (unchanged from before -- "
+         "still needed for the instant question bubble)",
+         chat["messages"][0]["text"] == "my home address is 12 Oak Street")
+
+    ran = app.process_pending_turn(chat, 3, "on_track")
+    check("process_pending_turn still ran (even though blocked)", ran is True)
+    check("the reply itself is tagged safety_blocked",
+         chat["messages"][1].get("mode") == "safety_blocked")
+    check("the STORED user message is now redacted, not the child's raw PII",
+         chat["messages"][0]["text"] == "[hidden for privacy]")
+
+    # A normal, safe message must NOT be touched by this redaction path.
+    chat2 = _new_chat(episode=None)
+    app.queue_pending_turn(chat2, "What is 2 + 2?")
+
+    class _Resolution:
+        resolved_question = "What is 2 + 2?"
+        retrieval_query = "What is 2 + 2?"
+        use_rag = False
+        use_verifier = False
+
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Resolution()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add 2 and 2!")):
+        app.process_pending_turn(chat2, 3, "on_track")
+    check("a safe message's stored text is left exactly as typed",
+         chat2["messages"][0]["text"] == "What is 2 + 2?")
+
+
+def test_vague_opener_clarifies_without_opening_an_episode() -> None:
+    """A first message with nothing to act on gets a
+    clarifying question and opens NO episode, so the child's next message
+    (the real problem) starts a fresh, gradable one."""
+    print("Vague opener -> clarify, no episode; next message starts a real one")
+
+    class _Fragment:
+        mode = "FRAGMENT"; resolved_question = "Which is the bigger one?"; retrieval_query = ""
+        use_rag = False; use_verifier = False; changed = False
+
+    class _New:
+        mode = "NEW"; resolved_question = "15 pencils and 4 more, how many?"
+        retrieval_query = resolved_question; use_rag = False; use_verifier = True; changed = False
+
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": "Which is the bigger one?"})
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Fragment()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Which two things do you mean?")):
+        reply = app.submit_turn(chat, "Which is the bigger one?", 2, "on_track", [])
+    check("the reply is a clarifying question", reply.get("mode") == C.MODE_CLARIFY)
+    check("no episode is opened by a vague opener", chat["episode"] is None)
+
+    chat["messages"].append(reply)
+    chat["messages"].append({"role": "user", "text": "15 pencils and 4 more, how many?"})
+    history = [{"role": "user", "content": "Which is the bigger one?"},
+               {"role": "assistant", "content": "Which two things do you mean?"}]
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _New()), \
+         _Patch(pipeline, "compute_trusted_answer", lambda *a, **kw: ("19", True, "numeric")), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's add them. What do you get?")):
+        reply = app.submit_turn(chat, "15 pencils and 4 more, how many?", 2, "on_track", history)
+    check("the concrete follow-up opens a gradable episode",
+         chat["episode"] is not None and chat["episode"]["state"].computed_answer == "19")
+
+    # A FRAGMENT later in a conversation is NOT an opener: unchanged path.
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": "what about that"})
+    with _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Fragment()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's look at it.")):
+        reply = app.submit_turn(chat, "what about that", 2, "on_track", history)
+    check("a mid-conversation fragment still opens an episode as before",
+         chat["episode"] is not None and reply.get("mode") == C.MODE_TEACH_INVITE)
+
+
+def test_small_model_scope_check_refuses_new_problem() -> None:
+    """A new problem the small-model scope check judges beyond Class 5 gets
+    the fixed refusal and opens no episode; one it clears opens normally."""
+    print("Small-model scope check on a new problem")
+    from scripts.llm import scope
+
+    class _New:
+        mode = "NEW"; resolved_question = "In how many ways can 4 friends stand in a line?"
+        retrieval_query = resolved_question; use_rag = False; use_verifier = False; changed = False
+
+    chat = _new_chat()
+    chat["messages"].append({"role": "user", "text": _New.resolved_question})
+    with _Patch(scope, "needs_beyond_primary", lambda *a, **kw: True), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _New()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: (_ for _ in ()).throw(AssertionError("no generation"))):
+        reply = app.submit_turn(chat, _New.resolved_question, 5, "on_track", [])
+    check("judged beyond Class 5 -> the fixed refusal", reply.get("mode") == "scope_refused"
+          and reply.get("text") == scope.REFUSAL_TEXT)
+    check("no episode is opened", chat["episode"] is None)
+
+    class _Checked(_New):
+        scope_checked = True
+    with _Patch(scope, "needs_beyond_primary", lambda *a, **kw: (_ for _ in ()).throw(AssertionError("asked twice"))), \
+         _Patch(episode, "record_feedback", lambda *a, **kw: None), \
+         _Patch(pipeline, "resolve_level", lambda *a, **kw: "intermediate"), \
+         _Patch(pipeline, "resolve_conversation", lambda *a, **kw: _Checked()), \
+         _Patch(pipeline, "generate_turn", lambda *a, **kw: _FakeStream("Let's think about it.")):
+        reply = app.submit_turn(chat, _New.resolved_question, 5, "on_track", [])
+    check("an opener the router already judged is not sent to the small model again",
+          chat["episode"] is not None)
+
+
+def main() -> None:
+    # Unit tests never call the network: the small-model scope check is a
+    # stand-in that clears everything, except where a test patches it.
+    from scripts.llm import scope
+    scope.needs_beyond_primary = lambda *a, **kw: False
+    test_generation_failure_rolls_back_state()
+    test_small_model_scope_check_refuses_new_problem()
+    test_vague_opener_clarifies_without_opening_an_episode()
+    test_hint_lifecycle_integration()
+    test_empty_generation_treated_as_failure()
+    test_start_episode_does_not_commit_on_failure()
+    test_practice_problem_shortcut_disabled()
+    test_attempt_recording_semantics()
+    test_public_api_wrappers()
+    test_post_check_paths()
+    test_conceptual_episode_never_advances()
+    test_math_followup_preserves_relationship()
+    test_math_followup_falls_back_safely_on_low_confidence()
+    test_confusion_correction_clarify_do_not_mutate_state()
+    test_confusion_correction_clarify_skip_retrieval()
+    test_clear_chat_preserves_learner_profile()
+    test_current_learner_level_uses_real_backend_classification()
+    test_top_weak_topic_surfaces_canonical_topics_only()
+    test_progress_to_next_badge_has_a_defensible_meaning()
+    test_init_session_state_defaults_to_the_weakest_level()
+    test_change_grade_invalidates_open_episodes_but_keeps_chat_history()
+    test_thread_notes_populated_on_terminal_action()
+    test_self_consistency_guardrail_surfaces_but_does_not_block()
+    test_live_app_never_calls_legacy_tier_a_path()
+    test_episode_scoped_active_turns_excludes_prior_episode()
+    test_input_safety_runs_before_any_llm_routing()
+    test_unsafe_message_mid_episode_preserves_the_open_problem()
+    test_output_safety_blocks_unsafe_generated_text()
+    test_interaction_telemetry_reconstructs_the_turn()
+    test_student_id_is_per_session_not_a_shared_constant()
+    test_pending_turn_shows_question_before_generating_the_reply()
+    test_wrong_answer_gets_a_distinct_visual_treatment()
+    test_name_page_submit_requires_name_and_class()
+    test_group_chat_history_collapses_follow_up_turns()
+    test_markdown_lite_converts_bold_and_code_but_not_multiplication()
+    test_blocked_input_is_redacted_in_stored_messages()
+    print(f"\n{_passed} passed, {_failed} failed")
+    if _failed:
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

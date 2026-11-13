@@ -37,6 +37,16 @@ s, a = C.step(s, "ATTEMPT", "is it 56?")
 check("correct -> diagnose_correct", a.mode == C.MODE_DIAGNOSE_CORRECT)
 check("terminal solved", a.terminal and a.outcome == "solved" and s.phase == C.SOLVED)
 check("offers practice/new", "Practice problem" in a.buttons)
+# Live-reported bug: the celebration text cited a DIFFERENT, earlier
+# problem's answer ("Your answer 5/8 is exactly right!" after the child
+# correctly answered a problem whose real answer was 3/5) -- the directive
+# used to say only "confirm the answer", trusting the model to recall the
+# right number from a conversation that may contain several worked
+# examples. It must now name the actual problem and answer explicitly, the
+# same grounding _d_diagnose_wrong already gets.
+check("diagnose_correct's directive names the actual problem and the "
+     "trusted answer, not a vague 'confirm the answer'",
+     "What is 7 times 8?" in a.directive and "56" in a.directive)
 
 # 2) wrong twice (intermediate) -> CO_SOLVE
 scenario("2. two wrong attempts (intermediate) -> CO_SOLVE")
@@ -111,11 +121,495 @@ s, a = C.start("q", 3, "intermediate", computed_answer="8", is_math=True)
 s, a = C.step(s, "ATTEMPT", "5 + 3 = 8")
 check("'5+3=8' vs truth 8 -> correct", a.outcome == "solved")
 
+# 10b) natural phrasings of a stated answer, including a SPOKEN fraction
+# ("6 over 9") -- previously unrecognized (only the written "6/9" slash form
+# was understood), so a child saying it out loud would fall through to
+# "ambiguous, ask again" instead of being graded.
+scenario("10b. natural answer phrasings, including the spoken '6 over 9' fraction form")
+check("bare fraction '6/9'", C._student_answer("6/9") == "6/9")
+check("'I got 6/9'", C._student_answer("I got 6/9") == "6/9")
+check("\"I think it's 6/9\"", C._student_answer("I think it's 6/9") == "6/9")
+check("'the answer is 6/9'", C._student_answer("the answer is 6/9") == "6/9")
+check("spoken '6 over 9' -> normalized to '6/9'", C._student_answer("6 over 9") == "6/9")
+check("'I got 6 over 9' -> '6/9'", C._student_answer("I got 6 over 9") == "6/9")
+check("unrelated use of the word 'over' is not mistaken for a fraction",
+     C._student_answer("I have 6 apples and ate over 9 of them") is None)
+s7, a7 = C.start("equivalent fraction", 3, "intermediate", computed_answer="2/3", is_math=True)
+s7, a7 = C.step(s7, "ATTEMPT", "6 over 9")
+check("a spoken-fraction answer is graded correct against an equal-value "
+     "trusted answer (6/9 == 2/3)", a7.outcome == "solved")
+
+# 10c) live-reported bug: a procedural "how" question that happens to
+# mention a number from the problem ("...adding 2 fractions") was being
+# read as a STATED answer (the stray "2"), then graded wrong against the
+# real computed answer -- a repeated "how do I find the common
+# denominator" kept getting "Not quite -- let's look again!" instead of
+# being re-explained or shown the method.
+scenario("10c. a 'how' question with a stray number is never read as a stated answer")
+check("'how to find common denominator when adding 2 fractions' has no "
+     "extractable answer despite the '2'",
+     C._student_answer("how to find common denominator when adding 2 fractions") is None)
+check("'how many toffees was it again' (recalling a GIVEN quantity, not "
+     "asking for the method) is unaffected by the guard",
+     C._student_answer("how many toffees was it again") is None)
+s8, a8 = C.start("q", 3, "intermediate", computed_answer="3/10", is_math=True)
+s8, a8 = C.step(s8, "ATTEMPT", "how to find common denominator when adding 2 fractions")
+check("routed to ask_answer (unclear), NOT diagnosed as a wrong attempt",
+     a8.mode == C.MODE_ASK_ANSWER and s8.attempts == 0)
+
 # 11) conceptual question -> engaged, supportive (not graded)
 scenario("11. conceptual attempt -> engaged")
 s, a = C.start("what is a fraction", 3, "intermediate", computed_answer=None, is_math=False)
 s, a = C.step(s, "ATTEMPT", "a part of something?")
 check("conceptual -> ack_conceptual, not terminal", a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
+
+# 11b) Live-reported bug: a bare number typed into a still-ungraded
+# (is_math=False, no computed_answer) episode got a free-text reply that
+# fabricated a false "You're right -- ...=14" confirmation for the input
+# "41", with no verified value on record to check it against at all (this
+# mode is also outside _post_check's checked-modes set, so nothing else
+# would have caught it). The directive must explicitly forbid declaring any
+# number right or wrong here.
+scenario("11b. a bare number in an ungraded conceptual episode must not be told it's right/wrong")
+s, a = C.start("teach me: what is 1 ten and 4 ones put together?", 1, "beginner",
+              computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "41")
+check("still ack_conceptual (no computed_answer exists to grade '41' against)",
+     a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
+check("directive explicitly forbids confirming/denying correctness when there is "
+     "nothing on record to check a stated number against",
+     "no verified value" in a.directive.lower()
+     and "must not tell them it is right or wrong" in a.directive.lower())
+
+# 12) conceptual episode graduates to math once the tutor poses a computable
+# exercise, and the NEXT attempt is then genuinely diagnosed (not a forever-loop)
+scenario("12. conceptual episode graduates when the reply poses a computable exercise")
+s, a = C.start("fractions", 3, "intermediate", computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "a fraction is part of a whole")
+check("still ack_conceptual before graduation", a.mode == C.MODE_ACK_CONCEPTUAL)
+graduated = C.graduate_if_computable(
+    s, "Good thinking! Here's one to try: what is 1/3 of 9?"
+)
+check("graduated to a trusted answer", graduated and s.is_math and s.computed_answer == "3")
+s, a = C.step(s, "ATTEMPT", "3")
+check("next attempt now genuinely diagnosed as correct", a.mode == C.MODE_DIAGNOSE_CORRECT and a.terminal)
+
+scenario("13. no computable sentence in the reply -> no graduation (unchanged loop)")
+s, a = C.start("fractions", 3, "intermediate", computed_answer=None, is_math=False)
+s, a = C.step(s, "ATTEMPT", "a fraction is part of a whole")
+graduated = C.graduate_if_computable(
+    s, "Fractions show parts of a whole. Does that make sense so far?"
+)
+check("not graduated: no computable sentence", not graduated and not s.is_math and s.computed_answer is None)
+s, a = C.step(s, "ATTEMPT", "yes")
+check("still loops through ack_conceptual, as before", a.mode == C.MODE_ACK_CONCEPTUAL and not a.terminal)
+
+scenario("14. already-math episode is never re-graduated (guard against overwrite)")
+s, a = C.start("q", 3, "intermediate", computed_answer="56", is_math=True)
+graduated = C.graduate_if_computable(s, "Try this too: what is 2 + 2?")
+check("already-math episode untouched", not graduated and s.computed_answer == "56")
+
+# 14b) The reported live bug: the posed exercise's numbers live in the
+# sentence BEFORE the one that asks the question, so the isolated trailing
+# "?"-sentence alone has nothing to compute -- graduation needs the growing
+# trailing-window retry, not just the last sentence.
+scenario("14b. posed exercise whose numbers are in the PRECEDING sentence still graduates")
+s, a = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated = C.graduate_if_computable(
+    s, "Pick a fraction you like, say 2/3, and multiply both parts by 3. "
+      "What equivalent fraction do you get?"
+)
+check("graduates using the setup sentence + the question sentence together",
+     graduated and s.is_math and s.computed_answer is not None)
+s2, a2 = C.step(s, "ATTEMPT", "6/9")
+check("the child's equivalent-fraction answer (6/9 == 2/3) is graded CORRECT, "
+     "not looped back into ack_conceptual",
+     a2.mode == C.MODE_DIAGNOSE_CORRECT and a2.terminal)
+
+# 14c) Same shape, but phrased as an instruction with NO '?' at all -- the
+# mechanism must not depend on a question mark being present.
+scenario("14c. posed exercise phrased as an instruction (no '?') still graduates")
+s3, a3 = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated3 = C.graduate_if_computable(
+    s3, "Try to find an equivalent fraction for 2/3 by multiplying the top "
+       "and bottom by 3. Write down the new fraction and tell me what it is."
+)
+check("graduates even though the exercise sentence ends in '.', not '?'",
+     graduated3 and s3.is_math and s3.computed_answer is not None)
+s4, a4 = C.step(s3, "ATTEMPT", "6/9")
+check("the natural-language answer is graded correct here too",
+     a4.mode == C.MODE_DIAGNOSE_CORRECT and a4.terminal)
+
+# 14d) A genuinely wrong equivalent fraction must still be rejected -- the
+# wider trailing window must not make grading more permissive.
+scenario("14d. a genuinely wrong answer to a graduated exercise is still caught")
+s5, a5 = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+C.graduate_if_computable(
+    s5, "Pick a fraction you like, say 2/3, and multiply both parts by 3. "
+       "What equivalent fraction do you get?"
+)
+s6, a6 = C.step(s5, "ATTEMPT", "6/12")
+check("a wrong equivalent fraction (6/12 != 2/3) is diagnosed wrong, not correct",
+     a6.mode == C.MODE_DIAGNOSE_WRONG)
+
+# 14e) The exact live-reported bug: a "colour/take N of M objects, what
+# fraction...?" exercise. The trailing-window retry (14b/14c) already finds
+# the right sentence span, but the extractor correctly resolves it to a bare
+# "int/int" expression (4/10), which verifier._grade_appropriate_answer used
+# to treat as an ambiguous division word problem and withhold -- so solve()
+# returned (None, True): "computable" but never actually injected, and the
+# episode silently never graduated no matter how wide the window got. See
+# verifier._FRACTION_CONVERSION_RE.
+scenario("14e. 'colour N of M, what fraction...?' exercise graduates and grades correctly")
+s7b, a7b = C.start("fractions", 5, "intermediate", computed_answer=None, is_math=False)
+graduated7 = C.graduate_if_computable(
+    s7b, "Imagine you have 10 small bottle caps. If you colour 4 of them, the "
+        "coloured part is a fraction of the whole set. What fraction of the "
+        "bottle caps did you colour?"
+)
+check("graduates (previously stuck at is_math=True, answer=None and never graduated)",
+     graduated7 and s7b.is_math and s7b.computed_answer is not None)
+s8, a8 = C.step(s7b, "ATTEMPT", "4/10")
+check("the child's literal answer (4/10, equal in value to the injected 2/5) is "
+     "genuinely diagnosed correct, not just conversationally acknowledged",
+     a8.mode == C.MODE_DIAGNOSE_CORRECT and a8.terminal)
+
+# 15) hint lifecycle: state-driven numbering, progression, exhaustion, and
+# idempotent repeated clicks after exhaustion. Previously untested: the
+# prior "min(hints_given, 3)" cap had no exhaustion state at all, so every
+# click past the 3rd silently re-requested the model for "Hint 3 of 3"
+# forever (see controller.MODE_HINT_EXHAUSTED).
+scenario("15. hint lifecycle: H1 -> H2 -> H3 -> exhausted -> repeated click is idempotent")
+s, a = C.start("What is 56 - 29?", 3, "intermediate", computed_answer="27", is_math=True)
+s, a = C.step(s, "HINT")
+check("Hint 1: mode=hint, hint_number=1 (state-driven, not LLM-chosen)",
+     a.mode == C.MODE_HINT and a.hint_number == 1 and s.hints_given == 1)
+s, a = C.step(s, "HINT")
+check("Hint 2: hint_number=2", a.mode == C.MODE_HINT and a.hint_number == 2 and s.hints_given == 2)
+s, a = C.step(s, "HINT")
+check("Hint 3: hint_number=3 (== MAX_HINTS)",
+     a.mode == C.MODE_HINT and a.hint_number == 3 and s.hints_given == C.MAX_HINTS)
+check("live-reported bug: the LAST valid hint's own buttons must not still "
+     "offer 'Another hint' -- there isn't one, and offering it anyway meant "
+     "a tap only revealed exhaustion one wasted click later",
+     "Another hint" not in a.buttons and "Just show me" in a.buttons)
+s, a = C.step(s, "HINT")
+check("4th HINT request -> MODE_HINT_EXHAUSTED, not another 'Hint 3' call, "
+     "hints_given does NOT increment past MAX_HINTS",
+     a.mode == C.MODE_HINT_EXHAUSTED and s.hints_given == C.MAX_HINTS)
+check("exhausted buttons drop 'Another hint', offering a real next action instead",
+     "Another hint" not in a.buttons and "Just show me" in a.buttons)
+check("the episode is NOT terminal just because hints are exhausted -- the "
+     "student can still try or ask to be shown",
+     not a.terminal and s.phase == C.AWAITING)
+
+# Live-reported bug, second half: once hints are exhausted, EVERY other
+# reply that offers a retry (wrong answer, confusion, a conceptual aside)
+# must also stop offering "Give me a hint" -- not just the hint branch
+# itself. Continuing from the same now-exhausted state above.
+s3, a3 = C.step(s, "ATTEMPT", "100")
+check("a wrong answer after hints are exhausted does not re-offer a hint",
+     a3.mode == C.MODE_DIAGNOSE_WRONG and "Give me a hint" not in a3.buttons)
+s4, a4 = C.step(s, "CONFUSION", "huh?")
+check("confusion after hints are exhausted does not re-offer a hint either",
+     a4.mode == C.MODE_CONFUSION and "Give me a hint" not in a4.buttons)
+# Repeated click after exhaustion (simulating a double-submit / rerender):
+# calling step() again on the SAME already-exhausted state must be
+# idempotent, not compound.
+s2, a2 = C.step(s, "HINT")
+check("a second request after exhaustion is still MODE_HINT_EXHAUSTED, and "
+     "hints_given is unchanged (idempotent, not compounding)",
+     a2.mode == C.MODE_HINT_EXHAUSTED and s2.hints_given == C.MAX_HINTS)
+
+scenario("16. hint generation failure does not corrupt hint-count state")
+# A failed generation must not have already incremented hints_given before
+# the caller can roll back -- controller.step() mutates state SYNCHRONOUSLY
+# before any generation call happens (generation is the caller's problem,
+# in frontend/app.py's commit-only-after-success pattern), so this checks
+# the controller side of that contract: hints_given reflects exactly the
+# number of HINT steps actually taken, independent of what the (separate)
+# generation layer does with that hint_number afterward.
+s, a = C.start("What is 12 x 4?", 3, "intermediate", computed_answer="48", is_math=True)
+s, a = C.step(s, "HINT")
+pre_fail_hints_given = s.hints_given
+# Simulate: the caller's generation step for this hint fails and rolls back
+# to a COPY of the state from before this step() call (the actual rollback
+# mechanism lives in frontend/app.py; here we confirm the controller-side
+# invariant the rollback depends on -- hint_number is a pure function of
+# hints_given, so retrying the identical state produces the identical
+# hint_number, not a skipped or duplicated one).
+import copy as _copy
+retry_state = _copy.copy(s)
+retry_state.hints_given -= 1  # what frontend/app.py's rollback restores to
+s_retry, a_retry = C.step(retry_state, "HINT")
+check("retrying after a simulated generation failure reproduces the SAME "
+     "hint_number, not the next one (no hint silently skipped or double-counted)",
+     a_retry.hint_number == a.hint_number == pre_fail_hints_given)
+
+scenario("17. broad-method vs specific-problem teaching directive selection")
+# A broad method/concept question ("Addition of 3 digit") has is_math=False
+# (nothing for verifier.compute() to extract) and must get the worked-
+# example directive, not the withhold-and-invite one that's correct for a
+# SPECIFIC computable problem. See controller._d_teach_invite_conceptual.
+s_broad, a_broad = C.start("Addition of 3 digit", 3, "intermediate",
+                           computed_answer=None, is_math=False)
+check("broad method question -> the worked-example directive variant is used",
+     a_broad.directive == C._d_teach_invite_conceptual)
+check("the worked-example directive actually asks for real steps, not just an analogy",
+     "ONE complete worked example" in a_broad.directive
+     and "the actual method must be" in a_broad.directive)
+# Live-observed bug: a bare topic request ("fractions") consistently got an
+# OPERATIONS-first answer (adding fractions, making equivalent fractions)
+# because a retrieved chunk discussed an operation, never once stating what
+# a fraction fundamentally IS first. The directive must explicitly require
+# grounding the basic meaning before any worked example/operation.
+check("the directive requires stating what the concept MEANS before any "
+     "worked example, for a bare topic request",
+     "fundamentally MEANS" in a_broad.directive
+     and "Ground the basic meaning first" in a_broad.directive)
+check("the directive explicitly warns against jumping to an operation just "
+     "because the retrieved context happens to discuss one",
+     "does not mean that is what was asked" in a_broad.directive)
+
+s_specific, a_specific = C.start("What is 245 + 136?", 3, "intermediate",
+                                 computed_answer="381", is_math=True)
+check("a specific computable problem -> the withhold-and-invite directive variant is used",
+     a_specific.directive == C._d_teach_invite_specific(s_specific))
+check("directives differ between the two cases (not the same text for both)",
+     a_broad.directive != a_specific.directive)
+
+# 17b) Live-reported: an "advanced"-classified student's explanations
+# weren't measurably terser than a beginner's, even after the level
+# genuinely flipped. Root cause -- the per-turn directive (which the model
+# weighs far more than the system-prompt-level LEVEL_STYLE block) was the
+# SAME fixed text for every level. It must now visibly differ for advanced.
+scenario("17b. teach_invite_specific's directive itself scales for 'advanced', not just LEVEL_STYLE")
+s_adv, a_adv = C.start("What is 245 + 136?", 3, "advanced",
+                       computed_answer="381", is_math=True)
+check("an advanced student's teach_invite directive is genuinely different "
+     "text from intermediate's -- not just a shared baseline the system "
+     "prompt's LEVEL_STYLE block hopes to compress",
+     a_adv.directive != a_specific.directive)
+check("the advanced directive explicitly caps it at 1-2 sentences and "
+     "makes the example optional, not just 'briefly'",
+     "ONE or TWO short sentences" in a_adv.directive
+     and "no example at all unless" in a_adv.directive)
+check("the advanced directive is still protecting the answer, same as "
+     "every other level (personalisation adjusts depth, never disclosure)",
+     "do not show the final answer" in a_adv.directive.lower())
+
+scenario("18. 'Show me how' (cold SOLVE) directive also distinguishes broad vs specific")
+s_broad2, a_broad2 = C.step(s_broad, "SOLVE")
+check("cold 'Show me how' on a broad method question -> honoured directly with "
+     "the SAME worked-example directive (no answer to protect, so no redirect gate)",
+     a_broad2.mode == C.MODE_REDIRECT and a_broad2.directive == C._d_teach_invite_conceptual)
+
+s_specific2, a_specific2 = C.step(s_specific, "SOLVE")
+check("cold 'Show me how' on a specific problem -> still redirected (protects "
+     "THIS problem's answer), but now requires an actual worked different-numbers example",
+     a_specific2.mode == C.MODE_REDIRECT
+     and "DIFFERENT numbers" in a_specific2.directive
+     and "381" not in a_specific2.directive)
+
+scenario("19. CONFUSION/CORRECTION/CLARIFY are generation-only (no state mutation)")
+for intent_label, expected_mode in (
+    ("CONFUSION", C.MODE_CONFUSION),
+    ("CORRECTION", C.MODE_CORRECTION),
+    ("CLARIFY", C.MODE_CLARIFY),
+):
+    s0, _ = C.start("What is 7 times 8?", 3, "intermediate",
+                    computed_answer="56", is_math=True)
+    s0.attempts = 1  # mid-episode, one prior wrong attempt
+    pre_attempts, pre_hints, pre_phase = s0.attempts, s0.hints_given, s0.phase
+    s1, a1 = C.step(s0, intent_label, "huh?")
+    check(f"{intent_label} -> mode {expected_mode}", a1.mode == expected_mode)
+    check(f"{intent_label} does not touch attempts", s1.attempts == pre_attempts)
+    check(f"{intent_label} does not touch hints_given", s1.hints_given == pre_hints)
+    check(f"{intent_label} does not change phase / end the episode",
+         s1.phase == pre_phase and not a1.terminal)
+    check(f"{intent_label} never reveals the computed answer in its directive",
+         "56" not in a1.directive)
+
+s_corr, a_corr = C.step(s0, "CORRECTION", "no thats not what i meant")
+check("CORRECTION's directive explicitly forbids solving/revealing the "
+     "answer -- live walkthrough found the model otherwise happily solving "
+     "a freshly-started problem the moment the child said 'no'",
+     "do NOT solve" in a_corr.directive and "do NOT state the final" in a_corr.directive)
+
+scenario("20. start_followup connects a changed value to the previous problem")
+s_follow, a_follow = C.start_followup(
+    "245 + 136", "245 + 150", 3, "intermediate",
+    computed_answer="395", is_math=True,
+)
+check("opens as teach_invite (same disclosure policy as a fresh episode)",
+     a_follow.mode == C.MODE_TEACH_INVITE and not a_follow.terminal)
+check("fresh attempts/hints budget for the follow-up sub-episode",
+     s_follow.attempts == 0 and s_follow.hints_given == 0)
+check("the new problem's trusted answer is NOT leaked into the teach directive",
+     "395" not in a_follow.directive)
+check("the directive explicitly names BOTH the previous and the new problem, "
+     "so the tutor states the connection instead of pretending nothing came before",
+     "245 + 136" in a_follow.directive and "245 + 150" in a_follow.directive)
+
+s_follow_conceptual, a_follow_conceptual = C.start_followup(
+    "fractions", "what about thirds", 4, "intermediate",
+    computed_answer=None, is_math=False,
+)
+check("a follow-up that resolves to non-computable falls back to the ordinary "
+     "conceptual teach_invite directive (no previous-problem text needed)",
+     a_follow_conceptual.directive == C._d_teach_invite_conceptual)
+
+# 21) Objective 2 gap, live-reported: a question with a single short,
+# NON-numeric answer (a day name, shape name, yes/no...) had no trusted
+# value to grade against, so a CORRECT answer like "Thursday" never got
+# confirmed OR counted toward personalisation (student_tracker.record is
+# only reached from a genuine diagnose_correct/wrong outcome). These cover
+# the categorical half of diagnose()/TutorState added to close that gap.
+scenario("21. categorical (non-numeric) trusted answers")
+check("'Thursday' matches the trusted answer 'Thursday' (case/punct-insensitive)",
+     C._categorical_match("I think it's thursday!", "Thursday"))
+check("a leading article on the trusted answer doesn't block a bare match "
+     "('a square' vs a child just writing 'square')",
+     C._categorical_match("square", "a square"))
+check("substring match works the other way too -- a short trusted answer "
+     "inside a longer sentence", C._categorical_match("Thursday", "Thursday"))
+check("a genuinely different answer does not match",
+     not C._categorical_match("Friday", "Thursday"))
+check("empty turn never matches", not C._categorical_match("", "Thursday"))
+
+check("diagnose() with a categorical trusted answer: a real match -> correct",
+     C.diagnose("Thursday", "Thursday", True, "categorical") == "correct")
+check("diagnose() with a categorical trusted answer: no match -> 'engaged', "
+     "NEVER 'wrong' -- deliberately conservative, see diagnose()'s own "
+     "docstring for why a false 'wrong' is worse than staying neutral",
+     C.diagnose("Friday", "Thursday", True, "categorical") == "engaged")
+
+s_cat, a_cat = C.start("if today is Monday, what day will it be after 3 days?",
+                       1, "beginner", computed_answer="Thursday", is_math=True,
+                       answer_type="categorical")
+check("categorical TutorState starts the same as any other open episode",
+     a_cat.mode == C.MODE_TEACH_INVITE and s_cat.answer_type == "categorical")
+s_cat, a_cat = C.step(s_cat, "ATTEMPT", "Thursday")
+check("a correct categorical ATTEMPT reaches diagnose_correct, terminal, "
+     "outcome=solved -- the SAME real grading/personalisation path a "
+     "numeric correct answer gets, not the old ungraded ack_conceptual loop",
+     a_cat.mode == C.MODE_DIAGNOSE_CORRECT and a_cat.terminal
+     and a_cat.outcome == "solved" and s_cat.phase == C.SOLVED)
+
+s_cat2, a_cat2 = C.start("if today is Monday, what day will it be after 3 days?",
+                         1, "beginner", computed_answer="Thursday", is_math=True,
+                         answer_type="categorical")
+s_cat2, a_cat2 = C.step(s_cat2, "ATTEMPT", "Friday")
+check("a WRONG categorical ATTEMPT stays conservative (ack_conceptual, not "
+     "a confident 'wrong' diagnosis) and does NOT count as a graded attempt",
+     a_cat2.mode == C.MODE_ACK_CONCEPTUAL and s_cat2.attempts == 0
+     and not a_cat2.terminal)
+
+# 22) Issue 3 gap, live-reported: questions like "What is the LCM of 4 and
+# 6?" (needs a named function neither the numeric nor categorical
+# extractor's grammar can express), "What type of angle is 120 degrees?"
+# (classification), and "Divide 20 by 3" (the quotient+remainder pair was
+# computable but left fully ungraded) all had no trusted value to grade
+# against end-to-end through the controller. These cover the three new
+# answer_type shapes (time/list/quotient_remainder) added to close that
+# gap, the same way scenario 21 covers "categorical".
+scenario("22. time / list / quotient_remainder trusted answers")
+check("a matching clock time -> correct",
+     C._time_match("I think it will be 4:15", "4:15"))
+check("a non-matching clock time does not match",
+     not C._time_match("I think it will be 5:00", "4:15"))
+check("the full matching factor set, any order -> matches",
+     C._list_match("12, 6, 4, 3, 2, 1", "1, 2, 3, 4, 6, 12"))
+check("a partial factor set does not match",
+     not C._list_match("1, 2, 3", "1, 2, 3, 4, 6, 12"))
+check("a matching quotient+remainder pair -> matches",
+     C._qr_match("6 remainder 2", "6 remainder 2"))
+check("a wrong remainder does not match",
+     not C._qr_match("6 remainder 1", "6 remainder 2"))
+
+s_time, a_time = C.start("If it is 3:30 now, what time will it be in 45 minutes?",
+                         4, "intermediate", computed_answer="4:15", is_math=True,
+                         answer_type="time")
+s_time, a_time = C.step(s_time, "ATTEMPT", "it will be 4:15")
+check("a correct TIME attempt reaches diagnose_correct, terminal, solved -- "
+     "the same real grading/personalisation path a numeric correct answer gets",
+     a_time.mode == C.MODE_DIAGNOSE_CORRECT and a_time.terminal
+     and a_time.outcome == "solved" and s_time.phase == C.SOLVED)
+
+s_list, a_list = C.start("What are the factors of 12?",
+                         5, "intermediate", computed_answer="1, 2, 3, 4, 6, 12",
+                         is_math=True, answer_type="list")
+s_list, a_list = C.step(s_list, "ATTEMPT", "1, 2, 3, 4, 6, 12")
+check("a correct LIST attempt (full matching set) reaches diagnose_correct, "
+     "terminal, solved",
+     a_list.mode == C.MODE_DIAGNOSE_CORRECT and a_list.terminal
+     and a_list.outcome == "solved" and s_list.phase == C.SOLVED)
+
+s_qr, a_qr = C.start("Divide 20 sweets among 3 children. How many does each get?",
+                     3, "beginner", computed_answer="6 remainder 2", is_math=True,
+                     answer_type="quotient_remainder")
+s_qr, a_qr = C.step(s_qr, "ATTEMPT", "6 remainder 2")
+check("a correct QUOTIENT_REMAINDER attempt reaches diagnose_correct, "
+     "terminal, solved -- previously left fully ungraded",
+     a_qr.mode == C.MODE_DIAGNOSE_CORRECT and a_qr.terminal
+     and a_qr.outcome == "solved" and s_qr.phase == C.SOLVED)
+
+s_qr2, a_qr2 = C.start("Divide 20 sweets among 3 children. How many does each get?",
+                       3, "beginner", computed_answer="6 remainder 2", is_math=True,
+                       answer_type="quotient_remainder")
+s_qr2, a_qr2 = C.step(s_qr2, "ATTEMPT", "6 remainder 1")
+check("a WRONG quotient+remainder attempt stays conservative (ack_conceptual, "
+     "not a confident 'wrong' diagnosis) and does NOT count as a graded attempt",
+     a_qr2.mode == C.MODE_ACK_CONCEPTUAL and s_qr2.attempts == 0
+     and not a_qr2.terminal)
+
+# 23) Live-reported: a bare "fractions" question (is_math=False, no
+# computed_answer -- a BROAD conceptual reply that already shows its own
+# worked example in the body text) still offered "Give me a hint"/"Show me
+# how" buttons, a dangling promise since there is no protected answer to
+# hint toward or reveal. Every call site that attaches this button set
+# must now be gated on there actually being one (controller._invite_buttons).
+scenario("23. hint/reveal buttons only appear when there's an actual protected answer")
+check("a broad conceptual start() offers NO hint/reveal buttons",
+     "Give me a hint" not in a_broad.buttons and "Show me how" not in a_broad.buttons)
+check("a specific computable start() still offers them, unaffected",
+     "Give me a hint" in a_specific.buttons and "Show me how" in a_specific.buttons)
+check("a cold 'Show me how' (REDIRECT) on a broad conceptual question also "
+     "offers no hint/reveal buttons -- same gate applies to _handle_solve",
+     a_broad2.buttons == [])
+check("a cold 'Show me how' (REDIRECT) on a specific problem still offers "
+     "them, unaffected", "Give me a hint" in a_specific2.buttons)
+
+s_concept, a_concept = C.start("what is a fraction", 3, "intermediate",
+                               computed_answer=None, is_math=False)
+check("start_followup's conceptual branch also offers no hint/reveal buttons",
+     "Give me a hint" not in a_follow_conceptual.buttons
+     and "Show me how" not in a_follow_conceptual.buttons)
+
+s_concept, a_concept = C.step(s_concept, "ATTEMPT", "a part of something?")
+check("MODE_ACK_CONCEPTUAL (the ordinary follow-up to a conceptual episode) "
+     "offers no hint/reveal buttons either -- same dangling-promise bug",
+     a_concept.mode == C.MODE_ACK_CONCEPTUAL and a_concept.buttons == [])
+
+s_concept2, a_concept2 = C.step(s_concept, "CONFUSION", "huh?")
+check("CONFUSION during a still-ungraded conceptual episode (0 attempts) "
+     "offers no hint/reveal buttons",
+     a_concept2.mode == C.MODE_CONFUSION and a_concept2.buttons == [])
+s_concept3, a_concept3 = C.step(s_concept, "CORRECTION", "no I meant something else")
+check("CORRECTION during a conceptual episode offers no hint/reveal buttons",
+     a_concept3.mode == C.MODE_CORRECTION and a_concept3.buttons == [])
+s_concept4, a_concept4 = C.step(s_concept, "CLARIFY", "huh what do you mean")
+check("CLARIFY during a conceptual episode offers no hint/reveal buttons",
+     a_concept4.mode == C.MODE_CLARIFY and a_concept4.buttons == [])
+
+# A categorical trusted answer (verdict "engaged" from a WRONG categorical
+# guess, scenario 21 above) DOES have a real protected answer -- the
+# gate must not over-trigger and strip buttons from that genuinely
+# different "engaged" case.
+check("a categorical episode's conservative 'engaged' wrong-guess case "
+     "(a real protected answer exists, just not confidently graded wrong) "
+     "still offers hint/reveal buttons -- the gate must not over-trigger",
+     "Give me a hint" in a_cat2.buttons)
 
 print(f"\n{_passed} passed, {_failed} failed")
 if _failed:

@@ -1,0 +1,2949 @@
+{
+  "source_result": "curriculum_benchmark_eval_20261024T083156Z_e55f69912c.json",
+  "items": [
+    {
+      "case_id": "cb-002",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Why does a ball roll easily in any direction?",
+      "expected_key_idea": "A ball (sphere) is round all over with no flat sides or corners, so it can roll smoothly in any direction."
+    },
+    {
+      "case_id": "cb-003",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Can two circles be different sizes but both still be circles? Explain.",
+      "expected_key_idea": "Yes -- 'circle' describes the SHAPE (perfectly round, no corners), not a fixed size; a small circle and a large circle are both still circles."
+    },
+    {
+      "case_id": "cb-004",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a rectangle.",
+      "expected_key_idea": "Any genuinely rectangular household object (e.g. a book, a door, a table top)."
+    },
+    {
+      "case_id": "cb-005",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "question": "What shape is the student describing?",
+      "expected_key_idea": "The description is self-contradictory for one simple primary shape (round AND four straight sides at once); the tutor should ask the student to clarify or re-describe rather than guess a shape name."
+    },
+    {
+      "case_id": "cb-009",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "conceptual",
+      "question": "Why do we say there are 'zero' apples when a basket is empty, instead of saying there is no number at all?",
+      "expected_key_idea": "Zero means there is nothing/none; it is still a valid number representing an empty count, not the absence of a number."
+    },
+    {
+      "case_id": "cb-019",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "conceptual",
+      "question": "Why do we write 10 using the digits 1 and 0, instead of a brand-new symbol?",
+      "expected_key_idea": "Place value: the 1 stands for one group of ten and the 0 stands for zero extra ones; reusing digits with place value lets us write any number without needing a new symbol for every number."
+    },
+    {
+      "case_id": "cb-023",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "comparison",
+      "question": "Is 1, 2, 4, 8 an ascending (increasing) pattern? How can you tell?",
+      "expected_key_idea": "Yes -- each number in the sequence is bigger than the one before it."
+    },
+    {
+      "case_id": "cb-025",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "question": "Is the student's stated rule correct for this pattern?",
+      "expected_key_idea": "No -- the actual rule is 'add 2 each time', not 'add 1'; point out the specific gap (e.g. 4-2=2, not 1) using the student's own numbers rather than a generic correction."
+    },
+    {
+      "case_id": "cb-026",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is longer: your arm or your little finger?",
+      "expected_key_idea": "The arm is longer."
+    },
+    {
+      "case_id": "cb-027",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "Why might you and a friend measure the same table with handspans and get different numbers?",
+      "expected_key_idea": "A handspan (a non-standard unit) is a different size for different people, so the resulting count differs even though the table's real length didn't change."
+    },
+    {
+      "case_id": "cb-028",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "Name something you would describe as 'heavier' or 'lighter' rather than count with a number.",
+      "expected_key_idea": "Any sensible example comparing weight rather than count, e.g. a bag of rice vs a bag of cotton."
+    },
+    {
+      "case_id": "cb-030",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "misconception",
+      "question": "Does the differing handspan count mean the book's size changed?",
+      "expected_key_idea": "No -- the book's real size didn't change; handspans differ in size from person to person, so the COUNT differs even though the actual length is the same."
+    },
+    {
+      "case_id": "cb-033",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "real_life",
+      "question": "Name one Indian coin from this list: Rs.1, Rs.2, Rs.5, Rs.10.",
+      "expected_key_idea": "Any one of Rs.1, Rs.2, Rs.5, Rs.10 is a valid answer."
+    },
+    {
+      "case_id": "cb-034",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "conceptual",
+      "question": "Why do we count carefully (e.g. one by one) before answering 'how many toys are there' in a picture?",
+      "expected_key_idea": "Careful counting (e.g. with tally marks or pointing to each item) avoids missing or double-counting items in a picture."
+    },
+    {
+      "case_id": "cb-179",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Why can a ball roll but a box cannot roll?",
+      "expected_key_idea": "A ball (sphere) is round all over with no flat sides, so it rolls smoothly; a box has flat sides and corners, so it slides or tips instead."
+    },
+    {
+      "case_id": "cb-180",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Is a square also a kind of rectangle? Why or why not?",
+      "expected_key_idea": "At this level it's fine to say yes in a simple sense -- a square has 4 straight sides and 4 right-angle corners just like a rectangle, it's just special because all 4 sides are equal."
+    },
+    {
+      "case_id": "cb-181",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one round object you can find in your kitchen.",
+      "expected_key_idea": "Any genuinely round/circular kitchen object (a plate, a roti, a bowl's rim, a bangle)."
+    },
+    {
+      "case_id": "cb-182",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a triangle.",
+      "expected_key_idea": "Any genuinely triangular household object (a slice of bread cut diagonally, a sandwich half, a party hat)."
+    },
+    {
+      "case_id": "cb-183",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "question": "What shape is the student describing?",
+      "expected_key_idea": "Could be a rectangle (if opposite sides are equal and corners are right angles) or some other 4-sided shape -- the description alone isn't enough to be sure; the tutor should ask a follow-up rather than guess."
+    },
+    {
+      "case_id": "cb-184",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "misconception",
+      "question": "Does a bigger triangle have more corners than a smaller one?",
+      "expected_key_idea": "No -- every triangle has exactly 3 corners no matter its size; size and number of corners are different properties."
+    },
+    {
+      "case_id": "cb-186",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Can two triangles be different sizes but both still be called triangles? Explain.",
+      "expected_key_idea": "Yes -- 'triangle' means 3 straight sides and 3 corners, which doesn't depend on size; a tiny triangle and a huge triangle are both triangles."
+    },
+    {
+      "case_id": "cb-188",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "If you look at a clock face, what shape is its outer edge usually?",
+      "expected_key_idea": "A circle."
+    },
+    {
+      "case_id": "cb-189",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Why does a box stack neatly on top of another box, but a ball does not?",
+      "expected_key_idea": "A box has flat sides that sit evenly against another flat surface, so it stays put; a ball is curved all over, so it has no flat side to rest stably on and rolls away."
+    },
+    {
+      "case_id": "cb-192",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a rectangle.",
+      "expected_key_idea": "Any genuinely rectangular household object (a door, a book, a table top)."
+    },
+    {
+      "case_id": "cb-193",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Is a circle the same shape as an oval? Why or why not?",
+      "expected_key_idea": "No -- a circle is perfectly round all over (every point the same distance from the centre), while an oval is stretched/squashed and not equally round in every direction."
+    },
+    {
+      "case_id": "cb-194",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "question": "What shape is the student describing?",
+      "expected_key_idea": "Most likely a circle, but the description alone (round, no corners) doesn't rule out an oval either -- a tutor should ask for more detail rather than assume circle with full confidence."
+    },
+    {
+      "case_id": "cb-196",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Why does a cone have one flat round face but still be able to stand upright?",
+      "expected_key_idea": "Its one flat circular base gives it a stable, flat surface to rest on, while its curved pointed top tapers to a point, so it balances upright on the flat base."
+    },
+    {
+      "case_id": "cb-197",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a sphere.",
+      "expected_key_idea": "Any genuinely sphere-shaped object (a ball, an orange, a marble)."
+    },
+    {
+      "case_id": "cb-198",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "Riya drew a shape with three straight lines meeting at three points. Without seeing the drawing, what shape did she most likely draw?",
+      "expected_key_idea": "A triangle -- three straight lines meeting at three points is exactly what makes a triangle."
+    },
+    {
+      "case_id": "cb-200",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "Look around the room you are in right now. Is there anything near you shaped like a circle?",
+      "expected_key_idea": "Any genuinely circular object plausibly nearby (a clock, a coin, a cup's rim) -- open-ended, graded on whether the named object is actually round."
+    },
+    {
+      "case_id": "cb-201",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "A square and a diamond (rotated square) -- do they have the same number of sides and corners?",
+      "expected_key_idea": "Yes -- a diamond shape here is just a square turned at an angle; turning a shape doesn't change how many sides or corners it has, only its orientation."
+    },
+    {
+      "case_id": "cb-202",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "misconception",
+      "question": "Does drawing a triangle bigger give it more corners?",
+      "expected_key_idea": "No -- every triangle has exactly 3 corners regardless of how big or small it is drawn; size changes the triangle's area, not its number of corners."
+    },
+    {
+      "case_id": "cb-203",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "real_life",
+      "question": "A samosa is often folded into a shape with 3 flat sides. What shape is that?",
+      "expected_key_idea": "A triangle."
+    },
+    {
+      "case_id": "cb-204",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "If you cut a square piece of paper exactly along one diagonal, what two shapes do you get?",
+      "expected_key_idea": "Two triangles -- cutting a square corner-to-corner along its diagonal splits it into two identical triangular halves."
+    },
+    {
+      "case_id": "cb-208",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "comparison",
+      "question": "Are 5 and 5 the same number, or is one bigger?",
+      "expected_key_idea": "5 and 5 are the same number -- neither is bigger."
+    },
+    {
+      "case_id": "cb-214",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "comparison",
+      "question": "Are 3 and 3 the same number, or is one bigger?",
+      "expected_key_idea": "3 and 3 are the same number -- neither is bigger."
+    },
+    {
+      "case_id": "cb-217",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "comparison",
+      "question": "Are 7 and 7 the same number, or is one bigger? You also have 2 pencils in your bag.",
+      "expected_key_idea": "7 and 7 are the same number -- neither is bigger."
+    },
+    {
+      "case_id": "cb-225",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "ambiguous",
+      "question": "A number is bigger than 3 and smaller than 7. What could it be?",
+      "expected_key_idea": "More than one correct answer is possible (4, 5, or 6) -- the tutor should recognize this is open-ended, not a single fixed value."
+    },
+    {
+      "case_id": "cb-229",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "misconception",
+      "question": "Can 0 be compared to other numbers, like saying it is smaller than 3?",
+      "expected_key_idea": "Yes -- 0 is a real number and can absolutely be compared; 0 is smaller than 3 (and smaller than every number from 1 to 9)."
+    },
+    {
+      "case_id": "cb-234",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "ambiguous",
+      "question": "Sara has 1 stickers. A friend gives some more, and now Sara has 6 more than before. How many stickers might that be in total?",
+      "expected_key_idea": "The total is 1+6=7 stickers if 'how many more' is read as an exact amount given directly, but the phrasing is loose enough that a tutor should confirm what '6 more' means before committing to one number."
+    },
+    {
+      "case_id": "cb-246",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "ambiguous",
+      "question": "Neha has 4 balloons. A friend gives some more, and now Neha has 4 more than before. How many balloons might that be in total?",
+      "expected_key_idea": "The total is 4+4=8 balloons if 'how many more' is read as an exact amount given directly, but the phrasing is loose enough that a tutor should confirm what '4 more' means before committing to one number."
+    },
+    {
+      "case_id": "cb-248",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "ambiguous",
+      "question": "Riya has 3 pencils. A friend gives some more, and now Riya has 6 more than before. Riya also has a red bag. How many pencils might that be in total?",
+      "expected_key_idea": "The total is 3+6=9 pencils if 'how many more' is read as an exact amount given directly, but the phrasing is loose enough that a tutor should confirm what '6 more' means before committing to one number."
+    },
+    {
+      "case_id": "cb-252",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "ambiguous",
+      "question": "Two numbers that are each less than 9 add up to 8. What could the two numbers be?",
+      "expected_key_idea": "Many pairs work (1+7, 2+6, 3+5, 4+4) -- the question is open-ended, with no single correct pair."
+    },
+    {
+      "case_id": "cb-259",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "conceptual",
+      "question": "What do the two digits in the number 15 stand for?",
+      "expected_key_idea": "The 1 stands for 1 ten (10), and the 5 stands for 5 ones -- together, 10+5=15."
+    },
+    {
+      "case_id": "cb-263",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "ambiguous",
+      "question": "A number between 10 and 20 has a 1 in its tens place. What could the number be?",
+      "expected_key_idea": "Any number from 10 to 19 fits -- the question is open-ended with multiple correct answers, not a single fixed value."
+    },
+    {
+      "case_id": "cb-270",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "conceptual",
+      "question": "What do the two digits in the number 19 stand for?",
+      "expected_key_idea": "The 1 stands for 1 ten (10), and the 9 stands for 9 ones -- together, 10+9=19."
+    },
+    {
+      "case_id": "cb-273",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "comparison",
+      "question": "Meera says her age is between 10 and 15, and also between 13 and 20. What could her age be?",
+      "expected_key_idea": "Her age must satisfy BOTH ranges at once, so it must be 13 or 14 -- the only ages that fall in both 'between 10 and 15' and 'between 13 and 20'."
+    },
+    {
+      "case_id": "cb-279",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "question": "In the pattern circle, square, circle, square, circle, what shape comes next?",
+      "expected_key_idea": "A square -- the pattern alternates circle then square, so after circle comes square."
+    },
+    {
+      "case_id": "cb-281",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "ambiguous",
+      "question": "Look at this pattern: 2, 4, 6. What could the next number be?",
+      "expected_key_idea": "Most likely 8 (continuing +2 each time), but with only 3 terms shown a tutor should note this is the most reasonable guess, not a certainty, since other patterns could technically also start 2,4,6."
+    },
+    {
+      "case_id": "cb-282",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "question": "In the pattern red, blue, blue, red, blue, blue, what comes next?",
+      "expected_key_idea": "Red -- the repeating unit is 'red, blue, blue', so after the second 'blue' the pattern restarts with 'red'."
+    },
+    {
+      "case_id": "cb-284",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "question": "Can a number pattern count down instead of up?",
+      "expected_key_idea": "Yes -- a pattern like 9,7,5,3 counts down by 2 each time, which is just as valid a pattern as one that counts up."
+    },
+    {
+      "case_id": "cb-287",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "question": "In the pattern star, star, moon, star, star, moon, what comes next?",
+      "expected_key_idea": "A star -- the repeating unit is 'star, star, moon', so after 'moon' the pattern restarts with 'star'."
+    },
+    {
+      "case_id": "cb-289",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "real_life",
+      "question": "Name one everyday pattern you can see on a piece of clothing, like stripes or dots.",
+      "expected_key_idea": "Any genuine repeating pattern (stripes, polka dots, checks)."
+    },
+    {
+      "case_id": "cb-290",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "ambiguous",
+      "question": "Look at this pattern: 1, 2, 4. What could the next number be?",
+      "expected_key_idea": "Could be 8 (doubling each time) or 7 (adding 1, then 2, then 3) -- with only 3 terms, more than one rule fits, so a tutor should note the ambiguity rather than pick one confidently."
+    },
+    {
+      "case_id": "cb-292",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "question": "Sara claps, stomps, claps, stomps, claps. If she keeps going the same way, what does she do next?",
+      "expected_key_idea": "Stomps -- the pattern alternates clap, stomp, so after the last clap comes a stomp."
+    },
+    {
+      "case_id": "cb-294",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "question": "Can a pattern go up for a while and then go down?",
+      "expected_key_idea": "Yes -- a pattern like 1,2,3,2,1 rises then falls; nothing requires a pattern to move in only one direction forever."
+    },
+    {
+      "case_id": "cb-295",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "real_life",
+      "question": "A row of streetlights goes on, off, on, off, on. If the pattern keeps going, is the next light on or off?",
+      "expected_key_idea": "Off -- the pattern alternates on/off, so after the 5th light (on) comes off."
+    },
+    {
+      "case_id": "cb-297",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is longer: a pencil or a school bus?",
+      "expected_key_idea": "A school bus is longer."
+    },
+    {
+      "case_id": "cb-298",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is heavier: a feather or a stone?",
+      "expected_key_idea": "A stone is heavier."
+    },
+    {
+      "case_id": "cb-299",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which holds more water: a small cup or a bucket?",
+      "expected_key_idea": "A bucket holds more."
+    },
+    {
+      "case_id": "cb-300",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "If you measure a table's length using your hand-spans, why might you and your friend get different numbers of hand-spans for the same table?",
+      "expected_key_idea": "Because hand-spans aren't a fixed, standard size -- a bigger hand gives fewer, longer spans and a smaller hand gives more, shorter spans, even for the exact same table."
+    },
+    {
+      "case_id": "cb-301",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "Name something in your classroom that is shorter than your pencil.",
+      "expected_key_idea": "Any genuinely shorter classroom object (an eraser, a small paperclip)."
+    },
+    {
+      "case_id": "cb-302",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is taller: a water bottle or a school building?",
+      "expected_key_idea": "A school building is taller."
+    },
+    {
+      "case_id": "cb-303",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "ambiguous",
+      "question": "Is the box definitely heavier than a smaller box nearby?",
+      "expected_key_idea": "Not necessarily -- 'feels heavy' is subjective and size alone doesn't decide weight; without actually comparing (e.g. on a balance), you can't be sure."
+    },
+    {
+      "case_id": "cb-304",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is shorter: a crayon or a cricket bat?",
+      "expected_key_idea": "A crayon is shorter."
+    },
+    {
+      "case_id": "cb-305",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which holds less water: a bathtub or a teacup?",
+      "expected_key_idea": "A teacup holds less."
+    },
+    {
+      "case_id": "cb-306",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "Name something at home that is heavier than a spoon.",
+      "expected_key_idea": "Any genuinely heavier household object (a book, a cooking pot, a chair)."
+    },
+    {
+      "case_id": "cb-307",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "Why can't you use a bucket of water to measure how long a table is?",
+      "expected_key_idea": "A bucket of water measures CAPACITY (how much it can hold), not LENGTH -- they are different kinds of measurement, so a capacity tool can't measure length."
+    },
+    {
+      "case_id": "cb-308",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is longer: your arm or your finger?",
+      "expected_key_idea": "Your arm is longer."
+    },
+    {
+      "case_id": "cb-309",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "ambiguous",
+      "question": "Someone says a rope is 'about as long as the room'. How long is the rope exactly?",
+      "expected_key_idea": "Not an exact length -- 'about as long as' is a rough comparison, not a precise measurement, so only an approximate sense of length can be given."
+    },
+    {
+      "case_id": "cb-310",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "Between a school bag full of books and an empty school bag, which one would be harder to lift?",
+      "expected_key_idea": "The full school bag -- more books inside means more weight, so it's harder to lift."
+    },
+    {
+      "case_id": "cb-311",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "Two jugs look exactly the same size from the outside, but one is tall and thin while the other is short and wide. Could they still hold the same amount of water?",
+      "expected_key_idea": "Yes -- capacity depends on the overall space inside, not just height or width alone; a tall thin shape and a short wide shape can hold equal amounts."
+    },
+    {
+      "case_id": "cb-312",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which weighs more: a bag with 5 oranges, or the same bag with only 2 oranges?",
+      "expected_key_idea": "The bag with 5 oranges -- more oranges inside means more total weight."
+    },
+    {
+      "case_id": "cb-318",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "ambiguous",
+      "question": "You have some coins that add up to Rs.7. What coins could they be?",
+      "expected_key_idea": "More than one combination works (e.g. one Rs.5 + two Rs.1, or Rs.2+Rs.2+Rs.2+Rs.1) -- the question is open-ended, not a single fixed answer."
+    },
+    {
+      "case_id": "cb-323",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "misconception",
+      "question": "Is a Rs.10 note worth less than ten Rs.1 coins?",
+      "expected_key_idea": "No -- a Rs.10 note is worth exactly the same as ten Rs.1 coins (both equal Rs.10); the number of physical pieces doesn't change the total value."
+    },
+    {
+      "case_id": "cb-324",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "real_life",
+      "question": "Your piggy bank rattles when you shake it. Does that tell you exactly how much money is inside?",
+      "expected_key_idea": "No -- the sound only tells you there ARE coins inside, not how many or which ones; you'd need to actually count them to know the exact amount."
+    },
+    {
+      "case_id": "cb-326",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "misconception",
+      "question": "Is a Rs.2 coin worth more than a Rs.5 coin?",
+      "expected_key_idea": "No -- the coin's printed value (Rs.5) is what it's worth, regardless of its physical size or weight; Rs.5 is worth more than Rs.2."
+    },
+    {
+      "case_id": "cb-327",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "conceptual",
+      "question": "If you trace around the bottom of a cylinder, like a tin can, onto paper, what shape do you get?",
+      "expected_key_idea": "A circle -- the flat round base of a cylinder leaves a circular outline when traced."
+    },
+    {
+      "case_id": "cb-329",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "comparison",
+      "question": "Between a cone and a cylinder, which one comes to a pointed tip?",
+      "expected_key_idea": "The cone -- it narrows to a single point at the top, while a cylinder stays the same width all the way up."
+    },
+    {
+      "case_id": "cb-330",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "misconception",
+      "question": "Does a square have more corners than a rectangle?",
+      "expected_key_idea": "No -- both a square and a rectangle have exactly 4 corners; being 'neater' (all sides equal) doesn't add extra corners."
+    },
+    {
+      "case_id": "cb-331",
+      "grade": 1,
+      "curriculum_topic": "Shapes & Spatial Understanding",
+      "question_type": "ambiguous",
+      "question": "How many sides might the shape the student is thinking of have?",
+      "expected_key_idea": "Not enough information is given -- the description only tells us the shape has corners (so it isn't a circle), but without a count it could be a triangle, a square, a rectangle, a pentagon, or more; a tutor should ask rather than guess."
+    },
+    {
+      "case_id": "cb-333",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "ambiguous",
+      "question": "A number is both greater than 5 and smaller than 9. Name a number it could be.",
+      "expected_key_idea": "Could be 6, 7, or 8 -- more than one correct answer exists, so a tutor shouldn't commit to just one without clarifying."
+    },
+    {
+      "case_id": "cb-334",
+      "grade": 1,
+      "curriculum_topic": "Numbers 1 to 9",
+      "question_type": "misconception",
+      "question": "Does 7 come after 9 when counting from 1 to 9?",
+      "expected_key_idea": "No -- counting in order from 1 to 9, 7 comes BEFORE 9 (...6, 7, 8, 9); 9 is the last number in this range, not 7."
+    },
+    {
+      "case_id": "cb-338",
+      "grade": 1,
+      "curriculum_topic": "Addition & Subtraction (1 to 9)",
+      "question_type": "conceptual",
+      "question": "Why does 8 minus 3 give a sensible answer, while 3 minus 8 would not make sense yet at this level?",
+      "expected_key_idea": "Subtraction isn't commutative -- order matters. 8-3=5 is a sensible answer, but 3-8 would need a result below 0, which isn't meaningful for numbers 1 to 9 at this stage."
+    },
+    {
+      "case_id": "cb-342",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "comparison",
+      "question": "Ananya says 18 is closer to 20 than it is to 10. Is she right?",
+      "expected_key_idea": "Yes -- 18 is only 2 away from 20 but 8 away from 10, so it is indeed closer to 20."
+    },
+    {
+      "case_id": "cb-343",
+      "grade": 1,
+      "curriculum_topic": "Numbers 10 to 20",
+      "question_type": "misconception",
+      "question": "Is 12 one whole number, or is it really '1' and '2' stuck together as two separate numbers?",
+      "expected_key_idea": "12 is one whole number (twelve) -- the digits 1 and 2 together represent 1 ten and 2 ones, not two separate standalone numbers."
+    },
+    {
+      "case_id": "cb-346",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "conceptual",
+      "question": "In the pattern leaf, flower, leaf, flower, leaf, what comes next?",
+      "expected_key_idea": "A flower -- the pattern alternates leaf then flower, so after leaf comes flower."
+    },
+    {
+      "case_id": "cb-347",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "ambiguous",
+      "question": "Look at this pattern: 5, 10, 20. What could the next number be?",
+      "expected_key_idea": "Could be 40 (doubling each time) or 30 (adding 5, then 10, then 15) -- with only 3 terms, more than one rule fits, so a tutor should flag the ambiguity rather than pick one confidently."
+    },
+    {
+      "case_id": "cb-348",
+      "grade": 1,
+      "curriculum_topic": "Patterns",
+      "question_type": "misconception",
+      "question": "Can a pattern be made using shapes or colours instead of numbers?",
+      "expected_key_idea": "Yes -- a pattern is any sequence that repeats or follows a clear rule, and shapes (circle, square, circle...) or colours (red, blue, red...) can form patterns just as validly as numbers."
+    },
+    {
+      "case_id": "cb-349",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "comparison",
+      "question": "Which is lighter: a single leaf or a brick?",
+      "expected_key_idea": "A leaf is lighter."
+    },
+    {
+      "case_id": "cb-350",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "real_life",
+      "question": "On the kitchen counter there is a watermelon, a lemon, and a recipe book kept nearby for reference. Of the watermelon and the lemon, which would be heavier to lift?",
+      "expected_key_idea": "The watermelon -- it is clearly heavier than the lemon; the recipe book is an irrelevant distractor, since it isn't one of the two things being weighed."
+    },
+    {
+      "case_id": "cb-351",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "conceptual",
+      "question": "Two ropes look about the same length when loosely coiled up on the floor. How could you be sure which one is actually longer?",
+      "expected_key_idea": "Stretch both ropes out straight, side by side, and compare their ends directly -- a loosely coiled rope's apparent size can be misleading, so a fair length comparison needs them laid out straight."
+    },
+    {
+      "case_id": "cb-352",
+      "grade": 1,
+      "curriculum_topic": "Measurement",
+      "question_type": "ambiguous",
+      "question": "Are the two bags definitely the same weight?",
+      "expected_key_idea": "Not necessarily -- 'feels about the same' is a rough, subjective judgement; without weighing them on a scale, small differences in weight could easily go unnoticed."
+    },
+    {
+      "case_id": "cb-357",
+      "grade": 1,
+      "curriculum_topic": "Data Handling & Money",
+      "question_type": "ambiguous",
+      "question": "You counted some coins and they add up to less than Rs.10. What is the largest amount they could add up to?",
+      "expected_key_idea": "Rs.9 is the largest whole-rupee amount strictly less than Rs.10 -- though many smaller totals are also possible, so without more detail the exact amount isn't fixed, only an upper bound."
+    },
+    {
+      "case_id": "cb-037",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "conceptual",
+      "question": "What is the difference between a straight line and a curved line? Give one example of each.",
+      "expected_key_idea": "A straight line does not bend (e.g. the edge of a ruler); a curved line bends (e.g. the edge of a circle)."
+    },
+    {
+      "case_id": "cb-038",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "Name one object shaped like a cylinder.",
+      "expected_key_idea": "Any genuinely cylindrical object, e.g. a pipe, a candle, a tin can."
+    },
+    {
+      "case_id": "cb-039",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "question": "A cube and a cuboid both have 6 faces and straight edges. What is one way to tell them apart?",
+      "expected_key_idea": "A cube has all 6 faces the same size (squares); a cuboid's faces can be rectangles of different sizes."
+    },
+    {
+      "case_id": "cb-040",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "misconception",
+      "question": "Is the student's identification of a ball as a circle correct?",
+      "expected_key_idea": "No -- a ball is a sphere (a solid 3D shape), not a circle (a flat 2D shape); they look similar from one angle, but a circle is flat and a sphere is not."
+    },
+    {
+      "case_id": "cb-044",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "conceptual",
+      "question": "Why is 90 greater than 19, even though both numbers contain the digit 9?",
+      "expected_key_idea": "Place value: in 90 the 9 is in the TENS place (worth 90); in 19 the 9 is in the ONES place (worth 9). Position, not just the digit, decides value."
+    },
+    {
+      "case_id": "cb-053",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Why might two people measuring the same wall with their own footsteps get different answers?",
+      "expected_key_idea": "Footsteps (a non-standard unit) differ in length from person to person."
+    },
+    {
+      "case_id": "cb-055",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "Is a heavier object always bigger in size than a lighter one? Give an example to support your answer.",
+      "expected_key_idea": "No -- e.g. a small stone can be heavier than a large balloon; size and weight are different properties."
+    },
+    {
+      "case_id": "cb-058",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "real_life",
+      "question": "Name one season you would expect heavy rain in, in most of India.",
+      "expected_key_idea": "The monsoon / rainy season."
+    },
+    {
+      "case_id": "cb-060",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "Why does a calendar have 12 separate sections for months instead of one long list of days?",
+      "expected_key_idea": "Grouping days into 12 months makes it easier to track dates, seasons, and events across a year."
+    },
+    {
+      "case_id": "cb-063",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "Why do we use tally marks instead of writing the running number directly while counting a long list of items?",
+      "expected_key_idea": "Tally marks let you keep an accurate count while looking at items one at a time, reducing counting errors, before converting to a final total."
+    },
+    {
+      "case_id": "cb-064",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "In a block diagram, if the bar for 'cats' is taller than the bar for 'dogs', what does that tell you?",
+      "expected_key_idea": "There are more cats than dogs in the data being shown."
+    },
+    {
+      "case_id": "cb-065",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "misconception",
+      "question": "Is it correct to treat a group of 4 tally marks as worth 5?",
+      "expected_key_idea": "Not automatically -- a group should only be counted as 5 if it actually has 5 marks (often shown with a diagonal slash through 4 verticals). A plain group of 4 marks is worth 4, not 5."
+    },
+    {
+      "case_id": "cb-362",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "question": "What is one way a cube and a square are alike, and one way they are different?",
+      "expected_key_idea": "Alike: both have flat faces that are squares. Different: a square is a flat (2D) shape with 4 sides, while a cube is a solid (3D) shape made of 6 square faces."
+    },
+    {
+      "case_id": "cb-363",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a cube.",
+      "expected_key_idea": "Any genuinely cube-shaped object (a dice, a sugar cube, a small gift box)."
+    },
+    {
+      "case_id": "cb-364",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a cylinder.",
+      "expected_key_idea": "Any genuinely cylinder-shaped object (a can, a candle, a rolling pin)."
+    },
+    {
+      "case_id": "cb-365",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "conceptual",
+      "question": "Why does a ball (sphere) have no flat faces, while a cube has 6?",
+      "expected_key_idea": "A sphere is curved everywhere with no flat surfaces at all; a cube is built entirely from flat square faces, 6 of them, meeting at straight edges."
+    },
+    {
+      "case_id": "cb-368",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a sphere.",
+      "expected_key_idea": "Any genuinely sphere-shaped object (a ball, an orange, a globe)."
+    },
+    {
+      "case_id": "cb-370",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "question": "What is one way a cone and a cylinder are alike, and one way they are different?",
+      "expected_key_idea": "Alike: both have at least one flat circular face. Different: a cylinder has two flat circular faces and a curved side of constant width, while a cone has only one flat circular face and tapers to a point."
+    },
+    {
+      "case_id": "cb-372",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "ambiguous",
+      "question": "What 3D shape is the student describing?",
+      "expected_key_idea": "Most likely a cube, since a cube has exactly 6 square faces -- though a tutor should confirm the faces are indeed all equal squares rather than assuming."
+    },
+    {
+      "case_id": "cb-374",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "conceptual",
+      "question": "Why does a soccer ball look like it's made of many flat patches, even though it's actually round overall?",
+      "expected_key_idea": "The small flat (or near-flat) panels are stitched together in a pattern that, overall, curves into an approximately round (spherical) shape -- lots of small flat pieces can approximate a curved surface."
+    },
+    {
+      "case_id": "cb-375",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "real_life",
+      "question": "A birthday party has cone-shaped hats and cylinder-shaped party horns. Which of these two shapes has exactly one flat face?",
+      "expected_key_idea": "The cone-shaped hat has exactly one flat (circular) face at its base; the cylinder has two."
+    },
+    {
+      "case_id": "cb-376",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "misconception",
+      "question": "Are a pentagon and a hexagon the same shape?",
+      "expected_key_idea": "No -- a pentagon has 5 sides and a hexagon has 6 sides; different numbers of sides make them genuinely different shapes."
+    },
+    {
+      "case_id": "cb-385",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "conceptual",
+      "question": "What do the two digits in the number 73 stand for?",
+      "expected_key_idea": "The 7 stands for 7 tens (70), and the 3 stands for 3 ones -- together, 70+3=73."
+    },
+    {
+      "case_id": "cb-390",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "ambiguous",
+      "question": "A 2-digit number has a 6 in its tens place. What could the number be?",
+      "expected_key_idea": "Any number from 60 to 69 fits -- the question is open-ended with 10 possible correct answers."
+    },
+    {
+      "case_id": "cb-415",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "ambiguous",
+      "question": "Two classes together have 85 students. One class has more students than the other. How many could each class have?",
+      "expected_key_idea": "Many splits work as long as they add to 85 and aren't equal (e.g. 43+42, 50+35, 60+25) -- open-ended, with no single correct split."
+    },
+    {
+      "case_id": "cb-419",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Which unit would you use to measure the length of your classroom: centimetres or metres?",
+      "expected_key_idea": "Metres -- a classroom is large, so metres give a more sensible-sized number than centimetres."
+    },
+    {
+      "case_id": "cb-420",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Which unit would you use to weigh an apple: grams or kilograms?",
+      "expected_key_idea": "Grams -- an apple is light, so grams give a more sensible-sized number than kilograms."
+    },
+    {
+      "case_id": "cb-422",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "A mango weighs 150 grams and an orange weighs 120 grams. Which is heavier?",
+      "expected_key_idea": "The mango is heavier (150 g > 120 g)."
+    },
+    {
+      "case_id": "cb-425",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Which unit would you use to measure the distance between two cities: metres or kilometres?",
+      "expected_key_idea": "Kilometres -- the distance between cities is large, so kilometres give a far more sensible-sized number than metres."
+    },
+    {
+      "case_id": "cb-427",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "Which is lighter: 1 kg of cotton or 1 kg of iron?",
+      "expected_key_idea": "Neither -- both weigh exactly 1 kg; cotton just takes up more SPACE (volume) for the same weight, which is a different property from weight itself."
+    },
+    {
+      "case_id": "cb-428",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "real_life",
+      "question": "If your school bag feels lighter today than yesterday, what's a sensible reason that might be true?",
+      "expected_key_idea": "Open-ended -- any sensible reason the contents weigh less (fewer books carried, a water bottle emptied, something left at home)."
+    },
+    {
+      "case_id": "cb-430",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "A gym bottle holds 750 ml and a sports bottle holds 1 litre. Which bottle holds more?",
+      "expected_key_idea": "The sports bottle -- 1 litre equals 1000 ml, and 1000 ml > 750 ml."
+    },
+    {
+      "case_id": "cb-433",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "If today is Tuesday, what day will it be tomorrow?",
+      "expected_key_idea": "Wednesday."
+    },
+    {
+      "case_id": "cb-436",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "If today is Friday, what day was it yesterday?",
+      "expected_key_idea": "Thursday."
+    },
+    {
+      "case_id": "cb-437",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "word_problem",
+      "question": "If today is Monday, what day will it be in 7 days?",
+      "expected_key_idea": "Monday -- 7 days later is exactly one week later, which lands on the same day of the week."
+    },
+    {
+      "case_id": "cb-438",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "ambiguous",
+      "question": "A clock's hour hand points between 2 and 3. What time could it roughly be?",
+      "expected_key_idea": "Somewhere between 2:00 and 3:00 -- without the minute hand's exact position, only a range can be given, not one exact time."
+    },
+    {
+      "case_id": "cb-441",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "If today is Sunday, what day will it be in 2 days?",
+      "expected_key_idea": "Tuesday."
+    },
+    {
+      "case_id": "cb-442",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "direct_numerical",
+      "question": "Which month comes right after June?",
+      "expected_key_idea": "July."
+    },
+    {
+      "case_id": "cb-443",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "misconception",
+      "question": "Does every month have exactly 30 days?",
+      "expected_key_idea": "No -- months vary (e.g. February usually has 28 days, January has 31 days); only some months have exactly 30 days."
+    },
+    {
+      "case_id": "cb-444",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "real_life",
+      "question": "If your birthday is in December and today is in March, has your birthday already happened this year?",
+      "expected_key_idea": "No -- December comes after March in the calendar year, so the birthday is still ahead, not already past."
+    },
+    {
+      "case_id": "cb-450",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "A bar graph shows that 'cricket' has the tallest bar among the sports children like. What does that tell you?",
+      "expected_key_idea": "Cricket was chosen by the most children -- the tallest bar means the highest count."
+    },
+    {
+      "case_id": "cb-452",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "ambiguous",
+      "question": "A tally chart shows some marks for 'dogs' and some for 'cats', and dogs has more marks. Which pet did more children choose?",
+      "expected_key_idea": "Dogs -- more tally marks means more children chose it, even without knowing the exact counts."
+    },
+    {
+      "case_id": "cb-455",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "Why is a bar graph often easier to read quickly than a long list of numbers?",
+      "expected_key_idea": "Because the bar heights let you compare quantities visually at a glance, without having to read and compare every number one by one."
+    },
+    {
+      "case_id": "cb-458",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "misconception",
+      "question": "If one bar in a graph looks taller than another, does that always mean its value is bigger?",
+      "expected_key_idea": "Yes, as long as the graph's scale is read correctly and consistently -- a taller bar represents a bigger value; the confusion in the misconception (ignoring the bar's height in favor of some other label) would be a misreading of the graph."
+    },
+    {
+      "case_id": "cb-459",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "real_life",
+      "question": "A tally chart at the school canteen shows which lunch was most popular today using little marks. Why would the canteen staff want to look at this chart?",
+      "expected_key_idea": "To see at a glance which lunch option was chosen most, which helps them plan how much of each dish to prepare in future."
+    },
+    {
+      "case_id": "cb-462",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "comparison",
+      "question": "What is one way a cylinder and a cone are different, in terms of their flat faces?",
+      "expected_key_idea": "A cylinder has two flat circular faces (top and bottom), while a cone has only one flat circular face, at its base."
+    },
+    {
+      "case_id": "cb-463",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "misconception",
+      "question": "Are a cube and a cuboid always exactly the same shape?",
+      "expected_key_idea": "No -- a cube is a special cuboid where ALL faces are equal squares; a general cuboid can have rectangular faces of different sizes, so not every cuboid is a cube."
+    },
+    {
+      "case_id": "cb-464",
+      "grade": 2,
+      "curriculum_topic": "Shapes & Spatial Geometry",
+      "question_type": "ambiguous",
+      "question": "What 3D shape could the student be describing?",
+      "expected_key_idea": "Most likely a square-based pyramid (1 square base + 4 triangular sides = 5 faces), though the exact arrangement should be confirmed rather than assumed from the description alone."
+    },
+    {
+      "case_id": "cb-467",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "conceptual",
+      "question": "Why is 100 written as a 1 followed by two 0s, instead of some other arrangement of digits?",
+      "expected_key_idea": "100 has 1 hundred, 0 tens, and 0 ones -- each digit's position shows how many of that place value there are, and since there are no tens or ones, those positions hold 0."
+    },
+    {
+      "case_id": "cb-468",
+      "grade": 2,
+      "curriculum_topic": "Numbers up to 100",
+      "question_type": "comparison",
+      "question": "Which number is smaller, 64 or 46?",
+      "expected_key_idea": "46 is smaller -- comparing the tens digit, 4 tens is less than 6 tens, regardless of the ones digit."
+    },
+    {
+      "case_id": "cb-472",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "conceptual",
+      "question": "When subtracting 47 from 82, why might you need to 'borrow' from the tens column?",
+      "expected_key_idea": "Because the ones digit of 82 (2) is smaller than the ones digit of 47 (7), you can't subtract directly in the ones column, so you borrow 1 ten from the tens column to make the ones column big enough."
+    },
+    {
+      "case_id": "cb-473",
+      "grade": 2,
+      "curriculum_topic": "Addition & Subtraction (Up to 99)",
+      "question_type": "misconception",
+      "question": "What happens if you try to subtract 73 from 29 at this level?",
+      "expected_key_idea": "It isn't a meaningful subtraction at this level (the true result would be negative, below 0), not simply 0 -- subtracting a bigger number from a smaller one doesn't work the same way as the reverse."
+    },
+    {
+      "case_id": "cb-476",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "conceptual",
+      "question": "Why does a tiny bottle of perfume usually get measured in millilitres rather than litres?",
+      "expected_key_idea": "A perfume bottle holds a very small amount of liquid, so millilitres give a sensibly-sized number, whereas measuring it in litres would give an awkward, very small decimal."
+    },
+    {
+      "case_id": "cb-477",
+      "grade": 2,
+      "curriculum_topic": "Measurement (Length, Weight, Capacity)",
+      "question_type": "comparison",
+      "question": "Which holds more: a 2-litre bottle, or five 300 ml cups combined?",
+      "expected_key_idea": "The 2-litre bottle holds more -- 5 x 300 ml = 1500 ml = 1.5 litres, which is less than 2 litres."
+    },
+    {
+      "case_id": "cb-481",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "conceptual",
+      "question": "Why does the calendar need a leap year, with an extra day added to February every 4 years?",
+      "expected_key_idea": "A year is actually about 365 and a quarter days long, not exactly 365; adding one extra day roughly every 4 years keeps the calendar lined up with the Earth's actual trip around the Sun."
+    },
+    {
+      "case_id": "cb-482",
+      "grade": 2,
+      "curriculum_topic": "Time & Calendar",
+      "question_type": "ambiguous",
+      "question": "Someone says a meeting will happen 'sometime next week'. On exactly which day will it happen?",
+      "expected_key_idea": "Not determinable -- 'sometime next week' only narrows it down to one of 7 possible days, not a single exact day, so a tutor shouldn't guess one day confidently."
+    },
+    {
+      "case_id": "cb-485",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "conceptual",
+      "question": "If a bar graph's tallest bar represents 'summer' as the class's favourite season, what does the SHORTEST bar tell you?",
+      "expected_key_idea": "The shortest bar shows whichever season was chosen by the fewest children -- the least popular option among those surveyed."
+    },
+    {
+      "case_id": "cb-486",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "comparison",
+      "question": "A tally chart shows 6 marks for 'apple' and 9 marks for 'banana' as favourite fruit. Which fruit got more votes?",
+      "expected_key_idea": "Banana, since 9 marks is more than 6 marks."
+    },
+    {
+      "case_id": "cb-487",
+      "grade": 2,
+      "curriculum_topic": "Data Handling & Patterns",
+      "question_type": "misconception",
+      "question": "Can a number pattern repeat the same number more than once in a row?",
+      "expected_key_idea": "Yes -- a pattern like 3, 3, 6, 6, 9, 9 repeats each number twice before moving on, and that is still a valid, rule-following pattern."
+    },
+    {
+      "case_id": "cb-069",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "conceptual",
+      "question": "Why is 100 the smallest 3-digit number, and not something like 099?",
+      "expected_key_idea": "A leading zero is not written in standard number form; numbers are written without unnecessary leading zeros, so the smallest 3-digit number must start with 1 in the hundreds place."
+    },
+    {
+      "case_id": "cb-084",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "question": "Share 23 pencils equally among 5 students. How many does each get, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-085",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "misconception",
+      "question": "Is it correct that the leftover cookie should go entirely to one friend, making their share 5?",
+      "expected_key_idea": "No -- in standard equal sharing, each friend gets the same whole-number share (4 each); the 1 leftover cookie remains unshared/set aside rather than being given whole to just one friend."
+    },
+    {
+      "case_id": "cb-086",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "What does it mean for a shape to have a 'line of symmetry'?",
+      "expected_key_idea": "A line along which the shape can be folded so both halves match exactly (mirror halves)."
+    },
+    {
+      "case_id": "cb-087",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "question": "Does a square have more lines of symmetry than a non-square rectangle? Explain.",
+      "expected_key_idea": "Yes -- a square has 4 lines of symmetry (2 diagonals + 2 through side midpoints); a non-square rectangle has only 2 (through the midpoints of its longer and shorter sides)."
+    },
+    {
+      "case_id": "cb-088",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "Name one everyday object or letter of the alphabet that has a line of symmetry.",
+      "expected_key_idea": "Any genuinely symmetric example, e.g. the letter 'A', a butterfly, a heart shape."
+    },
+    {
+      "case_id": "cb-089",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "What is a 'net' of a 3D shape?",
+      "expected_key_idea": "A flat (2D) pattern that can be folded up to form the 3D shape, e.g. a cube unfolded into 6 connected squares."
+    },
+    {
+      "case_id": "cb-090",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "misconception",
+      "question": "Is it true that every shape has at least one line of symmetry?",
+      "expected_key_idea": "No -- some shapes, like a general scalene triangle or an irregular/lopsided shape, have no line of symmetry at all."
+    },
+    {
+      "case_id": "cb-093",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "question": "Which is heavier: 1 kilogram of cotton or 1 kilogram of iron?",
+      "expected_key_idea": "They weigh the same (1 kg each); the material differs in density (how much space it takes up for that weight), not in the stated weight."
+    },
+    {
+      "case_id": "cb-094",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "question": "Why do we use standard units like centimetres and kilograms instead of handspans and footsteps as we get older?",
+      "expected_key_idea": "Standard units are the same for everyone everywhere, so measurements can be compared accurately and fairly between different people and places."
+    },
+    {
+      "case_id": "cb-100",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "conceptual",
+      "question": "Why is 'quarter past 3' written as 3:15 and not 3:25?",
+      "expected_key_idea": "A quarter of an hour (60 minutes) is 15 minutes, not 25; 'quarter past' means 15 minutes after the hour."
+    },
+    {
+      "case_id": "cb-490",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "conceptual",
+      "question": "What do the three digits in the number 482 stand for?",
+      "expected_key_idea": "The 4 stands for 4 hundreds (400), the 8 stands for 8 tens (80), and the 2 stands for 2 ones -- 400+80+2=482."
+    },
+    {
+      "case_id": "cb-495",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "ambiguous",
+      "question": "A 3-digit number has a 6 in its hundreds place. What could the number be?",
+      "expected_key_idea": "Any number from 600 to 699 fits -- the question is open-ended with 100 possible correct answers."
+    },
+    {
+      "case_id": "cb-502",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "ambiguous",
+      "question": "A 3-digit number is between 700 and 710. What could it be?",
+      "expected_key_idea": "Any number from 701 to 709 fits -- the question is open-ended with 9 possible correct answers."
+    },
+    {
+      "case_id": "cb-504",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "comparison",
+      "question": "Vikram says the number 'nine hundred and six' is written 960. Is he right?",
+      "expected_key_idea": "No -- 'nine hundred and six' is 906 (9 hundreds, 0 tens, 6 ones); 960 would be 'nine hundred and sixty'."
+    },
+    {
+      "case_id": "cb-521",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "conceptual",
+      "question": "Why do you 'carry over' a 1 when adding 7 and 8 in the ones column?",
+      "expected_key_idea": "Because 7+8=15, which is more than 9 -- a single ones-column digit can only hold 0-9, so the extra ten gets carried into the tens column."
+    },
+    {
+      "case_id": "cb-523",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "misconception",
+      "question": "When you borrow 1 ten to help subtract in the ones column, does the tens digit stay the same?",
+      "expected_key_idea": "No -- borrowing a ten REDUCES the tens digit by 1 (since that ten moved over to help the ones column); the tens digit does not stay the same."
+    },
+    {
+      "case_id": "cb-529",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "conceptual",
+      "question": "Why is 4 times 3 the same as 3 times 4?",
+      "expected_key_idea": "Multiplication is commutative -- 4 groups of 3 and 3 groups of 4 both total 12 objects, just arranged differently (as a 4x3 or 3x4 grid of dots, the total count is the same)."
+    },
+    {
+      "case_id": "cb-532",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "ambiguous",
+      "question": "Some equal rows of seats seat 24 people in total. How many rows and seats-per-row could that be?",
+      "expected_key_idea": "More than one combination works (e.g. 4 rows of 6, 6 rows of 4, 3 rows of 8, 8 rows of 3, 2 rows of 12, 12 rows of 2) -- the question is open-ended."
+    },
+    {
+      "case_id": "cb-539",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "comparison",
+      "question": "Which gives a bigger total: 9 groups of 2, or 2 groups of 9?",
+      "expected_key_idea": "Neither -- both equal 18, since multiplication gives the same result either order (9x2=2x9)."
+    },
+    {
+      "case_id": "cb-543",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "question": "20 candies are shared equally among 6 children. How many candies does each child get, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-544",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "question": "35 mangoes are shared equally among 8 families. How many mangoes does each family get, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-545",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "conceptual",
+      "question": "How is division related to repeated subtraction?",
+      "expected_key_idea": "Dividing N by a group-size g is the same as subtracting g from N repeatedly until nothing (or less than g) is left; the number of times you subtracted is the answer."
+    },
+    {
+      "case_id": "cb-547",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "misconception",
+      "question": "What is 9 divided by 0?",
+      "expected_key_idea": "Division by 0 is undefined -- it is not 9, not 0, and not any ordinary number; the question has no valid numeric answer."
+    },
+    {
+      "case_id": "cb-549",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "word_problem",
+      "question": "45 beads are shared equally among 7 bracelets. How many beads go on each bracelet, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-551",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "ambiguous",
+      "question": "Some stickers were shared equally among a few friends, and each friend got 4. How many stickers were there in total?",
+      "expected_key_idea": "Open-ended -- the total depends on how many friends there were (4 stickers per friend x any number of friends), which isn't stated."
+    },
+    {
+      "case_id": "cb-553",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "conceptual",
+      "question": "If 15 oranges are shared among 4 children and each gets 3 with 3 left over, how could you check that this sharing is correct without re-dividing from scratch?",
+      "expected_key_idea": "Multiply the quotient by the number of children and add the remainder: 3x4+3=15, which matches the original total -- confirming the division."
+    },
+    {
+      "case_id": "cb-556",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "Does the letter 'A' have a line of symmetry?",
+      "expected_key_idea": "Yes -- a vertical line down the middle of 'A' divides it into two mirror-image halves."
+    },
+    {
+      "case_id": "cb-557",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "Does the letter 'F' have a line of symmetry?",
+      "expected_key_idea": "No -- there is no line that divides 'F' into two matching mirror-image halves."
+    },
+    {
+      "case_id": "cb-559",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "What is a 'net' of a 3D shape?",
+      "expected_key_idea": "A net is a flat (2D) pattern of shapes that can be folded up to make a 3D solid -- e.g. 6 connected squares can fold into a cube."
+    },
+    {
+      "case_id": "cb-560",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a cone.",
+      "expected_key_idea": "Any genuinely cone-shaped object (an ice-cream cone, a party hat, a funnel)."
+    },
+    {
+      "case_id": "cb-561",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "question": "Does a circle have a line of symmetry? If so, how many?",
+      "expected_key_idea": "Yes -- a circle has infinitely many lines of symmetry, since any line through its centre divides it into two matching halves."
+    },
+    {
+      "case_id": "cb-562",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "Does the letter 'M' have a line of symmetry?",
+      "expected_key_idea": "Yes -- a vertical line down the middle of 'M' divides it into two mirror-image halves."
+    },
+    {
+      "case_id": "cb-564",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "Name one object at home shaped like a cuboid.",
+      "expected_key_idea": "Any genuinely cuboid-shaped object (a cereal box, a brick, a book)."
+    },
+    {
+      "case_id": "cb-566",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "ambiguous",
+      "question": "What 3D shape does the student's net fold into?",
+      "expected_key_idea": "Most likely a cube, though the exact arrangement of the 6 squares matters -- not every 6-square layout folds into a valid cube, so a tutor should confirm the specific net shape."
+    },
+    {
+      "case_id": "cb-567",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "A greeting card folds exactly in half and the two halves match perfectly. What property does the card's flat shape have?",
+      "expected_key_idea": "It has a line of symmetry along the fold -- the two halves are mirror images of each other."
+    },
+    {
+      "case_id": "cb-568",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "question": "Does the digit '8' have a line of symmetry, and if so, in which direction?",
+      "expected_key_idea": "Yes -- '8' has both a vertical line of symmetry (left-right) and a horizontal line of symmetry (top-bottom)."
+    },
+    {
+      "case_id": "cb-569",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "A butterfly's two wings look like mirror images of each other across its body. What property does the butterfly's shape have?",
+      "expected_key_idea": "A line of symmetry -- the body acts as the fold line, and the two wings mirror each other."
+    },
+    {
+      "case_id": "cb-573",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "question": "Why would you measure the weight of an elephant in kilograms rather than grams?",
+      "expected_key_idea": "An elephant is extremely heavy, so its weight in grams would be an enormous, unwieldy number; kilograms give a far more sensible-sized number."
+    },
+    {
+      "case_id": "cb-575",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "question": "Which is longer: 150 cm or 1 metre?",
+      "expected_key_idea": "150 cm is longer -- 1 metre equals 100 cm, and 150 cm > 100 cm."
+    },
+    {
+      "case_id": "cb-578",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "question": "Which is heavier: 1 kg or 900 grams?",
+      "expected_key_idea": "1 kg is heavier -- 1 kg equals 1000 g, and 1000 g > 900 g."
+    },
+    {
+      "case_id": "cb-580",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "question": "A tailor measures cloth with a metre-stick, but a jeweller measures gold with a tiny balance using grams. Why don't they use the same tool?",
+      "expected_key_idea": "They're measuring different KINDS of quantities (length vs weight) at very different scales -- cloth needs length measured over metres, gold needs weight measured precisely in small grams, so different tools suit different needs."
+    },
+    {
+      "case_id": "cb-588",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "ambiguous",
+      "question": "If it is 'almost 4 o'clock' now, what could the exact time be?",
+      "expected_key_idea": "Somewhere a little before 4:00 (e.g. 3:50-3:59) -- 'almost' doesn't give one exact minute, so a tutor should treat this as a range, not a single precise time."
+    },
+    {
+      "case_id": "cb-593",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "real_life",
+      "question": "If a train is scheduled to leave at 10:00 and you arrive at the station at 10:05, will you make it?",
+      "expected_key_idea": "No -- arriving 5 minutes AFTER the scheduled departure means the train has already left (or is about to), so you'd miss it."
+    },
+    {
+      "case_id": "cb-598",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "conceptual",
+      "question": "Does the digit 0 in the number 205 mean nothing is there, or does it still serve a purpose?",
+      "expected_key_idea": "It still serves a purpose -- the 0 is a placeholder showing there are 0 tens, which keeps the 2 in the hundreds place and the 5 in the ones place; without it, the number would be misread as 25."
+    },
+    {
+      "case_id": "cb-599",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "comparison",
+      "question": "Between 999 and 1000, which number has more digits?",
+      "expected_key_idea": "1000 has more digits (4 digits) than 999 (3 digits), even though 1000 is only 1 more than 999."
+    },
+    {
+      "case_id": "cb-600",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "misconception",
+      "question": "Does a number with more digits always use bigger individual digits than a number with fewer digits?",
+      "expected_key_idea": "No -- for example, 1000 (4 digits: 1 and three 0s) is bigger than 987 (3 digits: 9, 8, 7, which are individually bigger digits); the NUMBER OF digits matters far more than the size of each individual digit."
+    },
+    {
+      "case_id": "cb-601",
+      "grade": 3,
+      "curriculum_topic": "Numbers up to 1000",
+      "question_type": "real_life",
+      "question": "An election counter shows 847 votes for one candidate and 763 for another, with 50 votes still to be counted. If all 50 remaining votes go to the second candidate, could they catch up?",
+      "expected_key_idea": "No -- 763+50=813, which is still less than 847, so the second candidate cannot catch up even if every single remaining vote goes to them."
+    },
+    {
+      "case_id": "cb-604",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "conceptual",
+      "question": "When subtracting 286 from 500, why does the borrowing need to cascade through more than one column?",
+      "expected_key_idea": "Because both the ones digit (0) and the tens digit (0) of 500 are smaller than the digits being subtracted (6 and 8), the borrow has to pass through the tens column into the hundreds column, not stop after a single borrow."
+    },
+    {
+      "case_id": "cb-606",
+      "grade": 3,
+      "curriculum_topic": "Addition & Subtraction with Regrouping",
+      "question_type": "comparison",
+      "question": "Which needs more regrouping steps: subtracting 199 from 800, or subtracting 450 from 800?",
+      "expected_key_idea": "Subtracting 199 from 800 needs more cascading borrowing, since 800 has zeros in the tens and ones columns; 800-450 needs less borrowing because 450's digits don't force the same chain of borrows."
+    },
+    {
+      "case_id": "cb-610",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "conceptual",
+      "question": "Why does multiplying small numbers like 4 by 9 give an answer bigger than either number, unlike how subtraction behaves?",
+      "expected_key_idea": "Multiplying two whole numbers greater than 1 always produces a result bigger than either factor, since you're combining several equal groups; subtraction instead reduces a quantity, which is a fundamentally different operation."
+    },
+    {
+      "case_id": "cb-612",
+      "grade": 3,
+      "curriculum_topic": "Multiplication (Basic)",
+      "question_type": "comparison",
+      "question": "Without calculating the exact answer, which is bigger: 9 times 6, or 6 times 9?",
+      "expected_key_idea": "Neither is bigger -- multiplication gives the same result regardless of the order of the factors, so 9x6 and 6x9 are exactly equal (both 54)."
+    },
+    {
+      "case_id": "cb-616",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "conceptual",
+      "question": "If you already know that 6 times 7 equals 42, how does that help you quickly find 42 divided by 6?",
+      "expected_key_idea": "Division undoes multiplication -- since 6x7=42, it follows directly that 42 divided by 6 is 7, without needing to work it out from scratch."
+    },
+    {
+      "case_id": "cb-618",
+      "grade": 3,
+      "curriculum_topic": "Division (Introduction)",
+      "question_type": "ambiguous",
+      "question": "A tray of cookies was divided equally among some plates, with 6 cookies ending up on each plate. How many cookies were on the tray in total?",
+      "expected_key_idea": "Open-ended -- the total depends on how many plates there were (6 cookies per plate times any number of plates), which the question doesn't state."
+    },
+    {
+      "case_id": "cb-621",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "conceptual",
+      "question": "Does the letter 'T' have a line of symmetry?",
+      "expected_key_idea": "Yes -- a vertical line down the middle of 'T' divides it into two mirror-image halves."
+    },
+    {
+      "case_id": "cb-622",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "word_problem",
+      "question": "A kite-maker folds a kite's paper exactly in half so both sides match perfectly, and he also happens to be using blue thread for the tail today. What property does the folded paper shape have?",
+      "expected_key_idea": "It has a line of symmetry along the fold -- the two halves mirror each other exactly."
+    },
+    {
+      "case_id": "cb-623",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "misconception",
+      "question": "Does every shape with 4 equal sides have exactly 4 lines of symmetry?",
+      "expected_key_idea": "No -- a rhombus (diamond shape) can have 4 equal sides but only 2 lines of symmetry (along its diagonals), not 4; equal side lengths alone don't guarantee the same symmetry as a square."
+    },
+    {
+      "case_id": "cb-624",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "comparison",
+      "question": "Which has more lines of symmetry: a rectangle that is not a square, or an equilateral triangle?",
+      "expected_key_idea": "The equilateral triangle has more -- it has 3 lines of symmetry, while a non-square rectangle has only 2."
+    },
+    {
+      "case_id": "cb-625",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "real_life",
+      "question": "A paper snowflake is cut while the paper is folded into many layers, so the finished shape repeats evenly all the way around. What property does the snowflake likely have?",
+      "expected_key_idea": "Rotational symmetry (and often several lines of symmetry too) -- folding paper evenly before cutting naturally produces a shape that repeats around its centre."
+    },
+    {
+      "case_id": "cb-626",
+      "grade": 3,
+      "curriculum_topic": "Shapes, 2D Nets & Symmetry",
+      "question_type": "ambiguous",
+      "question": "What 3D shape does the student's net most likely fold into?",
+      "expected_key_idea": "Most likely a square-based pyramid (1 square base + 4 triangular sides), though the exact way the pieces connect should be checked before confirming -- not every 4-triangle-1-square arrangement folds correctly."
+    },
+    {
+      "case_id": "cb-629",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "conceptual",
+      "question": "Why might a scientist measuring a tiny insect's length use millimetres instead of centimetres?",
+      "expected_key_idea": "An insect can be extremely small, so millimetres give a far more precise and sensibly-sized number than centimetres, which might round away important detail."
+    },
+    {
+      "case_id": "cb-630",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "comparison",
+      "question": "Which is longer: 3 metres, or 280 centimetres?",
+      "expected_key_idea": "3 metres is longer -- 3 metres equals 300 cm, and 300 cm is more than 280 cm."
+    },
+    {
+      "case_id": "cb-631",
+      "grade": 3,
+      "curriculum_topic": "Measurement (Standard Units)",
+      "question_type": "misconception",
+      "question": "Do a kilogram and a litre measure the same kind of thing?",
+      "expected_key_idea": "No -- a kilogram measures WEIGHT (how heavy something is), while a litre measures CAPACITY (how much liquid something holds); they measure different kinds of quantities entirely."
+    },
+    {
+      "case_id": "cb-636",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "conceptual",
+      "question": "Why is it useful to know both the hour hand's and the minute hand's positions to tell time exactly?",
+      "expected_key_idea": "The hour hand alone only tells you roughly which hour it is; the minute hand tells you exactly how far into that hour you are, so both together give the precise time."
+    },
+    {
+      "case_id": "cb-639",
+      "grade": 3,
+      "curriculum_topic": "Time & Money",
+      "question_type": "ambiguous",
+      "question": "A clock shows the minute hand pointing exactly at the 6. What could the exact time be?",
+      "expected_key_idea": "It must be some hour and exactly 30 minutes past (e.g. 2:30, 7:30), but without knowing which hour the hour hand is near, the exact time can't be pinned down to a single answer."
+    },
+    {
+      "case_id": "cb-104",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "conceptual",
+      "question": "Why does adding a zero at the END of 999 (making 9990) change its value a lot, while adding a zero in FRONT of 999 (0999) doesn't change its value at all?",
+      "expected_key_idea": "A trailing zero shifts every existing digit one place higher (multiplies by 10); a leading zero before the first significant digit adds no new place value."
+    },
+    {
+      "case_id": "cb-109",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "conceptual",
+      "question": "Explain, in your own words, what the 'remainder' means when you do a long division like 97 / 8.",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-112",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "conceptual",
+      "question": "Explain why 2/4 and 1/2 represent the same amount even though they look like different fractions.",
+      "expected_key_idea": "Both describe the same portion of a whole; 2/4 simplifies (divide numerator and denominator by 2) to 1/2 -- they are equivalent fractions."
+    },
+    {
+      "case_id": "cb-113",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "misconception",
+      "question": "Is 1/8 bigger than 1/4?",
+      "expected_key_idea": "No -- with the same numerator, a larger denominator means the whole is split into more, smaller pieces, so 1/8 is actually smaller than 1/4."
+    },
+    {
+      "case_id": "cb-114",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "direct_numerical",
+      "question": "What do we call the distance from the center of a circle to any point on its edge?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-115",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "How is the diameter of a circle related to its radius?",
+      "expected_key_idea": "The diameter is twice the radius (diameter = 2 x radius); it passes through the center, touching the circle on both sides."
+    },
+    {
+      "case_id": "cb-117",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "real_life",
+      "question": "Name one tool used to draw a circle accurately.",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-118",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What is special about every point on the edge of a circle, with respect to the center?",
+      "expected_key_idea": "Every point on the circle's edge is exactly the same distance (the radius) from the center."
+    },
+    {
+      "case_id": "cb-121",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "conceptual",
+      "question": "What is the difference between perimeter and area, in your own words?",
+      "expected_key_idea": "Perimeter is the total length around the boundary of a shape; area is the amount of flat space covered inside it -- they measure different things (a length vs a covered surface)."
+    },
+    {
+      "case_id": "cb-123",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "misconception",
+      "question": "Do a 1x9 rectangle and a 5x5 square -- both with perimeter 20 -- also have the same area?",
+      "expected_key_idea": "No -- both have perimeter 20 cm, but their areas differ: 1x9 = 9 sq cm vs 5x5 = 25 sq cm. Equal perimeter does not guarantee equal area."
+    },
+    {
+      "case_id": "cb-127",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "conceptual",
+      "question": "Why do train timetables use the 24-hour clock format instead of just AM/PM?",
+      "expected_key_idea": "24-hour format avoids confusion between morning and evening times sharing the same clock number (e.g. 3 PM vs 3 AM), since each hour of the day gets a unique number from 0 to 23."
+    },
+    {
+      "case_id": "cb-131",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "question": "Why is a pictograph with a scale (e.g. 1 icon = 10 items) more useful than one icon always meaning exactly 1 item, when the data involves large numbers?",
+      "expected_key_idea": "A scale lets you represent large numbers with fewer icons, keeping the chart compact and readable, instead of needing hundreds of tiny icons."
+    },
+    {
+      "case_id": "cb-133",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "misconception",
+      "question": "Should a half icon be counted as the full scale value?",
+      "expected_key_idea": "No -- a half icon should represent half the scale value (5 items if 1 icon = 10), not the full value; partial icons represent a proportional partial count."
+    },
+    {
+      "case_id": "cb-641",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "conceptual",
+      "question": "What do the digits in the number 32,415 stand for, place by place?",
+      "expected_key_idea": "3 ten-thousands (30,000) + 2 thousands (2,000) + 4 hundreds (400) + 1 ten (10) + 5 ones (5) = 32,415."
+    },
+    {
+      "case_id": "cb-646",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "ambiguous",
+      "question": "A 5-digit number has a 7 in its ten-thousands place. What could the number be?",
+      "expected_key_idea": "Any number from 70,000 to 79,999 fits -- the question is open-ended with 10,000 possible correct answers."
+    },
+    {
+      "case_id": "cb-650",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "misconception",
+      "question": "Are 10,000 and 1,0000 the same number?",
+      "expected_key_idea": "Yes -- both represent the same value (ten thousand); commas are just readability separators and don't change the number's actual value."
+    },
+    {
+      "case_id": "cb-652",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "comparison",
+      "question": "A village has a population written as 8,042. Is the 0 in this number just a placeholder, or does it mean something?",
+      "expected_key_idea": "It's a genuine placeholder with real meaning -- it shows there are 0 hundreds, which keeps the 8 in the thousands place and the 4 in the tens place; removing it would change the number entirely (842 instead of 8042)."
+    },
+    {
+      "case_id": "cb-658",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "word_problem",
+      "question": "500 mangoes are packed equally into 12 crates. How many go into each crate, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-659",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "conceptual",
+      "question": "Why does multiplying a number by 10 just add a zero to the end of it?",
+      "expected_key_idea": "Multiplying by 10 shifts every digit one place-value position higher (ones become tens, tens become hundreds, etc.), which has the same effect as appending a 0 to the end."
+    },
+    {
+      "case_id": "cb-664",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "word_problem",
+      "question": "A farmer collects 275 eggs and packs them equally into 6 crates. How many eggs go into each crate, and how many are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-666",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "comparison",
+      "question": "To find out how many times 7 fits into 91, would you multiply or divide?",
+      "expected_key_idea": "Divide -- 91 divided by 7 tells you how many groups of 7 fit into 91 (which is 13)."
+    },
+    {
+      "case_id": "cb-670",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "comparison",
+      "question": "Which is bigger, 1/2 or 1/3?",
+      "expected_key_idea": "1/2 is bigger -- when the numerator is 1, a smaller denominator means each piece is bigger, so 1/2 (half) is more than 1/3 (a third)."
+    },
+    {
+      "case_id": "cb-671",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "direct_numerical",
+      "question": "What is an equivalent fraction for 1/2 with denominator 8?",
+      "expected_key_idea": "4/8 -- multiplying both the numerator and denominator of 1/2 by 4 gives 4/8, an equivalent fraction (both equal the same amount: sympy.Rational(4,8)==sympy.Rational(1,2))."
+    },
+    {
+      "case_id": "cb-673",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "conceptual",
+      "question": "What does the bottom number (denominator) of a fraction tell you?",
+      "expected_key_idea": "It tells you how many equal parts the whole has been split into."
+    },
+    {
+      "case_id": "cb-674",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "misconception",
+      "question": "Is 1/4 bigger than 1/2?",
+      "expected_key_idea": "No -- a bigger denominator means each piece is SMALLER (the whole is cut into more pieces), so 1/4 is smaller than 1/2, not bigger."
+    },
+    {
+      "case_id": "cb-678",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "comparison",
+      "question": "Which is bigger, 2/3 or 3/4?",
+      "expected_key_idea": "3/4 is bigger -- converting to a common denominator of 12, 2/3=8/12 and 3/4=9/12, and 9/12 > 8/12."
+    },
+    {
+      "case_id": "cb-682",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What is the centre of a circle?",
+      "expected_key_idea": "The centre is the one point inside a circle that is exactly the same distance from every point on the circle's edge."
+    },
+    {
+      "case_id": "cb-683",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What is the radius of a circle?",
+      "expected_key_idea": "The radius is the distance from the centre of the circle to any point on its edge."
+    },
+    {
+      "case_id": "cb-685",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What is the difference between a radius and a diameter?",
+      "expected_key_idea": "The radius goes from the centre to the edge; the diameter goes all the way across the circle through the centre, so the diameter is always exactly twice the radius."
+    },
+    {
+      "case_id": "cb-686",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "What do we call a straight line that touches a circle's edge at exactly one point?",
+      "expected_key_idea": "A tangent."
+    },
+    {
+      "case_id": "cb-687",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "comparison",
+      "question": "Are two lines that never meet, no matter how far they are extended, called parallel or perpendicular?",
+      "expected_key_idea": "Parallel lines."
+    },
+    {
+      "case_id": "cb-688",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "comparison",
+      "question": "Are two lines that cross each other to form a perfect right angle called parallel or perpendicular?",
+      "expected_key_idea": "Perpendicular lines."
+    },
+    {
+      "case_id": "cb-690",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "real_life",
+      "question": "Name one everyday object that is circular in shape.",
+      "expected_key_idea": "Any genuinely circular object (a coin, a clock face, a wheel)."
+    },
+    {
+      "case_id": "cb-691",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "ambiguous",
+      "question": "What is the name for the line the student is describing?",
+      "expected_key_idea": "Most likely a tangent, though the description should be checked carefully -- a line that CROSSES the circle at two points (a secant/chord) could superficially sound similar if 'only at one spot' is misheard."
+    },
+    {
+      "case_id": "cb-693",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "real_life",
+      "question": "Railway tracks run side by side and never meet, even far into the distance. What are these two lines called?",
+      "expected_key_idea": "Parallel lines."
+    },
+    {
+      "case_id": "cb-694",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "misconception",
+      "question": "Are the diameter and radius of a circle the same thing?",
+      "expected_key_idea": "No -- the radius goes from the centre to the edge, while the diameter goes all the way across through the centre; the diameter is always twice the radius, not the same measurement."
+    },
+    {
+      "case_id": "cb-699",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "conceptual",
+      "question": "What is the difference between perimeter and area?",
+      "expected_key_idea": "Perimeter is the total distance around the OUTSIDE edge of a shape; area is the amount of flat SURFACE the shape covers on the inside."
+    },
+    {
+      "case_id": "cb-701",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "misconception",
+      "question": "Does a shape with a bigger perimeter always have a bigger area?",
+      "expected_key_idea": "Not necessarily -- a long thin rectangle (e.g. 1m x 20m, perimeter 42m, area 20 sq m) can have a bigger perimeter but a smaller area than a more compact shape (e.g. a 10m x 10m square, perimeter 40m, area 100 sq m)."
+    },
+    {
+      "case_id": "cb-703",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "word_problem",
+      "question": "A square carpet has an area of 49 square metres. What is the length of one side?",
+      "expected_key_idea": "7 metres -- since 7x7=49, the square root of 49 is 7."
+    },
+    {
+      "case_id": "cb-705",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "real_life",
+      "question": "A farmer wants to put a fence all the way around a rectangular field. Would the farmer need to know the field's perimeter or its area?",
+      "expected_key_idea": "The perimeter -- fencing goes around the OUTSIDE edge, which is exactly what perimeter measures."
+    },
+    {
+      "case_id": "cb-713",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "conceptual",
+      "question": "Why would you convert 2.5 kilometres into metres before adding it to a distance already given in metres?",
+      "expected_key_idea": "You can only add quantities measured in the SAME unit -- converting both distances into metres first makes the addition meaningful."
+    },
+    {
+      "case_id": "cb-720",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "comparison",
+      "question": "A bar chart shows 30, 45, 20, and 55 units sold on four different days. Which of these four numbers is the highest single-day sale?",
+      "expected_key_idea": "55 is the highest of the four values shown."
+    },
+    {
+      "case_id": "cb-722",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "question": "What does the height of a bar in a bar graph represent?",
+      "expected_key_idea": "The height of each bar shows the count or quantity for that category -- a taller bar means a bigger number."
+    },
+    {
+      "case_id": "cb-724",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "ambiguous",
+      "question": "A bar chart shows that 'blue' has a much taller bar than every other colour. What does that suggest?",
+      "expected_key_idea": "Blue was the most popular choice by a wide margin -- though without exact numbers, only the relative ranking (blue is clearly ahead), not precise counts, can be stated."
+    },
+    {
+      "case_id": "cb-726",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "question": "Why might a pictograph be misleading if one symbol secretly represents 10 items instead of 1?",
+      "expected_key_idea": "If a reader assumes each symbol is worth 1 without checking the key/legend, they would badly underestimate the real totals -- the key telling you what one symbol is worth is essential to reading it correctly."
+    },
+    {
+      "case_id": "cb-728",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "real_life",
+      "question": "If a weather chart shows rainfall bars that are all roughly the same height across a whole month, what does that suggest about the rain that month?",
+      "expected_key_idea": "It suggests the rainfall was fairly steady/consistent from day to day, rather than having a few very heavy days and many dry ones."
+    },
+    {
+      "case_id": "cb-732",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "conceptual",
+      "question": "Why does the number 50,000 usually get a comma (or a space) when written out, while 500 does not?",
+      "expected_key_idea": "Commas or spaces are readability aids for larger numbers, grouping digits so they're easier to read at a glance; 500 is short enough to read correctly without any grouping, while 50000 risks being misread without one."
+    },
+    {
+      "case_id": "cb-734",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "comparison",
+      "question": "Which number is closer to 50,000: 48,200 or 53,900?",
+      "expected_key_idea": "48,200 is closer -- it is 1,800 away from 50,000, while 53,900 is 3,900 away."
+    },
+    {
+      "case_id": "cb-735",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "real_life",
+      "question": "A company's yearly revenue is reported as 'approximately 4,50,000 rupees, rounded to the nearest ten thousand'. What is the smallest and largest exact revenue this rounding could represent?",
+      "expected_key_idea": "Anywhere from 4,45,000 up to (but not including) 4,55,000 -- rounding to the nearest ten-thousand means the true value could be anywhere within 5,000 of the rounded figure in either direction."
+    },
+    {
+      "case_id": "cb-736",
+      "grade": 4,
+      "curriculum_topic": "Numbers up to 100,000",
+      "question_type": "ambiguous",
+      "question": "A 5-digit number rounds to 60,000 when rounded to the nearest ten thousand. What could the exact number be?",
+      "expected_key_idea": "Any number from 55,000 up to 64,999 fits -- the question is open-ended with many possible correct answers, not a single fixed value."
+    },
+    {
+      "case_id": "cb-740",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "conceptual",
+      "question": "If a question asks you to split 365 into equal groups of 7, why might the answer not come out to a clean whole number?",
+      "expected_key_idea": "365 is not an exact multiple of 7 (7x52=364, leaving 1 left over), so the sharing doesn't divide evenly -- the answer must be expressed as a quotient with a remainder, not a clean whole number."
+    },
+    {
+      "case_id": "cb-741",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "misconception",
+      "question": "Does dividing a bigger number always take more steps than dividing a smaller one?",
+      "expected_key_idea": "Not necessarily -- the number of steps depends on how the digits interact with the divisor, not just the size of the number; a big number that divides very cleanly can sometimes be quicker to work through than a small number that doesn't."
+    },
+    {
+      "case_id": "cb-742",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "comparison",
+      "question": "Which gives the bigger result: 840 divided by 4, or 840 divided by 8?",
+      "expected_key_idea": "840 divided by 4 gives the bigger result (210) compared to 840 divided by 8 (105) -- dividing by a SMALLER number gives a BIGGER quotient, for the same starting amount."
+    },
+    {
+      "case_id": "cb-744",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "word_problem",
+      "question": "A trader buys 950 kg of rice and packs it into bags of 40 kg each. How many full bags can be packed, and how many kg are left over?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-745",
+      "grade": 4,
+      "curriculum_topic": "Multiplication & Division",
+      "question_type": "ambiguous",
+      "question": "A number, when divided by 6, gives a quotient of 15. What could the original number be, allowing for a possible remainder?",
+      "expected_key_idea": "Open-ended -- the original number could be exactly 90 (if there's no remainder) or anywhere from 91 to 95 (if there's a remainder from 1 to 5); the question doesn't specify, so more than one answer fits."
+    },
+    {
+      "case_id": "cb-748",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "conceptual",
+      "question": "Why can't you simply add the numerators and the denominators separately when adding 1/2 and 1/3?",
+      "expected_key_idea": "1/2 and 1/3 represent pieces of DIFFERENT sizes (halves vs thirds), so you first need a common denominator (sixths: 3/6 + 2/6 = 5/6) before adding; adding numerators and denominators directly ignores that the pieces aren't the same size."
+    },
+    {
+      "case_id": "cb-749",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "misconception",
+      "question": "Are 2/4 and 1/2 the same amount?",
+      "expected_key_idea": "Yes -- 2/4 simplifies to 1/2 (dividing both numerator and denominator by 2); they look different on paper but represent exactly the same amount."
+    },
+    {
+      "case_id": "cb-750",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "comparison",
+      "question": "Which is bigger, 5/6 or 7/8?",
+      "expected_key_idea": "7/8 is bigger -- converting to a common denominator of 24, 5/6=20/24 and 7/8=21/24, and 21/24 is more than 20/24."
+    },
+    {
+      "case_id": "cb-753",
+      "grade": 4,
+      "curriculum_topic": "Fractions",
+      "question_type": "ambiguous",
+      "question": "Part of a garden has flowers planted, and the rest is bare soil. If the bare part is 2/5 of the garden, what fraction has flowers?",
+      "expected_key_idea": "3/5 -- since the whole garden is 1 (or 5/5), subtracting the bare 2/5 leaves 3/5 with flowers; flagged ambiguous mainly because the fraction with flowers has to be inferred from 'the rest' rather than being stated outright."
+    },
+    {
+      "case_id": "cb-756",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "conceptual",
+      "question": "Why do all the spokes of a bicycle wheel have the same length?",
+      "expected_key_idea": "Each spoke runs from the centre of the wheel to its rim, which is exactly what a radius is -- since every point on a circle's rim is the same distance from the centre, all the spokes (radii) must be equal in length."
+    },
+    {
+      "case_id": "cb-757",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "misconception",
+      "question": "Does a tangent line cross through the inside of a circle?",
+      "expected_key_idea": "No -- a tangent line touches a circle at exactly ONE point and stays entirely outside the circle everywhere else; a line that crosses through the inside at two points is called a secant (or chord), not a tangent."
+    },
+    {
+      "case_id": "cb-758",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "comparison",
+      "question": "Are two lines that meet to form a perfect right angle called parallel or perpendicular?",
+      "expected_key_idea": "Perpendicular lines."
+    },
+    {
+      "case_id": "cb-761",
+      "grade": 4,
+      "curriculum_topic": "Geometry & Circles",
+      "question_type": "ambiguous",
+      "question": "What is the name for the line segment the student is describing?",
+      "expected_key_idea": "Most likely a diameter, since passing through the centre and touching the circle at two opposite points is exactly what defines one -- though a tutor should still confirm it's a straight line segment rather than something curved."
+    },
+    {
+      "case_id": "cb-764",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "conceptual",
+      "question": "If you double both the length and the width of a rectangle, what happens to its area?",
+      "expected_key_idea": "The area becomes 4 times as large, not just double -- since area is length times width, doubling BOTH dimensions multiplies the area by 2x2=4."
+    },
+    {
+      "case_id": "cb-765",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "misconception",
+      "question": "Must two rectangles with the same perimeter always have the same area?",
+      "expected_key_idea": "No -- a 2m x 8m rectangle and a 4m x 6m rectangle both have a perimeter of 20m, but their areas differ (16 sq m vs 24 sq m); equal perimeters don't guarantee equal areas."
+    },
+    {
+      "case_id": "cb-766",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "comparison",
+      "question": "Of a 6m x 6m square and an 8m x 4m rectangle, both with the same perimeter, which has the bigger area?",
+      "expected_key_idea": "The square has the bigger area (36 sq m vs 32 sq m) -- for a fixed perimeter, a square tends to enclose more area than a more 'stretched out' rectangle."
+    },
+    {
+      "case_id": "cb-769",
+      "grade": 4,
+      "curriculum_topic": "Perimeter & Area",
+      "question_type": "ambiguous",
+      "question": "A rectangle has an area of 24 square metres. What could its length and width be?",
+      "expected_key_idea": "More than one pair works (e.g. 1x24, 2x12, 3x8, 4x6) -- the question is open-ended, since area alone doesn't pin down a unique pair of dimensions."
+    },
+    {
+      "case_id": "cb-772",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "conceptual",
+      "question": "Why would you convert both distances to the same unit before comparing 'which is further: 2.3 km or 2500 m'?",
+      "expected_key_idea": "You can only meaningfully compare quantities measured in the SAME unit -- converting 2.3 km to 2300 m makes the comparison against 2500 m direct and valid."
+    },
+    {
+      "case_id": "cb-776",
+      "grade": 4,
+      "curriculum_topic": "Metric Conversions & Time",
+      "question_type": "comparison",
+      "question": "Which is a longer distance: 2,400 metres, or 2.3 kilometres?",
+      "expected_key_idea": "2,400 metres is longer -- 2.3 km equals 2,300 m, and 2,400 m is more than 2,300 m."
+    },
+    {
+      "case_id": "cb-779",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "conceptual",
+      "question": "Why might two different bar graphs of the exact same data look very different if they use different scales on the vertical axis?",
+      "expected_key_idea": "If one graph's vertical axis jumps in large steps and another's jumps in small steps, the exact same values can make the bars look dramatically different in height -- always checking the scale before comparing bar heights visually is essential."
+    },
+    {
+      "case_id": "cb-781",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "comparison",
+      "question": "A tally chart shows 13 marks for 'rainy days' and 17 marks for 'sunny days' in a month. Which type of day was more common?",
+      "expected_key_idea": "Sunny days, since 17 marks is more than 13 marks."
+    },
+    {
+      "case_id": "cb-782",
+      "grade": 4,
+      "curriculum_topic": "Data Handling",
+      "question_type": "real_life",
+      "question": "A shop owner tracks daily sales on a line graph and notices the line has been climbing steadily for the past week. What does this trend suggest?",
+      "expected_key_idea": "Sales have been increasing day by day over that week -- a steadily climbing line indicates a consistent upward trend, not just a one-off good day."
+    },
+    {
+      "case_id": "cb-134",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "direct_numerical",
+      "question": "Write 2,45,678 in words using the Indian place-value system.",
+      "expected_key_idea": "two lakh forty-five thousand six hundred seventy-eight"
+    },
+    {
+      "case_id": "cb-138",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "conceptual",
+      "question": "What is the difference between a 'lakh' and a 'crore' in the Indian numbering system?",
+      "expected_key_idea": "1 lakh = 1,00,000 (one hundred thousand); 1 crore = 1,00,00,000 (ten million) = 100 lakhs."
+    },
+    {
+      "case_id": "cb-142",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "real_life",
+      "question": "Name one everyday object that shows a right angle.",
+      "expected_key_idea": "Any genuine right-angle example, e.g. the corner of a book, a window frame."
+    },
+    {
+      "case_id": "cb-144",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "direct_numerical",
+      "question": "What tool is used to measure an angle accurately, and what unit does it use?",
+      "expected_key_idea": "A protractor, measuring in degrees."
+    },
+    {
+      "case_id": "cb-145",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "misconception",
+      "question": "Does the length of the lines drawn for an angle affect its degree measure?",
+      "expected_key_idea": "No -- the degree measure depends on how much the two rays turn apart (the amount of rotation), not on how long the lines are drawn; a short-armed angle can have a bigger degree measure than a long-armed one."
+    },
+    {
+      "case_id": "cb-147",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "question": "After a half-turn (180 degrees), does a square look the same as before, or different?",
+      "expected_key_idea": "The same -- a square has rotational symmetry, so a 180-degree rotation returns it to an identical-looking position."
+    },
+    {
+      "case_id": "cb-148",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "Name one object or symbol that looks the same after a half-turn (180 degrees).",
+      "expected_key_idea": "Any genuine 180-degree rotational example, e.g. the letter 'S', the letter 'Z', a standard playing card's number pattern."
+    },
+    {
+      "case_id": "cb-150",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "misconception",
+      "question": "Does having a line of symmetry guarantee a shape also has rotational symmetry?",
+      "expected_key_idea": "No -- e.g. a simple arrow or the letter 'A' has a line of symmetry but does not look the same under any rotation less than a full 360-degree turn, so it lacks rotational symmetry."
+    },
+    {
+      "case_id": "cb-151",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "direct_numerical",
+      "question": "List all the factors of 20.",
+      "expected_key_idea": "1, 2, 4, 5, 10, 20"
+    },
+    {
+      "case_id": "cb-153",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "conceptual",
+      "question": "What does it mean for a number to be 'prime'?",
+      "expected_key_idea": "A prime number has exactly two factors: 1 and itself (no other whole number divides it evenly)."
+    },
+    {
+      "case_id": "cb-154",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "comparison",
+      "question": "Is 1 a prime number? Why or why not?",
+      "expected_key_idea": "No -- 1 has only one factor (itself), not two distinct factors, so it does not meet the definition of a prime number."
+    },
+    {
+      "case_id": "cb-156",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "misconception",
+      "question": "Is it true that a number's factors are always smaller than its multiples?",
+      "expected_key_idea": "Generally true for a number N (factors of N are <= N, multiples of N are >= N), but the reasoning matters: factors divide INTO N, while multiples are N added to itself repeatedly (N, 2N, 3N, ...), which is why the two sets behave oppositely in size."
+    },
+    {
+      "case_id": "cb-157",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "comparison",
+      "question": "Which is larger: 0.4 or 0.25?",
+      "expected_key_idea": null
+    },
+    {
+      "case_id": "cb-159",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "conceptual",
+      "question": "Why does the fraction 3/4 equal the decimal 0.75?",
+      "expected_key_idea": "3/4 means 3 divided by 4; dividing 3 by 4 gives 0.75, and decimals are just another way of writing fractions whose denominators are powers of 10."
+    },
+    {
+      "case_id": "cb-162",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "misconception",
+      "question": "Is 0.5 smaller than 0.25?",
+      "expected_key_idea": "No -- comparing decimals requires looking at place value, not digit count; 0.5 = 0.50, and 50 hundredths is more than 25 hundredths, so 0.5 is actually bigger than 0.25."
+    },
+    {
+      "case_id": "cb-165",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "conceptual",
+      "question": "What does 'volume' measure, and how is it different from 'area'?",
+      "expected_key_idea": "Volume measures the 3D space inside a solid (e.g. how many 1 cm cubes fit inside it); area measures a flat 2D surface -- volume adds a third dimension that area doesn't have."
+    },
+    {
+      "case_id": "cb-168",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "misconception",
+      "question": "Does doubling a square's side length double its area?",
+      "expected_key_idea": "No -- doubling the side of a square QUADRUPLES the area (area depends on side squared), not doubles it; e.g. side 3 has area 9, side 6 has area 36, which is 4 times as much, not 2 times."
+    },
+    {
+      "case_id": "cb-170",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "What does a 'scale' on a map tell us?",
+      "expected_key_idea": "It tells us how a distance measured on the map corresponds to the real/actual distance on the ground, so map measurements can be converted into real-world distances."
+    },
+    {
+      "case_id": "cb-172",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "real_life",
+      "question": "Why might a town planner use a scaled floor plan before building a house, instead of drawing it at full size?",
+      "expected_key_idea": "A scaled drawing fits on paper while still showing accurate proportions, letting the planner check how rooms relate to each other before building at full size."
+    },
+    {
+      "case_id": "cb-174",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "misconception",
+      "question": "Does a scale of '1 cm = 10 km' mean the map is bigger than real life?",
+      "expected_key_idea": "No -- it's the opposite: the map is SMALLER than real life by that scale; 1 cm on the map stands for a much larger 10 km in reality."
+    },
+    {
+      "case_id": "cb-784",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "direct_numerical",
+      "question": "A city's population is 12,45,678. What digit is in the ten-thousands place?",
+      "expected_key_idea": "4 -- reading 12,45,678 as 1,2,4,5,6,7,8 place by place (lakhs onward), the ten-thousands digit is 4."
+    },
+    {
+      "case_id": "cb-789",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "conceptual",
+      "question": "What is the difference between the Indian place-value system (ones, tens, hundreds, thousands, lakhs) and just grouping digits in 3s?",
+      "expected_key_idea": "The Indian system groups the first 3 digits from the right (ones, tens, hundreds), then groups every 2 digits after that (thousands, lakhs, crores) -- which is why Indian numbers are written like 12,34,567 rather than 1,234,567."
+    },
+    {
+      "case_id": "cb-790",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "misconception",
+      "question": "Is a 6-digit number always bigger than a 5-digit number?",
+      "expected_key_idea": "Yes, this one is actually true -- the smallest possible 6-digit number (100000) is already bigger than the largest possible 5-digit number (99999)."
+    },
+    {
+      "case_id": "cb-795",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "comparison",
+      "question": "Which is a more sensible way to estimate 48,732 plus 19,045 quickly: rounding both to the nearest ten, or to the nearest ten-thousand?",
+      "expected_key_idea": "Rounding to the nearest ten-thousand gives a quick, sensible estimate (50,000+20,000=70,000) for numbers this large; rounding to the nearest ten barely simplifies the calculation at all."
+    },
+    {
+      "case_id": "cb-802",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "conceptual",
+      "question": "A triangle's three angles add up to how many degrees?",
+      "expected_key_idea": "180 degrees -- this is always true for every triangle, no matter its shape or size."
+    },
+    {
+      "case_id": "cb-804",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "comparison",
+      "question": "Is a triangle with all three sides equal called equilateral, isosceles, or scalene?",
+      "expected_key_idea": "Equilateral."
+    },
+    {
+      "case_id": "cb-808",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "comparison",
+      "question": "Is a triangle with no two sides equal called equilateral, isosceles, or scalene?",
+      "expected_key_idea": "Scalene."
+    },
+    {
+      "case_id": "cb-815",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "conceptual",
+      "question": "Does the letter 'H' have a line of symmetry? If so, how many?",
+      "expected_key_idea": "Yes, 'H' has 2 lines of symmetry -- one straight down the middle vertically, and one straight across the middle horizontally."
+    },
+    {
+      "case_id": "cb-816",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "conceptual",
+      "question": "What does it mean for a shape to have 'rotational symmetry'?",
+      "expected_key_idea": "A shape has rotational symmetry if, after turning it around its centre by some amount less than a full turn, it looks exactly the same as before."
+    },
+    {
+      "case_id": "cb-817",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "question": "Does a square look the same if you rotate it 90 degrees around its centre?",
+      "expected_key_idea": "Yes -- a square has rotational symmetry at 90 degrees, since it looks identical after a quarter turn."
+    },
+    {
+      "case_id": "cb-818",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "Name one everyday object that looks the same after being rotated, like a pinwheel or fan blade pattern.",
+      "expected_key_idea": "Any genuinely rotationally-symmetric object (a ceiling fan, a pinwheel, a steering wheel with evenly spaced spokes)."
+    },
+    {
+      "case_id": "cb-820",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "conceptual",
+      "question": "Does the letter 'O' have rotational symmetry?",
+      "expected_key_idea": "Yes -- 'O' looks the same at many rotation angles since it is close to a circle in shape."
+    },
+    {
+      "case_id": "cb-821",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "question": "Does an equilateral triangle look the same if you rotate it 120 degrees around its centre?",
+      "expected_key_idea": "Yes -- an equilateral triangle has rotational symmetry at 120 degrees, since all three sides and angles are equal."
+    },
+    {
+      "case_id": "cb-822",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "A kolam (rangoli) design looks identical no matter which of its 6 'petals' you start looking from. What property does this design have?",
+      "expected_key_idea": "Rotational symmetry -- the design repeats itself at equal turns around its centre, so it looks the same from each of the 6 petal positions."
+    },
+    {
+      "case_id": "cb-823",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "misconception",
+      "question": "Does every shape with a line of symmetry also have rotational symmetry?",
+      "expected_key_idea": "No -- a shape like the letter 'A' has a line of symmetry (vertical) but does NOT look the same after any partial rotation, so it lacks rotational symmetry; the two properties are independent."
+    },
+    {
+      "case_id": "cb-824",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "A ceiling fan with 3 evenly spaced blades looks the same after spinning a third of the way around. What property is this an example of?",
+      "expected_key_idea": "Rotational symmetry."
+    },
+    {
+      "case_id": "cb-832",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "direct_numerical",
+      "question": "List the first five multiples of 7.",
+      "expected_key_idea": "7, 14, 21, 28, 35."
+    },
+    {
+      "case_id": "cb-835",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "word_problem",
+      "question": "What is the LCM of 4, 6, and 8?",
+      "expected_key_idea": "24 -- independently checked: sympy.lcm(sympy.lcm(4,6),8) == 24."
+    },
+    {
+      "case_id": "cb-836",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "word_problem",
+      "question": "What is the HCF of 24, 36, and 60?",
+      "expected_key_idea": "12 -- independently checked: sympy.gcd(sympy.gcd(24,36),60) == 12."
+    },
+    {
+      "case_id": "cb-837",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "direct_numerical",
+      "question": "Is 1 a prime number?",
+      "expected_key_idea": "No -- a prime number needs exactly two distinct factors (1 and itself), but 1 only has one factor (itself), so it does not qualify."
+    },
+    {
+      "case_id": "cb-840",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "comparison",
+      "question": "Of the numbers 15 and 22, which one has more factors?",
+      "expected_key_idea": "15 has 4 factors (1,3,5,15) and 22 also has 4 factors (1,2,11,22) -- they actually have the SAME number of factors, which is worth noticing rather than assuming one obviously has more."
+    },
+    {
+      "case_id": "cb-846",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "comparison",
+      "question": "Which is bigger, 0.6 or 0.45?",
+      "expected_key_idea": "0.6 is bigger -- comparing the tenths digit, 6 tenths is more than 4 tenths, regardless of the hundredths that follow."
+    },
+    {
+      "case_id": "cb-848",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "misconception",
+      "question": "Is 0.5 smaller than 0.25?",
+      "expected_key_idea": "No -- 0.5 equals 0.50, which is bigger than 0.25; comparing decimal place by place (not digit-count) is what matters, not how many digits are written."
+    },
+    {
+      "case_id": "cb-853",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "real_life",
+      "question": "A sprinter's race time is recorded as 12.8 seconds. Another sprinter finishes in 12.65 seconds. Who ran faster?",
+      "expected_key_idea": "The second sprinter (12.65s) ran faster -- a smaller time means less time taken, and 12.65 < 12.8."
+    },
+    {
+      "case_id": "cb-860",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "conceptual",
+      "question": "What is the difference between area and volume?",
+      "expected_key_idea": "Area measures a flat, 2D surface (length x width); volume measures how much 3D space a solid takes up (length x width x height)."
+    },
+    {
+      "case_id": "cb-865",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "misconception",
+      "question": "Is volume just a bigger version of area?",
+      "expected_key_idea": "No -- area measures a flat 2D surface (length x width), while volume measures 3D space (length x width x height); they measure fundamentally different things, not just different sizes of the same thing."
+    },
+    {
+      "case_id": "cb-871",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "What does a map's scale, like '1 cm = 5 km', actually tell you?",
+      "expected_key_idea": "It tells you how a small distance measured on the map (1 cm) relates to the real, much larger distance on the ground (5 km), so you can convert map measurements into real-world distances."
+    },
+    {
+      "case_id": "cb-873",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "Why is a compass direction like 'north-east' useful on a map?",
+      "expected_key_idea": "It describes a direction that is between two main directions (north and east), giving a more precise sense of direction than just saying 'north' or 'east' alone."
+    },
+    {
+      "case_id": "cb-874",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "ambiguous",
+      "question": "On a map, a village is shown 'somewhere near' a river bend. How far is the village from the river, exactly?",
+      "expected_key_idea": "'Somewhere near' does not give an exact distance -- without a measurement on the map and the map's scale, only a vague closeness, not a precise distance, can be stated."
+    },
+    {
+      "case_id": "cb-877",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "Why does a map need a 'key' or 'legend' explaining its symbols?",
+      "expected_key_idea": "Without a key, a reader wouldn't know what each symbol or colour on the map actually represents (a school, a river, a road), making the map impossible to interpret correctly."
+    },
+    {
+      "case_id": "cb-878",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "real_life",
+      "question": "A delivery app shows two routes to your house: one marked 4 cm on the map, another marked 6 cm, using the same scale. Which route is shorter in real life?",
+      "expected_key_idea": "The 4 cm route is shorter -- with the same map scale applied to both, a smaller map distance always corresponds to a smaller real distance."
+    },
+    {
+      "case_id": "cb-880",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "real_life",
+      "question": "A treasure hunt clue says 'walk north-east from the big tree'. Why is 'north-east' a better clue than just saying 'that way'?",
+      "expected_key_idea": "'North-east' gives an exact, shared direction anyone can follow using a compass, while 'that way' depends on which way the speaker happened to be pointing and means nothing to someone else."
+    },
+    {
+      "case_id": "cb-883",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "conceptual",
+      "question": "Why does estimating 38,742 plus 61,205 by rounding both to the nearest ten-thousand give a quick, useful check, even though it isn't the exact answer?",
+      "expected_key_idea": "Rounding to 40,000+60,000=100,000 is close to the real sum and takes seconds to compute mentally -- it won't be exact, but it quickly flags whether the precise calculated answer is in the right ballpark."
+    },
+    {
+      "case_id": "cb-885",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "comparison",
+      "question": "Which is closer to 1,00,000: 94,800 or 1,03,500?",
+      "expected_key_idea": "1,03,500 is closer -- it is 3,500 away from 1,00,000, while 94,800 is 5,200 away."
+    },
+    {
+      "case_id": "cb-886",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "real_life",
+      "question": "A company's quarterly profit is reported as '6,20,000 rupees, rounded to the nearest ten thousand'. What is the widest possible range the true profit could fall within?",
+      "expected_key_idea": "Anywhere from 6,15,000 up to (but not including) 6,25,000 -- rounding to the nearest ten-thousand means the true value lies within 5,000 of the rounded figure on either side."
+    },
+    {
+      "case_id": "cb-887",
+      "grade": 5,
+      "curriculum_topic": "Large Numbers & Operations",
+      "question_type": "ambiguous",
+      "question": "A 6-digit number rounds to 5,00,000 when rounded to the nearest lakh. What could the exact number be?",
+      "expected_key_idea": "Any number from 4,50,000 up to 5,49,999 fits -- open-ended, with a very wide range of possible correct answers."
+    },
+    {
+      "case_id": "cb-891",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "conceptual",
+      "question": "Why must the three angles inside any triangle always add up to exactly 180 degrees, no matter the triangle's shape?",
+      "expected_key_idea": "This is a fundamental fact about flat triangles -- it can be shown by tearing the three corners off a paper triangle and arranging them together, which always forms a straight line (180 degrees), regardless of the triangle's specific shape."
+    },
+    {
+      "case_id": "cb-892",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "misconception",
+      "question": "Is a reflex angle simply a bigger obtuse angle?",
+      "expected_key_idea": "No -- an obtuse angle is strictly between 90 and 180 degrees, while a reflex angle is strictly between 180 and 360 degrees; they occupy entirely separate ranges, rather than one being a 'bigger' version of the other."
+    },
+    {
+      "case_id": "cb-893",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "comparison",
+      "question": "Is a triangle with exactly two equal sides called equilateral, isosceles, or scalene?",
+      "expected_key_idea": "Isosceles."
+    },
+    {
+      "case_id": "cb-896",
+      "grade": 5,
+      "curriculum_topic": "Shapes & Angles",
+      "question_type": "ambiguous",
+      "question": "A triangle has one angle of exactly 90 degrees. What could its other two angles be?",
+      "expected_key_idea": "Open-ended -- the other two angles must add up to 90 degrees together (since all three sum to 180), but many specific pairs work (e.g. 45+45, 30+60, 20+70), so no single pair is forced."
+    },
+    {
+      "case_id": "cb-899",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "conceptual",
+      "question": "Why does a regular hexagon have rotational symmetry at 60 degrees, but a regular pentagon does not also have symmetry at that same angle?",
+      "expected_key_idea": "A regular shape with n equal sides has rotational symmetry at 360/n degrees; for a hexagon (n=6) that is 60 degrees, but for a pentagon (n=5) that works out to 72 degrees instead, so turning it by 60 degrees doesn't line it back up with itself."
+    },
+    {
+      "case_id": "cb-900",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "misconception",
+      "question": "Can a shape have rotational symmetry without having any line of symmetry at all?",
+      "expected_key_idea": "Yes -- a shape like a pinwheel with curved, slanted blades can look the same after certain rotations yet have no straight line that splits it into mirror-image halves; the two properties don't have to come together."
+    },
+    {
+      "case_id": "cb-901",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "comparison",
+      "question": "Which has more lines of symmetry: a regular hexagon, or a regular pentagon?",
+      "expected_key_idea": "The regular hexagon has more -- it has 6 lines of symmetry, compared to the regular pentagon's 5."
+    },
+    {
+      "case_id": "cb-902",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "real_life",
+      "question": "A traditional rangoli pattern looks exactly the same after being turned a sixth of a full circle. What property does this pattern have?",
+      "expected_key_idea": "Rotational symmetry -- the design repeats itself at equal turns around its centre."
+    },
+    {
+      "case_id": "cb-903",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "word_problem",
+      "question": "A logo is designed as a square, though it's drawn rotated to look like a diamond. If you turn it 90 degrees, does it look the same as before?",
+      "expected_key_idea": "Yes -- a square (even drawn as a rotated diamond) has rotational symmetry at 90 degrees, so a quarter turn leaves it looking identical."
+    },
+    {
+      "case_id": "cb-904",
+      "grade": 5,
+      "curriculum_topic": "Symmetry & Rotations",
+      "question_type": "ambiguous",
+      "question": "What regular shape is the student most likely describing?",
+      "expected_key_idea": "Most likely a regular pentagon, since 360/5=72 degrees matches its rotational symmetry -- though a tutor should confirm the shape actually has 5 equal sides rather than assuming from the angle alone."
+    },
+    {
+      "case_id": "cb-907",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "conceptual",
+      "question": "Why does finding the HCF of two numbers help when simplifying a fraction like 18/24?",
+      "expected_key_idea": "Dividing both the numerator and denominator by their HCF (which is 6 for 18 and 24) reduces the fraction to its simplest form (3/4) in one step, rather than trying several smaller common factors one at a time."
+    },
+    {
+      "case_id": "cb-909",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "comparison",
+      "question": "Which has more factors: 16 or 17?",
+      "expected_key_idea": "16 has more factors (1, 2, 4, 8, 16 -- five factors) than 17, which is prime and has only two factors (1 and 17)."
+    },
+    {
+      "case_id": "cb-912",
+      "grade": 5,
+      "curriculum_topic": "Factors & Multiples",
+      "question_type": "ambiguous",
+      "question": "A number less than 30 has exactly 2 factors. What could the number be?",
+      "expected_key_idea": "Open-ended -- any prime number under 30 fits (2, 3, 5, 7, 11, 13, 17, 19, 23, 29), since having exactly 2 factors is the definition of prime; many correct answers exist."
+    },
+    {
+      "case_id": "cb-915",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "conceptual",
+      "question": "Why does lining up the decimal points matter when adding 3.4 and 12.75 by hand?",
+      "expected_key_idea": "Lining up decimal points ensures that tenths are added to tenths, hundredths to hundredths, and so on, matching place values correctly; misaligning them would wrongly add digits from different place-value columns together."
+    },
+    {
+      "case_id": "cb-916",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "misconception",
+      "question": "Is 0.9 smaller than 0.12?",
+      "expected_key_idea": "No -- 0.9 equals 0.90, which is bigger than 0.12; the number of digits written after the decimal point doesn't determine size, the actual place values do."
+    },
+    {
+      "case_id": "cb-917",
+      "grade": 5,
+      "curriculum_topic": "Fractions & Decimals",
+      "question_type": "comparison",
+      "question": "Which is bigger, 3/5 or 0.55?",
+      "expected_key_idea": "3/5 is bigger -- 3/5 equals 0.6 as a decimal, and 0.6 is more than 0.55."
+    },
+    {
+      "case_id": "cb-923",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "conceptual",
+      "question": "If you triple all three dimensions of a cuboid -- its length, width, and height -- what happens to its volume?",
+      "expected_key_idea": "The volume becomes 27 times as large, not just triple -- since volume is length x width x height, tripling all three dimensions multiplies the volume by 3x3x3=27."
+    },
+    {
+      "case_id": "cb-925",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "comparison",
+      "question": "Between a 10m x 10m square plot and a 20m x 5m rectangular plot, both with the same area, which has the bigger perimeter?",
+      "expected_key_idea": "The 20m x 5m rectangle has the bigger perimeter (50m vs the square's 40m), even though both enclose exactly the same area (100 sq m) -- a more 'stretched out' shape needs more fencing for the same area."
+    },
+    {
+      "case_id": "cb-928",
+      "grade": 5,
+      "curriculum_topic": "Area, Perimeter & Volume",
+      "question_type": "ambiguous",
+      "question": "A cuboid has a volume of 60 cubic cm. What could its length, width, and height be?",
+      "expected_key_idea": "Open-ended -- many triples of whole numbers multiply to 60 (e.g. 5x4x3, 10x3x2, 6x5x2), so the question doesn't pin down a single unique set of dimensions."
+    },
+    {
+      "case_id": "cb-931",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "conceptual",
+      "question": "Why can two different maps of the same city use completely different scales, like '1 cm = 1 km' versus '1 cm = 5 km'?",
+      "expected_key_idea": "A map's scale is chosen based on how much detail or how large an area needs to fit on the page -- a smaller scale (1 cm = 1 km) shows more detail over a smaller area, while a larger scale (1 cm = 5 km) fits a bigger area but with less fine detail."
+    },
+    {
+      "case_id": "cb-932",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "misconception",
+      "question": "Does a scale like '1 cm = 10 km' mean the map shows MORE detail than a scale of '1 cm = 1 km'?",
+      "expected_key_idea": "No -- a larger real-world distance per cm (1 cm = 10 km) means LESS detail is shown per centimetre, not more; it lets you fit a bigger area on the page, but with coarser detail, which is the opposite of the claim."
+    },
+    {
+      "case_id": "cb-933",
+      "grade": 5,
+      "curriculum_topic": "Data & Mapping Skills",
+      "question_type": "comparison",
+      "question": "On the same map, one road is drawn 3 cm long and another is drawn 7 cm long. Which real-world road is longer?",
+      "expected_key_idea": "The road drawn 7 cm long is longer in real life -- with the same map scale applied to both, a bigger map distance always means a bigger real distance."
+    }
+  ]
+}

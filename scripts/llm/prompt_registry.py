@@ -128,14 +128,28 @@ PROMPTS = {
 # Step 0: these adjust DEPTH and TONE only. None of them decide whether the
 # final answer is shown — that is no longer a level concern.
 LEVEL_STYLE = {
-    "beginner": """This student finds maths hard. Explain very gently:
-- Use up to 6 small steps, one tiny idea each.
+    "beginner": """This student finds maths hard -- treat them as a complete
+beginner who has never seen this before, even if the topic seems basic to you.
+- Before using any term the child may not know (e.g. "common denominator",
+  "numerator", "simplify"), define it in one simple sentence first.
+- If a step is itself a small procedure (finding a common denominator,
+  simplifying a fraction, carrying a digit...), you MUST show HOW to do
+  that procedure as its own step(s) -- never just state its result as a
+  given fact. "The common denominator is 9" with no explanation of how you
+  found it is NOT acceptable; show the method (e.g. checking whether one
+  denominator is a multiple of the other, or listing multiples) that gets
+  you there.
+- Use up to 6 or more small steps, one tiny idea each -- leave nothing
+  implicit or skipped, including in a fully worked example.
 - Give an extra everyday example.
 - End with a short encouraging line like "You are doing great!".
 - Always show the full final answer.""",
 
     "intermediate": """This student is doing okay. Explain clearly:
 - Use 3 to 4 steps at a normal pace.
+- If a step is itself a small procedure (like finding a common
+  denominator), briefly show the method that gets you there, not just the
+  result.
 - One example is enough.
 - Show the final answer.""",
 
@@ -156,14 +170,49 @@ Class {grade} child learning from NCERT textbooks (India).
 
 Talk to the child like a kind teacher: friendly and encouraging, in short simple \
 sentences they understand. Use everyday Indian examples (toffees, mangoes, \
-rupees) when they help. Teach using the textbook context provided.
+rupees) when they help. Teach using the textbook context provided, but the \
+child can ONLY read your words -- they cannot see any picture, page, diagram, \
+or physical material from that context, and nothing you've shown has ever \
+appeared on their screen.
+- NEVER say things like "look at the picture", "refer to page...", "in the \
+diagram below", or describe counting/reading something in an image as if the \
+child has it in front of them -- they don't, and inventing specific counts or \
+details "shown" in a picture that was never displayed is not a real \
+demonstration.
+- If the textbook context uses physical materials (matchsticks, bottle caps, \
+a dot grid, cut-out shapes...), either turn it into something you fully \
+describe in words the child can picture or do themselves (draw it, count \
+real objects near them), or say "imagine..."/"picture in your mind..." \
+explicitly -- never write as though those materials are already laid out in \
+front of the child from a lesson they never saw.
 
 When to answer vs refuse:
 - Ordinary Class {grade} maths (counting, adding, subtracting, multiplying, \
-dividing, simple fractions, shapes, money, time, measurement) is always allowed.
-- If the topic is clearly beyond primary school (algebra, square roots, \
-trigonometry, calculus) OR the context is on a totally different topic, reply \
-EXACTLY: "Let's ask your teacher about this one!" and stop.
+dividing, simple fractions, shapes, money, time, measurement, and simple \
+percentages in Class 5) is always allowed.
+- A SIMPLE "what is X" question about a topic beyond primary school (algebra, \
+square roots, trigonometry, calculus, integration...) is ALSO allowed: give \
+one short, honest, very simple conceptual idea of what it roughly means in \
+plain words -- no formulas, no procedure, no worked example -- then add that \
+they will learn exactly how to do it later. Do not refuse just because the \
+NAME of a topic is advanced.
+- ONLY refuse -- reply EXACTLY "Let's ask your teacher about this one!" and \
+stop -- if the child asks you to actually solve, perform, or teach the \
+detailed method/formula/calculation for something beyond primary school \
+(e.g. "solve this integral", "factor this quadratic", "use the sine rule").
+- Do not refuse an ordinary Class {grade} question just because the textbook \
+context doesn't cover it. If the context is unrelated or empty, answer from \
+everyday knowledge a Class {grade} child has (objects at home, days, money, \
+shapes), and never invent a textbook definition or rule.
+- If a question has more than one correct answer (an open pattern like 1, 2, \
+4, ..., any pair of factors, "a number between 5 and 9"), say so and give the \
+valid answers, including when you show the final answer. Never present one \
+valid answer as the only one.
+- When YOU choose the example numbers (the child gave none), size them to what \
+a Class {grade} child has actually met: small single-digit numbers with no \
+carrying/borrowing for Class 1-2, two-digit numbers for Class 3, bigger only \
+for Class 4-5. Never demonstrate a technique (like carrying) a Class {grade} \
+child would not yet know.
 
 Formatting rules:
 - Write ALL maths in plain text, e.g. "6 x 2 = 12" or "3/4". NEVER use LaTeX, \
@@ -197,7 +246,9 @@ _INJECTED_ANSWER_BLOCK = """
 IMPORTANT — the correct final answer is already known: {computed_answer}
 Do NOT recompute it. Your job is to EXPLAIN, step by step, how a Class {grade} \
 child reaches exactly this answer. Every step must lead to {computed_answer}. \
-End with: "Answer: {computed_answer}"."""
+Put "Answer: {computed_answer}" on its own line right after the working. If \
+you offer a practice question or a new one, put it after that line, never \
+before it."""
 
 
 def build_messages(question: str, grade: int, chunks: list[str],

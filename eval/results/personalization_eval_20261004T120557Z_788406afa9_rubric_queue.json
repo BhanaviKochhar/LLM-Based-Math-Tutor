@@ -1,0 +1,107 @@
+{
+  "source_result": "personalization_eval_20261004T120557Z_788406afa9.json",
+  "items": [
+    {
+      "case_id": "pz-001",
+      "scenario": "same_question_beginner_vs_advanced_explanation_depth",
+      "learner_level": "beginner",
+      "underlying_question": "What is 23 + 48?",
+      "expected_to_change": [
+        "explanation_depth (beginner gets up to ~6 short steps with an everyday example)",
+        "scaffolding_amount (more hand-holding, explicit encouragement)"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE['beginner'] vs ['advanced']"
+    },
+    {
+      "case_id": "pz-002",
+      "scenario": "same_question_beginner_vs_advanced_explanation_depth",
+      "learner_level": "advanced",
+      "underlying_question": "What is 23 + 48?",
+      "expected_to_change": [
+        "explanation_depth (advanced gets a brief hint/leading question rather than a full step-by-step walkthrough, per prompt_registry's advanced LEVEL_STYLE block)",
+        "the final answer should NOT be shown immediately for the advanced style, per that block's own description"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE['advanced']"
+    },
+    {
+      "case_id": "pz-005",
+      "scenario": "persistent_repeated_mistake_same_topic",
+      "learner_level": "beginner",
+      "underlying_question": "A new subtraction-with-borrowing problem, e.g. What is 74 - 38?",
+      "expected_to_change": [
+        "the controller should classify this student as 'beginner' for this and subsequent turns (recent_accuracy < 0.4), affecting both explanation depth and the co-solve threshold"
+      ],
+      "mechanism_reference": "scripts.llm.student_tracker.record() tracks weak_topics; classify() uses the last WINDOW=5 attempts"
+    },
+    {
+      "case_id": "pz-007",
+      "scenario": "explicit_request_for_simpler_explanation_overrides_classified_level",
+      "learner_level": "intermediate",
+      "underlying_question": "What is a fraction? (conceptual, grade 4)",
+      "expected_to_change": [
+        "explanation register should become noticeably simpler in response to the EXPLICIT request, even though the tracked level classification is 'intermediate', not 'beginner'"
+      ],
+      "mechanism_reference": "No dedicated code path found for an explicit in-turn 'simpler please' override during this authoring pass's code reading; this case probes a currently-unverified behavior."
+    },
+    {
+      "case_id": "pz-008",
+      "scenario": "partial_understanding_already_demonstrated_not_restarted",
+      "learner_level": "intermediate",
+      "underlying_question": "Ongoing conceptual episode about fractions; student just said 'so the bottom number is how many pieces there are'.",
+      "expected_to_change": [
+        "the tutor's next response should build on the denominator point already made, adding the numerator's role next, rather than re-explaining fractions from scratch"
+      ],
+      "mechanism_reference": "scripts.llm.controller._d_ack_conceptual directive instructs: 'do NOT restart with a generic definition they have already heard'"
+    },
+    {
+      "case_id": "pz-009",
+      "scenario": "terminology_register_by_level",
+      "learner_level": "beginner",
+      "underlying_question": "What is the perimeter of a square with side 6 cm?",
+      "expected_to_change": [
+        "terminology should favor plain, everyday words (e.g. 'the distance all the way around the edge') over formal vocabulary used unexplained"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE text (qualitative wording difference, not a separate code branch)"
+    },
+    {
+      "case_id": "pz-010",
+      "scenario": "terminology_register_by_level",
+      "learner_level": "advanced",
+      "underlying_question": "What is the perimeter of a square with side 6 cm?",
+      "expected_to_change": [
+        "terminology can use the formal term 'perimeter' directly without first grounding it in plain language, and the task itself should be slightly harder (e.g. asked to find perimeter without being told the side is a square's side explicitly) per the advanced LEVEL_STYLE block"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE text (qualitative wording difference)"
+    },
+    {
+      "case_id": "pz-011",
+      "scenario": "correction_style_by_level_on_wrong_attempt",
+      "learner_level": "beginner",
+      "underlying_question": "What is 7 x 6? (student answered 36)",
+      "expected_to_change": [
+        "correction should be especially gentle and specific to this exact slip (36 vs 42), per the beginner support level"
+      ],
+      "mechanism_reference": "scripts.llm.controller._d_diagnose_wrong directive (shared text across levels; this case probes whether tone/pacing differs in practice)"
+    },
+    {
+      "case_id": "pz-012",
+      "scenario": "scaffolding_amount_multi_step_word_problem",
+      "learner_level": "beginner",
+      "underlying_question": "A baker makes 96 cookies and packs them equally into 8 boxes. How many cookies per box?",
+      "expected_to_change": [
+        "number of explicit steps shown (more, smaller steps for beginner) and presence of an everyday example"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE['beginner'] (up to 6 short steps + 1 everyday example + encouraging ending)"
+    },
+    {
+      "case_id": "pz-013",
+      "scenario": "scaffolding_amount_multi_step_word_problem",
+      "learner_level": "intermediate",
+      "underlying_question": "A baker makes 96 cookies and packs them equally into 8 boxes. How many cookies per box?",
+      "expected_to_change": [
+        "fewer explicit steps than the beginner case (3-4 vs up to 6), per the intermediate LEVEL_STYLE block"
+      ],
+      "mechanism_reference": "scripts.llm.prompt_registry LEVEL_STYLE['intermediate'] (three or four steps + one example)"
+    }
+  ]
+}

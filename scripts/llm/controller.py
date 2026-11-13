@@ -50,18 +50,72 @@ MODE_CO_SOLVE = "co_solve"
 MODE_REVEAL = "reveal"
 MODE_REDIRECT = "redirect"              # cold solve -> re-explain, invite a try
 MODE_NEW_QUESTION = "new_question"
+MODE_HINT_EXHAUSTED = "hint_exhausted"   # hint budget used up; no more model calls for hints
+MODE_CONFUSION = "confusion_help"        # child didn't follow the LAST reply about THIS problem
+MODE_CORRECTION = "correction_repair"    # child is rejecting/correcting the LAST reply
+MODE_CLARIFY = "clarify"                 # message too ambiguous to safely act on
 
 # ---- level-tuned thresholds (personalization dial; Step 7 refines wording) --
 # Wrong attempts allowed before we switch to co-solving together.
 _COSOLVE_AFTER = {"beginner": 2, "intermediate": 2, "advanced": 3}
+
+# Hints offered per problem before the hint action is retired. Previously
+# this was an implicit "min(hints_given, 3)" cap with no exhaustion state, so
+# every click past the 3rd silently re-requested "Hint 3 of 3" from the model
+# forever -- a wasted call each time, producing a near-duplicate of the same
+# "final step" hint rather than anything new (see MODE_HINT_EXHAUSTED).
+MAX_HINTS = 3
 
 # Button sets per situation (the UI renders these as SECONDARY shortcuts; the
 # text box stays primary). Labels map to intents in the app.
 _BTN_AFTER_INVITE = ["I'll try", "Give me a hint", "Show me how"]
 _BTN_AFTER_WRONG = ["Try again", "Give me a hint", "Just show me"]
 _BTN_AFTER_HINT = ["Try again", "Another hint", "Just show me"]
+_BTN_AFTER_HINT_EXHAUSTED = ["I'll try", "Just show me"]
 _BTN_AFTER_SOLVED = ["Practice problem", "New question"]
 _BTN_TERMINAL = ["New question"]
+
+
+def _without_hint_if_exhausted(buttons: list[str], state: "TutorState") -> list[str]:
+    """Drop "Give me a hint" from a button set once the hint budget is
+    already spent, so no reply -- wrong answer, confusion, correction,
+    clarify, a conceptual aside, or a cold solve request -- ever offers a
+    hint that no longer exists. Only the HINT/SOLVE-exhaustion branches
+    themselves already guard this; every other call site below builds its
+    button list from these same constants without checking hints_given,
+    which is what let "Give me a hint" keep appearing after MAX_HINTS."""
+    if state.hints_given < MAX_HINTS:
+        return buttons
+    return [b for b in buttons if b != "Give me a hint"]
+
+
+def _invite_buttons(state: "TutorState") -> list[str]:
+    """"Give me a hint"/"Show me how" only make sense when there's an
+    actual protected answer to hint toward or reveal. Every call site that
+    offers this button set used to hardcode _BTN_AFTER_INVITE regardless of
+    state.is_math -- harmless for a SPECIFIC computable problem (the normal
+    case), but for a BROAD conceptual reply (e.g. "what is a fraction?",
+    state.is_math False, no computed_answer) it's a dangling promise: the
+    reply already showed its own worked example in the body text, so there
+    is nothing left to hint toward or "show the working" for. Live-reported:
+    a bare "fractions" question got exactly this -- a complete conceptual
+    explanation with buttons implying a withheld answer that never existed.
+    Gated on is_math AND a real computed_answer (not just is_math) since
+    diagnose()'s own "engaged" verdict -- the only path into
+    MODE_ACK_CONCEPTUAL -- can equally mean computed_answer is None despite
+    is_math being True."""
+    if not (state.is_math and state.computed_answer is not None):
+        return []
+    return _without_hint_if_exhausted(list(_BTN_AFTER_INVITE), state)
+
+# Fixed, non-generated message for MODE_HINT_EXHAUSTED -- deliberately NOT an
+# LLM call: the whole point of this state is to stop spending a call on a
+# hint the system has already told the student everything it will say
+# without solving it for them.
+HINT_EXHAUSTED_MESSAGE = (
+    "You've had all the hints for this one! Want to give it your best guess, "
+    "or see it worked out?"
+)
 
 
 @dataclass
@@ -71,6 +125,11 @@ class TutorState:
     level: str = "intermediate"
     computed_answer: str | None = None   # injected truth, or None
     is_math: bool = False
+    # "numeric" (verifier.solve, compared via _safe_eval/_close) or
+    # "categorical" (verifier.compute_categorical -- a day name, shape
+    # name, yes/no... compared via substring match, see diagnose() below).
+    # Only meaningful when computed_answer is set.
+    answer_type: str = "numeric"
     phase: str = AWAITING
     attempts: int = 0                    # wrong attempts so far
     hints_given: int = 0
@@ -98,6 +157,33 @@ class Action:
 # ---- reading a student's stated answer out of free text ---------------------
 _NUM = re.compile(r"[-+]?\d+\s*/\s*\d+|[-+]?\d*\.\d+|[-+]?\d+")
 
+# A spoken fraction ("6 over 9") said aloud rather than written "6/9".
+# Normalized to the standard slash form before any other extraction runs, so
+# the rest of _student_answer (and downstream verifier._safe_eval) only ever
+# has to understand one fraction syntax.
+_OVER_FRACTION_RE = re.compile(r"\b(\d+)\s+over\s+(\d+)\b", re.IGNORECASE)
+
+# A turn containing "how" is asking a procedural question ("how do I find a
+# common denominator", "how many are left") -- never a stated final answer,
+# even when it happens to contain exactly one digit. Without this guard, the
+# "sole number" fallback below read the "2" out of "...adding 2 fractions"
+# as the child's claimed answer and graded a clarifying question as a WRONG
+# attempt (live-reported: a repeated "how do I find the common denominator"
+# kept getting "Not quite -- let's look again!" instead of being
+# re-explained). This can only ever soften a false "wrong" into a safe
+# "unclear" (which just asks "what answer did you get?") -- it never
+# suppresses a genuine answer, since "is it 12?" and other real attempts
+# don't contain "how".
+_PROCEDURAL_Q_RE = re.compile(r"\bhow\b", re.IGNORECASE)
+
+# "so 26", "is 48", "makes 12", "gives 7", "equals 9" -- a result stated
+# after working. Requires the number DIRECTLY after the word, so a question
+# like "is it 12?" never matches here (it has exactly one number anyway).
+_STATED_RESULT_RE = re.compile(
+    r"\b(?:so|is|makes|gives|equals|get|got|that'?s|it'?s|thats|its)\s+(?:the\s+answer\s+is\s+)?("
+    + _NUM.pattern + r")",
+    re.IGNORECASE)
+
 
 def _student_answer(turn: str) -> str | None:
     """Best-effort: the number the student is offering as their answer.
@@ -108,7 +194,7 @@ def _student_answer(turn: str) -> str | None:
     """
     if not turn:
         return None
-    t = turn.strip()
+    t = _OVER_FRACTION_RE.sub(r"\1/\2", turn.strip())
     # after the last '=' (e.g. "5 + 3 = 8")
     if "=" in t:
         tail = t.rsplit("=", 1)[1]
@@ -119,20 +205,182 @@ def _student_answer(turn: str) -> str | None:
     m = re.search(r"answer\D*(" + _NUM.pattern + ")", t, re.IGNORECASE)
     if m:
         return re.sub(r"\s+", "", m.group(1))
+    if _PROCEDURAL_Q_RE.search(t):
+        return None
     nums = _NUM.findall(t)
     if len(nums) == 1:
         return re.sub(r"\s+", "", nums[0])
-    return None  # 0 numbers, or ambiguous multi-number working
+    # Working followed by a stated result: "area is length times width, so
+    # 8 times 6 is 48", "4 times 510 is 2040", "2 times (8 plus 5), so 26".
+    # The number right after the LAST so/is/makes/gives/equals is the
+    # child's answer. Without this, 29 correct multi-turn answers in the
+    # paper-eval v1 run got "what's your answer?".
+    stated = list(_STATED_RESULT_RE.finditer(t))
+    if stated:
+        return re.sub(r"\s+", "", stated[-1].group(1))
+    return None  # 0 numbers, or ambiguous multi-number working with no stated result
 
 
-def diagnose(turn: str, computed_answer: str | None, is_math: bool) -> str:
+_SENTENCE_RE = re.compile(r"[^.!?]+[.!?]+|[^.!?]+$")
+
+# How many trailing sentences graduate_if_computable will try combined, at
+# most. A posed exercise's numbers routinely live in the sentence BEFORE the
+# one that actually asks the question (e.g. "Pick 2/3 and multiply both
+# parts by 3. What do you get?" is two sentences), and the exercise itself
+# may be phrased as an instruction with no '?' at all ("...tell me what it
+# is."). Bounded to 3 so this stays a localized "did the tutor just pose a
+# concrete task" check, not a scan of the whole reply.
+_MAX_GRADUATION_SENTENCES = 3
+
+
+def _trailing_candidates(text: str) -> list[str]:
+    """Progressively larger trailing windows of `text`, by sentence, most
+    specific (just the final sentence) first. Used only as
+    graduate_if_computable()'s candidate list; a candidate ending up here is
+    not yet known to be computable."""
+    if not text:
+        return []
+    sentences = [m.group(0).strip() for m in _SENTENCE_RE.finditer(text) if m.group(0).strip()]
+    n = min(_MAX_GRADUATION_SENTENCES, len(sentences))
+    return [" ".join(sentences[-k:]) for k in range(1, n + 1)]
+
+
+def graduate_if_computable(state: "TutorState", generated_text: str) -> bool:
+    """Let a conceptual episode (state.is_math False -- e.g. the student
+    opened with a broad topic like "fractions") acquire a trusted answer
+    mid-conversation, so it can stop looping through MODE_ACK_CONCEPTUAL
+    forever once it has something concrete to grade.
+
+    Tutors routinely pose a concrete follow-up exercise unprompted while
+    acknowledging a conceptual turn -- e.g. "Pick a fraction like 2/3 and
+    multiply both parts by 3. What equivalent fraction do you get?" The
+    numbers the exercise needs often live in the sentence BEFORE the one
+    that asks the question, and the exercise may be phrased as an
+    instruction with no '?' at all ("...tell me what it is."), so this
+    checks growing trailing windows of the tutor's own reply (last sentence,
+    then last two, then last three), most specific first, through the SAME
+    compute-first+gate path used everywhere else (verifier.solve) --
+    deliberately not a new extraction mechanism. The first window that
+    yields a usable value graduates the episode (state.computed_answer/
+    is_math are set so the student's NEXT reply is diagnosed numerically);
+    if none do, this is a no-op and today's unchanged ack-conceptual loop
+    continues. Returns True iff the episode was graduated.
+    """
+    if state.is_math or state.computed_answer is not None:
+        return False
+    for candidate in _trailing_candidates(generated_text):
+        # solve_with_type, not solve: an ack_conceptual follow-up is just as
+        # likely to pose a short-factual-answer exercise ("now you try: if
+        # today is Tuesday, what day will it be after 5 days?" -- an actual
+        # live example) as an arithmetic one, and both deserve to graduate
+        # out of the ungraded loop the same way.
+        answer, is_math, answer_type = verifier.solve_with_type(candidate, state.grade)
+        if is_math and answer is not None:
+            state.computed_answer = answer
+            state.is_math = True
+            state.answer_type = answer_type
+            return True
+    return False
+
+
+# A short categorical answer (a day name, a shape name, "yes"/"no", a
+# number used as a label rather than a computation...) can't be compared
+# with _safe_eval/_close the way a numeric one is -- there's no arithmetic
+# value to evaluate. This is the SAME kind of deterministic, pattern-based
+# extraction _student_answer already does for numbers (not an enumerated
+# list of day names or shape names: the expected answer itself is supplied
+# per-question by verifier.compute_categorical, never hardcoded here), just
+# applied as a substring check instead of a numeric comparison. Leading
+# English articles are stripped from BOTH sides so "a square" (the
+# extractor's own phrasing) still matches a child who just writes "square".
+_LEADING_ARTICLE_RE = re.compile(r"^(a|an|the)\s+", re.IGNORECASE)
+_NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _categorical_match(turn: str, trusted_answer: str) -> bool:
+    def norm(s: str) -> str:
+        s = _LEADING_ARTICLE_RE.sub("", (s or "").strip())
+        return _NON_ALNUM_RE.sub(" ", s.lower()).strip()
+    answer = norm(trusted_answer)
+    return bool(answer) and answer in norm(turn)
+
+
+# Three more non-numeric answer shapes (see verifier.solve_with_type /
+# verifier._FUNCTION_REGISTRY), each matched the SAME conservative way as
+# _categorical_match above -- correct/engaged only, never wrong/unclear,
+# because each is a best-effort pattern read of free text rather than a
+# single unambiguous numeric comparison.
+_TIME_RE = re.compile(r"\b(\d{1,2})\s*[:.]\s*(\d{2})\b")
+
+
+def _time_match(turn: str, trusted_answer: str) -> bool:
+    m_truth = _TIME_RE.search(trusted_answer or "")
+    m_turn = _TIME_RE.search(turn or "")
+    if not m_truth or not m_turn:
+        return False
+    return (int(m_truth.group(1)) % 24, int(m_truth.group(2))) == \
+        (int(m_turn.group(1)) % 24, int(m_turn.group(2)))
+
+
+def _list_match(turn: str, trusted_csv: str) -> bool:
+    """trusted_csv is verifier.compute_function's comma-separated list
+    value (e.g. factors(12) -> "1, 2, 3, 4, 6, 12"). Compared as a SET of
+    ints, not strings, so order/spacing/duplicates in the child's reply
+    never cause a false mismatch -- only the actual set of numbers named
+    matters."""
+    truth_nums = {int(x) for x in re.findall(r"\d+", trusted_csv or "")}
+    turn_nums = {int(x) for x in re.findall(r"\d+", turn or "")}
+    return bool(truth_nums) and truth_nums.issubset(turn_nums)
+
+
+_QR_RE = re.compile(
+    r"(\d+)\s*(?:,|and|\s)*\s*r(?:emainder)?\.?\s*[:=]?\s*(\d+)",
+    re.IGNORECASE,
+)
+
+
+def _qr_match(turn: str, trusted_answer: str) -> bool:
+    """trusted_answer is verifier.solve_with_type's "q remainder r" string."""
+    m_truth = _QR_RE.search(trusted_answer or "")
+    m_turn = _QR_RE.search(turn or "")
+    if not m_truth or not m_turn:
+        return False
+    return (int(m_truth.group(1)), int(m_truth.group(2))) == \
+        (int(m_turn.group(1)), int(m_turn.group(2)))
+
+
+def diagnose(turn: str, computed_answer: str | None, is_math: bool,
+            answer_type: str = "numeric") -> str:
     """Return 'correct' | 'wrong' | 'unclear' | 'engaged'.
 
     'engaged'  -> non-computable / no trusted value; can't grade numerically.
     'unclear'  -> computable, but we couldn't read a single stated answer.
+
+    A CATEGORICAL trusted answer only ever resolves to 'correct' or
+    'engaged', never 'wrong'/'unclear' -- deliberately conservative. Unlike
+    a number, a categorical match is a substring check against whatever
+    short phrase the extractor returned, and a real match phrased
+    differently (child writes "square" when the trusted phrase is "a
+    square shape") could miss; declaring that a WRONG answer risks
+    confidently telling a correct child they're wrong, which is worse than
+    the previous gap (no confirmation at all for a correct one). This is
+    the same conservative bias as the ack_conceptual fix next to it: when
+    unsure, stay neutral rather than assert a grade with no solid basis.
+    The three answer types below (time/list/quotient_remainder -- see
+    verifier.solve_with_type) are matched with the SAME conservative bias
+    for the same reason: each is a best-effort pattern read of free text,
+    not an unambiguous single-value comparison.
     """
     if not is_math or computed_answer is None:
         return "engaged"
+    if answer_type == "categorical":
+        return "correct" if _categorical_match(turn, computed_answer) else "engaged"
+    if answer_type == "time":
+        return "correct" if _time_match(turn, computed_answer) else "engaged"
+    if answer_type == "list":
+        return "correct" if _list_match(turn, computed_answer) else "engaged"
+    if answer_type == "quotient_remainder":
+        return "correct" if _qr_match(turn, computed_answer) else "engaged"
     ans = _student_answer(turn)
     if ans is None:
         return "unclear"
@@ -144,7 +392,74 @@ def diagnose(turn: str, computed_answer: str | None, is_math: bool) -> str:
 
 
 # ---- directive builders (words the generator will expand) -------------------
-def _d_teach_invite(s: TutorState) -> str:
+# A broad method/concept question ("Addition of 3 digit", "What is a
+# fraction?") has no SPECIFIC problem whose answer needs protecting --
+# state.is_math is False because verifier.compute() correctly found nothing
+# to compute, not because there's a secret answer being withheld. Treating
+# it like a specific problem (vague "idea behind it" talk, no worked steps)
+# produces exactly the generic-analogy-only response this was found to
+# produce in practice (e.g. "piles of objects" standing in for an actual
+# worked example). A SPECIFIC computable problem (is_math=True, e.g. "What
+# is 245 + 136?") keeps the original withhold-and-invite behaviour, since
+# there the whole point is for the child to attempt it before being shown.
+_d_teach_invite_conceptual = (
+    "For THIS reply: this is a BROAD method/concept question with no single "
+    "specific problem to protect an answer for (not 'solve this', but 'teach "
+    "me this').\n"
+    "FIRST decide what is actually being asked:\n"
+    "- If the child named just the TOPIC itself (e.g. 'fractions', 'what is "
+    "a fraction', 'teach me fractions', 'addition') with no specific skill "
+    "mentioned, your VERY FIRST job is to state in one or two plain "
+    "sentences what the idea fundamentally MEANS -- e.g. for fractions, "
+    "that it is a way of showing a part of a whole that has been split into "
+    "equal pieces -- BEFORE anything else. Do NOT open with an operation on "
+    "fractions (adding, making equivalent fractions, simplifying) just "
+    "because the retrieved context happens to discuss one; a retrieved "
+    "chunk about equivalent fractions does not mean that is what was asked. "
+    "Ground the basic meaning first, THEN (only if it flows naturally) show "
+    "one small worked example of that basic idea itself -- not a more "
+    "advanced skill the child never asked about.\n"
+    "- If the child named a SPECIFIC skill or operation within the topic "
+    "(e.g. 'how do I add fractions', 'teach me equivalent fractions'), you "
+    "may teach that skill directly, but still ground it in one plain "
+    "sentence of what the underlying idea is before diving into steps.\n"
+    "Either way: show ONE complete worked example using YOUR OWN chosen "
+    "numbers (not the child's, since they gave none) with the actual "
+    "working shown, not just a one-line analogy — a full worked "
+    "demonstration. Keep it to as many steps as the idea genuinely needs: a "
+    "simple idea (like counting a handful of objects) needs only a couple of "
+    "short sentences, not a long enumerated list or a bold 'method name' "
+    "heading — save the longer numbered breakdown for a technique that "
+    "actually has several distinct steps (like column addition). Then invite "
+    "the child to try a similar one themselves. Do NOT make an analogy (like "
+    "piles of objects) the ONLY explanation — the actual method must be "
+    "shown, not just described."
+)
+def _d_teach_invite_specific(s: TutorState) -> str:
+    # Live-reported: an "advanced"-classified student's explanations
+    # weren't measurably terser than a beginner's, despite LEVEL_STYLE's
+    # "2-3 tight steps, skip obvious ones" instruction. Root cause: that
+    # instruction lives in the big, multi-purpose system prompt, competing
+    # for attention with everything else in it, while THIS per-turn
+    # directive -- which gets far more weight, being the most specific,
+    # most recent instruction -- was the SAME fixed text for every level,
+    # and already fairly compact ("a few warm sentences... ONE tiny
+    # example"). Beginner's LEVEL_STYLE had plenty of room to EXPAND on an
+    # already-short baseline (define terms, show sub-step methods); advanced
+    # had almost no room left to compress further. Branching the directive
+    # itself, not just the style block, gives advanced a genuinely
+    # different -- not just differently-worded -- target.
+    if s.level == "advanced":
+        return (
+            "For THIS reply: this child is strong and picks things up "
+            "quickly. Get to the point in ONE or TWO short sentences -- no "
+            "numbered steps, and no example at all unless the idea "
+            "genuinely needs one to make sense (if so, ONE tiny one-line "
+            "example at most, not a full worked demonstration). Then "
+            "briskly invite the child to try THIS question themselves. Do "
+            "NOT solve their question, do NOT show the final answer, and "
+            "do NOT write an 'Answer:' line."
+        )
     return (
         "For THIS reply: gently explain the idea behind the question in a few "
         "warm, plain sentences — NO numbered steps. You may add ONE tiny "
@@ -153,6 +468,10 @@ def _d_teach_invite(s: TutorState) -> str:
         "solve their question, do NOT show the final answer, and do NOT write "
         "an 'Answer:' line."
     )
+
+
+def _d_teach_invite(s: TutorState) -> str:
+    return _d_teach_invite_conceptual if not s.is_math else _d_teach_invite_specific(s)
 
 
 def _d_diagnose_wrong(s: TutorState) -> str:
@@ -170,9 +489,22 @@ def _d_diagnose_wrong(s: TutorState) -> str:
 
 
 def _d_diagnose_correct(s: TutorState) -> str:
+    # Unlike _d_diagnose_wrong, this directive used to give the model NO
+    # grounding at all -- just "confirm the answer" and trust it to recall
+    # the right number from the conversation on its own. In a conversation
+    # with several worked examples (a teaching analogy, an earlier practice
+    # problem), that recall isn't reliable: live-reported, the celebration
+    # cited a DIFFERENT problem's answer from several turns earlier ("Your
+    # answer 5/8 is exactly right!" after the child correctly answered 3/5),
+    # which the verify-tag correctly flagged as disagreeing but the praise
+    # text itself did not. Naming the actual problem and answer here, the
+    # same way the wrong-answer path already does, removes the guesswork.
+    truth = f" The correct answer is {s.computed_answer}." if s.computed_answer else ""
     return (
-        "For THIS reply: the child got it right! Warmly celebrate in a sentence "
-        "or two and confirm the answer. Then offer either a slightly harder "
+        f"For THIS reply: the child got it right on \"{s.question}\".{truth} "
+        "Warmly celebrate in a sentence or two and confirm using THAT exact "
+        "number -- do not recompute it and do not cite any other number from "
+        "earlier in the conversation. Then offer either a slightly harder "
         "practice question OR a new topic — their choice. No numbered steps."
     )
 
@@ -186,11 +518,39 @@ def _d_ask_answer(s: TutorState) -> str:
 
 
 def _d_ack_conceptual(s: TutorState) -> str:
+    # Every ungradable turn in this episode routes through this same
+    # directive (there is no computed_answer to diagnose against), so without
+    # an explicit instruction to vary the model tends to regenerate the same
+    # explanation each time instead of building on what the child just said.
     return (
         "For THIS reply: this is a 'what is / why' question with no single "
-        "number answer. Warmly explain the idea in a few plain sentences using "
-        "the textbook context, then invite a related question or a small "
-        "practice. Do NOT write an 'Answer:' line and do NOT use numbered steps."
+        "number answer you can grade. First, look at what the child actually "
+        "wrote: if it genuinely shows their own reasoning or a partial answer, "
+        "acknowledge THAT specifically and build on their own words. If it is "
+        "just a bare request or restatement (e.g. 'learn addition', 'what is "
+        "a fraction') with no reasoning of their own in it, do NOT claim they "
+        "already noticed, showed, or said something they didn't -- simply "
+        "treat it as a request and move the teaching forward. "
+        "If what they wrote is, or contains, a bare number offered as an "
+        "answer (e.g. they typed '41'), this mode has NO verified value to "
+        "check it against -- you MUST NOT tell them it is right or wrong, "
+        "and MUST NOT restate or imply any specific number is 'the' correct "
+        "answer. (Live-reported failure: told a child '41' was correct for a "
+        "problem whose real answer was 14, inventing a false derivation to "
+        "match -- there was no answer on record to check that against at "
+        "all.) Acknowledge their attempt neutrally (e.g. 'I see you're "
+        "thinking about this!') without confirming or denying it, and move "
+        "the teaching forward instead. "
+        "Either way, do NOT restart with a generic definition they have "
+        "already heard in this conversation. Then, if it fits naturally, end "
+        "with ONE small, concrete question with a specific number in it that "
+        "the child could actually work out (e.g. 'What is one-third of 9?'), "
+        "phrased as a question ending in '?' — do not solve it yourself. If "
+        "a concrete question doesn't fit naturally here, add one new, SHORT "
+        "point that moves the conversation forward instead (do not repeat an "
+        "example you already gave). Keep the textbook context as grounding, "
+        "not as a script to re-read. Do NOT write an 'Answer:' line and do "
+        "NOT use numbered steps."
     )
 
 
@@ -215,23 +575,117 @@ def _d_reveal(s: TutorState) -> str:
 
 
 def _d_redirect(s: TutorState) -> str:
+    # "Show me how" / a cold solve request routes here. For a BROAD
+    # method question (is_math=False) there is no specific answer to
+    # protect, so honour the request directly with the same full worked
+    # demonstration as the conceptual teach_invite branch -- "earn it"
+    # pedagogy doesn't apply when there's nothing specific being withheld.
+    # For a SPECIFIC computable problem (is_math=True), keep protecting
+    # THAT problem's answer, but require an actual worked numeric example
+    # (different numbers) rather than a vague "explain it another way" --
+    # found to otherwise produce another generic conceptual explanation
+    # instead of a real demonstration of the method.
+    if not s.is_math:
+        return _d_teach_invite_conceptual
     return (
         "For THIS reply: the child wants the answer without trying yet. Don't "
-        "give it. In a few warm plain sentences, explain the key idea a "
-        "DIFFERENT, simpler way (not a repeat), and warmly invite ONE try. "
-        "Reassure them they can ask again to see it worked out. No numbered "
-        "steps, no 'Answer:' line."
+        "give THIS problem's answer. Instead, actually demonstrate the method: "
+        "show ONE complete worked example using DIFFERENT numbers (not the "
+        "child's own problem), with the real steps written out, not just a "
+        "restated idea. Then warmly invite ONE try at their own question. "
+        "Reassure them they can ask again to see their own worked out. No "
+        "'Answer:' line for their own problem."
     )
+
+
+# A child who says they don't understand the LAST reply about THIS problem is
+# not asking for the next rung of the hint ladder (MODE_HINT) and is not
+# giving up (GIVE_UP) -- they want the SAME idea re-explained more simply.
+# Routed here from intent.CONFUSION, kept separate from MODE_HINT so it never
+# consumes the hint budget and never just repeats verbatim.
+_d_confusion = (
+    "For THIS reply: the child says they did not follow your IMMEDIATELY "
+    "PREVIOUS reply about this SAME problem. Do not restart from scratch and "
+    "do not just give a generic hint. First identify, from your own last "
+    "reply, the ONE specific step or idea most likely to be the sticking "
+    "point. Re-explain ONLY that step, more simply (smaller numbers or fewer "
+    "words if that helps), using the SAME facts and numbers as the child's "
+    "actual problem -- do not introduce a different problem. If it is "
+    "genuinely unclear from context what confused them, ask one short, "
+    "specific clarifying question instead of guessing or repeating "
+    "yourself verbatim. No 'Answer:' line."
+)
+
+# The child is rejecting or correcting the tutor's last statement. Routed
+# from intent.CORRECTION; must not defend the previous reply or wander into a
+# new problem.
+_d_correction = (
+    "For THIS reply: the child is correcting or rejecting your last "
+    "response. Do not defend it or repeat it. Re-read what they actually "
+    "said, work out the smallest correction it implies, acknowledge it in "
+    "one short warm sentence, and continue from that corrected "
+    "understanding of the SAME problem. Do not invent a new problem. The "
+    "child has NOT earned the final answer yet just by correcting you -- "
+    "do NOT solve their problem, do NOT show the worked-out steps for "
+    "THEIR number, do NOT write an 'Answer:' line, and do NOT state the "
+    "final numeric answer; go back to gently explaining and inviting them "
+    "to try it, exactly as you would for a freshly started problem."
+)
+
+# The message is too incomplete/ambiguous to safely act on. Routed from
+# intent.CLARIFY; must never invent numbers, retrieve, or verify -- just ask.
+_d_clarify = (
+    "For THIS reply: the child's message is too incomplete or ambiguous to "
+    "safely act on by itself. Do NOT guess a new problem, do NOT invent "
+    "numbers or examples, and do NOT solve anything. In one short, warm "
+    "sentence, ask the ONE specific clarifying question that would let you "
+    "help them with THIS problem."
+)
 
 
 # ---- entry points -----------------------------------------------------------
 def start(question: str, grade: int, level: str = "intermediate",
-          computed_answer: str | None = None, is_math: bool = False):
+          computed_answer: str | None = None, is_math: bool = False,
+          answer_type: str = "numeric"):
     """Begin an episode: teach + invite. Returns (state, action)."""
     s = TutorState(question=question, grade=grade, level=level,
-                   computed_answer=computed_answer, is_math=is_math)
+                   computed_answer=computed_answer, is_math=is_math,
+                   answer_type=answer_type)
     return s, Action(MODE_TEACH_INVITE, _d_teach_invite(s),
-                     buttons=list(_BTN_AFTER_INVITE))
+                     buttons=_invite_buttons(s))
+
+
+def start_followup(previous_question: str, question: str, grade: int,
+                   level: str = "intermediate", computed_answer: str | None = None,
+                   is_math: bool = False, answer_type: str = "numeric"):
+    """Begin a new problem that the child derived from the PREVIOUS one by
+    changing a value/condition (e.g. "what if it was 150 instead of 136?").
+
+    Functionally a fresh TutorState/episode (its own attempts/hints budget),
+    but the opening directive explicitly names the connection to the previous
+    problem instead of silently acting as if nothing came before -- the gap
+    found live: without this, a mid-value change during an open episode fell
+    through to the intent classifier's ATTEMPT handling and the tutor asked
+    "what answer did you get?" instead of recognising the new problem.
+    Returns (state, action), same contract as start().
+    """
+    s = TutorState(question=question, grade=grade, level=level,
+                   computed_answer=computed_answer, is_math=is_math,
+                   answer_type=answer_type)
+    if not is_math:
+        return s, Action(MODE_TEACH_INVITE, _d_teach_invite_conceptual,
+                         buttons=_invite_buttons(s))
+    directive = (
+        f"For THIS reply: the child has changed the previous problem "
+        f"(\"{previous_question}\") into a new one (\"{question}\"). In one "
+        "short sentence, acknowledge what they changed and how it connects "
+        "to the previous problem. Then continue exactly as you would for a "
+        "fresh problem: gently explain the idea in a few warm, plain "
+        "sentences (NO numbered steps), and invite the child to try THIS "
+        "version themselves. Do NOT solve it and do NOT reveal the final "
+        "answer."
+    )
+    return s, Action(MODE_TEACH_INVITE, directive, buttons=_invite_buttons(s))
 
 
 def step(state: TutorState, intent: str, turn: str | None = None):
@@ -251,12 +705,37 @@ def step(state: TutorState, intent: str, turn: str | None = None):
                              outcome="gave_up")
 
     if intent == "HINT":
+        if state.hints_given >= MAX_HINTS:
+            return state, Action(MODE_HINT_EXHAUSTED, "",
+                                 buttons=list(_BTN_AFTER_HINT_EXHAUSTED))
         state.hints_given += 1
-        return state, Action(MODE_HINT, "", buttons=list(_BTN_AFTER_HINT),
-                             hint_number=min(state.hints_given, 3))
+        # This may BE the last hint (hints_given now == MAX_HINTS) -- if so,
+        # the button row must not still invite "Another hint": there isn't
+        # one. Offering it anyway was the exact reported bug (a tap on the
+        # phantom button only revealed exhaustion one wasted click later).
+        buttons = (_BTN_AFTER_HINT_EXHAUSTED if state.hints_given >= MAX_HINTS
+                  else _BTN_AFTER_HINT)
+        return state, Action(MODE_HINT, "", buttons=list(buttons),
+                             hint_number=state.hints_given)
 
     if intent == "SOLVE":
         return _handle_solve(state)
+
+    # Conversational repair intents -- deliberately do NOT touch
+    # attempts/hints_given/phase. These are not graded attempts and must not
+    # consume the hint budget or end the episode; see docstrings on the
+    # _d_confusion/_d_correction/_d_clarify directives above for why each is
+    # kept distinct from MODE_HINT/ATTEMPT.
+    if intent == "CONFUSION":
+        buttons = (_without_hint_if_exhausted(_BTN_AFTER_WRONG, state) if state.attempts
+                  else _invite_buttons(state))
+        return state, Action(MODE_CONFUSION, _d_confusion, buttons=list(buttons))
+
+    if intent == "CORRECTION":
+        return state, Action(MODE_CORRECTION, _d_correction, buttons=_invite_buttons(state))
+
+    if intent == "CLARIFY":
+        return state, Action(MODE_CLARIFY, _d_clarify, buttons=_invite_buttons(state))
 
     # ATTEMPT (and anything unrecognised) -> treat as an attempt
     return _handle_attempt(state, turn)
@@ -270,12 +749,23 @@ def _handle_solve(state: TutorState):
                              buttons=list(_BTN_TERMINAL), terminal=True,
                              outcome="shown")
     state.solve_redirect_used = True
-    return state, Action(MODE_REDIRECT, _d_redirect(state),
-                         buttons=["I'll try", "Give me a hint", "Show me anyway"])
+    if state.is_math and state.computed_answer is not None:
+        buttons = _without_hint_if_exhausted(
+            ["I'll try", "Give me a hint", "Show me anyway"], state)
+    else:
+        # A cold solve request on a BROAD conceptual question (e.g. "show
+        # me how" on "fractions") has no protected answer to hint toward
+        # or "show anyway" -- see _invite_buttons' own docstring. The
+        # directive already falls back to the ordinary worked-example
+        # explanation in this case (eval/controller_walk.py's "broad-method
+        # vs specific-problem teaching directive selection" scenario); the
+        # buttons must match that.
+        buttons = []
+    return state, Action(MODE_REDIRECT, _d_redirect(state), buttons=list(buttons))
 
 
 def _handle_attempt(state: TutorState, turn: str | None):
-    verdict = diagnose(turn or "", state.computed_answer, state.is_math)
+    verdict = diagnose(turn or "", state.computed_answer, state.is_math, state.answer_type)
 
     if verdict == "correct":
         state.phase = SOLVED
@@ -285,11 +775,12 @@ def _handle_attempt(state: TutorState, turn: str | None):
 
     if verdict == "engaged":  # conceptual — can't grade, keep it supportive
         return state, Action(MODE_ACK_CONCEPTUAL, _d_ack_conceptual(state),
-                             buttons=list(_BTN_AFTER_INVITE))
+                             buttons=_invite_buttons(state))
 
     if verdict == "unclear":  # working shown but no single answer
+        buttons = _without_hint_if_exhausted(_BTN_AFTER_WRONG, state)
         return state, Action(MODE_ASK_ANSWER, _d_ask_answer(state),
-                             buttons=list(_BTN_AFTER_WRONG))
+                             buttons=list(buttons))
 
     # wrong
     state.attempts += 1
@@ -299,5 +790,6 @@ def _handle_attempt(state: TutorState, turn: str | None):
         return state, Action(MODE_CO_SOLVE, _d_co_solve(state),
                              buttons=list(_BTN_TERMINAL), terminal=True,
                              outcome="shown")
+    buttons = _without_hint_if_exhausted(_BTN_AFTER_WRONG, state)
     return state, Action(MODE_DIAGNOSE_WRONG, _d_diagnose_wrong(state),
-                         buttons=list(_BTN_AFTER_WRONG))
+                         buttons=list(buttons))

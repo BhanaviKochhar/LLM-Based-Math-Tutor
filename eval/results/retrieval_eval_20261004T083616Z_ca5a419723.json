@@ -1,0 +1,1260 @@
+{
+  "evaluator_name": "retrieval_eval",
+  "run_timestamp_utc": "20261004T083616Z",
+  "git": {
+    "commit": "ca5a419723c42ae0817f495a7a17188a2455bcc6",
+    "branch": "final-development",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\retrieval\\v1_starter.jsonl",
+      "version": "v1_starter",
+      "item_count": 29
+    },
+    {
+      "path": "eval\\datasets\\retrieval\\v2_extended.jsonl",
+      "version": "v2_extended",
+      "item_count": 20
+    }
+  ],
+  "config": {
+    "retriever": "scripts.retrieval.retrieve_with_metadata (BM25 + ChromaDB, local, no LLM/API call)",
+    "top_k": 5,
+    "live_llm_used": false
+  },
+  "aggregate_metrics": {
+    "total_queries": 49,
+    "scored_queries": 38,
+    "excluded_queries": 11,
+    "recall_at_1": 0.6842,
+    "recall_at_3": 0.9211,
+    "recall_at_5": 0.9474,
+    "mrr": 0.7961,
+    "needs_review_count": 4,
+    "grade_scope_mismatch_cross_grade_leakage_count": 0
+  },
+  "exclusions": [
+    {
+      "query_id": "rq-005",
+      "reason": "category='grade_scope_mismatch' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-007",
+      "reason": "category='out_of_corpus_topic' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-023",
+      "reason": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-026",
+      "reason": "category='paraphrase' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-028",
+      "reason": "category='curriculum_grade_specific' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-030",
+      "reason": "category='single_word_topic' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-031",
+      "reason": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-040",
+      "reason": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-042",
+      "reason": "category='short_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-045",
+      "reason": "category='short_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-048",
+      "reason": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    }
+  ],
+  "execution_errors": [],
+  "notes": "Recall@k/MRR exclude grade_scope_mismatch/out_of_corpus_topic queries and any query with no labelled relevant_chunks, per the dataset's own documented scoring convention (docs/evaluation_dataset_schema.md). A retrieval miss here is a retrieval-component finding only -- it does not imply the generated tutoring response was wrong, and a hit does not prove the eventual generation was grounded in that chunk.",
+  "per_example_results": [
+    {
+      "query_id": "rq-001",
+      "category": "single_word_topic",
+      "needs_review": false,
+      "outcome": "miss",
+      "first_relevant_rank": null,
+      "top5_grade_page": [
+        [
+          3,
+          88
+        ],
+        [
+          3,
+          141
+        ],
+        [
+          3,
+          181
+        ],
+        [
+          3,
+          181
+        ],
+        [
+          3,
+          38
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-002",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 4,
+      "top5_grade_page": [
+        [
+          4,
+          66
+        ],
+        [
+          3,
+          113
+        ],
+        [
+          3,
+          30
+        ],
+        [
+          4,
+          109
+        ],
+        [
+          3,
+          113
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-003",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          4,
+          102
+        ],
+        [
+          4,
+          107
+        ],
+        [
+          4,
+          101
+        ],
+        [
+          4,
+          147
+        ],
+        [
+          4,
+          76
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-004",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          4,
+          104
+        ],
+        [
+          4,
+          104
+        ],
+        [
+          4,
+          104
+        ],
+        [
+          4,
+          102
+        ],
+        [
+          4,
+          109
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-005",
+      "outcome": "excluded",
+      "category": "grade_scope_mismatch",
+      "cross_grade_leakage": false,
+      "detail": "category='grade_scope_mismatch' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-006",
+      "category": "paraphrase",
+      "needs_review": true,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          4,
+          166
+        ],
+        [
+          4,
+          102
+        ],
+        [
+          3,
+          73
+        ],
+        [
+          3,
+          168
+        ],
+        [
+          4,
+          103
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-007",
+      "outcome": "excluded",
+      "category": "out_of_corpus_topic",
+      "detail": "category='out_of_corpus_topic' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-008",
+      "category": "curriculum_grade_specific",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          1,
+          169
+        ],
+        [
+          1,
+          170
+        ],
+        [
+          1,
+          169
+        ],
+        [
+          1,
+          165
+        ],
+        [
+          1,
+          81
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-009",
+      "category": "curriculum_grade_specific",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 3,
+      "top5_grade_page": [
+        [
+          5,
+          16
+        ],
+        [
+          5,
+          95
+        ],
+        [
+          5,
+          18
+        ],
+        [
+          5,
+          114
+        ],
+        [
+          4,
+          175
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-010",
+      "category": "numeric_arithmetic_question",
+      "needs_review": true,
+      "outcome": "miss",
+      "first_relevant_rank": null,
+      "top5_grade_page": [
+        [
+          4,
+          161
+        ],
+        [
+          3,
+          130
+        ],
+        [
+          3,
+          141
+        ],
+        [
+          3,
+          54
+        ],
+        [
+          3,
+          89
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-011",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          3,
+          143
+        ],
+        [
+          3,
+          149
+        ],
+        [
+          3,
+          181
+        ],
+        [
+          3,
+          131
+        ],
+        [
+          3,
+          147
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-012",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          3,
+          181
+        ],
+        [
+          3,
+          147
+        ],
+        [
+          3,
+          141
+        ],
+        [
+          3,
+          137
+        ],
+        [
+          3,
+          143
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-013",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          2,
+          128
+        ],
+        [
+          2,
+          107
+        ],
+        [
+          3,
+          89
+        ],
+        [
+          2,
+          127
+        ],
+        [
+          2,
+          7
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-014",
+      "category": "single_word_topic",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          1,
+          164
+        ],
+        [
+          1,
+          163
+        ],
+        [
+          1,
+          20
+        ],
+        [
+          1,
+          25
+        ],
+        [
+          1,
+          174
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-015",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          73
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          3,
+          68
+        ],
+        [
+          3,
+          113
+        ],
+        [
+          3,
+          74
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-016",
+      "category": "single_word_topic",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          2,
+          130
+        ],
+        [
+          2,
+          110
+        ],
+        [
+          2,
+          111
+        ],
+        [
+          2,
+          65
+        ],
+        [
+          1,
+          134
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-017",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          2,
+          108
+        ],
+        [
+          2,
+          111
+        ],
+        [
+          2,
+          110
+        ],
+        [
+          3,
+          198
+        ],
+        [
+          2,
+          111
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-018",
+      "category": "single_word_topic",
+      "needs_review": true,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          115
+        ],
+        [
+          3,
+          116
+        ],
+        [
+          3,
+          101
+        ],
+        [
+          3,
+          152
+        ],
+        [
+          3,
+          48
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-019",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          4,
+          161
+        ],
+        [
+          4,
+          91
+        ],
+        [
+          3,
+          113
+        ],
+        [
+          4,
+          66
+        ],
+        [
+          4,
+          161
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-020",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          155
+        ],
+        [
+          2,
+          43
+        ],
+        [
+          3,
+          157
+        ],
+        [
+          3,
+          91
+        ],
+        [
+          3,
+          147
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-021",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          158
+        ],
+        [
+          3,
+          157
+        ],
+        [
+          3,
+          157
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          3,
+          158
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-022",
+      "category": "single_word_topic",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          3,
+          30
+        ],
+        [
+          3,
+          198
+        ],
+        [
+          2,
+          44
+        ],
+        [
+          3,
+          51
+        ],
+        [
+          2,
+          91
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-023",
+      "outcome": "excluded",
+      "category": "specific_conceptual",
+      "detail": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-024",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          127
+        ],
+        [
+          4,
+          140
+        ],
+        [
+          3,
+          122
+        ],
+        [
+          4,
+          145
+        ],
+        [
+          4,
+          140
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-025",
+      "category": "single_word_topic",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          181
+        ],
+        [
+          4,
+          130
+        ],
+        [
+          3,
+          173
+        ],
+        [
+          3,
+          171
+        ],
+        [
+          4,
+          134
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-026",
+      "outcome": "excluded",
+      "category": "paraphrase",
+      "detail": "category='paraphrase' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-027",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          1,
+          57
+        ],
+        [
+          1,
+          91
+        ],
+        [
+          1,
+          169
+        ],
+        [
+          1,
+          165
+        ],
+        [
+          1,
+          170
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-028",
+      "outcome": "excluded",
+      "category": "curriculum_grade_specific",
+      "detail": "category='curriculum_grade_specific' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-029",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          116
+        ],
+        [
+          3,
+          118
+        ],
+        [
+          3,
+          182
+        ],
+        [
+          3,
+          117
+        ],
+        [
+          3,
+          109
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-030",
+      "outcome": "excluded",
+      "category": "single_word_topic",
+      "detail": "category='single_word_topic' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-031",
+      "outcome": "excluded",
+      "category": "specific_conceptual",
+      "detail": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-032",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          102
+        ],
+        [
+          5,
+          102
+        ],
+        [
+          5,
+          102
+        ],
+        [
+          5,
+          102
+        ],
+        [
+          5,
+          97
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-033",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 3,
+      "top5_grade_page": [
+        [
+          5,
+          97
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          102
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          102
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-034",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          140
+        ],
+        [
+          5,
+          85
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          141
+        ],
+        [
+          5,
+          85
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-035",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          200
+        ],
+        [
+          5,
+          197
+        ],
+        [
+          5,
+          133
+        ],
+        [
+          5,
+          200
+        ],
+        [
+          5,
+          133
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-036",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 3,
+      "top5_grade_page": [
+        [
+          5,
+          112
+        ],
+        [
+          4,
+          63
+        ],
+        [
+          5,
+          120
+        ],
+        [
+          4,
+          20
+        ],
+        [
+          4,
+          63
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-037",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          15
+        ],
+        [
+          3,
+          15
+        ],
+        [
+          3,
+          16
+        ],
+        [
+          3,
+          112
+        ],
+        [
+          3,
+          111
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-038",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          122
+        ],
+        [
+          5,
+          126
+        ],
+        [
+          5,
+          130
+        ],
+        [
+          5,
+          135
+        ],
+        [
+          5,
+          123
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-039",
+      "category": "specific_conceptual",
+      "needs_review": true,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          16
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          5,
+          16
+        ],
+        [
+          4,
+          135
+        ],
+        [
+          5,
+          16
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-040",
+      "outcome": "excluded",
+      "category": "specific_conceptual",
+      "detail": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-041",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          4,
+          92
+        ],
+        [
+          4,
+          91
+        ],
+        [
+          4,
+          92
+        ],
+        [
+          4,
+          91
+        ],
+        [
+          4,
+          94
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-042",
+      "outcome": "excluded",
+      "category": "short_conceptual",
+      "detail": "category='short_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-043",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          3,
+          184
+        ],
+        [
+          4,
+          174
+        ],
+        [
+          3,
+          192
+        ],
+        [
+          4,
+          174
+        ],
+        [
+          3,
+          193
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-044",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          5,
+          106
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          106
+        ],
+        [
+          5,
+          88
+        ],
+        [
+          5,
+          89
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-045",
+      "outcome": "excluded",
+      "category": "short_conceptual",
+      "detail": "category='short_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-046",
+      "category": "specific_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          3,
+          162
+        ],
+        [
+          3,
+          161
+        ],
+        [
+          3,
+          161
+        ],
+        [
+          3,
+          161
+        ],
+        [
+          3,
+          163
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-047",
+      "category": "short_conceptual",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 1,
+      "top5_grade_page": [
+        [
+          2,
+          81
+        ],
+        [
+          2,
+          81
+        ],
+        [
+          2,
+          80
+        ],
+        [
+          2,
+          78
+        ],
+        [
+          2,
+          83
+        ]
+      ]
+    },
+    {
+      "query_id": "rq-048",
+      "outcome": "excluded",
+      "category": "specific_conceptual",
+      "detail": "category='specific_conceptual' or no relevant_chunks labelled -- no ground truth to score Recall@k against; this is the CORRECT outcome for this category, not a retrieval miss"
+    },
+    {
+      "query_id": "rq-049",
+      "category": "paraphrase",
+      "needs_review": false,
+      "outcome": "hit",
+      "first_relevant_rank": 2,
+      "top5_grade_page": [
+        [
+          1,
+          164
+        ],
+        [
+          1,
+          163
+        ],
+        [
+          1,
+          164
+        ],
+        [
+          1,
+          21
+        ],
+        [
+          1,
+          169
+        ]
+      ]
+    }
+  ]
+}

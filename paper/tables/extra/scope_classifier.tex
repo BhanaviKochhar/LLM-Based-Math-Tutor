@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\caption{The Scope Gate as a Classifier}
+\label{tab:scope-classifier}
+\footnotesize
+\begin{tabular}{@{}L{4.4cm}rrr@{}}
+\toprule
+Positive = needs maths beyond Class 5 & Base. & Sys. & Sys., held-out \\
+\midrule
+True positives (stopped, beyond Class 5) & 0 & 212 & 33 \\
+False negatives (taught, beyond Class 5) & 217 & 5 & 7 \\
+False positives (refused, in scope) & 0 & 13 & 0 \\
+True negatives (answered, in scope) & 1495 & 1482 & 10 \\
+\midrule
+Precision & -- & 0.942 & 1.000 \\
+Recall & 0.000 & 0.977 & 0.825 \\
+Specificity & 1.000 & 0.991 & 1.000 \\
+False-positive rate & 0.000 & 0.009 & 0.000 \\
+F1 & 0.000 & 0.959 & 0.904 \\
+Balanced accuracy & 0.500 & 0.984 & 0.912 \\
+MCC & 0.000 & 0.953 & 0.697 \\
+Accuracy & 0.873 & 0.989 & 0.860 \\
+\bottomrule
+\end{tabular}
+\par\smallskip\parbox{\linewidth}{\scriptsize Main sets: 217 beyond-Class-5 items and 1,495 in-scope items (curriculum, SVAMP, probes). A gloss counts as stopped. Held-out: 40 disguised beyond-Class-5 questions and 10 in-scope probes, Tiny Thinker only. Only 13\% of main-set items are positive, so balanced accuracy and MCC are the fair single numbers.}
+\end{table}

@@ -1,0 +1,4220 @@
+{
+  "evaluator_name": "final_answer_scoring",
+  "run_timestamp_utc": "20261023T163834Z",
+  "git": {
+    "commit": "7a0e56c5f73e8315e8ff42a84a15c08d2b346b9e",
+    "branch": "evaluation",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.13.4",
+    "platform": "Windows-11-10.0.26300-SP0"
+  },
+  "dataset_sources": [
+    {
+      "path": "eval\\datasets\\curriculum_benchmark_class2.jsonl",
+      "version": "curriculum_benchmark_class2",
+      "item_count": 160
+    }
+  ],
+  "config": {
+    "baseline_checkpoint": "eval/results/baseline_runs/curriculum_benchmark_class2.jsonl",
+    "system_checkpoint": "eval/results/system_runs/curriculum_benchmark_class2.jsonl",
+    "extractor": "eval/answer_extraction.py (committed-answer extraction, no substring fallback)",
+    "out_of_scope_scheme": "answer/gloss/decline vs refused/gloss/taught; gloss counts as a decline"
+  },
+  "aggregate_metrics": {
+    "baseline": {
+      "overall": {
+        "category": "overall",
+        "n_total": 160,
+        "n_scorable": 98,
+        "n_correct": 97,
+        "correct_rate": 0.9897959183673469,
+        "wilson_95_lo": 0.9444438369076963,
+        "wilson_95_hi": 0.9981964986722632,
+        "strict_rate": 0.60625,
+        "n_needs_llm_extraction": 3,
+        "n_needs_judge": 0
+      },
+      "by_grade": [
+        {
+          "category": "grade_2",
+          "n_total": 160,
+          "n_scorable": 98,
+          "n_correct": 97,
+          "correct_rate": 0.9897959183673469,
+          "wilson_95_lo": 0.9444438369076963,
+          "wilson_95_hi": 0.9981964986722632,
+          "strict_rate": 0.60625,
+          "n_needs_llm_extraction": 3,
+          "n_needs_judge": 0
+        }
+      ]
+    },
+    "system": {
+      "overall": {
+        "category": "overall",
+        "n_total": 160,
+        "n_scorable": 99,
+        "n_correct": 98,
+        "correct_rate": 0.98989898989899,
+        "wilson_95_lo": 0.9449833445859679,
+        "wilson_95_hi": 0.9982147386799481,
+        "strict_rate": 0.6125,
+        "n_needs_llm_extraction": 2,
+        "n_needs_judge": 0
+      },
+      "by_grade": [
+        {
+          "category": "grade_2",
+          "n_total": 160,
+          "n_scorable": 99,
+          "n_correct": 98,
+          "correct_rate": 0.98989898989899,
+          "wilson_95_lo": 0.9449833445859679,
+          "wilson_95_hi": 0.9982147386799481,
+          "strict_rate": 0.6125,
+          "n_needs_llm_extraction": 2,
+          "n_needs_judge": 0
+        }
+      ]
+    },
+    "paired": {
+      "overall": {
+        "category": "overall",
+        "n_paired": 97,
+        "both_right": 96,
+        "only_baseline_right": 1,
+        "only_system_right": 0,
+        "both_wrong": 0,
+        "diff_system_minus_baseline": -0.010309278350515427,
+        "diff_95_lo": -0.05610635606355274,
+        "diff_95_hi": 0.028720076898565587,
+        "mcnemar_p": 1.0
+      },
+      "by_grade": [
+        {
+          "category": "grade_2",
+          "n_paired": 97,
+          "both_right": 96,
+          "only_baseline_right": 1,
+          "only_system_right": 0,
+          "both_wrong": 0,
+          "diff_system_minus_baseline": -0.010309278350515427,
+          "diff_95_lo": -0.05610635606355274,
+          "diff_95_hi": 0.028720076898565587,
+          "mcnemar_p": 1.0,
+          "mcnemar_p_holm": 1.0
+        }
+      ]
+    }
+  },
+  "exclusions": [],
+  "execution_errors": [],
+  "notes": "Automated final-answer correctness scoring; independently re-verified, never trusted from either runner's own 'ok' flag. Items marked needs_llm_extraction / needs_judge are not yet scored.",
+  "per_example_results": [
+    {
+      "item_id": "cb-036",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "6 flat faces. 🌟",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-036",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "6**",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-037",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-037",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-038",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-038",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-039",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-039",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-040",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-040",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-041",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "- Numerically: **73**",
+      "truncated": false,
+      "expected_any_of": [
+        "73"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-041",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "73",
+      "truncated": false,
+      "expected_any_of": [
+        "73"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-042",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "25",
+      "truncated": false,
+      "expected_any_of": [
+        "25"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-042",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "25",
+      "truncated": false,
+      "expected_any_of": [
+        "25"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-043",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "86 is greater than 68**. 🌟",
+      "truncated": false,
+      "expected_any_of": [
+        "86"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-043",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "86**",
+      "truncated": false,
+      "expected_any_of": [
+        "86"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-044",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-044",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-045",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, the number that is 10 more than 47 is 57**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "57"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-045",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "57",
+      "truncated": false,
+      "expected_any_of": [
+        "57"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-046",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **23 + 12 = 35**.",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-046",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "35",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-047",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The shop has **27 pencils left**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "27"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-047",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "27",
+      "truncated": false,
+      "expected_any_of": [
+        "27"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-048",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The second basket contains **83 mangoes**.",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-048",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "83**",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-049",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, 17 students are still in the class**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "17"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-049",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "17",
+      "truncated": false,
+      "expected_any_of": [
+        "17"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-050",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "last_bold",
+      "committed_segment": "**After borrowing, subtract each column and write the result**.",
+      "truncated": false,
+      "expected_any_of": [
+        "25"
+      ],
+      "scorable": false,
+      "correct": null,
+      "needs_llm_extraction": true,
+      "note": "no committed answer of the right kind found -- LLM extraction decides"
+    },
+    {
+      "item_id": "cb-050",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "25",
+      "truncated": false,
+      "expected_any_of": [
+        "25"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-051",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "A **bucket** holds more water than a cup.",
+      "truncated": false,
+      "expected_any_of": [
+        "bucket"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-051",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "bucket",
+      "truncated": false,
+      "expected_any_of": [
+        "bucket"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-052",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, when you go to the shop and buy a bag of rice, the label will say something like “5 kg of rice.”",
+      "truncated": false,
+      "expected_any_of": [
+        "kilograms"
+      ],
+      "scorable": false,
+      "correct": null,
+      "needs_llm_extraction": true,
+      "note": "no committed answer of the right kind found -- LLM extraction decides"
+    },
+    {
+      "item_id": "cb-052",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "kilograms",
+      "truncated": false,
+      "expected_any_of": [
+        "kilograms"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-053",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-053",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-054",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, you need **4 bottles of 2 litres each** to fill the 8-litre container. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-054",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "4",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-055",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-055",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-056",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **one week = 7 days**.",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-056",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "7",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-057",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "last_bold",
+      "committed_segment": "The day that follows **Wednesday** is **Thursday**. 🌟",
+      "truncated": false,
+      "expected_any_of": [
+        "Thursday"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-057",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "Thursday",
+      "truncated": false,
+      "expected_any_of": [
+        "Thursday"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-058",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-058",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-059",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Thursday.",
+      "truncated": false,
+      "expected_any_of": [
+        "Thursday"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-059",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "Thursday",
+      "truncated": false,
+      "expected_any_of": [
+        "Thursday"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-060",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-060",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-061",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "There are **7 fruits in total** (4 apples + 3 bananas).",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-061",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "7",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-062",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, the next number in the pattern is 10**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-062",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "10**",
+      "truncated": false,
+      "expected_any_of": [
+        "10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-063",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-063",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-064",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-064",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-065",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-065",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-358",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, a cube has **6 faces**.",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-358",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "6",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-359",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, a cube has **8 corners (or vertices)**.",
+      "truncated": false,
+      "expected_any_of": [
+        "8"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-359",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "8",
+      "truncated": false,
+      "expected_any_of": [
+        "8"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-360",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "A pentagon has **5 sides**.",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-360",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5**",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-361",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, a hexagon has **6 sides**. 😊",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-361",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "6",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-362",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-362",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-363",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-363",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-364",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-364",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-365",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-365",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-366",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, the triangle and the square together have **7 corners**.",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-366",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "7**",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-367",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "Therefore, a cube has **12 edges**.",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-367",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "12**",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-368",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-368",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-369",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "An octagon has **8 sides**.",
+      "truncated": false,
+      "expected_any_of": [
+        "8"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-369",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "8**",
+      "truncated": false,
+      "expected_any_of": [
+        "8"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-370",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-370",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-371",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, when you put the sides of the hexagon and the pentagon together, they have **11 sides in total**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "11"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-371",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "11",
+      "truncated": false,
+      "expected_any_of": [
+        "11"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-372",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-372",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-373",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Rohan used **5 cube blocks** in total. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-373",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-374",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-374",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-375",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-375",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-376",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-376",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-377",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "74** is the greater number. 🌟",
+      "truncated": false,
+      "expected_any_of": [
+        "74"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-377",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "74**",
+      "truncated": false,
+      "expected_any_of": [
+        "74"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-378",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "83** is greater than **38**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-378",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "83**",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-379",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "last_bold",
+      "committed_segment": "**Conclusion:** **65 is greater than 56**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "65"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-379",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "65",
+      "truncated": false,
+      "expected_any_of": [
+        "65"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-380",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "92** is greater than **29**.",
+      "truncated": false,
+      "expected_any_of": [
+        "92"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-380",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "92**",
+      "truncated": false,
+      "expected_any_of": [
+        "92"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-381",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "**61 is greater than 16**.",
+      "truncated": false,
+      "expected_any_of": [
+        "61"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-381",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "61**",
+      "truncated": false,
+      "expected_any_of": [
+        "61"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-382",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, 50 is greater than 49**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "50"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-382",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "50**",
+      "truncated": false,
+      "expected_any_of": [
+        "50"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-383",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So the greater number is **77**.",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-383",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "77",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-384",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, 89 is greater than 88**. 🌟",
+      "truncated": false,
+      "expected_any_of": [
+        "89"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-384",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "89**",
+      "truncated": false,
+      "expected_any_of": [
+        "89"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-385",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-385",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-386",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So after 59 the next whole number is **60**.",
+      "truncated": false,
+      "expected_any_of": [
+        "60"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-386",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "60",
+      "truncated": false,
+      "expected_any_of": [
+        "60"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-387",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "last_bold",
+      "committed_segment": "The number that comes just before 90 is **89**.",
+      "truncated": false,
+      "expected_any_of": [
+        "89"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-387",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "89",
+      "truncated": false,
+      "expected_any_of": [
+        "89"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-388",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So put 9 in the tens place and the remaining digit 4 in the units place: Number = 9 (tens)4 (units) = 94",
+      "truncated": false,
+      "expected_any_of": [
+        "94"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-388",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "94**",
+      "truncated": false,
+      "expected_any_of": [
+        "94"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-389",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, the **5th number said is 50**.",
+      "truncated": false,
+      "expected_any_of": [
+        "50"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-389",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "50",
+      "truncated": false,
+      "expected_any_of": [
+        "50"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-390",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-390",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-391",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So the next number after 99 is 100.",
+      "truncated": false,
+      "expected_any_of": [
+        "100"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-391",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "100",
+      "truncated": false,
+      "expected_any_of": [
+        "100"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-392",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "last_bold",
+      "committed_segment": "Since 37 < 73, the smaller (i.e., the smallest) two-digit number we can form is ** 37 **.",
+      "truncated": false,
+      "expected_any_of": [
+        "37"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-392",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "37",
+      "truncated": false,
+      "expected_any_of": [
+        "37"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-393",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, the number of children in the hall now is 77**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-393",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "77",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-394",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, the correct order is:** **69 → 70**",
+      "truncated": false,
+      "expected_any_of": [
+        "69"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-394",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "69**",
+      "truncated": false,
+      "expected_any_of": [
+        "69"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-395",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "There are **19 usable desks** in the classroom. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "19"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-395",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "19**",
+      "truncated": false,
+      "expected_any_of": [
+        "19"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-396",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, Neha’s grandmother is 82 years old**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "82"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-396",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "82**",
+      "truncated": false,
+      "expected_any_of": [
+        "82"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-397",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, the tailor has 28 metres of cloth left**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "28"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-397",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "28",
+      "truncated": false,
+      "expected_any_of": [
+        "28"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-398",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "**The sum of two odd numbers is always even, not odd**.",
+      "truncated": false,
+      "expected_any_of": [
+        "40"
+      ],
+      "scorable": false,
+      "correct": null,
+      "needs_llm_extraction": true,
+      "note": "no committed answer of the right kind found -- LLM extraction decides"
+    },
+    {
+      "item_id": "cb-398",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "no**",
+      "truncated": false,
+      "expected_any_of": [
+        "40"
+      ],
+      "scorable": false,
+      "correct": null,
+      "needs_llm_extraction": true,
+      "note": "no committed answer of the right kind found -- LLM extraction decides"
+    },
+    {
+      "item_id": "cb-399",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Amit now has **38 stickers**.",
+      "truncated": false,
+      "expected_any_of": [
+        "38"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-399",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "38**",
+      "truncated": false,
+      "expected_any_of": [
+        "38"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-400",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Riya now has **76 marbles**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "76"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-400",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "76",
+      "truncated": false,
+      "expected_any_of": [
+        "76"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-401",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, after receiving the extra cards, **Sara has 54 cards**.",
+      "truncated": false,
+      "expected_any_of": [
+        "54"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-401",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "54**",
+      "truncated": false,
+      "expected_any_of": [
+        "54"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-402",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Kabir has **33 shells** left. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "33"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-402",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "33",
+      "truncated": false,
+      "expected_any_of": [
+        "33"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-403",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Neha has **33 beads** after giving away 45 beads.",
+      "truncated": false,
+      "expected_any_of": [
+        "33"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-403",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "33",
+      "truncated": false,
+      "expected_any_of": [
+        "33"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-404",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So after giving away 37 stickers, **Amit has 53 stickers left**.",
+      "truncated": false,
+      "expected_any_of": [
+        "53"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-404",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "53",
+      "truncated": false,
+      "expected_any_of": [
+        "53"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-405",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So after Tuesday, Riya has **46 marbles in total**.",
+      "truncated": false,
+      "expected_any_of": [
+        "46"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-405",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "46",
+      "truncated": false,
+      "expected_any_of": [
+        "46"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-406",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Sara has **36 cards left**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "36"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-406",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "36**",
+      "truncated": false,
+      "expected_any_of": [
+        "36"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-407",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Kabir now has **83 shells**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-407",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "83**",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-408",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Neha now has **58 beads**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "58"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-408",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "58",
+      "truncated": false,
+      "expected_any_of": [
+        "58"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-409",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "Amit has **35 stickers** left. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-409",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "35",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-410",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So after giving away 46 marbles, **Riya has 35 marbles left**.",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-410",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "35**",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-411",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "83 cards.",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-411",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "83",
+      "truncated": false,
+      "expected_any_of": [
+        "83"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-412",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, after giving away 9 shells, **Kabir has 64 shells left**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "64"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-412",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "64",
+      "truncated": false,
+      "expected_any_of": [
+        "64"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-413",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "No, adding two 2-digit numbers does **not** always give a 2-digit answer.",
+      "truncated": false,
+      "expected_any_of": [
+        "125"
+      ],
+      "scorable": true,
+      "correct": false
+    },
+    {
+      "item_id": "cb-413",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "no",
+      "truncated": false,
+      "expected_any_of": [
+        "125"
+      ],
+      "scorable": false,
+      "correct": null,
+      "needs_llm_extraction": true,
+      "note": "no committed answer of the right kind found -- LLM extraction decides"
+    },
+    {
+      "item_id": "cb-414",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, the farmer sold 23 hens**.",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-414",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "23",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-415",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-415",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-416",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The two ribbons together are **75 cm** long.",
+      "truncated": false,
+      "expected_any_of": [
+        "75"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-416",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "75",
+      "truncated": false,
+      "expected_any_of": [
+        "75"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-417",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The total weight of the two bags is **43 kg**.",
+      "truncated": false,
+      "expected_any_of": [
+        "43"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-417",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "43",
+      "truncated": false,
+      "expected_any_of": [
+        "43"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-418",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, the bottle and the jug together can hold **5 litres** of water. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-418",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-419",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-419",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-420",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-420",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-421",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The tank has **28 litres** of water left.",
+      "truncated": false,
+      "expected_any_of": [
+        "28"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-421",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "28",
+      "truncated": false,
+      "expected_any_of": [
+        "28"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-422",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-422",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-423",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The first rope is **35 cm longer** than the second rope.",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-423",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "35**",
+      "truncated": false,
+      "expected_any_of": [
+        "35"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-424",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, 11 litres of water remain in the bucket**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "11"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-424",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "11",
+      "truncated": false,
+      "expected_any_of": [
+        "11"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-425",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-425",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-426",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **23 kg of potatoes remain**. (The two goats don’t affect the potato count.)",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-426",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "23",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-427",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-427",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-428",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-428",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-429",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, the other piece is 55 cm long**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "55"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-429",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "55",
+      "truncated": false,
+      "expected_any_of": [
+        "55"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-430",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-430",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-431",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, there are **7 days in a week**.",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-431",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "7",
+      "truncated": false,
+      "expected_any_of": [
+        "7"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-432",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, the answer is **12 months** in a year.",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-432",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "12",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-433",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-433",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-434",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The clock will show **5 o’clock**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "5:00"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-434",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5",
+      "truncated": false,
+      "expected_any_of": [
+        "5:00"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-435",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "It will be **5 : 45**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "5:45"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-435",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5:45**",
+      "truncated": false,
+      "expected_any_of": [
+        "5:45"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-436",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-436",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-437",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-437",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-438",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-438",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-439",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, there are **2 weeks** in exactly 14 days.",
+      "truncated": false,
+      "expected_any_of": [
+        "2"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-439",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "2**",
+      "truncated": false,
+      "expected_any_of": [
+        "2"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-440",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "In 50 minutes it will be **9 : 10**.",
+      "truncated": false,
+      "expected_any_of": [
+        "9:10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-440",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "9:10",
+      "truncated": false,
+      "expected_any_of": [
+        "9:10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-441",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-441",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-442",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-442",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-443",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-443",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-444",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-444",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-445",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So the first class ends at 9 : 10 am**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "9:10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-445",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "9:10**",
+      "truncated": false,
+      "expected_any_of": [
+        "9:10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-446",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, from Monday up to (and including) the next Thursday there are **4 days**.",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-446",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "4",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-447",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "There are **10 fruits** shown in the pictograph.",
+      "truncated": false,
+      "expected_any_of": [
+        "10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-447",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "10",
+      "truncated": false,
+      "expected_any_of": [
+        "10"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-448",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So **2 more children chose red than blue**.",
+      "truncated": false,
+      "expected_any_of": [
+        "2"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-448",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "2**",
+      "truncated": false,
+      "expected_any_of": [
+        "2"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-449",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, the next number in the pattern is 15**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "15"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-449",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "15",
+      "truncated": false,
+      "expected_any_of": [
+        "15"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-450",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-450",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-451",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The number that comes next is **12**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-451",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "12",
+      "truncated": false,
+      "expected_any_of": [
+        "12"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-452",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-452",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-453",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, the number that comes next is 20**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "20"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-453",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "20",
+      "truncated": false,
+      "expected_any_of": [
+        "20"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-454",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "There are **4 more cars** than bikes shown in the pictograph.",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-454",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "4",
+      "truncated": false,
+      "expected_any_of": [
+        "4"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-455",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-455",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-456",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**Therefore, the next number in the pattern is 30**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "30"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-456",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "30",
+      "truncated": false,
+      "expected_any_of": [
+        "30"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-457",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **23 children** were surveyed about these two sports.",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-457",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "23**",
+      "truncated": false,
+      "expected_any_of": [
+        "23"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-458",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-458",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-459",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-459",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-460",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "A cuboid has **6 faces**. 🎉",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-460",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "6",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-461",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So the toy chest has 6 faces**.",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-461",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "6",
+      "truncated": false,
+      "expected_any_of": [
+        "6"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-462",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-462",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-463",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-463",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-464",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-464",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-465",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So the number that comes right after **79** is **80**.",
+      "truncated": false,
+      "expected_any_of": [
+        "80"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-465",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "80**",
+      "truncated": false,
+      "expected_any_of": [
+        "80"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-466",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **57 footballs remain in the sports room**. (The 3 carrom boards don’t affect the count of footballs.)",
+      "truncated": false,
+      "expected_any_of": [
+        "57"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-466",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "57",
+      "truncated": false,
+      "expected_any_of": [
+        "57"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-467",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-467",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-468",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-468",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-469",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So, 70 cars are parked in the lot**. 🚗🚗🚗🚗🚗🚗🚗🚗🚗🚗 (and many more!)",
+      "truncated": false,
+      "expected_any_of": [
+        "70"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-469",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "70**",
+      "truncated": false,
+      "expected_any_of": [
+        "70"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-470",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, **48 plus 29 equals 77**.",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-470",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "77",
+      "truncated": false,
+      "expected_any_of": [
+        "77"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-471",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "34  buns are left.",
+      "truncated": false,
+      "expected_any_of": [
+        "34"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-471",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "34",
+      "truncated": false,
+      "expected_any_of": [
+        "34"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-472",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-472",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-473",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-473",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-474",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "4 metres = 400 centimetres",
+      "truncated": false,
+      "expected_any_of": [
+        "400"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-474",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "400",
+      "truncated": false,
+      "expected_any_of": [
+        "400"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-475",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, the total length of the two cloth pieces is **350 centimetres**. (The colour of the thread doesn’t affect the measurement.)",
+      "truncated": false,
+      "expected_any_of": [
+        "350"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-475",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "350",
+      "truncated": false,
+      "expected_any_of": [
+        "350"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-476",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-476",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-477",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-477",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-478",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "**So the seller weighed out a total of 5 kilograms of potatoes**.",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-478",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "5**",
+      "truncated": false,
+      "expected_any_of": [
+        "5"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-479",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "There are **14 days** in exactly 2 weeks.",
+      "truncated": false,
+      "expected_any_of": [
+        "14"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-479",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "14",
+      "truncated": false,
+      "expected_any_of": [
+        "14"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-480",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The train arrives at **7 : 05**.",
+      "truncated": false,
+      "expected_any_of": [
+        "7:05"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-480",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "425",
+      "truncated": false,
+      "expected_any_of": [
+        "7:05"
+      ],
+      "scorable": true,
+      "correct": false
+    },
+    {
+      "item_id": "cb-481",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-481",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-482",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-482",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-483",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "answer_line",
+      "committed_segment": "The next number in the pattern is **30**.",
+      "truncated": false,
+      "expected_any_of": [
+        "30"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-483",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "30",
+      "truncated": false,
+      "expected_any_of": [
+        "30"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-484",
+      "grade": 2,
+      "condition": "baseline",
+      "path": "curriculum",
+      "mode": null,
+      "extraction_source": "conclusion",
+      "committed_segment": "So, there are **3 more pens than erasers** shown in the pictograph. (The little star in the corner doesn’t affect the count.)",
+      "truncated": false,
+      "expected_any_of": [
+        "3"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-484",
+      "grade": 2,
+      "condition": "system",
+      "path": "curriculum",
+      "mode": "co_solve",
+      "extraction_source": "answer_line",
+      "committed_segment": "3",
+      "truncated": false,
+      "expected_any_of": [
+        "3"
+      ],
+      "scorable": true,
+      "correct": true
+    },
+    {
+      "item_id": "cb-485",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-485",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-486",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-486",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-487",
+      "grade": 2,
+      "condition": "baseline",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    },
+    {
+      "item_id": "cb-487",
+      "grade": 2,
+      "condition": "system",
+      "scorable": false,
+      "correct": null,
+      "path": "curriculum",
+      "note": "no ground truth to score against (conceptual item -- judge territory)"
+    }
+  ]
+}

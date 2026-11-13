@@ -1,0 +1,36 @@
+=== 17:06:58 baseline curriculum_benchmark_class1 (first pass) ===
+judged 217/217 -> eval\results\judge_runs\baseline_curriculum_benchmark_class1.jsonl
+=== 17:15:49 baseline curriculum_benchmark_class2 (first pass) ===
+judged 160/160 -> eval\results\judge_runs\baseline_curriculum_benchmark_class2.jsonl
+=== 17:26:44 baseline curriculum_benchmark_class3 (first pass) ===
+judged 187/187 -> eval\results\judge_runs\baseline_curriculum_benchmark_class3.jsonl
+=== 17:34:40 baseline curriculum_benchmark_class4 (first pass) ===
+judged 177/177 -> eval\results\judge_runs\baseline_curriculum_benchmark_class4.jsonl
+=== 17:43:40 baseline curriculum_benchmark_class5 (first pass) ===
+judged 194/194 -> eval\results\judge_runs\baseline_curriculum_benchmark_class5.jsonl
+=== 17:56:02 baseline out_of_scope (first pass) ===
+judged 277/277 -> eval\results\judge_runs\baseline_out_of_scope.jsonl
+=== 18:16:03 baseline multi_turn (first pass) ===
+judged 206/206 -> eval\results\judge_runs\baseline_multi_turn.jsonl
+eval/results/judge_runs\baseline_curriculum_benchmark_class1.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_curriculum_benchmark_class2.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_curriculum_benchmark_class3.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_curriculum_benchmark_class4.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_curriculum_benchmark_class5.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_multi_turn.jsonl: removed 0 failed verdicts for retry
+eval/results/judge_runs\baseline_out_of_scope.jsonl: removed 0 failed verdicts for retry
+=== 18:38:51 baseline curriculum_benchmark_class1 (retry pass) ===
+judged 217/217 -> eval\results\judge_runs\baseline_curriculum_benchmark_class1.jsonl
+=== 18:38:52 baseline curriculum_benchmark_class2 (retry pass) ===
+judged 160/160 -> eval\results\judge_runs\baseline_curriculum_benchmark_class2.jsonl
+=== 18:38:54 baseline curriculum_benchmark_class3 (retry pass) ===
+judged 187/187 -> eval\results\judge_runs\baseline_curriculum_benchmark_class3.jsonl
+=== 18:38:55 baseline curriculum_benchmark_class4 (retry pass) ===
+judged 177/177 -> eval\results\judge_runs\baseline_curriculum_benchmark_class4.jsonl
+=== 18:38:57 baseline curriculum_benchmark_class5 (retry pass) ===
+judged 194/194 -> eval\results\judge_runs\baseline_curriculum_benchmark_class5.jsonl
+=== 18:38:58 baseline out_of_scope (retry pass) ===
+judged 277/277 -> eval\results\judge_runs\baseline_out_of_scope.jsonl
+=== 18:39:00 baseline multi_turn (retry pass) ===
+judged 206/206 -> eval\results\judge_runs\baseline_multi_turn.jsonl
+=== 18:39:01 baseline judge finished ===
